@@ -1,5 +1,5 @@
 SHELL:=/bin/bash
-BASE=some
+BASE=ajpastor
 ZIP=diff_defined_functions# ZIP name
 VERSION=$(shell cat ./package-version.txt)
 
@@ -15,8 +15,14 @@ create:
 	
 zip:
 	@echo "Compressing the project into file" $(ZIP)".zip"...
-	@zip -r ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip $(BASE)
 	@rm -f ./releases/$(ZIP)__$(VERSION).zip
-	zip -r ./releases/$(ZIP)__$(VERSION).zip $(BASE)
-	@echo $(VERSION)
-	    
+	@zip -r ./releases/$(ZIP)__$(VERSION).zip $(BASE) type SPKG.txt setup.py package-version.txt Makefile dependencies
+	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip
+	
+git:
+	@echo "Pushing changes to public git repository"
+	@git add -A
+	@git commit
+	@git push
+    
+	
