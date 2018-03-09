@@ -281,7 +281,7 @@ class Operator(object):
     def jp_value(self):
         ## TODO Be careful with this computation:oinly valid is the base field are the rational
         jp_pol = self.get_recursion_polynomial(self.forward_order);
-        return max([self.getOrder()-self.forward_order] + [root[_sage_const_0 ] for root in jp_pol.roots() if (root[_sage_const_0 ] in ZZ)]);
+        return max([self.getOrder()-self.forward_order] + [ZZ(root[_sage_const_0 ]) for root in jp_pol.roots() if (root[_sage_const_0 ] in ZZ)]);
        
     @derived_property 
     def jp_matrix(self):

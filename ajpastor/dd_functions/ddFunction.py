@@ -61,7 +61,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     
     _Default_Base = PolynomialRing(QQ,x);
     _Default_Depth = _sage_const_1 ;
-    _Default_Base_Field = QQ;
+    _Default_Base_Field = None;
     _Default_Invertibility = None;
     _Default_Derivation = None;
     _Default_Operator = None;
@@ -119,7 +119,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             final_args[_sage_const_0 ][_sage_const_1 ] = final_args[_sage_const_0 ][_sage_const_1 ]._DDRing__original;
             
         ## Casting to tuple (so is hashable)
-        to_hash = tuple(tuple(el) for el in final_args[:_sage_const_3 ]);
+        to_hash = tuple(tuple(el) for el in final_args[:_sage_const_2 ]);
         final_args = tuple(tuple(el) for el in final_args);
         
         if(final_args[_sage_const_1 ][_sage_const_1 ] == _sage_const_0 ):
@@ -173,7 +173,22 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                 self.__original = base.__original;
             # Otherwise, we set this simplest ring as our current coefficient ring
             else:
-                self.base_field = base_field;
+                if(base_field is None):
+                    from sage.categories.pushout import PolynomialFunctor, FractionField;
+                    current = base;
+                    const = base.construction();
+                    while((not (const is None)) and (isinstance(const[_sage_const_0 ], PolynomialFunctor) or isinstance(const[_sage_const_0 ],FractionField))):
+                        current = const[_sage_const_1 ];
+                        const = current.construction();
+                        
+                    if(not current.is_field()):
+                        self.base_field = current.fraction_field();
+                    else:
+                        self.base_field = current;
+                        
+                        
+                else:
+                    self.base_field = base_field;
                 self.__depth = _sage_const_1 ;
                 self.__original = base;
             
@@ -191,7 +206,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             if(derivation is None):
                 try:
                     self_var = self.variables(True,False)[_sage_const_0 ];
-                    self.base_derivation = lambda p : p.derivative(self_var);
+                    self.base_derivation = lambda p : p.derivative(self.base()(self_var));
                 except IndexError:
                     self.base_derivation = lambda p : _sage_const_0 ;
             else:
