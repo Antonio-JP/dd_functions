@@ -53,13 +53,10 @@ class PolynomialLazyOperator(TwoStepsOperator):
     ####################################################### 
     
     @cached_method
-    def companion(self, element=None):
+    def companion(self):
         field = LazyIntegralDomain(self._original_base).fraction_field();
         
-        if(element is None):
-            coefficients = [field(el) for el in self.getCoefficients()];    
-        else:
-            coefficients = [field(el(x=element)) for el in self.getCoefficients()];
+        coefficients = [field(el) for el in self.getCoefficients()];    
         
         if(self.__conversion is None):  
             self.__conversion = LazyToPoly(self.base(), coefficients);
@@ -95,16 +92,7 @@ class PolynomialLazyOperator(TwoStepsOperator):
         return self.companion(), other.companion(), self.companion().parent().base();
         
     def _compose_companion(self, Mf, g):
-        ## Creating the new conversion system adding `dg`
-        dg = self.derivate()(self.base()(g));
-        new_conversion = self.__conversion.mix_conversion(dg);
-        
-        ## Changing the conversion system of `self`
-        self.__conversion = new_conversion; 
-        self.__dict__['companion'].cache.clear();
-        
-        ## Returning the new companion matrix and the conversed version of `dg`
-        return self.companion(g), new_conversion.to_poly(dg), self.companion(g).parent().base();
+        raise NotImplementedError("Method not implemented for this class of operators: %s" %(self.__class__));
         
     def _pre_proc(self, M):
         return self.__conversion.to_real(M);

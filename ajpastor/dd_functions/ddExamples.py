@@ -460,6 +460,153 @@ def MathieuCos(a=None,q=None):
 ##################################################################################
 ##################################################################################
 ###
+### Algebraic functions
+###
+##################################################################################
+################################################################################## 
+def DAlgebraic(polynomial, init=[], dR=None):
+    '''
+        Method that transform an algebraic function to a DD-Function.
+                
+        INPUT:
+            - polynomial: the minimal polynomial of the function we want to transform.
+            - init: the initial values that the function will have. Two options are 
+            possible: a list is given, then we will use it directly to build the final 
+            result, or a value is given an we will compute the others using the polynomial 
+            equation.
+            - dR: the ring where we want to include the result. If None, an automatic 
+            destiny ring will be computed.
+            
+        OUTPUT:
+            - A DDFunction in a particuar DDRing.
+            
+        WARNINGS:
+            - There is no control about the irreducibility of the polynomial.
+            
+        ERRORS:
+            - If the function can not be represented in dR a TypeError will be raised
+            - If any error happens with the initial values, a ValueError will be raised
+    '''
+    ## Local imports
+    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
+    from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
+    from sage.categories.pushout import FractionField;
+    from ajpastor.misc.matrix import matrix_of_dMovement as move;
+    
+    ###############################################
+    ## Dealing with the polynomial input
+    ###############################################
+    parent = polynomial.parent();
+    if(not (isPolynomial(parent) or isMPolynomial(parent))):
+        raise TypeError("The minimal polynomial is NOT a polynomial");
+    
+    base_ring = None;  
+    F = None;  
+    poly_ring = parent;
+    if(isMPolynomial(parent)):
+        base_ring = PolynomialRing(parent.base(),parent.gens()[:-_sage_const_1 ]);
+        poly_ring = PolynomialRing(base_ring.fraction_field(), parent.gens()[-_sage_const_1 ]);
+    else:
+        if(isinstance(parent.base().construction()[_sage_const_0 ], FractionField)):
+            base_ring = parent.base().base();
+        else:
+            base_ring = parent.base();
+            if(not parent.base().is_field()):
+                poly_ring = PolynomialRing(parent.base().fraction_field(), parent.gens()[-_sage_const_1 ]);
+                
+    F = poly_ring.base();
+    y = poly_ring.gens()[-_sage_const_1 ];
+    ## At this point we have the following
+    ##   - F is a field
+    ##   - y is a variable
+    ##   - poly_ring == F[y]
+    polynomial = poly_ring(polynomial); ## Now the structure is univariate
+    if(polynomial.degree() == _sage_const_1 ):
+        return -polynomial[_sage_const_0 ]/polynomial[_sage_const_1 ];
+    elif(polynomial.degree() <= _sage_const_0 ):
+        raise TypeError("Constant polynomial given for algebraic function: IMPOSSIBLE!!");
+        
+    #################################################
+    ## Building and checking the destiny ring
+    #################################################
+    destiny_ring = None;
+    if(dR is None):
+        destiny_ring = DDRing(base_ring);
+    else:
+        destiny_ring = dR;
+        coercion = destiny_ring._coerce_map_from_(base_ring);
+        if((coercion is None) or (coercion is False)):
+            raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring));
+            
+    dest_var = repr(destiny_ring.variables()[_sage_const_0 ]);
+    
+    ##################################################
+    ## Computing the differential equation
+    ##################################################
+    ## Computing the derivative
+    dy = polynomial.derivative(y);
+    
+    ## Getting its gcd with the polynomial
+    g,r,s = polynomial.xgcd(dy);
+    if((g != _sage_const_1 ) or (not(g in poly_ring.base()))):
+        raise ValueError("No irreducible polynomial given");
+        
+    ## Computing the coefficient-wise derivation of polynomial
+    mon = poly_ring(_sage_const_1 );
+    ky = poly_ring(_sage_const_0 );
+    for i in range(polynomial.degree()+_sage_const_1 ):
+        ky += (polynomial[i].derivative())*mon;
+        mon *= y;
+        
+    ## Getting the polynomial expression of y', y'',..., y^{(deg(polynomial))}
+    rows = [[_sage_const_0 ]*polynomial.degree()];
+    mon = poly_ring(_sage_const_1 );
+    for i in range(polynomial.degree()-_sage_const_1 ):
+        rows += [((-(i+_sage_const_1 )*mon*s*ky)%polynomial).coefficients(False)];
+        mon *= y;
+        
+    ## Building the derivation matrix of <1,y,y^2,...>
+    print rows
+    M = Matrix(F, rows).transpose();
+    print M
+    ## Creating the vector representing y
+    y_vector = vector(F, [_sage_const_0 ,_sage_const_1 ] + [_sage_const_0 ]*(polynomial.degree()-_sage_const_2 ));
+    print y_vector;
+    ## Building ans solving the system
+    to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+_sage_const_1 );
+    v = to_solve.right_kernel_matrix()[_sage_const_0 ];
+    
+    ## Cleaning denominators
+    cleaning = lcm(el.denominator() for el in v);
+    
+    equation = destiny_ring.element([F.base()(el*cleaning) for el in v]).equation;
+    
+    ##################################################
+    ## Getting the initial values
+    ##################################################
+    if(not (type(init) is list)):
+        ## We try to compute the new initial values
+        init = [init];
+        go_on = True;
+        for i in range(_sage_const_1 ,min(equation.get_jp_fo()+_sage_const_2 , to_solve.ncols())):
+            try:
+                init += [sum(to_solve[j,i](**{dest_var:_sage_const_0 })*init[_sage_const_0 ]**j for j in range(polynomial.degree()))];
+            except ZeroDivisionError:
+                go_on = False;
+                break;
+        
+        if(go_on and (equation.get_jp_fo()+_sage_const_2  > to_solve.ncols())):
+            extra = move(M, vector(F,[el[_sage_const_0 ] for el in to_solve[:,-_sage_const_1 ]]), equation.get_jp_fo()+_sage_const_2 -to_solve.ncols());
+            init += [sum(extra[j,i](**{dest_var:_sage_const_0 })*init[_sage_const_0 ]**j for j in range(polynomial.degree())) for i in range(extra.ncols())];
+    
+    ##################################################
+    ## Returning the DDFunction
+    ##################################################
+    return destiny_ring.element(equation, init);
+    
+##################################################################################
+##################################################################################
+###
 ### Particular differential Equations
 ###
 ##################################################################################

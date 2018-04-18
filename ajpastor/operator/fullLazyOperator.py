@@ -45,24 +45,14 @@ class FullLazyOperator(TwoStepsOperator):
         
         self.__conversion = LazyRing(self.base(), self.base().base_ring());
         self.__version = self.__conversion.version();
-        self.__companion = {};
+        self.__companion = None;
             
     ####################################################### 
-    def companion(self, element=None):
+    def companion(self):
         R = self.__conversion;
-        if((not (element in self.__companion)) or (self.__version != R.version())):
+        if(self.__companion is None or self.__version != R.version()):
             self.__version = R.version();
-            if(element is None):
-                coefficients = [R(el) for el in self.getCoefficients()];    
-            else:
-                try:
-                    if(not element in self.base().original_ring()):
-                        raise TypeError("Composition with no polynomials is not allowed");
-                except AttributeError:
-                    if(not element in self.base().base_ring()):
-                        raise TypeError("Composition with no polynomials is not allowed");
-                ## TODO Fix this step to work for compositions
-                coefficients = [R(el(x=element)) for el in self.getCoefficients()];
+            coefficients = [R(el) for el in self.getCoefficients()];    
                                     
             ## We divide by the leading coefficient
             coefficients = [-(coefficients[i]/coefficients[-_sage_const_1 ]) for i in range(len(coefficients)-_sage_const_1 )];
@@ -80,9 +70,9 @@ class FullLazyOperator(TwoStepsOperator):
                 rows += [[kronecker_delta(i,j) for j in range(d-_sage_const_1 )] + [coefficients[i+_sage_const_1 ]]];
                 
             ## Returning the matrix
-            self.__companion[element] = Matrix(R, rows);
+            self.__companion = Matrix(R, rows);
             
-        return self.__companion[element];
+        return self.__companion;
         
     ####################################################### 
     ### GETTING MATRICES METHODS
@@ -131,17 +121,14 @@ class FullLazyOperator(TwoStepsOperator):
         return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+_sage_const_1 );
         
     def _get_matrix_composition(self, other):
-        #raise TypeError("Composition not allowed *'FullLazyOperator level'*");
         from ajpastor.misc.matrix import matrix_of_dMovement as move;
+        R = self.__conversion;
     
-        g = other;
+        dg = R(other).derivative();
         
-        Mf = self.companion(g);
+        full_companion = dg*self.companion();
         
-        Mf,dg, parent = self._compose_companion(Mf,g);
-        
-        full_companion = dg*Mf;
-        init_vector = vector(parent, [_sage_const_1 ] + [_sage_const_0  for i in range(_sage_const_1 ,self.getOrder())]);
+        init_vector = vector(R, [_sage_const_1 ] + [_sage_const_0  for i in range(_sage_const_1 ,self.getOrder())]);
         
         return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+_sage_const_1 );
     ####################################################### 

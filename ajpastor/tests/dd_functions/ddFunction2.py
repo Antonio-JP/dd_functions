@@ -69,7 +69,7 @@ def run():
         assert ParametrizedDDRing(DDFinite, 'P').base() is DFiniteP, "Error building parameters. Not uniqueness in P(DD,var).base() and P(D,var)";
         sverbose.decrease_depth();
         
-        sverbose("Testing pushouts");
+        sverbose("Testing pushouts for parameters with D(QQ[x])");
         sverbose.increase_depth();
         sverbose.start_iteration(_sage_const_9 , True, True);
         

@@ -139,14 +139,11 @@ class Operator(object):
         return self.getCoefficient(i);
         
     @cached_method
-    def companion(self, element=None):
+    def companion(self):
         field = self.base().fraction_field();
         
-        if(element is None):
-            coefficients = [field(el) for el in self.getCoefficients()];    
-        else:
-            coefficients = [field(el(x=element)) for el in self.getCoefficients()];
-            
+        coefficients = [field(el) for el in self.getCoefficients()];    
+        
         ## We divide by the leading coefficient
         coefficients = [-(coefficients[i]/coefficients[-_sage_const_1 ]) for i in range(len(coefficients)-_sage_const_1 )];
         ## Trying to reduce the elements
@@ -385,7 +382,18 @@ class Operator(object):
         
     def compose_solution(self, other):
         '''
-        This method computes a new operator that annihilates any solution of 'self' compose with 'other' (an element that must be in the base ring).
+        Let c be the coefficients of 'self'. This method computes a differential operator such any solution 'f' of the equation with coefficients 'c(other^(-1))' composed with 'other' will satisfy.
+        
+        This method (akward by definition) requires that 'other' is in self.base().
+        
+        INPUT:
+            - other: an element of 'self.base()'
+            
+        OUTPUT:
+            - A new operator 'A' of the same class as 'self' with 'A.base() == self.base()'
+        
+        ERRORS:
+            - 'TypeError' wil be raised if 'other' is not in 'self.base()'
         '''
         ## If the input is not an operator, trying the casting
         if(not other in self.base()):
@@ -394,10 +402,6 @@ class Operator(object):
         return self._compute_compose_solution(other);
     
     def _compute_add_solution(self, other):
-        '''
-        This method computes a new operator such any solution of 'self == 0' plus any solution of 'other == 0' must satisfy.
-        It assumes that other and self are exactly the same type.
-        '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
         
     def _compute_mult_solution(self, other):

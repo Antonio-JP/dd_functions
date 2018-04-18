@@ -65,11 +65,11 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
     def getSequenceElement(self, el, n):
         self_gen = 'x';
         try:
-            self_gen = str(self.base().gens()[-_sage_const_1 ]);
+            self_gen = self.base().gens()[-_sage_const_1 ];
         except:
             pass;
             
-        if(self_gen == '1'):
+        if(self_gen == _sage_const_1 ):
             if(n > _sage_const_0 ):
                 return _sage_const_0 ;
             elif(n==_sage_const_0 ):
@@ -80,14 +80,14 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
             res = el;
             for i in range(n):
                 try:
-                    res = derivative(res,self(var(self_gen)));
+                    res = derivative(res,self_gen);
                 except AttributeError:
                     ## Not derivative possible. Considering a constant
                     if(n == _sage_const_0 ):
                         return res;
                     return _sage_const_0 ;
             try:
-                return res(**{self_gen:_sage_const_0 })/factorial(n);
+                return res(**{repr(self_gen):_sage_const_0 })/factorial(n);
             except TypeError:
                 ## Not callable element. Returning the element without evaluation
                 return res/factorial(n);

@@ -108,16 +108,13 @@ class TwoStepsOperator(ListOperator):
         return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+_sage_const_1 ));
         
     def _get_matrix_composition(self, other):
-        
         from ajpastor.misc.matrix import matrix_of_dMovement as move;
     
         g = other;
         
-        Mf = self.companion(g);
+        Mf = self.companion();
         
-        Mf,dg, parent = self._compose_companion(Mf,g);
-        
-        full_companion = dg*Mf;
+        full_companion, parent = self._compose_companion(Mf,g);
         init_vector = vector(parent, [_sage_const_1 ] + [_sage_const_0  for i in range(_sage_const_1 ,self.getOrder())]);
         
         return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+_sage_const_1 ));
@@ -126,7 +123,8 @@ class TwoStepsOperator(ListOperator):
         return Mf, Mg, Mf.parent().base();
         
     def _compose_companion(self,Mf,g):
-        return Mf, self.derivate()(self.base()(g)), Mf.parent().base();
+        dg = Mf.parent().base()(self.derivate()(self.base()(g)));
+        return dg*Mf, Mf.parent().base();
         
     def _pre_proc(self, M):
         return M;

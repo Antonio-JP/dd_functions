@@ -152,11 +152,13 @@ class _LazyElement(IntegralDomainElement):
     def __eq__(self, other):
         return (self-other).is_zero();
         
-    def __call__(self, input):
+    def __call__(self, *input, **kwds):
         if(self.__raw is None):
-            return self.poly()(**{str(var):self.parent().to_real(var)(input) for var in self.variables()});
-        else:
-            return self.raw()(input);
+            try:
+                return self.poly()(**{str(var):self.parent().to_real(var)(*input,**kwds) for var in self.variables()});
+            except TypeError:
+                pass;
+        return self.raw()(*input,**kwds);
         
     ################################################################################################
     ### Non-trivial arithmetics methods
@@ -208,7 +210,7 @@ class _LazyElement(IntegralDomainElement):
         
     def is_zero(self):
         result = (self.poly() == _sage_const_0 );
-        if(not result):
+        if((not result) and (self(**{str(self.parent().base().variables()[_sage_const_0 ]):_sage_const_0 }) == _sage_const_0 )):
             if(not (self.__raw is None)):
                 result = self.raw() == _sage_const_0 ;
             else:

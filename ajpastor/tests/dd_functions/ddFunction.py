@@ -156,7 +156,7 @@ def run():
         try:
             aux = sin**cos;
             assert False, "Error catching a NotImplementedError for method __pow__";
-        except (NotImplementedError):
+        except (NotImplementedError, TypeError):
             pass;
         try:
             aux = pow(sin, -_sage_const_3 );
