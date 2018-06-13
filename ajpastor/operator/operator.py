@@ -45,12 +45,44 @@ from ajpastor.misc.cached_property import derived_property;
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence;
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring;
 
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
+
+
 ## GENERIC UTILITIES METHODS
 def foo_derivative(p):
     try:
         return p.derivative(x);
     except AttributeError:
         return _sage_const_0 ;
+    
+@cached_function
+def get_integer_roots(element):
+    if(not is_PolynomialRing(element.parent())):
+        raise TypeError("Incompatible element to compute integer roots");
+    base,deep_vars, n_vars = _tower_variables(element.parent().base());
+    gen = str(element.parent().gens()[0]);
+    
+    ring = element.parent().change_ring(base);
+    deg = element.degree();
+    p = ring.one();
+    while(p.degree() < deg):
+        new_ev = {var : base.random_element() for var in deep_vars};
+        p = ring(element(**new_ev));
+    
+    pos_roots = [ZZ(root) for root in p.roots(multiplicities=False) if (root in ZZ)];
+    return [rt for rt in pos_roots if element(**{gen : rt}) == 0];
+    
+@cached_function
+def _tower_variables(parent):
+    result = [];
+    n_vars = _sage_const_0;
+    while(is_PolynomialRing(parent) or is_MPolynomialRing(parent)):
+        result += [str(gen) for gen in parent.gens()];
+        n_vars += parent.ngens();
+        parent = parent.base();
+
+    return (parent,result, n_vars);
 
 ## Operator class
 class Operator(object):
@@ -278,7 +310,7 @@ class Operator(object):
     def jp_value(self):
         ## TODO Be careful with this computation:oinly valid is the base field are the rational
         jp_pol = self.get_recursion_polynomial(self.forward_order);
-        return max([self.getOrder()-self.forward_order] + [ZZ(root[_sage_const_0 ]) for root in jp_pol.roots() if (root[_sage_const_0 ] in ZZ)]);
+        return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol));
        
     @derived_property 
     def jp_matrix(self):

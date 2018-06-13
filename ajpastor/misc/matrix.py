@@ -4,7 +4,7 @@ from sage.all_cmdline import *   # import sage library
 
 _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 
-from sage.matrix.matrix import Matrix as MatrixClass;
+from sage.structure.element import is_Matrix;
 
 ####################################################################################
 ###
@@ -125,7 +125,7 @@ def random_matrix(parent, *args, **kwds):
     
 ### Auxiliary (and private) methods
 def __check_input(X, parent):
-    if(isinstance(X, MatrixClass) and parent.has_coerce_map_from(X.parent().base())):
+    if(is_Matrix(X) and parent.has_coerce_map_from(X.parent().base())):
         return True;
     elif(isinstance(X, list)):
         try:

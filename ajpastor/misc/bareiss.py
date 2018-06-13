@@ -3,12 +3,12 @@
 from sage.all_cmdline import *   # import sage library
 
 _sage_const_2 = Integer(2); _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
-from .matrix import swap_rows;
-from .matrix import swap_cols;
+from ajpastor.misc.matrix import swap_rows;
+from ajpastor.misc.matrix import swap_cols;
 
-from .cached_property import derived_property;
+from ajpastor.misc.cached_property import derived_property;
 
-from .verbose import *;
+from ajpastor.misc.verbose import *;
 
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial;
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
