@@ -341,6 +341,20 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         if(isinstance(S, DDRing)):
             return S.depth() <= self.depth();
         
+        #coer = None;
+        #if(isinstance(S, DDRing)):
+        #    coer = self.base()._coerce_map_from_(S.base());
+        #elif(S == self.base()):
+        #    coer = True;
+        #elif(isinstance(S, sage.symbolic.ring.SymbolicRing)):
+        #    coer = True;
+        #else:
+        #    coer = self.base()._coerce_map_from_(S);
+        #    
+        #if(not(coer is False) and not(coer is None)):
+        #    return True;
+        #return None;
+        
     def __is_polynomial(self, S):
         from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial;
         from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
@@ -531,48 +545,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             Method inherited from Ring SAGE class. It returns an example of object that is in the DDRing. It simply returns the 1 element.        
         '''
         return self.one();
-    
-    def random_element(self,**kwds):
-        '''
-            Method to compute a random element in this ring. This method relies in a random generator of the self.base() ring and a generator of
-            elements of the ring self.base_ring().
-            This method accepts different named arguments:
-		- "min_order": minimal order for the equation we would get (default to 1)
-		- "max_order": maximal order for the equation we would get (default to 3)
-		- "simple": if True, the leading coefficient will always be one (default True)
-        '''
-	## Getting the arguments values
-	min_order = kwds.get("min_order", 1);
-	max_order = kwds.get("max_order", 3);
-	simple = kwds.get("simple", True);
-
-	## Checking the argument values
-	min_order = max(min_order,0); ## Need at least order 1
-	max_order = max(min_order, max_order); ## At least the maximal order must be equal to the minimal
-	if(simple != True and simple != False):
-            simple = False;
-
-        ## Computing the list of coefficients
-	R = self.base(); S = self.base_field;
-        coeffs = [R.random_element() for i in range(randint(min_order,max_order))];
-	
-	init_values = [0];
-	while(init_values[0] == 0):
-            init_values[0] = S.random_element();
-
-	## If we want simple elements, we can compute the initial values directly
-	if(simple):
-	    coeffs[-1] = R.one();
-	    init_values += [S.random_element() for i in range(len(coeffs)-2)];
-	    return self.element(coeffs,init_values);
-	## Otherwise, we need to know the initial value condition
-        equation = self.element(coeffs).equation;
-        warnings.warn("Not-simple random element not implemented. Returning zero", DDFunctionWarning, stacklevel=_sage_const_2);
-
-	return self.zero();
-
-	
-   
+        
     def characteristic(self):
         '''
             Method inherited from the Ring SAGE class. It returns the characteristic of the coefficient ring.
