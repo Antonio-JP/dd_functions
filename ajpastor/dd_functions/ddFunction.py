@@ -554,7 +554,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
 
         ## Computing the list of coefficients
 	R = self.base(); S = self.base_field;
-        coeffs = [R.random_element() for i in range(randint(min_order,max_order))];
+        coeffs = [R.random_element() for i in range(randint(min_order,max_order)+1)];
+	print coeffs;
 	
 	init_values = [0];
 	while(init_values[0] == 0):
