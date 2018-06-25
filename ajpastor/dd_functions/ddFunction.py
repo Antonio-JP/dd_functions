@@ -816,10 +816,7 @@ class ParametrizedDDRing(DDRing):
         
     def ngens(self):
         return len(self.parameters());
-            
-    #def variables(self, as_symbolic=False):
-    #    return self.base_ddRing().variables(as_symbolic);
-            
+                        
     # Override to_depth method from DDRing
     def to_depth(self, dest):
         return ParametrizedDDRing(self.base_ddRing().to_depth(dest), self.parameters(True));
@@ -1981,7 +1978,8 @@ class DDFunction (IntegralDomainElement):
         '''
             Hash method for DDFunctions.
         '''
-        return int("%d%d%d" %(self.getOrder(),self.equation.get_jp_fo(),self.size()));
+        return sum(self.getInitialValueList(20));
+        #return int("%d%d%d" %(self.getOrder(),self.equation.get_jp_fo(),self.size()));
         #return sum([hash(coeff) for coeff in self.getOperator().getCoefficients()]);
 
     def __getitem__(self, key):
@@ -2272,9 +2270,9 @@ def polynomial_computation(poly, functions):
     if(len(dics) == 1):
         if(hasattr(f.equation, "annihilator_of_polynomial")):
             ## Reordering the variables
-            parent_poly = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]]);
-            poly = parent_poly(poly);
-            newOperator = f.equation.annihilator_of_polynomial(poly);
+            parent_poly2 = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]]);
+            poly2 = parent_poly2(poly);
+            newOperator = f.equation.annihilator_of_polynomial(poly2);
     if(newOperator is None):
         newOperator = _get_equation_poly(poly, dics);
             
@@ -2282,6 +2280,7 @@ def polynomial_computation(poly, functions):
     needed_initial = newOperator.get_jp_fo()+1 ;
         
     ### Getting as many initial values as posible until the new order
+    
     newInit = [_get_initial_poly(poly, dics, i) for i in range(needed_initial)];
     ## If some error happens, we delete all results after it
     if(None in newInit):
@@ -2294,7 +2293,7 @@ def polynomial_computation(poly, functions):
         
     ## Building the element
     result = parent.element(newOperator, newInit, check_init=False, name=newName);
-    result.change_built("polynomial", (poly, {str(gens[i]) : functions[i]}));
+    result.change_built("polynomial", (poly, {str(gens[i]) : functions[i] for i in range(len(gens))}));
 
     return result;
 
@@ -2342,17 +2341,79 @@ def _m_replace(string, to_replace, escape=("(",")")):
 def _get_equation_poly(poly, dic):    
     raise DevelopementError("_get_equation_poly");
     
-def _get_initial_poly(poly, dic, i):    
+__CACHED_INIT_POLY = {};
+def _get_initial_poly(poly, dic, m):    
+    '''
+        Method that computes the ith initial value of the polynomial
+        given when evaluated using the dictionary dic.
+    '''
+    ## Constant case
+    if(poly.is_constant()):
+        #print "Calling (%s +++ %s +++ %d)" %(poly, dic, m);
+        if(m > 0):
+            return 0;
+        return poly.parent().base()(poly);
+    
+    ## Non-constant polynomial
+    ## Checking the Cache
+    global __CACHED_INIT_POLY;
+    if(not poly in __CACHED_INIT_POLY):
+        __CACHED_INIT_POLY[poly] = [];
+    
+    found = False;
+    for el in __CACHED_INIT_POLY[poly]:
+        if(el[0] == dic):
+            found = True;
+            if(m in el[1]):
+                #print "Calling (%s +++ %s +++ %d) -- CACHED" %(poly, dic, m);
+                return el[1][m];
+            break;
+    if(not found):
+        __CACHED_INIT_POLY[poly] += [(dic, {})];
+    #print "Calling (%s +++ %s +++ %d)" %(poly, dic, m);
+        
+    result = None;
     ## General case (poly is not a monomial)
     if(not (poly.is_monomial())):
-        c = poly.coefficients(); m = poly.monomials();
-        return sum(c[i]*_get_equation_poly(m[i],dic,i) for i in range(len(m)));
+        c = poly.coefficients(); mo = poly.monomials();
+        result = sum(c[j]*_get_initial_poly(mo[j],dic,m) for j in range(len(mo)));
         
     ## More than one variable
-    if(len(poly.variables()) > 1):
-        raise DevelopementError("_get_initial_poly");
+    elif(len(poly.variables()) > 1):
+        var = poly.variables()[0];
+        deg = poly.degree(var);
+        oth = poly.parent()(poly/(var**deg));
         
-    raise DevelopementError("_get_initial_poly");
+        result = sum(binomial(m,k)*_get_initial_poly(var**deg, dic, k)*_get_initial_poly(oth, dic, m-k) for k in range(m+1));
+    
+    ## A power of a variable (using Faa di Bruno's formula)
+    elif(len(poly.variables()) == 1):
+        var = poly.variables()[0];
+        deg = poly.degree();
+        ## Getting the function and the offset for the initial values
+        func = None;
+        for key in dic.keys():
+            if(var in dic[key]):
+                func = key;
+                offset = dic[key].index(var);
+        
+        init = lambda n : func.getInitialValue(offset+n);
+        
+        ## Computing the final result
+        if(m > 0):
+            result = sum(falling_factorial(deg,k)*(init(0)**(deg-k))*bell_polynomial(m,k)(*[init(j+1) for j in range(m-k+1)]) for k in range(min(deg,m)+1));
+        else:
+            result = init(0)**deg;
+    
+    if(not(result is None)):
+        ## Saving the result
+        for el in __CACHED_INIT_POLY[poly]:
+            if(el[0] == dic):
+                el[1][m] = result;
+                break;
+        return result;
+    else:
+        raise ValueError("An impossible point was reached");
 
 ###################################################################################################
 ### COMMAND CONVERSION OF DD_FUNCTIONS
