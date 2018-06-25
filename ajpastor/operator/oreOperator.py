@@ -207,4 +207,13 @@ class w_OreOperator(Operator):
         
     ####################################################### 
     
+    #######################################################
+    ### OTHER WRAPPED METHODS
+    #######################################################
+    def annihilator_of_associate(self, M):
+        M = w_OreOperator(self.base(), M).operator;
+        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(M));
+        
+    def annihilator_of_polynomial(self, poly):
+        return w_OreOperator(self.base(), self.operator.annihilator_of_polynomial(poly));
 
