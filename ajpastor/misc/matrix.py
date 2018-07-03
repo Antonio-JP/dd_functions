@@ -339,6 +339,24 @@ def simplify_matrix(M):
     
 ####################################################################################
 ###
+### MATRIX OPERATIONS
+###
+### In this section we include functionality to compute some operations of 
+### matrices.
+###
+####################################################################################
+def direct_sum(*matrices):
+    return Matrix.block_diagonal(*matrices);
+
+def kronecker_sum(M,N):
+    if(not (M.is_square() and N.is_square())):
+        raise TypeError("Only square matrices for the Kronecker sum");
+    
+    n1 = M.nrows(); n2 = N.nrows();
+    return M.tensor_product(identity_matrix(n2)) + identity_matrix(n1).tensor_product(N);
+    
+####################################################################################
+###
 ### MATRICIAL D-MOVE
 ###
 ### In this section we include functionality to compute a differential movement 
