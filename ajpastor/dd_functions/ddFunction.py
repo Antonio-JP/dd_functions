@@ -2422,7 +2422,7 @@ def _get_derivation_matrix(poly, dic, simpl = False):
         coeffs = poly.coefficients();
         sols = [_get_derivation_matrix(mon, dic, simpl=True) for mon in poly.monomials()];
         D = Matrix.block_diagonal(*[sol[1] for sol in sols]);
-        v = vector(D[0][0].parent(), sum([[coeffs[i]*el for el in sols[i][2]] for i in range(len(sols))], []);
+        v = vector(D[0][0].parent(), sum([[coeffs[i]*el for el in sols[i][2]] for i in range(len(sols))], []))
         
         return D,v;
     ## More than one variable
