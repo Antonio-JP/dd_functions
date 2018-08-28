@@ -130,7 +130,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         from sage.categories.pushout import FractionField as fraction;
         
         current = parent; 
-        const = parent.construction(); 
+        try:
+            const = parent.construction(); 
+        except AttributeError:
+            raise RuntimeError("Impossible to get construction of %s" %parent);
         gens = [el for el in parent.gens()];
         
         res = {'algebraic' : [], 'polynomial': [], 'other' : []};
@@ -157,15 +160,18 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             
         ## Cleaning "1" from the result
         ## Put everything as tuples
-        if(1  in res['algebraic']):
-            raise TypeError("1 is a generator of an algebraic extension");
-        res['algebraic'] = tuple(res['algebraic']);
-        while(1  in res['polynomial']):
-            res['polynomial'].remove(1 );
-        res['polynomial'] = tuple(set(res['polynomial']));
-        while(1  in res['other']):
-            res['other'].remove(1 );
-        res['other'] = tuple(set(res['other']));
+        try:
+            if(1  in res['algebraic']):
+                raise TypeError("1 is a generator of an algebraic extension");
+            res['algebraic'] = tuple(res['algebraic']);
+            while(1  in res['polynomial']):
+                res['polynomial'].remove(1 );
+            res['polynomial'] = tuple(set(res['polynomial']));
+            while(1  in res['other']):
+                res['other'].remove(1 );
+            res['other'] = tuple(set(res['other']));
+        except TypeError:
+            raise RuntimeError("Non hashable object found");
             
         return res, current;
         

@@ -378,9 +378,11 @@ def __dm(M,v,D):
     return differential_movement(M,v,D);
     
 def matrix_of_dMovement(M,v,D, cols):
+    from sage.categories.pushout import pushout;
+    parent = pushout(M.parent().base(), v.parent().base()); 
     res = [v];
     for j in range(1 ,cols):
         res += [__dm(M,res[-1 ],D)];
-    return Matrix(M.parent().base(), res).transpose();
+    return Matrix(parent, res).transpose();
     
 
