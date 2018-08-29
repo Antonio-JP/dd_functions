@@ -2137,6 +2137,10 @@ class DDRingFunctor (ConstructionFunctor):
     def _repr_(self):
         return "DDRing(*,%d,%s)" %(self.__depth, self.__base_field);
         
+    def __eq__(self, other):
+        if(other.__class__ == self.__class__):
+            return ((other.__depth == self.__depth) and (other.__base_field == self.__base_field))
+        
     def depth(self):
         return self.__depth;
         

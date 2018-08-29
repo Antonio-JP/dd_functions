@@ -47,19 +47,24 @@ def infinite_derivative(element, times=1):
         except AttributeError:
             return parent.zero();
     if(element.is_monomial()):
-        if(len(element.variables()) == 1):
+        if(len(element.variables()) == 1 and element.degree() == 1):
             return parent(repr(parent.gen()).replace("*", str(int(str(element).split("_")[-1])+1)));
         else:
             degrees = element.degrees();
             variables = [parent("y_%d" %i) for i in range(len(degrees))]; variables.reverse();
-            print degrees;
-            print variables;
-            part = prod(variables[i]**(degrees[i]-1) for i in range(len(degrees)));
-            return sum([degrees[i]*infinite_derivative(variables[i])*prod(variables[j] for j in range(len(variables)) if i != j) for i in range(len(variables))]);
+            ## Computing the common factor
+            com_factor = prod([variables[i]**(degrees[i]-1) for i in range(len(degrees)) if degrees[i] > 0]);
+            ## Computing the derivative for each variable
+            each_sum = [
+                degrees[i]*infinite_derivative(variables[i])*prod(
+                    variables[j] for j in range(len(variables)) if ((i != j) and (degrees[j] > 0)))
+                for i in range(len(variables)) if degrees[i] > 0];
+            
+            return com_factor*sum(each_sum);
     else:
         coefficients = element.coefficients();
         monomials = element.monomials();
-        return sum([coefficients[i].derivative()*monomials[i] + coefficients[i]*infinite_derivative(parent(monomials[i])) for i in range(len(monomials))]);
+        return sum([infinite_derivative(coefficients[i])*monomials[i] + coefficients[i]*infinite_derivative(parent(monomials[i])) for i in range(len(monomials))]);
     
 def fromInfinityPolynomial_toFinitePolynomial(poly):
     if(not is_InfinitePolynomialRing(poly.parent())):
@@ -151,12 +156,12 @@ def toDifferentiallyAlgebraic_Below(poly):
                 row += [infinite_derivative(row[-1])];
             rows += [row];
         else:
-            rows += [row for row in matrix_of_dMovement(el.equation.companion(), vector(goal_ring, dict_to_vectors[el]), infinite_derivative, S)];
+            C = el.equation.companion();
+            C = Matrix(goal_ring.base(),[[goal_ring.base()(row_el) for row_el in row] for row in C]);
+            rows += [row for row in matrix_of_dMovement(C, vector(goal_ring, dict_to_vectors[el]), infinite_derivative, S)];
         
-    M = Matrix(goal_ring, rows);
-    print M;
-    
-    return M.determinant();
+    M = Matrix(rows);
+    return M.determinant().numerator();
 
 def diff_to_diffalg(func):
     try:
@@ -169,6 +174,7 @@ def diff_to_diffalg(func):
         p = sum(func[i]*R("y_%d" %i) for i in range(func.getOrder()+1));
         for i in range(parent.depth()-1):
             p = toDifferentiallyAlgebraic_Below(p);
+        return p;
     else:
         R = PolynomialRing(PolynomialRing(QQ,x).fraction_field, "y_0");
         return R.gens()[0] - func;
