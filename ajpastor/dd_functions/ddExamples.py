@@ -460,6 +460,76 @@ def MathieuSin(a=None,q=None):
 @cached_function
 def MathieuCos(a=None,q=None):
     return MathieuD(a,q,(_sage_const_1 ,_sage_const_0 ));
+
+### Airy's functions
+@cached_function
+def AiryD(init=()):
+    name = None;
+    if(len(init) >= 2): ## Complete Airy function, we can build the name
+        ## Rejecting the zero case
+        if(init[0] == init[1] and init[0] == 0):
+            return DFinite.zero();
+        
+        ## Simplifying the name if there is zero coefficients
+        if(init[0] != 0):
+            name_a1 = "(3**(2/3)*gamma(2/3))*%s" %init[0];
+            name_b1 = "(3**(1/3)*gamma(2/3))*%s" %init[0];
+        else:
+            name_a1 = "";
+            name_b1 = "";
+        if(init[1] != 0):
+            name_a2 = "-(3**(1/3)*gamma(1/3))*%s" %init[1];
+            name_b2 = "+(gamma(1/3))*%s" %init[1];
+        else:
+            name_a2 = "";
+            name_b2 = "";
+            
+        ## Building the final name
+        name = DinamicString("((%s%s)/2)*airy_ai(_1) + ((%s%s)/(2*3**(1/6)))*airy_bi(_1)" %(name_a1, name_a2, name_b1, name_b2), ["x"]);
+    return DFinite.element([-x,0,1], init, name=name);
+
+### Struve's functions
+@cached_function
+def StruveD(mu,kind=1):
+    raise NotImplementedError("Struve functions not yet implemented");
+    if(kind != 1):
+        raise TypeError("Only struve_H functions are implemented");
+    elif((mu < 0) or (mu not in ZZ)):
+        raise TypeError("Parameter must be greater or equal to -1 to have a power series (got %d)" %mu);
+    
+    name=DinamicString("(%s)*struve_H(%s,_1)" %((1/(struve_H(mu,x).derivative(mu+1)(x=0))),mu), ["x"]);
+    init = [0 for i in range(mu+1)] + [1];
+    return DFinite.element([x**2*(1-mu)-mu**2,x*(x**2-mu**2-mu),-(mu-2)*x**2,x**3], init, name=name);
+
+### Parabolic Cylinder Functions
+@cached_function
+def ParabolicCylinderD(a=None,b=None,c=None, init=()):
+    params =[];
+    if(a is None):
+        params += ['a'];
+    if(b is None):
+        params += ['b'];
+    if(c is None):
+        params += ['c'];
+    
+    destiny_ring = DFinite; ra = a; rb = b; rc = c;
+    if(len(params) > _sage_const_0 ):
+        destiny_ring = ParametrizedDDRing(DFinite, params);
+        if(len(params) == 3 ):
+            ra,rb,rc = destiny_ring.parameters();
+        elif(len(params) == 2 and 'a' not in params):
+            rb,rc = destiny_ring.parameters();
+        elif(len(params) == 2 and 'b' not in params):
+            ra,rc = destiny_ring.parameters();
+        elif(len(params) == 2 and 'c' not in params):
+            ra,rb = destiny_ring.parameters();
+        elif('a' in params):
+            ra = destiny_ring.parameters()[0];
+        elif('b' in params):
+            rb = destiny_ring.parameters()[0];
+        elif('c' in params):
+            rc = destiny_ring.parameters()[0];
+    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], init, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4)", [repr(ra), repr(rb), repr(rc), "x"]));
     
 ##################################################################################
 ##################################################################################
