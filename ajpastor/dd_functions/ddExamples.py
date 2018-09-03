@@ -10,7 +10,6 @@ _sage_const_3 = Integer(3); _sage_const_2 = Integer(2); _sage_const_1 = Integer(
 from ajpastor.dd_functions.ddFunction import *;
 
 from ajpastor.misc.dinamic_string import *;
-#from ajpastor.dd_functions.ddParametrizedFunction import *;
 
 ## Global variables (PUBLIC)
 DFinite_examples = {};
@@ -46,7 +45,8 @@ def DD_EXAMPLES_LOAD():
     DFinite_examples['sinh'] = sh;
     DFinite_examples['cosh'] = ch;
     P = DFiniteP.parameters()[_sage_const_0 ];
-    DFinite_examples['bessel'] = DFiniteP.element([x**_sage_const_2 -P**_sage_const_2 ,x,x**_sage_const_2 ], name=DinamicString("bessel_J(_1,_2)", ["P","x"]));
+    DFinite_examples['bessel'] = DFiniteP.element([x**2-P**2,x,x**2], name=DinamicString("bessel_J(_1,_2)", ["P","x"]));
+    DFinite_examples['struve'] = DFiniteP.element([(1-P)*x**2+P**2*(P+1),x*(x**2-P**2-P),(2-P)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", ["P","x"]));
     DFinite_examples['legendre'] = DFiniteP.element([P*(P+_sage_const_1 ), -_sage_const_2 *x,_sage_const_1 -x**_sage_const_2 ], name=DinamicString("legendre_P(_1,_2)", ["P","x"]));
     DFinite_examples['chebyshev1'] = DFiniteP.element([P**_sage_const_2 ,-x,(_sage_const_1 -x**_sage_const_2 )], name=DinamicString("chebyshev_T(_1,_2)", ["P","x"]));
     DFinite_examples['chebyshev2'] = DFiniteP.element([P*(P+_sage_const_2 ),-_sage_const_3 *x,_sage_const_1 -x**_sage_const_2 ], name=DinamicString("chebyshev_U(_1,_2)", ["P","x"]));
@@ -490,16 +490,28 @@ def AiryD(init=()):
 
 ### Struve's functions
 @cached_function
-def StruveD(mu,kind=1):
-    raise NotImplementedError("Struve functions not yet implemented");
+def StruveD(mu=None,kind=1):
+    _sage_const_1 = ZZ(1); _sage_const_2 = ZZ(2); _sage_const_3 = ZZ(3);
     if(kind != 1):
         raise TypeError("Only struve_H functions are implemented");
+        
+    f = DFinite_examples['struve'];
+    if(mu is None):
+        return f;
     elif((mu < 0) or (mu not in ZZ)):
         raise TypeError("Parameter must be greater or equal to -1 to have a power series (got %d)" %mu);
+        
+    P = f.parent().parameters()[0];
+    num = factorial(mu+_sage_const_1)*pi*(_sage_const_1/_sage_const_2)**(mu+_sage_const_1);
+    den = gamma(_sage_const_3/_sage_const_2)*gamma(mu+_sage_const_3/_sage_const_2);
+    val = QQ(num/den);
     
-    name=DinamicString("(%s)*struve_H(%s,_1)" %((1/(struve_H(mu,x).derivative(mu+1)(x=0))),mu), ["x"]);
-    init = [0 for i in range(mu+1)] + [1];
-    return DFinite.element([x**2*(1-mu)-mu**2,x*(x**2-mu**2-mu),-(mu-2)*x**2,x**3], init, name=name);
+    print num,den,val;
+    
+    f = f(P=mu);
+    f = f.change_init_values([0 for i in range(mu+1)] + [val], name=f._DDFunction__name);
+    
+    return f;
 
 ### Parabolic Cylinder Functions
 @cached_function
@@ -531,6 +543,39 @@ def ParabolicCylinderD(a=None,b=None,c=None, init=()):
             rc = destiny_ring.parameters()[0];
     return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], init, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4)", [repr(ra), repr(rb), repr(rc), "x"]));
     
+## Elliptic integrals
+## Legendre elliptic integrals
+def EllipticLegendreD(kind,var='phi'):
+    if(kind not in [0,1,2]):
+        raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2");
+    if(str(var) not in ['m','phi']):
+        raise ValueError("The variable for taking the equation must be 'm' or 'phi'");
+        
+    var = str(var);
+    if(var == 'm'):
+        if(kind == 1):
+            name = DinamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"]);
+            return DFinite.elemetn([-x,(1-3*x**2), x*(1-x**2)],[1], name=name);
+        elif(kind == 2):
+            name = DinamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"]);
+            return DFinite.elemetn([x,(1-x**2), x*(1-x**2)],[1], name=name);
+        else:
+            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2;
+            
+    if(var == 'phi'):
+        DDFiniteP = DFiniteP.to_depth(2);
+        P = DDFiniteP.parameters()[0];
+        s = DFiniteP(Sin(x));
+        c = DFiniteP(Cos(x));
+        if(kind == 1):
+            name = DinamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"]);
+            return DDFiniteP.element([0,-P**2*s*c,1-P**2*s**2], [0,1], name=name);
+        elif(kind == 2):
+            name = DinamicString("(2/pi)*elliptic_e(_2,_1)", [repr(P),"x"]);
+            return DDFiniteP.element([0,P**2*s*c,1-P**2*s**2], [0,1], name=name);
+        else:
+            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/P**2;
+            
 ##################################################################################
 ##################################################################################
 ###
