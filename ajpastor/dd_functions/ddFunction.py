@@ -807,6 +807,14 @@ class ParametrizedDDRing(DDRing):
         else:
             return "%s with parameter %s" %(self.base_ddRing(),res);
     
+    def parameter(self,input):
+        if(input in ZZ):
+            return self.parameters()[ZZ(input)];
+        elif(isinstance(input, str)):
+            return self.parameters()[([str(v) for v in self.parameters()]).index(input)];
+        else:
+            raise NotImplementedError("No parameter can be got with input %s" %input);
+    
     @cached_method
     def parameters(self, as_symbolic = False):
         if(as_symbolic):

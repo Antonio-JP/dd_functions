@@ -299,6 +299,7 @@ def Exp(input, ddR = None):
 ###
 ##################################################################################
 ##################################################################################    
+##### BESSEL TYPE FUNCTIONS
 ### Bessel Functions
 @cached_function 
 def BesselD(input, kind = _sage_const_1 ):
@@ -321,7 +322,34 @@ def BesselD(input, kind = _sage_const_1 ):
             raise TypeError("Impossible to manage Bessel functions of first kind with irrational order");
     else:
         raise ValueError("Impossible to manage Bessel functions of %dth kind" %(kind));
+    
+### Struve's functions
+@cached_function
+def StruveD(mu=None,kind=1):
+    _sage_const_1 = ZZ(1); _sage_const_2 = ZZ(2); _sage_const_3 = ZZ(3);
+    if(kind != 1):
+        raise TypeError("Only struve_H functions are implemented");
+        
+    f = DFinite_examples['struve'];
+    if(mu is None):
+        return f;
+    elif((mu < 0) or (mu not in ZZ)):
+        raise TypeError("Parameter must be greater or equal to -1 to have a power series (got %d)" %mu);
+        
+    P = f.parent().parameters()[0];
+    num = factorial(mu+_sage_const_1)*pi*(_sage_const_1/_sage_const_2)**(mu+_sage_const_1);
+    den = gamma(_sage_const_3/_sage_const_2)*gamma(mu+_sage_const_3/_sage_const_2);
+    val = QQ(num/den);
+    
+    print num,den,val;
+    
+    f = f(P=mu);
+    f = f.change_init_values([0 for i in range(mu+1)] + [val], name=f._DDFunction__name);
+    
+    return f;
 
+
+###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials     
 __legendre_initials = [[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_1 ]];   
 @cached_function 
@@ -380,13 +408,37 @@ def ChebyshevD(input, kind = _sage_const_1 ):
     except TypeError as e:
         raise e;    
 
+###### HYPERGEOMETRIC FUNCTIONS
 ### Hypergeometric Functions
 __CACHED_HYPERGEOMETRIC = {};
 
 def HypergeometricFunction(a,b,c, init = _sage_const_1 ):
     return GenericHypergeometricFunction([a,b],[c],init);
 
+def __check_list(list_of_elements, invalid_vars=[]):
+    all_vars = [];
+    for i in range(len(list_of_elements)):
+        el = list_of_elements[i];
+        if(el not in QQ):
+            if(isinstance(el, str)):
+                all_vars += [el];
+            else:
+                all_vars += [str(v) for v in el.variables()];
+                list_of_elements[i] = str(el);
+    
+    if(any(el in all_vars for el in invalid_vars)):
+        raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars));
+    
+    parent = QQ;
+    if(len(all_vars) > 0):
+        all_vars = list(set(all_vars));
+        parent = PolynomialRing(QQ, all_vars).fraction_field();
+        list_of_elements = [parent(el) for el in list_of_elements];
+    
+    return (parent, list_of_elements);
+
 def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
+    ## Checking arguments: num
     if (not (isinstance(num,list) or isinstance(num,set) or isinstance(num,tuple))):
         num = [num];
     else:
@@ -395,6 +447,15 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
         den = [den];
     else:
         den = list(den);
+        
+    parent, new_all = __check_list(num+den, [str(el) for el in DFinite.variables()]);
+    num = new_all[:len(num)];
+    den = new_all[len(num):];
+    
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
         
     ## Cleaning repeated values 
     i = _sage_const_0 ;
@@ -415,12 +476,12 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
     global __CACHED_HYPERGEOMETRIC;
     if(not((num,den,init) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
-        get_op = lambda p : DFinite.element(p).equation;
+        get_op = lambda p : destiny_ring.element(p).equation;
         op_num = x*prod(get_op([el,x]) for el in num);
         op_den = x*get_op([_sage_const_0 ,_sage_const_1 ])*prod(get_op([el-_sage_const_1 ,x]) for el in den);
         op = op_num - op_den;
         
-        f = DFinite.element(op);
+        f = destiny_ring.element(op);
         
         initVals = [init];
         
@@ -432,6 +493,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(num,den,init)];
     
+###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
 def MathieuD(a=None,q=None,init=()):
@@ -443,13 +505,11 @@ def MathieuD(a=None,q=None,init=()):
     
     destiny_ring = DDFinite; ra = a; rq = q;
     if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(DDFinite, params);
-        if(len(params) == _sage_const_2 ):
-            ra,rq = destiny_ring.parameters();
-        elif('a' in params):
-            ra = destiny_ring.parameters()[_sage_const_0 ]; rq = q;
-        else:
-            rq = destiny_ring.parameters()[_sage_const_0 ]; ra = a;
+        destiny_ring = ParametrizedDDRing(destiny_ring, params);
+        if('a' in params):
+            ra = destiny_ring.parameter('a');
+        if('q' in params):
+            rq = destiny_ring.parameter('q');
         
     return destiny_ring.element([ra-_sage_const_2 *rq*Cos(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], init, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
 
@@ -461,6 +521,59 @@ def MathieuSin(a=None,q=None):
 def MathieuCos(a=None,q=None):
     return MathieuD(a,q,(_sage_const_1 ,_sage_const_0 ));
 
+### Modified Mathieu's Functions
+@cached_function
+def ModifiedMathieuD(a=None,q=None,init=()):
+    params =[];
+    if(a is None):
+        params += ['a'];
+    if(q is None):
+        params += ['q'];
+    
+    destiny_ring = DDFinite; ra = a; rq = q;
+    if(len(params) > _sage_const_0 ):
+        destiny_ring = ParametrizedDDRing(destiny_ring, params);
+        if('a' in params):
+            ra = destiny_ring.parameter('a');
+        if('q' in params):
+            rq = destiny_ring.parameter('q');
+        
+    return destiny_ring.element([ra-_sage_const_2 *rq*Cosh(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], init, name=DinamicString("ModMathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+
+@cached_function
+def ModifiedMathieuSin(a=None,q=None):
+    return ModifiedMathieuD(a,q,(_sage_const_0 ,_sage_const_1 ));
+    
+@cached_function
+def ModifiedMathieuCos(a=None,q=None):
+    return ModifiedMathieuD(a,q,(_sage_const_1 ,_sage_const_0 ));
+
+### Hill's equation
+@cached_function
+def HillD(a=None,q=None,init=()):
+    params =[];
+    destiny_ring = DFinite;
+    
+    if(a is None):
+        params += ['a'];
+    if(q is None):
+        params += ['q'];
+    elif(isinstance(q.parent(), DDRing)):
+        destiny_ring = q.parent().to_depth(q.parent().depth()+1);
+    else:
+        q,destiny_ring = __decide_parent(q);
+        
+    ra = a; rq = q;
+    if(len(params) > _sage_const_0 ):
+        destiny_ring = ParametrizedDDRing(destiny_ring, params);
+        if('a' in params):
+            ra = destiny_ring.parameter('a');
+        if('q' in params):
+            rq = destiny_ring.parameter('q');
+        
+    return destiny_ring.element([ra+rq, _sage_const_0 , _sage_const_1 ], init, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+
+###### AIRY TYPE FUNCTIONS
 ### Airy's functions
 @cached_function
 def AiryD(init=()):
@@ -488,31 +601,8 @@ def AiryD(init=()):
         name = DinamicString("((%s%s)/2)*airy_ai(_1) + ((%s%s)/(2*3**(1/6)))*airy_bi(_1)" %(name_a1, name_a2, name_b1, name_b2), ["x"]);
     return DFinite.element([-x,0,1], init, name=name);
 
-### Struve's functions
-@cached_function
-def StruveD(mu=None,kind=1):
-    _sage_const_1 = ZZ(1); _sage_const_2 = ZZ(2); _sage_const_3 = ZZ(3);
-    if(kind != 1):
-        raise TypeError("Only struve_H functions are implemented");
-        
-    f = DFinite_examples['struve'];
-    if(mu is None):
-        return f;
-    elif((mu < 0) or (mu not in ZZ)):
-        raise TypeError("Parameter must be greater or equal to -1 to have a power series (got %d)" %mu);
-        
-    P = f.parent().parameters()[0];
-    num = factorial(mu+_sage_const_1)*pi*(_sage_const_1/_sage_const_2)**(mu+_sage_const_1);
-    den = gamma(_sage_const_3/_sage_const_2)*gamma(mu+_sage_const_3/_sage_const_2);
-    val = QQ(num/den);
-    
-    print num,den,val;
-    
-    f = f(P=mu);
-    f = f.change_init_values([0 for i in range(mu+1)] + [val], name=f._DDFunction__name);
-    
-    return f;
 
+###### PARABOLIC-CYLINDER TYPE FUNCTIONS
 ### Parabolic Cylinder Functions
 @cached_function
 def ParabolicCylinderD(a=None,b=None,c=None, init=()):
@@ -543,7 +633,7 @@ def ParabolicCylinderD(a=None,b=None,c=None, init=()):
             rc = destiny_ring.parameters()[0];
     return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], init, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4)", [repr(ra), repr(rb), repr(rc), "x"]));
     
-## Elliptic integrals
+###### ELLIPTIC INTEGRALS
 ## Legendre elliptic integrals
 def EllipticLegendreD(kind,var='phi'):
     if(kind not in [0,1,2]):
@@ -555,10 +645,10 @@ def EllipticLegendreD(kind,var='phi'):
     if(var == 'm'):
         if(kind == 1):
             name = DinamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"]);
-            return DFinite.elemetn([-x,(1-3*x**2), x*(1-x**2)],[1], name=name);
+            return DFinite.element([-x,(1-3*x**2), x*(1-x**2)],[1], name=name);
         elif(kind == 2):
             name = DinamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"]);
-            return DFinite.elemetn([x,(1-x**2), x*(1-x**2)],[1], name=name);
+            return DFinite.element([x,(1-x**2), x*(1-x**2)],[1], name=name);
         else:
             return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2;
             
