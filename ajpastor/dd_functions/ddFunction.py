@@ -937,7 +937,7 @@ class DDFunction (IntegralDomainElement):
         try:
             self.equation = self.__buildOperator(equation);
         except Exception as e:
-            print e;
+            #print "here -- ", e;
             raise TypeError("The input for this operator is not valid");
             
         ### Managing the inhomogeneous term
@@ -1992,7 +1992,7 @@ class DDFunction (IntegralDomainElement):
         '''
             Hash method for DDFunctions.
         '''
-        return sum(self.getInitialValueList(20));
+        return sum(hash(el) for el in self.getInitialValueList(20));
         #return int("%d%d%d" %(self.getOrder(),self.equation.get_jp_fo(),self.size()));
         #return sum([hash(coeff) for coeff in self.getOperator().getCoefficients()]);
 
@@ -2489,7 +2489,6 @@ def _get_initial_poly(poly, dic, m):
     '''
     ## Constant case
     if(poly.is_constant()):
-        #print "Calling (%s +++ %s +++ %d)" %(poly, dic, m);
         if(m > 0):
             return 0;
         return poly.parent().base()(poly);
@@ -2505,12 +2504,10 @@ def _get_initial_poly(poly, dic, m):
         if(el[0] == dic):
             found = True;
             if(m in el[1]):
-                #print "Calling (%s +++ %s +++ %d) -- CACHED" %(poly, dic, m);
                 return el[1][m];
             break;
     if(not found):
         __CACHED_INIT_POLY[poly] += [(dic, {})];
-    #print "Calling (%s +++ %s +++ %d)" %(poly, dic, m);
         
     result = None;
     ## General case (poly is not a monomial)
