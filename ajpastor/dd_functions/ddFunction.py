@@ -64,6 +64,9 @@ def _aux_derivation(p):
 #####################################################
 ### Class for DD-Rings
 #####################################################
+def is_DDRing(ring):
+    return isinstance(ring, DDRing);
+
 class DDRing (Ring_w_Sequence, IntegralDomain):
     Element = None;
     
@@ -698,6 +701,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
 ### Ring class for Parametrized DD Functions
 ###
 #############################################################################
+def is_ParametrizedDDRing(ring):
+    return isinstance(ring, ParametrizedDDRing);
+
 class ParametrizedDDRing(DDRing):
 
     @staticmethod
@@ -879,6 +885,9 @@ class ParametrizedDDRing(DDRing):
 #####################################################
 ### Class for DD-Functions
 #####################################################
+def is_DDFunction(func):
+    return isinstance(func, DDFunction);
+
 class DDFunction (IntegralDomainElement):
     #####################################
     ### Init and Interface methods
@@ -2628,6 +2637,6 @@ DFinite._DDRing__get_recurrence = __get_recurrence;
 ###################################################################################################
 ### PACKAGE ENVIRONMENT VARIABLES
 ###################################################################################################
-__all__ = ["DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "polynomial_computation", "ParametrizedDDRing", "DFiniteP"];
+__all__ = ["is_DDRing", "is_ParametrizedDDRing", "is_DDFunction", "DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "polynomial_computation", "ParametrizedDDRing", "DFiniteP"];
   
 
