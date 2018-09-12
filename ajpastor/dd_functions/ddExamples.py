@@ -574,43 +574,123 @@ def StruveD(mu='P',kind=1):
 
 ###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials 
-__legendre_initials = [[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_1 ]];   
+def __init_value_associated_legendre(n,m,kind):
+    S1_2 = _sage_const_1/_sage_const_2;
+    S2 = _sage_const_2;
+    S1 = _sage_const_1;
+    
+    if(kind == 1):
+        res = (2**m*sqrt(pi))/gamma((n-m)/S2 + S1)/gamma(S1_2-(n+m)/S2);
+        #num = 2**m*sqrt(pi);
+        #den = gamma((n-m)/2 + 1)*gamma(S1_2-(n+m)/2);
+    else:
+        res = -(S2**(m-S1)*sqrt(pi)*sin((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1_2)/gamma((n-m)/S2 + S1);
+        #num = -2**(m-1)*sqrt(pi)*sin((S1_2)*(n+m)*pi)*gamma((n+m)/2 + S1_2);
+        #den = gamma((n-m)/2 + 1);
+    #
+    #return num/den; 
+    return res;
+
+def __first_derivative_associated_legendre(n,m,kind):
+    S1_2 = _sage_const_1/_sage_const_2;
+    S2 = _sage_const_2;
+    S1 = _sage_const_1;
+    
+    if(kind == 1):
+        res = -(S2**(m+S1)*sqrt(pi))/gamma((n-m)/S2 + S1_2)/gamma(-(n+m)/S2);
+        #num = -2**(m+1)*sqrt(pi);
+        #den = gamma((n-m)/2 + S1_2)*gamma(-(n+m)/2);
+    else:
+        res = (S2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1)/gamma((n-m)/S2 + S1_2);
+        #num = 2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi)*gamma((n+m)/2 + 1)
+        #den = gamma((n-m)/2 + S1_2);
+    #        
+    #return num/den;
+    return res;
+
 @cached_function 
-def LegendreD(input):
+def LegendreD(nu='n', mu = 0, kind=1):
     '''
-        D-finite implementation of the Legendre polynomials (P_n(x))
+        D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
         
         References:
-            - https://dlmf.nist.gov/18.3
+            - https://dlmf.nist.gov/18.3 & https://dlmf.nist.gov/14.2
             - https://en.wikipedia.org/wiki/Legendre_polynomials
-            - http://mathworld.wolfram.com/LegendrePolynomial.html
+            - http://mathworld.wolfram.com/LegendrePolynomial.html & http://mathworld.wolfram.com/LegendreFunctionoftheSecondKind.html
             
-        TODO
+        Legendre functions are the solutions to the differential equation:
+            (1-x^2)f'' - 2xf' + n(n+1)f = 0
+        
+        This equation has a parameter 'n'. When 'n' takes non-negative integer
+        values, it has polynomial solutions, the so called Legendre polynomials (P_n(x)). 
+        This family of polynomials is a orthogonal set of polynomials. In particular
+            \int_{-1}^{1} P_n(x)P_m(x) = (2/(2n+1))\delta_{m,n}
+        This set of polynomials (as any orthogonal family of polynomials), also satisfies
+        a recursive relation:
+            (n+1)P_{n+1}(x) = (2n+1)xP_n(x) - nP_{n-1}(x)
+        
+        The other solution are the Legendre functions of second kind (Q_n(x)). They also 
+        satisfy the same recurrence relation as the Legendre polynomials. They are power series
+        that converges from x=-1 to x=1.
+        
+        There is an associated differential equation with an extra parameter:
+            (1-x^2)^2f'' - 2x(1-x^2)f' + (n(n+1)(1-x^2) - m^2)f = 0
+        that reduces to the original equation when m=0.
+        
+        This method allows the user to get the D-finite representation of the associated
+        Legendre differential equation. 
+        
+        INPUT:
+            - nu: the parameter 'n' on the assocaited differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - mu: the parameter 'm' on the assocaited differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - kind: the kind of the Legendre function the user want to get. It can take the values 1 and 2 (1 by default).
+            
+        WARNING:
+            - Initial values will also be computed for the parameter values that have power series solutions. The second kind may have non-rational initial values and those will not be computed.
+            - When evaluating parameters, the initial values will not update and must be set by hand.
     '''
-    global __legendre_initials;
-    if(input is None):
-        return DDFunction_example('legendre');
-
-    try:
-        n = ZZ(input);
-        if(n < _sage_const_0 ):
-            raise ValueError("Impossible to create a Legendre polynomial of negative index");
-            
-        P = DFiniteP.parameters()[_sage_const_0 ];  
-        func = DDFunction_example('legendre')(**{str(P):n});
-        for i in range(len(__legendre_initials), n+_sage_const_1 ):
-            prev = __legendre_initials[-_sage_const_1 ];
-            prev2 = __legendre_initials[-_sage_const_2 ];
-            __legendre_initials += [[-(i-_sage_const_1 )*prev2[_sage_const_0 ]/i,((_sage_const_2 *i-_sage_const_1 )*prev[_sage_const_0 ] - (i-_sage_const_1 )*prev2[_sage_const_1 ])/i]];
-        return func.change_init_values(__legendre_initials[n], name=DinamicString("legendre_P(_1,_2)", [str(input), "x"]));
-    except TypeError as e:
-        #raise TypeError("Impossible to create a Legendre polynomial of rational index");
-        raise e;
-
+    parent, par = __check_list([nu,mu], DFinite.variables());
+    n = par[0]; m = par[1];
+    
+    ## Building the final parent
+    if(parent is QQ):
+        parent = DFinite;
+    else:
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    
+    ## Building the final name
+    x = parent.variables()[0];
+    if(m != 0):
+        name = DinamicString("Legendre(_1,_2;_3)" [repr(n), repr(m), repr(x)]);
+    elif(kind == 1):
+        name = DinamicString("legendre_P(_1,_2)", [repr(n),repr(x)]);
+    elif(kind == 2):
+        name = DinamicString("legendre_Q(_1,_2)", [repr(n),repr(x)]);
+    else:
+        raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind);
+    
+    ## Building the initial values
+    init = [];
+    if((m == 0) and (n in ZZ) and (n >= 0)):
+        try:
+            init = [__init_value_associated_legendre(n,m,kind), __first_derivative_associated_legendre(n,m,kind)];
+            if(any(el not in parent.base_field for el in init)):
+                init = [];
+        except:
+            pass;
+    ## Building the coefficients of the equation
+    if(m == 0):
+        coeffs = [(n*(n+1)),-2*x,1-x**2];
+    else:
+        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)];
+     
+    ## Returning the final element
+    return parent.element(coeffs, init, name=name);        
+   
 ### Chebyshev Polynomials        
 __chebyshev_initials = [[],[[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_1 ]],[[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_2 ]]];
 @cached_function    
-def ChebyshevD(input, kind = _sage_const_1 ):
+def ChebyshevD(n, kind = 1):
     '''
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
@@ -619,6 +699,23 @@ def ChebyshevD(input, kind = _sage_const_1 ):
             - https://en.wikipedia.org/wiki/Chebyshev_polynomials
             - http://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html & http://mathworld.wolfram.com/ChebyshevPolynomialoftheSecondKind.html
             
+        The Chebyshev polynomials of the first kind T_n(x) are the polynomial solutions 
+        to the differential equation
+            (1-x^2)f'' - xf' + n^2f = 0
+        with a parameter 'n'. The poylnomial solutions (with the appropriate normalization)
+        form a orthogonal basis with the orthogonality relation:
+            \int_{-1}^{1} (T_n(x)T_m(x))/(sqrt(1-x^2)) = \delta_{n,m}pi/(2-\delta_{0,n})
+        
+        The Chebyshev polynomials of the second kind U_n(x) are the polynomial solutions 
+        to the differential equation
+            (1-x^2)f'' - 3xf' + n(n+2)f = 0
+        with a parameter 'n'. The poylnomial solutions (with the appropriate normalization)
+        form a orthogonal basis with the orthogonality relation:
+            \int_{-1}^{1} U_n(x)U_m(x))sqrt(1-x^2) = \delta_{n,m}pi/2
+            
+        This method allows the user to get the D-finite representation of the associated
+        Chebyshev differential equation. 
+        
         TODO
     '''
     global __chebyshev_initials;
@@ -1396,5 +1493,5 @@ def __check_list(list_of_elements, invalid_vars=[]):
     return (parent, list_of_elements);
     
 #### Usual running after defining everything
-DD_EXAMPLES_LOAD();
+#DD_EXAMPLES_LOAD();
 
