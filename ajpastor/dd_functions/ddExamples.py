@@ -140,9 +140,9 @@ def ddExamples(functions = False, names=False):
             - MathieuD
             - MathieuSin
             - MathieuCos
-            - ModifiedMathieuD
-            - ModifiedMathieuSin
-            - ModifiedMathieuCos
+            - MathieuH
+            - MathieuSinh
+            - MathieuCosh
             - HillD
         ** AIRY'S FUNCTIONS
             - AiryD
@@ -682,15 +682,14 @@ def LegendreD(nu='n', mu = 0, kind=1):
     if(m == 0):
         coeffs = [(n*(n+1)),-2*x,1-x**2];
     else:
-        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)];
+        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)**2];
      
     ## Returning the final element
     return parent.element(coeffs, init, name=name);        
    
 ### Chebyshev Polynomials        
-__chebyshev_initials = [[],[[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_1 ]],[[_sage_const_1 ,_sage_const_0 ],[_sage_const_0 ,_sage_const_2 ]]];
 @cached_function    
-def ChebyshevD(n, kind = 1):
+def ChebyshevD(input='n', kind = 1, poly=True):
     '''
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
@@ -713,46 +712,82 @@ def ChebyshevD(n, kind = 1):
         form a orthogonal basis with the orthogonality relation:
             \int_{-1}^{1} U_n(x)U_m(x))sqrt(1-x^2) = \delta_{n,m}pi/2
             
+        The Chebyshev polynomials of the third kind V_n(x) are the polynomial solutions
+        to the differential equation
+            (1-x^2)f'' + (1-2x)f' + n(n+1)f = 0
+            
+        THe Chebyshev polynomials of the fourth kind W_n(x) are the polynomial solutions to
+        the differential equation
+            (1-x^2)f'' - (1+2x)f' + n(n+1)f = 0
+            
         This method allows the user to get the D-finite representation of the associated
         Chebyshev differential equation. 
         
-        TODO
+        INPUT:
+            - input: the parameter 'n' on the differential equation. If not provided, it takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - kind: the kind of the Chebyshev polynomials the user want to get. It can take the values 1, 2, 3 and 4 (1 by default).
+            - poly: a boolean value that refer to the polynomial solution to the differential equation or the other power series solution. If False, the other power serie solution will be returned such that the Wronskian of this solution with the polynomial solution is 1. NOTE: when the parameter is not an integer, this parameter only makes a difference in the name of the function, adding a "P_" at the beginning.
+            
+        WARNING:
+            - Initial values will also be computed for the integer parameter values.
+            - When evaluating parameters, the initial values will not update and must be set by hand.
     '''
-    global __chebyshev_initials;
-    if(input is None):
-        return DDFunction_example('chebyshev%d' %kind);
-
-    try:
-        n = ZZ(input);
-        if(n < _sage_const_0 ):
-            raise ValueError("Impossible to create a Legendre polynomial of negative index");
-            
-        P = DFiniteP.parameters()[_sage_const_0 ];
-        ## Building the differential equation
-        name = None;
-        if(kind == _sage_const_1 ):
-            func = DDFunction_example('chebyshev1')(**{str(P):n});
-            name = DinamicString("chebyshev_T(_1,_2)", [str(input), "x"]);
-        elif(kind == _sage_const_2 ):
-            func = DDFunction_example('chebyshev2')(**{str(P):n});
-            name = DinamicString("chebyshev_U(_1,_2)", [str(input), "x"]);
+    parent, par = __check_list([input], DFinite.variables());
+    n = par[0];
+    
+    ## Building the final parent
+    if(parent is QQ):
+        parent = DFinite;
+    else:
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    
+    ## Building the final name and the equation
+    x = parent.variables()[0];
+    name = "chebyshev";
+    if(not poly):
+        name = "P_" + name;
+        
+    if(kind == 1):
+        coeffs = [n**2, -x, 1-x**2];
+        name = DinamicString("%s_T(_1;_2)" %name, [repr(n), repr(x)]);
+    elif(kind == 2):
+        coeffs = [n*(n+2), -3*x, 1-x**2];
+        name = DinamicString("%s_U(_1;_2)" %name, [repr(n),repr(x)]);
+    elif(kind == 3):
+        coeffs = [n*(n+1), 1-2*x, 1-x**2];
+        name = DinamicString("%s_V(_1;_2)" %name, [repr(n),repr(x)]);
+    elif(kind == 4):
+        coeffs = [n*(n+1), -1-2*x, 1-x**2];
+        name = DinamicString("%s_W(_1;_2)" %name, [repr(n),repr(x)]);
+    else:
+        raise ValueError("Only Chebyshev polynomials of first, second, third and fourth kind are implemented. Got %s" %kind);
+    
+    ## Building the initial values
+    init = [];
+    if(n in ZZ):
+        if(n%2 == 0):
+            n = n/2;
+            if(poly):
+                init = [(-1)**(n),0];
+            else:
+                init = [0, (-1)**(n)];
         else:
-            raise ValueError("Impossible to manage Chebyshev polynomial of %d-th kind" %(kind));
-            
-        ## Computing initial values
-        for i in range(len(__chebyshev_initials[kind]), n+_sage_const_1 ):
-            prev = __chebyshev_initials[kind][-_sage_const_1 ];
-            prev2 = __chebyshev_initials[kind][-_sage_const_2 ];
-            __chebyshev_initials[kind] += [[-prev2[_sage_const_0 ], _sage_const_2 *prev[_sage_const_0 ]-prev2[_sage_const_1 ]]];
-        return func.change_init_values(__chebyshev_initials[kind][n],name);
-    except TypeError as e:
-        raise e;    
+            n = (n-1)/2;
+            if(kind == 1):
+                init = [0, ((-1)**n)*(2*n+1)];
+            else:
+                init = [0, ((-1)**n)*(2*n+2)];   
+            if(not poly):
+                init = [-1/init[1], 0];
+     
+    ## Returning the final element
+    return parent.element(coeffs, init, name=name);        
 
 ###### HYPERGEOMETRIC FUNCTIONS
 ### Hypergeometric Functions
 __CACHED_HYPERGEOMETRIC = {};
-
-def HypergeometricFunction(a,b,c, init = _sage_const_1 ):
+@cached_function
+def HypergeometricFunction(a='a',b='b',c='c', init = _sage_const_1 ):
     '''
         D-finite implementation of the Gauss Hypergeometric function
         
@@ -761,7 +796,23 @@ def HypergeometricFunction(a,b,c, init = _sage_const_1 ):
             - https://en.wikipedia.org/wiki/Hypergeometric_function
             - http://mathworld.wolfram.com/HypergeometricFunction.html
             
-        TODO
+        The Gauss Hypergeometric function is a special function represented by the hypergeometric 
+        series, that includes many other special functions as specific or limiting cases. It is a 
+        solution of the second-order differential equation
+            x(1-x)f'' + (c-(a+b+1)x)f' - abf = 0
+            
+        The associated sequence to this functions have the following expression:
+            f_n = ((a)_n * (b)_n)/(n!*(c)_n)
+        where (a)_n = a*(a+1)*...*(a+n-1). Hence, if a or b is a negative integer this is a polynomial.
+        
+        This is a particular case of the Generic Hypergeometric Function, 2F1(a,b;c;x), being equivalent
+        to GenericHypergeometricFunction([a,b],[c],init).
+        
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
     return GenericHypergeometricFunction([a,b],[c],init);
 
@@ -774,7 +825,19 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
             - https://en.wikipedia.org/wiki/Generalized_hypergeometric_function
             - http://mathworld.wolfram.com/GeneralizedHypergeometricFunction.html
             
-        TODO
+        The Generic Hypergeometric function is a special function denoted by qFp(a_1,...,a_p;b_1,...,b_q;x) represented 
+        by the hypergeometric series
+            f_n = ((a_1)_n * ... * (a_p)_n)/(n!*(b_1)_n * ... * (b_q)_n)
+        where (a)_n = a*(a+1)*...*(a+n-1).
+        
+        This hypergeometric functions satisfies a linear differential equation of order max(p,q) that can be represented
+        using the gauss differential operator D(f) = xf':
+            (D(D+b_1-1)...(D+b_q-1) - x(D+a_1)...(D+a_p))(f) = 0
+                
+        INPUT:
+            - num: a list with the parameters "a_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            - den: a list with the parameters "b_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
     ## Checking arguments: num
     if (not (isinstance(num,list) or isinstance(num,set) or isinstance(num,tuple))):
@@ -786,9 +849,10 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
     else:
         den = list(den);
         
-    parent, new_all = __check_list(num+den, [str(el) for el in DFinite.variables()]);
-    num = new_all[:len(num)];
-    den = new_all[len(num):];
+    parent, new_all = __check_list(num+den+[init], [str(el) for el in DFinite.variables()]);
+    numerator = new_all[:len(num)];
+    denominator = new_all[len(num):-1];
+    initial = new_all[-1];
     
     if(parent != QQ):
         destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
@@ -797,44 +861,44 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
         
     ## Cleaning repeated values 
     i = _sage_const_0 ;
-    while(i < len(num) and len(den) > _sage_const_0 ):
-        if(num[i] in den):
-            den.remove(num[i]);
-            num.remove(num[i]);
+    while(i < len(numerator) and len(denominator) > _sage_const_0 ):
+        if(numerator[i] in denominator):
+            denominator.remove(numerator[i]);
+            numerator.remove(numerator[i]);
         else:
             i += _sage_const_1 ;
     
     ## Sort list for cannonical input
-    num.sort(); den.sort();
+    numerator.sort(); denominator.sort();
     
     ## Casting to tuples to have hash  
-    num = tuple(num); den = tuple(den);
+    numerator = tuple(numerator); denominator = tuple(denominator);
     
     ## Checking the function is cached
     global __CACHED_HYPERGEOMETRIC;
-    if(not((num,den,init) in __CACHED_HYPERGEOMETRIC)):
+    if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
         get_op = lambda p : destiny_ring.element(p).equation;
-        op_num = x*prod(get_op([el,x]) for el in num);
-        op_den = x*get_op([_sage_const_0 ,_sage_const_1 ])*prod(get_op([el-_sage_const_1 ,x]) for el in den);
+        op_num = x*prod(get_op([el,x]) for el in numerator);
+        op_den = x*get_op([_sage_const_0 ,_sage_const_1 ])*prod(get_op([el-_sage_const_1 ,x]) for el in denominator);
         op = op_num - op_den;
         
         f = destiny_ring.element(op);
         
-        initVals = [init];
+        initVals = [initial];
         
-        if(init == _sage_const_1 ):
-            __CACHED_HYPERGEOMETRIC[(num,den,init)] = f.change_init_values([_sage_const_1 ],name=DinamicString("hypergeometric(_1,_2,_3)", [str(num),str(den),"x"]));
+        if(initial == _sage_const_1 ):
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([_sage_const_1 ],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]));
         else:
-            __CACHED_HYPERGEOMETRIC[(num,den,init)] = f.change_init_values([init],name=DinamicString("%d*(hypergeometric(_1,_2,_3))", [str(num),str(den),"x"]));
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DinamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]));
         
     ## Return the cached element
-    return __CACHED_HYPERGEOMETRIC[(num,den,init)];
+    return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)];
     
 ###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
-def MathieuD(a=None,q=None,init=()):
+def MathieuD(a='a',q='q',init=()):
     '''
         DD-finite implementation of the Matheiu function
         
@@ -843,26 +907,30 @@ def MathieuD(a=None,q=None,init=()):
             - https://en.wikipedia.org/wiki/Mathieu_function
             - http://mathworld.wolfram.com/MathieuFunction.html
             
-        TODO
-    '''
-    params =[];
-    if(a is None):
-        params += ['a'];
-    if(q is None):
-        params += ['q'];
-    
-    destiny_ring = DDFinite; ra = a; rq = q;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(destiny_ring, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('q' in params):
-            rq = destiny_ring.parameter('q');
+        The Mathieu functions are the solutions to the DD-finite differential equation
+            f'' + (a - 2qcos(2x))f = 0.
+            
+        This is a generalization of the differential equation of the trigonometric functions
+        sine and cosine (for q=0, a=1), and have several physical aplications.
         
-    return destiny_ring.element([ra-_sage_const_2 *rq*Cos(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], init, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+    '''
+    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
+    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
+    
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DDFinite;
+    x = destiny_ring.variables()[0];
+    
+    return destiny_ring.element([ra-_sage_const_2 *rq*Cos(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:_sage_const_2 ]),repr(x)]));
 
 @cached_function
-def MathieuSin(a=None,q=None):
+def MathieuSin(a='a',q='q'):
     '''
         DD-finite implementation of the Mathieu Sine function.
         
@@ -877,7 +945,7 @@ def MathieuSin(a=None,q=None):
     return MathieuD(a,q,(_sage_const_0 ,_sage_const_1 ));
     
 @cached_function
-def MathieuCos(a=None,q=None):
+def MathieuCos(a='a',q='q'):
     '''
         DD-finite implementation of the Mathieu Cosine function.
         
@@ -893,63 +961,67 @@ def MathieuCos(a=None,q=None):
 
 ### Modified Mathieu's Functions
 @cached_function
-def ModifiedMathieuD(a=None,q=None,init=()):
+def MathieuH(a='a',q='q',init=()):
     '''
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - hhttps://dlmf.nist.gov/28.20
+            - https://dlmf.nist.gov/28.20
             - https://en.wikipedia.org/wiki/Mathieu_function
             
-        TODO
-    '''
-    params =[];
-    if(a is None):
-        params += ['a'];
-    if(q is None):
-        params += ['q'];
-    
-    destiny_ring = DDFinite; ra = a; rq = q;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(destiny_ring, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('q' in params):
-            rq = destiny_ring.parameter('q');
+        The Modified Mathieu functions are the solutions to the DD-finite differential equation
+            f'' - (a - 2qcosh(2x))f = 0.
+            
+        This is a generalization of the differential equation of the hyperbolic trigonometric functions
+        sinh and cosh (for q=0, a=1), and have several physical aplications.
         
-    return destiny_ring.element([ra-_sage_const_2 *rq*Cosh(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], init, name=DinamicString("ModMathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+    '''
+    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
+    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
+    
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DDFinite;
+    x = destiny_ring.variables()[0];
+    
+    return destiny_ring.element([-ra-_sage_const_2 *rq*Cosh(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:_sage_const_2 ]),repr(x)]));
 
 @cached_function
-def ModifiedMathieuSin(a=None,q=None):
+def MathieuSinh(a='a',q='q'):
     '''
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - hhttps://dlmf.nist.gov/28.20
+            - https://dlmf.nist.gov/28.20
             - https://en.wikipedia.org/wiki/Mathieu_function
             
-        This is the sine function with the Mathieu equation (i.e., with initial values
-        0 an 1). It is equivalent to ModifiedMathieuD(a,q,(0,1)).
+        This is the hyperbolic sine function with the Mathieu equation (i.e., with initial values
+        0 an 1). It is equivalent to MathieuH(a,q,(0,1)).
     '''
-    return ModifiedMathieuD(a,q,(_sage_const_0 ,_sage_const_1 ));
+    return MathieuH(a,q,(_sage_const_0 ,_sage_const_1 ));
     
 @cached_function
-def ModifiedMathieuCos(a=None,q=None):
+def MathieuCosh(a='a',q='q'):
     '''
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - hhttps://dlmf.nist.gov/28.20
+            - https://dlmf.nist.gov/28.20
             - https://en.wikipedia.org/wiki/Mathieu_function
             
-        This is the cosine function with the Mathieu equation (i.e., with initial values
-        1 an 0). It is equivalent to ModifiedMathieuD(a,q,(1,0)).
+        This is the hyperbolic cosine function with the Mathieu equation (i.e., with initial values
+        1 an 0). It is equivalent to MathieuH(a,q,(1,0)).
     '''
-    return ModifiedMathieuD(a,q,(_sage_const_1 ,_sage_const_0 ));
+    return MathieuH(a,q,(_sage_const_1 ,_sage_const_0 ));
 
 ### Hill's equation
 @cached_function
-def HillD(a=None,q=None,init=()):
+def HillD(a='a',q='q',init=()):
     '''
         DD-finite implementation of the Hill equation.
         
@@ -958,29 +1030,46 @@ def HillD(a=None,q=None,init=()):
             - https://en.wikipedia.org/wiki/Hill_differential_equation
             - http://mathworld.wolfram.com/HillsDifferentialEquation.html
             
-        TODO
+        The Hill differential equation is defined as
+            f'' + (a + q(x))f = 0
+        where 'a' is a parameter and q(x) is a function on the variable 'x'. This generalize the
+        Mathieu differential equation and the modified Mathieu differential equation (taking the
+        corresponding value for the function q(x)).
+        
+        This method allows the user to get the representation of the Hill function with some particular
+        initial values. The possible values for the function q(x) is any polynomial function with x and 
+        any DDFunction of any depth.
+        
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any DDFunction, rational number or any polynomial expression, which all variables (except 'x') will be considered as parameters.
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    params =[];
-    destiny_ring = DFinite;
-    
-    if(a is None):
-        params += ['a'];
-    if(q is None):
-        params += ['q'];
-    elif(isinstance(q.parent(), DDRing)):
-        destiny_ring = q.parent().to_depth(q.parent().depth()+1);
+    if(is_DDFunction(q)):
+        destiny_ring = DDRing(q.parent());
+        parent, new_all = __check_list([a] + list(init), [str(el) for el in DFinite.variables()]);
+        
+        if(not (parent is QQ)):
+            destiny_ring = ParametrizedDDRing(base, [str(v) for v in parent.gens()]);
+        ra = new_all[0]; rq = destiny_ring.base()(q); rinit = new_all[-len(init):];
     else:
-        q,destiny_ring = __decide_parent(q);
+        parent, new_all = __check_list([a,q] + list(init), []);
+        ra = new_all[0]; rq = new_all[1]; rinit = new_all[-len(init):];
         
-    ra = a; rq = q;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(destiny_ring, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('q' in params):
-            rq = destiny_ring.parameter('q');
-        
-    return destiny_ring.element([ra+rq, _sage_const_0 , _sage_const_1 ], init, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+        if(parent is QQ):
+            destiny_ring = DFinite;
+        else:
+            new_vars = [str(v) for v in parent.gens()];
+            
+            if('x' in new_vars):
+                x = parent.gens()[new_vars.index('x')];
+                if(x in ra.variables() or any(x in el.variables() for el in rinit)):
+                    raise ValueError("The variable 'x' can not appear in the parameter 'a' or in the initial values.\n\t- a: %s\n\t- init: %s" %(ra,rinit));
+                new_vars.remove('x');
+            
+            destiny_ring = ParametrizedDDRing(DFinite, new_vars);
+            
+    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
 
 ###### AIRY TYPE FUNCTIONS
 ### Airy's functions
@@ -994,37 +1083,64 @@ def AiryD(init=()):
             - https://en.wikipedia.org/wiki/Airy_function
             - http://mathworld.wolfram.com/AiryFunctions.html
             
-        TODO
+        The Airy functions are the solutions of the differential equation:
+            f'' - xf = 0
+        
+        The classical Airy functions, denoted by Ai(x) and Bi(x), form a set of linearly independent
+        solutions to the differential equations. The initial value of the classical Airy functions
+        are
+            Ai(0) = 1/(3^(2/3) * gamma(2/3)); Ai'(0) = -1/(3^(1/3) * gamma(1/3))
+            Bi(0) = 1/(3^(1/6) * gamma(2/3)); Bi'(0) = (3^(1/6))/gamma(1/3)
+            
+        Due to this fact, the classical Airy functions do not have rational initial values. This is why
+        this method can not retrieve te user with the functions Ai(x) or Bi(x). This method returns
+        the solution of the Airy's differential equation with some particular initial value.
+        
+        The name of the returned function will show the linear combination of the function Ai(x) and Bi(x)
+        using the gamma function and the transcendental value pi.
+        
+        INPUT:
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
+    parent, rinit = __check_list(list(init), [str(el) for el in DFinite.variables()]);
+    
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
+    x = destiny_ring.variables()[0];
+    
     name = None;
-    if(len(init) >= 2): ## Complete Airy function, we can build the name
+    if(len(rinit) >= 2): ## Complete Airy function, we can build the name
         ## Rejecting the zero case
-        if(init[0] == init[1] and init[0] == 0):
+        if(rinit[0] == rinit[1] and rinit[0] == 0):
             return DFinite.zero();
         
         ## Simplifying the name if there is zero coefficients
-        if(init[0] != 0):
-            name_a1 = "(3**(2/3)*gamma(2/3))*%s" %init[0];
-            name_b1 = "(3**(1/3)*gamma(2/3))*%s" %init[0];
+        if(rinit[0] != 0):
+            name_a1 = DinamicString("(3**(2/3)*gamma(2/3))*_1", [repr(rinit[0])]);
+            name_b1 = DinamicString("(3**(1/3)*gamma(2/3))*_1", [repr(rinit[0])]);
         else:
-            name_a1 = "";
-            name_b1 = "";
-        if(init[1] != 0):
-            name_a2 = "-(3**(1/3)*gamma(1/3))*%s" %init[1];
-            name_b2 = "+(gamma(1/3))*%s" %init[1];
+            name_a1 = DinamicString("", []);
+            name_b1 = DinamicString("", []);
+        if(rinit[1] != 0):
+            name_a2 = DinamicString("-(3**(1/3)*gamma(1/3))*_1", [repr(rinit[1])]);
+            name_b2 = DinamicString("+(gamma(1/3))*_1", [repr(rinit[1])]);
         else:
-            name_a2 = "";
-            name_b2 = "";
+            name_a2 = DinamicString("", []);
+            name_b2 = DinamicString("", []);
             
         ## Building the final name
-        name = DinamicString("((%s%s)/2)*airy_ai(_1) + ((%s%s)/(2*3**(1/6)))*airy_bi(_1)" %(name_a1, name_a2, name_b1, name_b2), ["x"]);
-    return DFinite.element([-x,0,1], init, name=name);
+        name = DinamicString("((_1_2)/2)*airy_ai(_5) + ((_3_4)/(2*3**(1/6)))*airy_bi(_5)", [name_a1, name_a2, name_b1, name_b2,repr(x)]);
+    else:
+        name = DinamicString("airy(_1; _2)", [repr(x), repr(rinit)]);
+    return destiny_ring.element([-x,0,1], rinit, name=name);
 
 
 ###### PARABOLIC-CYLINDER TYPE FUNCTIONS
 ### Parabolic Cylinder Functions
 @cached_function
-def ParabolicCylinderD(a=None,b=None,c=None, init=()):
+def ParabolicCylinderD(a='a',b='b',c='c', init=()):
     '''
         D-finite implementation of Parabolic Cylinder functions.
         
@@ -1033,26 +1149,25 @@ def ParabolicCylinderD(a=None,b=None,c=None, init=()):
             - https://en.wikipedia.org/wiki/Parabolic_cylinder_function
             - http://mathworld.wolfram.com/ParabolicCylinderDifferentialEquation.html
             
-        TODO
+        The parabolic cylinder function is a solution to the differential equation:
+            f'' + (c + bx + ax^2)f = 0
+            
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    params =[];
-    if(a is None):
-        params += ['a'];
-    if(b is None):
-        params += ['b'];
-    if(c is None):
-        params += ['c'];
+    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
     
-    destiny_ring = DFinite; ra = a; rb = b; rc = c;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(DFinite, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('b' in params):
-            rb = destiny_ring.parameter('b');
-        if('c' in params):
-            rc = destiny_ring.parameter('c');
-    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], init, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4)", [repr(ra), repr(rb), repr(rc), "x"]));
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
+    x = destiny_ring.variables()[0];
+    
+    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], rinit, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4;_5)", [repr(ra), repr(rb), repr(rc), repr(rinit), repr(x)]));
     
 ###### ELLIPTIC INTEGRALS
 ## Legendre elliptic integrals
@@ -1100,7 +1215,7 @@ def EllipticLegendreD(kind,var='phi'):
 ###### SPHEROIDAL WAVE FUNCTIONS
 ## Generalized (or Coulomb) Spheroidal Differential Equation
 @cached_function
-def CoulombSpheroidalFunctionD(a=None, b=None, c=None, d=None, kind = 1, init=()):
+def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     '''
         D-finite implementation of the Coulomb speroidal function 
         
@@ -1108,30 +1223,25 @@ def CoulombSpheroidalFunctionD(a=None, b=None, c=None, d=None, kind = 1, init=()
             - https://dlmf.nist.gov/30.12
             
         TODO
+        
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - kind: the kind of Coulomb Spheroidal function. Currently this can take the value 1 or 2 (1 by default).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(kind not in [1,2]):
         raise TypeValue("Generalized Spheroidal functions only allowed in two different generalizations (1 or 2). Got %s" %kind);
-    params =[];
-    if(a is None):
-        params += ['a'];
-    if(b is None):
-        params += ['b'];
-    if(c is None):
-        params += ['c'];
-    if(d is None):
-        params += ['d'];
+    parent, new_all = __check_list([a,b,c,d]+list(init), [str(el) for el in DFinite.variables()]);
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rd = new_all[3]; rinit = new_all[-len(init):];
     
-    destiny_ring = DFinite; ra = a; rb = b; rc = c; rd = d;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(DFinite, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('b' in params):
-            rb = destiny_ring.parameter('b');
-        if('c' in params):
-            rc = destiny_ring.parameter('c');
-        if('d' in params):
-            rd = destiny_ring.parameter('d');
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
+    x = destiny_ring.variables()[0];
     
     coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2];
     if(kind == 1):
@@ -1142,7 +1252,7 @@ def CoulombSpheroidalFunctionD(a=None, b=None, c=None, d=None, kind = 1, init=()
     return destiny_ring.element(coeffs, init, name=DinamicString("CoulombSpheroidal(_1,_2,_3,_4;%d;%s)(_5)" %(kind,init), [repr(ra), repr(rb), repr(rc), repr(rd), "x"]));
 
 @cached_function
-def SpheroidalWaveFunctionD(a=None, b=None, c=None, init=()):
+def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     '''
         D-finite implementation of the spheroidal wave function.
         
@@ -1151,28 +1261,32 @@ def SpheroidalWaveFunctionD(a=None, b=None, c=None, init=()):
             - https://en.wikipedia.org/wiki/Spheroidal_wave_function
             - http://mathworld.wolfram.com/SpheroidalWaveFunction.html
             
-        TODO
+        The Spheroidal Wave functions are the solutions to the differential equation
+            ((1-x^2)f')' + (a + b^2*(1-x^2) - c^2/(1-x^2))f = 0.
+            
+        This functions are related with the related Legendre functions (taking b = 0).
+        
+        This method allows to get the D-finite representation of the Spheroidal Wave functions
+        with a set of initial values.
+        
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    params =[];
-    if(a is None):
-        params += ['a'];
-    if(b is None):
-        params += ['b'];
-    if(c is None):
-        params += ['c'];
+    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
     
-    destiny_ring = DFinite; ra = a; rb = b; rc = c;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(DFinite, params);
-        if('a' in params):
-            ra = destiny_ring.parameter('a');
-        if('b' in params):
-            rb = destiny_ring.parameter('b');
-        if('c' in params):
-            rc = destiny_ring.parameter('c');
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
+    x = destiny_ring.variables()[0];
     
     coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2];
-    return destiny_ring.element(coeffs, init, name=DinamicString("SpheroidalWave(_1,_2,_3;%s)(_4)" %(str(init)), [repr(ra), repr(rb), repr(rc), "x"]));
+    
+    return destiny_ring.element(coeffs, init, name=DinamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]));
 
 ###### HEUN FUNCTIONS
 ### Fuschian equation
@@ -1197,11 +1311,12 @@ def FuschianD(a = [], gamma = [], q = [], init=()):
     N = len(a);
     
     ## Getting the parameters
-    parent, new_all = __check_list(a+gamma+q, [str(el) for el in DFinite.variables()]);
+    parent, new_all = __check_list(a+gamma+q+list(init), [str(el) for el in DFinite.variables()]);
     
     a = new_all[:N];
     gamma = new_all[N:2*N];
-    q = new_all[-N:];
+    q = new_all[2*N:2*N+len(q)];
+    rinit = new_all[-len(init)];
     
     if(sum(q) != 0):
         raise ValueError("The q parameters must sum up zero. Got %s" %(sum(q)));
@@ -1222,10 +1337,10 @@ def FuschianD(a = [], gamma = [], q = [], init=()):
     coeffs = [sum(q[i]*Q[i] for i in range(N)), sum(gamma[i]*Q[i] for i in range(N)), P];
     
     ## Returning the solution
-    return destiny_ring.element(coeffs, init, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(init)), [repr(a), repr(gamma), repr(q), "x"]));
+    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(a), repr(gamma), repr(q), "x"]));
 
 ### Heun's function
-def HeunD(a=None,b=None,d=None,g=None,e=None,q=None):
+def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
     '''
         D-finite implementation of the Heun's functions.
         
@@ -1235,14 +1350,16 @@ def HeunD(a=None,b=None,d=None,g=None,e=None,q=None):
             - http://mathworld.wolfram.com/HeunsDifferentialEquation.html
             
         TODO
-    '''
-    pars = ["a","b","d","g","e","q"];
-    args = [a,b,d,g,e,q];
-    for i in range(len(args)):
-        if(args[i] is not None):
-            pars[i] = args[i];
         
-    parent, new_all = __check_list(pars, [str(el) for el in DFinite.variables()]);
+        INPUT:
+            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - g: the parameter 'g' on the differential equation. If not provided, it takes the value 'g' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - e: the parameter 'e' on the differential equation. If not provided, it takes the value 'e' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+    '''
+    parent, new_all = __check_list([a,b,d,,e,q], [str(el) for el in DFinite.variables()]);
     ra,rb,rd,rg,re,rq = new_all;
         
     al = rg+rd+re-rb-1;
@@ -1251,7 +1368,7 @@ def HeunD(a=None,b=None,d=None,g=None,e=None,q=None):
     return f;
 
 ###### COULOMB FUNCTIONS
-def CoulombF(m=None, l=None):
+def CoulombF(m='m', l='l'):
     '''
         D-finite implementation of the regular Coulomb wave function (F_l(mu,ro)).
         
@@ -1259,28 +1376,31 @@ def CoulombF(m=None, l=None):
             - https://dlmf.nist.gov/33.2
             - https://en.wikipedia.org/wiki/Coulomb_wave_function
             
-        TODO
+        The Coulomb Wave function is the solution to the differential equation
+            f'' + (1-(2m)/x - (l(l+1))/x^2)f = 0
+            
+        If l is integer, there is a power serie solution of order l+1, and this function return that solution
+        with first sequence element 1.
+        
+        INPUT:
+            - m: the parameter 'm' on the differential equation. If not provided, it takes the value 'm' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            - l: the parameter 'l' on the differential equation. If not provided, it takes the value 'l' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    params =[];
-    if(m is None):
-        params += ['m'];
-    if(l is None):
-        params += ['l'];
-    destiny_ring = DFinite; rm = m; rl = l;
-    if(len(params) > _sage_const_0 ):
-        destiny_ring = ParametrizedDDRing(DFinite, params);
-        if('m' in params):
-            rm = destiny_ring.parameter('m');
-        if('l' in params):
-            rl = destiny_ring.parameter('l');
+    parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()]);
+    rm, rl = new_all;
+    
+    if(parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+    else:
+        destiny_ring = DFinite;
     x = destiny_ring.variables()[0];
     init = [];
     
-    if(l in ZZ): ## Power series solution
-        if(l in [-1,0]): ## Special cases
+    if(rl in ZZ): ## Power series solution
+        if(rl in [-1,0]): ## Special cases
             init = [0,1];
-        elif(l > 0):
-            init = [0 for i in range(l+1)] + [1];
+        elif(rl > 0):
+            init = [0 for i in range(rl+1)] + [1];
             
     return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DinamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]));
 
