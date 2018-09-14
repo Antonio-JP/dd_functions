@@ -10,97 +10,6 @@ from ajpastor.misc.dinamic_string import *;
 
 _sage_const_3 = Integer(3); _sage_const_2 = Integer(2); _sage_const_1 = Integer(1); _sage_const_0 = Integer(0); _sage_const_6 = Integer(6);
 
-### Global variables (PUBLIC)
-#DFinite_examples = {};
-#DDFinite_examples = {};
-#
-### Global variables (PRIVATE)
-#__example_names = {};
-#
-##################################################################################
-##################################################################################
-###
-### Predefined examples
-###
-##################################################################################
-##################################################################################
-#def DD_EXAMPLES_LOAD():
-#    global DFinite_examples; global DDFinite_examples;
-#    global __example_names;
-#
-#    s = DFinite.element([_sage_const_1 ,_sage_const_0 ,_sage_const_1 ],[_sage_const_0 ,_sage_const_1 ], name=DinamicString("sin(_1)", "x"));
-#    c = DFinite.element([_sage_const_1 ,_sage_const_0 ,_sage_const_1 ],[_sage_const_1 ,_sage_const_0 ], name=DinamicString("cos(_1)", "x"));
-#    sh = DFinite.element([-_sage_const_1 ,_sage_const_0 ,_sage_const_1 ],[_sage_const_0 ,_sage_const_1 ], name=DinamicString("sinh(_1)", "x"));
-#    ch = DFinite.element([-_sage_const_1 ,_sage_const_0 ,_sage_const_1 ],[_sage_const_1 ,_sage_const_0 ], name=DinamicString("cosh(_1)", "x"));
-#    ln = DFinite.element([_sage_const_1 ,_sage_const_0 ,(x+_sage_const_1 )],[_sage_const_0 ,_sage_const_1 ], name=DinamicString("log(_1-1)", "x"));
-#    e = DFinite.element([-_sage_const_1 ,_sage_const_1 ],[_sage_const_1 ], name=DinamicString("exp(_1)", "x"));
-#    tan = DDFinite.element([-_sage_const_2 ,_sage_const_0 ,c**_sage_const_2 ],[_sage_const_0 ,_sage_const_1 ], name=DinamicString("tan(_1)", "x"));
-#    
-#    ## Defining D-Finite Examples
-#    DFinite_examples['e'] = e;
-#    DFinite_examples['ln'] = ln;
-#    DFinite_examples['sin'] = s;
-#    DFinite_examples['cos'] = c;
-#    DFinite_examples['sinh'] = sh;
-#    DFinite_examples['cosh'] = ch;
-#    P = DFiniteP.parameters()[_sage_const_0 ];
-#    DFinite_examples['bessel'] = DFiniteP.element([x**2-P**2,x,x**2], name=DinamicString("bessel_J(_1,_2)", ["P","x"]));
-#    DFinite_examples['struve'] = DFiniteP.element([(1-P)*x**2+P**2*(P+1),x*(x**2-P**2-P),(2-P)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", ["P","x"]));
-#    DFinite_examples['legendre'] = DFiniteP.element([P*(P+_sage_const_1 ), -_sage_const_2 *x,_sage_const_1 -x**_sage_const_2 ], name=DinamicString("legendre_P(_1,_2)", ["P","x"]));
-#    DFinite_examples['chebyshev1'] = DFiniteP.element([P**_sage_const_2 ,-x,(_sage_const_1 -x**_sage_const_2 )], name=DinamicString("chebyshev_T(_1,_2)", ["P","x"]));
-#    DFinite_examples['chebyshev2'] = DFiniteP.element([P*(P+_sage_const_2 ),-_sage_const_3 *x,_sage_const_1 -x**_sage_const_2 ], name=DinamicString("chebyshev_U(_1,_2)", ["P","x"]));
-#    
-#    ## Defining DD-Finite Examples
-#    DDFinite_examples['esin'] = DDFinite.element([_sage_const_1 ,-c], [_sage_const_1 ], name=DinamicString("exp(sin(_1))", "x"));
-#    DDFinite_examples['sine'] = DDFinite.element([e**_sage_const_2 ,-_sage_const_1 ,_sage_const_1 ],[_sage_const_0 ,_sage_const_1 ], name=DinamicString("sin(exp(_1))", "x"));
-#    DDFinite_examples['tan'] = [tan, DDFinite.element([_sage_const_0 ,-_sage_const_2 *s*c,c**_sage_const_2 ], [_sage_const_0 ,_sage_const_1 ], name=DinamicString("tan(_1)", "x"))];
-#    DDFinite_examples['bernoulli'] = DDFinite.element([x*e-e+_sage_const_1 ,x*(e-_sage_const_1 )],[_sage_const_1 ,-_sage_const_1 /_sage_const_2 ,_sage_const_1 /_sage_const_6 ,_sage_const_0 ]);
-#    
-#    ## Defining some names
-#    __example_names['exp'] = 'e';
-#    __example_names['log'] = 'ln';
-#    __example_names['sen'] = 'sin';
-#    __example_names['tg'] = 'tan';
-#
-#def DFinite_example(input, n=_sage_const_0 ):
-#    if(DFinite_examples.has_key(input)):
-#        res = DFinite_examples[input];
-#    elif (__example_names.has_key(input) and DFinite_examples.has_key(__example_names[input])):
-#        res = DFinite_examples[__example_names[input]];
-#    else:
-#        raise ValueError('The DD-Function by name %s does not exist' %(input));
-#        
-#    if(type(res)==list):
-#        return res[n];
-#    else:
-#        return res;
-#    
-#
-#def DDFinite_example(input, n = _sage_const_0 ):
-#    if(DDFinite_examples.has_key(input)):
-#        res = DDFinite_examples[input];
-#    elif (__example_names.has_key(input) and DDFinite_examples.has_key(__example_names[input])):
-#        res = DDFinite_examples[__example_names[input]];
-#    else:
-#        raise ValueError('The DD-Function by name %s does not exist' %(input));
-#        
-#    if(type(res)==list):
-#        return res[n];
-#    else:
-#        return res;
-#    
-#def DDFunction_example(input, n=_sage_const_0 ):
-#    try:
-#        return DFinite_example(input, n);
-#    except Exception:
-#        pass;
-#    try:
-#        return DDFinite_example(input, n);
-#    except Exception:
-#        pass;
-#        
-#    raise ValueError('No DD-Function by name %s exist' %(input));
-
 def ddExamples(functions = False, names=False):
     '''
         Welcome to ddExamples documentation. Here we describe the functions
@@ -167,7 +76,6 @@ def ddExamples(functions = False, names=False):
         if(names):
             return [el.__name__ for el in funcs];
         return funcs;
-    
 
 ##################################################################################
 ##################################################################################
@@ -1180,9 +1088,29 @@ def EllipticLegendreD(kind,var='phi'):
             - https://en.wikipedia.org/wiki/Legendre_form
             - http://mathworld.wolfram.com/EllipticIntegraloftheFirstKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheSecondKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheThirdKind.html
             
-        TODO
+        Given a function s(t) such that s^2 is a cubic or quartic polynomial in t and r(s,t) a rational function on s and t, 
+        then the integral of r(s,t) w.r.t. t is calles an elliptic integral. The Legendre elliptic integral are obtained from
+        the following functions:
+        
+            - First kind:
+                s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = 1/s --> F(phi,k) = int_{0}^{sin(phi)} r(s,t).
+            - Second kind:
+                s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = s/(1-t^2) --> E(phi,k) = int_{0}^{sin(phi)} r(s,t).
+            - Third kind:
+                s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = t^2/s --> D(phi,k) = (F(phi,k)-E(phi,k))/k^2.
+                
+        These elliptic functions (called incomplete Legendre integrals) satisfies differential equations w.r.t. both k and phi.
+        When phi=pi/2, they are called the complete Legendre integrals.
+        
+        This method allows the user to get the complete Legendre differential equations with respect to k (which are D-finite)
+        or the incomplete differential equation with respect to phi (which is DD-finite). In the latter case, we consider k as a
+        parameter for the differential equation.
+        
+        INPUT:
+            - kind: determines the kind of the Legendre elliptic integral the user will get. Can only take the values 1,2 or 3 and MUST be provided.
+            - var: the variable to consider. If str(var) is 'k', then the compelte Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
     '''
-    if(kind not in [0,1,2]):
+    if(kind not in [1,2,3]):
         raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2");
     if(str(var) not in ['m','phi']):
         raise ValueError("The variable for taking the equation must be 'm' or 'phi'");
@@ -1199,10 +1127,10 @@ def EllipticLegendreD(kind,var='phi'):
             return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2;
             
     if(var == 'phi'):
-        DDFiniteP = DFiniteP.to_depth(2);
-        P = DDFiniteP.parameters()[0];
-        s = DFiniteP(Sin(x));
-        c = DFiniteP(Cos(x));
+        DDFiniteK = ParametrizedDDRing(DDFinite, 'k');
+        P = DDFiniteK.parameters()[0];
+        s = DDFiniteK.to_depth(1)(Sin(x));
+        c = DDFiniteK.to_depth(1)(Cos(x));
         if(kind == 1):
             name = DinamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"]);
             return DDFiniteP.element([0,-P**2*s*c,1-P**2*s**2], [0,1], name=name);
@@ -1222,7 +1150,16 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
         References:
             - https://dlmf.nist.gov/30.12
             
-        TODO
+        This method retrieves the Coulomb Spheroidal Wave function that is a generalization of the Spheroidal Wave 
+        function (see documentation of SpheroidalWaveFunctionD). This function adds a new parameter (d). There are
+        two kinds of generalizations (both catched vy this function with the argumen 'kind'). They satisfy 
+        the following differential equation:
+            - First kind:
+                ((1-x^2)f')' + (a + dx + b^2(1-x^2) - c^2/(1-x^2))f = 0
+            - Second kind:
+                ((1-x^2)f')' + (a+ b^2(1-x^2) - d(d+1)/x^2 - c^2/(1-x^2))f = 0
+                
+        Both equations reduce to the Spheroidal Wave differential equation when d=0.
         
         INPUT:
             - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
@@ -1290,14 +1227,32 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
 
 ###### HEUN FUNCTIONS
 ### Fuschian equation
-def FuschianD(a = [], gamma = [], q = [], init=()):
+@cached_function
+def FuschianD(a = (), gamma = (), q = (), init=()):
     '''
         D-finite implementation of the Fuschian equation
         
         References:
             - https://dlmf.nist.gov/31.15
             
-        TODO
+        The Fuschian differential equation is defined using three list of parameters of the same length
+        a,gamma and q with the following formula:
+            f'' + (sum_j [gamma_j/(x-a_j)])f' + (sum_j [q_j/(x-a_j)])f = 0,
+        where (sum_j [q_j]) == 0.
+        
+        This differential equation has finite singularities at a_j of exponent {0,1-gamma_j} and at
+        infinity of exponents {alpha, beta} where they are the solutions to
+            alpha+beta+1 = sum_j [gamma_j]
+            alpha*beta = sum_j [a_jq_j]
+            
+        This differential equation is a generalization of the Heun differential equation (see documentation
+        of method HeunD) when len(a) = 3, and the parameters are appropriately addapted.
+        
+        INPUT:
+            - a: a TUPLE with the values for the singularity parameter. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            - gamma: a TUPLE with the exponents values. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            - q: a TUPLE with the accesory parameters for the equation. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     ## Checking parameters
     if (not (isinstance(a,list) or isinstance(a,set) or isinstance(a,tuple))):
@@ -1311,12 +1266,12 @@ def FuschianD(a = [], gamma = [], q = [], init=()):
     N = len(a);
     
     ## Getting the parameters
-    parent, new_all = __check_list(a+gamma+q+list(init), [str(el) for el in DFinite.variables()]);
+    parent, new_all = __check_list(list(a)+list(gamma)+list(q)+list(init), [str(el) for el in DFinite.variables()]);
     
-    a = new_all[:N];
-    gamma = new_all[N:2*N];
-    q = new_all[2*N:2*N+len(q)];
-    rinit = new_all[-len(init)];
+    ra = new_all[:N];
+    rgamma = new_all[N:2*N];
+    rq = new_all[2*N:3*N];
+    rinit = new_all[-len(init):];
     
     if(sum(q) != 0):
         raise ValueError("The q parameters must sum up zero. Got %s" %(sum(q)));
@@ -1326,18 +1281,15 @@ def FuschianD(a = [], gamma = [], q = [], init=()):
     else:
         destiny_ring = DFinite;
         
-    a = [destiny_ring.base()(el) for el in a];
-    gamma = [destiny_ring.base()(el) for el in gamma];
-    q = [destiny_ring.base()(el) for el in q];
     x = destiny_ring.variables()[0];
     ## Computing the differential equation
-    P = prod([x-a[i] for i in range(N)]); R = P.parent();
-    Q = [R(P/(x-a[i])) for i in range(N)];
+    P = prod([x-ra[i] for i in range(N)]); R = P.parent();
+    Q = [R(P/(x-ra[i])) for i in range(N)];
     
-    coeffs = [sum(q[i]*Q[i] for i in range(N)), sum(gamma[i]*Q[i] for i in range(N)), P];
+    coeffs = [sum(rq[i]*Q[i] for i in range(N)), sum(rgamma[i]*Q[i] for i in range(N)), P];
     
     ## Returning the solution
-    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(a), repr(gamma), repr(q), "x"]));
+    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]));
 
 ### Heun's function
 def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
@@ -1349,7 +1301,15 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
             - https://en.wikipedia.org/wiki/Heun_function
             - http://mathworld.wolfram.com/HeunsDifferentialEquation.html
             
-        TODO
+        Heun functions are the solutions of the differential equation
+            f'' + (g/x + d/(x-1) + e/(x-a))f' + (Abx - q)/(x(x-1)(x-a)) f = 0,
+        where A = d+g+e-b-1.
+        
+        This equation ahs regualr singularities at 0, 1, a and infinity and captures all the possible
+        differential equation of order two with four regular singularities.
+        
+        The parameter a is called "singularity parameter", A,b,g,d,e are called "exponent parameters" 
+        and q is called the "accesory parameter".
         
         INPUT:
             - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
@@ -1358,6 +1318,9 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
             - g: the parameter 'g' on the differential equation. If not provided, it takes the value 'g' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
             - e: the parameter 'e' on the differential equation. If not provided, it takes the value 'e' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
             - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            
+        WARNING:
+            - This method does not compute initial values for the solution of this differential equation as no power series solution is guaranteed due to the singularity at 0.
     '''
     parent, new_all = __check_list([a,b,d,,e,q], [str(el) for el in DFinite.variables()]);
     ra,rb,rd,rg,re,rq = new_all;
@@ -1558,7 +1521,17 @@ def DAlgebraic(polynomial, init=[], dR=None):
 ##################################################################################    
 def __decide_parent(input, parent = None, depth = 1):
     '''            
-        TODO
+        This method is an auxiliary method that decides the parent associated
+        with an input given some basic possible parent and depth.
+        
+        This method converst the input to the parent base or, in case that parent
+        is not provided, computes the appropriate DDRing where the input can be consider
+        as the coefficient of a differential equation.
+        
+        If 'parent' is None, then several considerations are made:
+            - If 'input' is a Symbolic Expression, we take the variables of it, consider everyone but 'x' as parameters and create the corresponding ParametrizedDDRing of the depth given. The argument 'input' MUST be a polynomial in 'x' and a rational function in any other variable.
+            - If 'input' is a polynomial, then the first generator will be consider as the variable of a DDRing and the others as parameters. Then we create the corresponding ParametrizedDDRing with the depth given.
+            - Otherwise, we create the DDRing of the parent of 'input' of the given depth and try to work with that ring.
     '''
     if(parent is None):
         R = input.parent();
@@ -1584,8 +1557,21 @@ def __decide_parent(input, parent = None, depth = 1):
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
-        TODO
+        This method computes a field of rational functions in several variables given a list of 
+        elements, where all the elements can be casted into. This method also allows to ban some variables
+        to appear in the elements, raising an error if that happens.
+        
+        The elements on the list can be:
+            - A string: it will be consider as the name of a parameter.
+            - Any element with attribute 'variables'. All the variables found will be add as parameters.
+            - Elements of a FractionField. The base ring must provide the method 'variables'. All the variables found will be added as parameters.
+            
+        Once all the variables are computed, we checked that there are no invalid variables and then we 
+        build the field of rational functions in the variables found. Then we return this field together 
+        with the original list, now with all elements casted to this field.
+        
     '''
+    invalid_vars = [str(el) for el in invalid_vars];
     all_vars = [];
     for i in range(len(list_of_elements)):
         el = list_of_elements[i];
@@ -1612,6 +1598,4 @@ def __check_list(list_of_elements, invalid_vars=[]):
     
     return (parent, list_of_elements);
     
-#### Usual running after defining everything
-#DD_EXAMPLES_LOAD();
 
