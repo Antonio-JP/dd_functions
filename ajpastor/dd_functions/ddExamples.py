@@ -170,7 +170,7 @@ def Tan(input, ddR = None):
     if(is_DDFunction(input)):
         return Tan(x)(input);
     if(input == x):
-        return DDFinite_example('tan');
+        return DDFinite.element([-_sage_const_2,0,Cos(x)**2],[0,1]);
     g, dR = __decide_parent(input, ddR,_sage_const_2 );
     
     
@@ -830,7 +830,7 @@ def MathieuD(a='a',q='q',init=()):
     ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DDFinite, [str(v) for v in parent.gens()]);
     else:
         destiny_ring = DDFinite;
     x = destiny_ring.variables()[0];
@@ -1322,7 +1322,7 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
         WARNING:
             - This method does not compute initial values for the solution of this differential equation as no power series solution is guaranteed due to the singularity at 0.
     '''
-    parent, new_all = __check_list([a,b,d,,e,q], [str(el) for el in DFinite.variables()]);
+    parent, new_all = __check_list([a,b,d,g,e,q], [str(el) for el in DFinite.variables()]);
     ra,rb,rd,rg,re,rq = new_all;
         
     al = rg+rd+re-rb-1;
