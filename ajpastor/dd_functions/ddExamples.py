@@ -67,6 +67,10 @@ def ddExamples(functions = False, names=False):
             - HeunD
         ** COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov)
             - CoulombF
+            
+        ** COMBINATORIAL FUNCTIONS
+            - Catalan
+            - Fibonacci
     '''
     if(not functions):
         print ddExamples.__doc__;
@@ -1367,6 +1371,41 @@ def CoulombF(m='m', l='l'):
             
     return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DinamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]));
 
+##################################################################################
+##################################################################################
+###
+### Combinatorial functions
+###
+##################################################################################
+################################################################################## 
+@cached_function
+def Catalan():
+    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1]);
+
+@cached_function
+def Fibonacci(init=(1,1)):
+    parent, rinit = __check_list([el for el in init], [str(el) for el in DFinite.variables()]);
+    params = [str(v) for v in parent.gens()];
+    pos = ord('a');
+    if(len(init) < 2):
+        if(len(init) < 1):
+            while(chr(pos) in params):
+                pos += 1;
+            rinit = [chr(pos)];
+        if(len(init) == 1):
+            while(chr(pos) in params):
+                pos += 1;
+            rinit += [chr(pos)];
+        return Fibonacci(tuple(rinit));
+    
+    if(parent is QQ):
+        destiny_ring = DFinite;
+    else:
+        destiny_ring = ParametrizedDDRing(DFinite, params);
+    
+    x = destiny_ring.variables()[0];
+    
+    return destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2));
             
 ##################################################################################
 ##################################################################################

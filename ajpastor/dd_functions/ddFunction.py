@@ -481,13 +481,24 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             else:
                 try:
                     try:
-                        X = self.base()(X);
+                        num = self.base()(X); den = self.base().one();
                     except TypeError as e:
                         try:
-                            X = self.base()(str(X));
+                            num = self.base()(str(X)); den = self.base().one();
                         except:
-                            raise e;
-                    el = self.element([-self.base_derivation(X), X]);
+                            ## Trying the fraction field
+                            try:
+                                X = self.base().fraction_field()(X);
+                                num = self.base()(X.numerator()); den = self.base()(X.denominator());
+                            except:
+                                try:
+                                    X = self.base().fraction_field()(str(X));
+                                    num = self.base()(X.numerator()); den = self.base()(X.denominator());
+                                except:
+                                    raise e;
+                                
+                    dnum = self.base_derivation(num); dden = self.base_derivation(den);
+                    el = self.element([dden*num - dnum*den, num*den]);
                     name = str(X);
                     try:
                         name = X._DDFunction__name;
