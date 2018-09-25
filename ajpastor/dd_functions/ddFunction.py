@@ -2,6 +2,7 @@
 from sage.all_cmdline import *   # import sage library
 
 _sage_const_1en10 = RealNumber('1e-10');
+_sage_const_0 = Integer(0);
 
 # Python imports
 import warnings;
@@ -59,7 +60,7 @@ def _aux_derivation(p):
         R = p.parent();
         return derivative(p,R(x));
     except Exception:
-        return 0 ;
+        return _sage_const_0 ;
         
 #####################################################
 ### Class for DD-Rings
@@ -499,6 +500,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                                 
                     dnum = self.base_derivation(num); dden = self.base_derivation(den);
                     el = self.element([dden*num - dnum*den, num*den]);
+                    X = num/den;
                     name = str(X);
                     try:
                         name = X._DDFunction__name;
@@ -509,6 +511,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                     try:
                         return self.element([1 ],[], self.base()(X), name=str(X));
                     except Exception:
+                        print "WHAT??";
                         return self(str(element));
         except TypeError as e:
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e));
@@ -1381,7 +1384,7 @@ class DDFunction (IntegralDomainElement):
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return directly 0
         if ((other.is_null) or (self.is_null)):
-            return 0 ;
+            return _sage_const_0 ;
         if(self.is_one):
             return other;
         elif(other.is_one):
@@ -1894,13 +1897,13 @@ class DDFunction (IntegralDomainElement):
         return super(DDFunction,self).__add__(self.__check_symbolic(other));
         
     def __rsub__(self, other):
-        return super(DDFunction,self).__sub__(self.__check_symbolic(other));
+        return (-self) + self.__check_symbolic(other);
         
     def __rmul__(self, other):
         return super(DDFunction,self).__mul__(self.__check_symbolic(other));
         
     def __rdiv__(self, other):
-        return super(DDFunction,self).__div__(self.__check_symbolic(other));
+        return self.inverse * self.__check_symbolic(other);
         
     def __iadd__(self, other):
         return super(DDFunction,self).__add__(self.__check_symbolic(other));
@@ -2032,7 +2035,7 @@ class DDFunction (IntegralDomainElement):
         '''
             Missing method for DDFuntions.
         '''
-        return 0 ;
+        return _sage_const_0 ;
         
     def __str__(self, detail=True):
         '''
@@ -2510,7 +2513,7 @@ def _get_initial_poly(poly, dic, m):
     ## Constant case
     if(poly.is_constant()):
         if(m > 0):
-            return 0;
+            return _sage_const_0;
         return poly.parent().base()(poly);
     
     ## Non-constant polynomial

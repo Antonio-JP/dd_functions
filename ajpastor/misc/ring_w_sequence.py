@@ -93,6 +93,9 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
 
 def sequence(el, n):
     R = el.parent();
+    if(sage.symbolic.ring.is_SymbolicExpressionRing(R)):
+        variable = el.variables()[0];
+        return el.derivative(variable,n)(**{str(variable):0})/factorial(n);
     if(not isinstance(R, Ring_w_Sequence)):
         R = Wrap_w_Sequence_Ring(R);
         
