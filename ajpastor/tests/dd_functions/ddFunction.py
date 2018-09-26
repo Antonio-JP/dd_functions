@@ -50,7 +50,7 @@ def run():
         
         ## Creation and Initial Values tests
         sverbose("Test for creation and initial values computation");
-        sin = DFinite_example('sin');
+        sin = Sin(x);
         assert_coefficients(sin, [_sage_const_1 ,_sage_const_0 ,_sage_const_1 ], 'sin');
         assert_initialValues(sin, [_sage_const_0 , _sage_const_1 , _sage_const_0 , -_sage_const_1 , _sage_const_0 , _sage_const_1 ], 'sin');
 
@@ -87,7 +87,7 @@ def run():
         # Summation, multiplication and scalar tests
         # Summation
         sverbose("Test for addition of elements (exp(x) + exp(x))");
-        e = DFinite_example('e');
+        e = Exp(x);
         _aux = e.add(e)
         assert_coefficients(_aux, [-_sage_const_1 ,_sage_const_1 ], '2exp(x)');
         assert_initialValues(_aux, [_sage_const_2 ,_sage_const_2 ,_sage_const_2 ,_sage_const_2 ,_sage_const_2 ,_sage_const_2 ], '2exp(x)');
