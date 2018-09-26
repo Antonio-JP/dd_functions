@@ -102,6 +102,12 @@ def run():
 
         sverbose("Identity for 2F1 (Usual Hypergeometric function)");
         sverbose.increase_depth();
+        sverbose("Test for derivative of hypergeometric function and its contiguous functions");
+        f = HypergeometricFunction(); P = f.parent(); a = P.parameter('a'); b = P.parameter('b'); c = P.parameter('c');
+        g = a*b/c * HypergeometricFunction(a+1,b+1,c+1);
+        if(not f.derivative() == g):
+            raise ValueError("Error with the equality of 2F1(a,b;c;z)");
+        sverbose
         sverbose.start_iteration((__MAX_N-__MIN_N)**_sage_const_4 , True, True);
         for a in range(__MIN_N, __MAX_N):
             for b in range(__MIN_N, __MAX_N):
