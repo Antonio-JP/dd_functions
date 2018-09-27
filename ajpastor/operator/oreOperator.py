@@ -200,7 +200,7 @@ class w_OreOperator(Operator):
     ### MAGIC PYTHON METHODS
     ####################################################### 
     def __call__(self, obj):
-        return self.operator(obj);
+        return self.operator(obj, action=lambda p : p.derivative(x));
         
     def __repr__(self):
         return ("Wrapped_OreOperator(%s)"%(self.operator.__repr__()));

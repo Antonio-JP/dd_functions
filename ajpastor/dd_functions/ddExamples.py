@@ -1572,27 +1572,28 @@ def __decide_parent(input, parent = None, depth = 1):
             - If 'input' is a polynomial, then the first generator will be consider as the variable of a DDRing and the others as parameters. Then we create the corresponding ParametrizedDDRing with the depth given.
             - Otherwise, we create the DDRing of the parent of 'input' of the given depth and try to work with that ring.
     '''
-    if(parent is None):
+    dR = parent;
+    if(dR is None):
         R = input.parent();
         if(isinstance(R, sage.symbolic.ring.SymbolicRing)):
             parameters = set([str(el) for el in input.variables()])-set(['x']);
             if(len(parameters) > 0 ):
-                parent = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters);
+                dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters);
             else:
-                parent = DDRing(PolynomialRing(QQ,x), depth=depth);
+                dR = DDRing(PolynomialRing(QQ,x), depth=depth);
         elif(is_MPolynomialRing(R) or is_PolynomialRing(R)):
             parameters = [str(gen) for gen in R.gens()[1:]];
             if(len(parameters) > 0):
-                parent = ParametrizedDDRing(DDRing(PolynomialRing(QQ,R.gens()[0]), depth=depth), parameters);
+                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base(),R.gens()[0]), depth=depth), parameters);
             else:
-                parent = DDRing(PolynomialRing(QQ,R.gens()[0]), depth = depth);
+                dR = DDRing(PolynomialRing(R.base(),R.gens()[0]), depth = depth);
         else:
             try:
-                parent = DDRing(R, depth = depth);
+                dR = DDRing(R, depth = depth);
             except Exception:
                 raise TypeError("The object provided is not in a valid Parent", e);
     
-    return parent.base()(input), parent;
+    return dR.base()(input), dR;
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
@@ -1612,19 +1613,21 @@ def __check_list(list_of_elements, invalid_vars=[]):
     '''
     invalid_vars = [str(el) for el in invalid_vars];
     all_vars = [];
+    parent = QQ;
     for i in range(len(list_of_elements)):
         el = list_of_elements[i];
-        if(el not in QQ):
-            if(isinstance(el, str)):
-                all_vars += [el];
+        if(el in QQ):
+            pass;
+        elif(isinstance(el, str)):
+            all_vars += [el];
+        else:
+            from sage.rings.fraction_field import is_FractionField;
+            if(is_FractionField(el.parent())):
+                all_vars += [str(v) for v in el.numerator().variables()];
+                all_vars += [str(v) for v in el.denominator().variables()];
             else:
-                from sage.rings.fraction_field import is_FractionField;
-                if(is_FractionField(el.parent())):
-                    all_vars += [str(v) for v in el.numerator().variables()];
-                    all_vars += [str(v) for v in el.denominator().variables()];
-                else:
-                    all_vars += [str(v) for v in el.variables()];
-                list_of_elements[i] = str(el);
+                all_vars += [str(v) for v in el.variables()];
+            list_of_elements[i] = str(el);
     
     if(any(el in all_vars for el in invalid_vars)):
         raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars));

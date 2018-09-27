@@ -91,10 +91,19 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
             raise TypeError("Element not in `self` to compute the sequence.");
 #####################################################################
 
-def sequence(el, n):
+def sequence(el, n, x_required=True):
     R = el.parent();
     if(sage.symbolic.ring.is_SymbolicExpressionRing(R)):
-        variable = el.variables()[0];
+        variables = [str(v) for v in el.variables()];
+        if('x' in variables):
+            variable = el.variables()[variables.index('x')];
+        elif(not x_required):
+            variable = el.variables()[0];
+        else:
+            if(n > 0):
+                return 0;
+            else:
+                return el;
         return el.derivative(variable,n)(**{str(variable):0})/factorial(n);
     if(not isinstance(R, Ring_w_Sequence)):
         R = Wrap_w_Sequence_Ring(R);
