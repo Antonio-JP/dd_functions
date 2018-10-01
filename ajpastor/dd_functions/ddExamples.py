@@ -295,7 +295,7 @@ def Log(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Log(x+_sage_const_1 )(input);
+        return Log(x+_sage_const_1 )(input-1);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );

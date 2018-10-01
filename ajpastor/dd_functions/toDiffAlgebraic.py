@@ -35,13 +35,34 @@ def get_InfinitePolynomialRingVaribale(parent, gen, number):
     
 #### TODO: Review this function
 def infinite_derivative(element, times=1, var=x):
-    if(times in ZZ and times > 1):
+    '''
+        Method that takes an element and compute its times-th derivative
+        with respect to the variable given by var.
+        
+        If the element is not in a InfinitePolynomialRing then the method
+        'derivative' of the object will be called. Otherwise this method
+        returns the derivative following the rules:
+            - The coefficients of the polynomial ring are differentiated using
+            a recursive call to this method (usually this leads to a call of the
+            method '.derivative' of that coefficient).
+            - Any variable "#_n" appearing in the InfinitePolynomialRing has
+            as derivative the variable "#_{n+1}", i.e., the same name but with
+            one higher index.
+    '''
+    if(not ((times in ZZ) and times >=0)):
+        raise ValueError("The argument 'times' must be a non-negative integer");
+    elif(times > 1): # Recursive call
         return infinite_derivative(infinite_derivative(element, times-1))
+    elif(times == 0): # Empty call
+        return element;
+        
+    ## Call with times = 1
     try:
         parent = element.parent();
     except AttributeError:
         return 0;
     
+    ## Simple call: not an InfinitePolynomialRing
     if(not is_InfinitePolynomialRing(parent)):
         try:
             try:
@@ -50,27 +71,42 @@ def infinite_derivative(element, times=1, var=x):
                 return element.derivative();
         except AttributeError:
             return parent.zero();
+            
+    ## IPR call
+    ## Symbolic case?
+    if(sage.symbolic.ring.is_SymbolicExpressionRing(parent.base())):
+        raise TypeError("Base ring for the InfinitePolynomialRing not valid (found SymbolicRing)");
+    ### Monomial case
     if(element.is_monomial()):
+        ## Case of degree 1 (add one to the index of the variable)
         if(len(element.variables()) == 1 and element.degree() == 1):
             g,n = get_InfinitePolynomialRingGen(parent, element, True);
             return get_InfinitePolynomialRingVaribale(parent, g,n+1);
+        ## Case of higher degree
         else:
-            degrees = element.degrees();
+            # Computing the variables in the monomial and their degrees (in order)
             variables = element.variables();
             degrees = [element.degree(v) for v in variables];
+            variables = [parent(v) for v in variables]
             ## Computing the common factor
-            com_factor = prod([variables[i]**(degrees[i]-1) for i in range(len(degrees)) if degrees[i] > 0]);
-            ## Computing the derivative for each variable
-            each_sum = [
-                degrees[i]*infinite_derivative(parent(variables[i]))*prod(
-                    variables[j] for j in range(len(variables)) if ((i != j) and (degrees[j] > 0)))
-                for i in range(len(variables)) if degrees[i] > 0];
+            com_factor = prod([variables[i]**(degrees[i]-1) for i in range(len(degrees))]);
+            ## Computing the derivative of each variable
+            der_variables = [infinite_derivative(parent(v)) for v in variables];
             
+            ## Computing the particular part for each summand
+            each_sum = [];
+            for i in range(len(variables)):
+                if(degrees[i] > 0):
+                    part_prod = prod([variables[j] for j in range(len(variables)) if j != i]);
+                    each_sum += [degrees[i]*infinite_derivative(parent(variables[i]))*part_prod];
+            
+            ## Computing the final result
             return com_factor*sum(each_sum);
+    ### Non-monomial case
     else:
         coefficients = element.coefficients();
-        monomials = element.monomials();
-        return sum([infinite_derivative(coefficients[i])*monomials[i] + parent(coefficients[i])*infinite_derivative(parent(monomials[i])) for i in range(len(monomials))]);
+        monomials = [parent(el) for el in element.monomials()];
+        return sum([infinite_derivative(coefficients[i])*monomials[i] + coefficients[i]*infinite_derivative(monomials[i]) for i in range(len(monomials))]);
     
 def fromInfinityPolynomial_toFinitePolynomial(poly):
     if(not is_InfinitePolynomialRing(poly.parent())):

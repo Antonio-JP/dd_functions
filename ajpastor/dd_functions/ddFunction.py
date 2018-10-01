@@ -1894,16 +1894,23 @@ class DDFunction (IntegralDomainElement):
         return super(DDFunction,self).__div__(self.__check_symbolic(other));
         
     def __radd__(self, other):
-        return super(DDFunction,self).__add__(self.__check_symbolic(other));
+        return super(DDFunction,self).__radd__(self.__check_symbolic(other));
         
     def __rsub__(self, other):
-        return (-self) + self.__check_symbolic(other);
+        return super(DDFunction,self).__rsub__(self.__check_symbolic(other));
         
     def __rmul__(self, other):
-        return super(DDFunction,self).__mul__(self.__check_symbolic(other));
+        return super(DDFunction,self).__rmul__(self.__check_symbolic(other));
         
     def __rdiv__(self, other):
-        return self.inverse * self.__check_symbolic(other);
+        return super(DDFunction,self).__rdiv__(self.__check_symbolic(other));
+        
+    def __rpow__(self, other):
+        try:
+            print "__rpow__ was called";
+            return self.parent().to_depth(1)(other)**self;
+        except:
+            return NotImplemented;
         
     def __iadd__(self, other):
         return super(DDFunction,self).__add__(self.__check_symbolic(other));
@@ -1974,20 +1981,39 @@ class DDFunction (IntegralDomainElement):
                     except Exception:
                         raise ZeroDivisionError("Impossible to compute the inverse");
                     return inverse.__pow__(-other);
-            else: ## Trying a power on the basic field
-                try:
-                    newDDRing = DDRing(self.parent());
-                    other = self.parent().base_ring()(other);
-                    self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.getInitialValueList(1 )], check_init=False);
+            else: ## Trying a generic power
+                if(is_DDFunction(other) or other in self.parent()):
+                    if(self(x=0) != 1):
+                        raise ValueError("The base of exponentiation must have initial value 1");
+                    from ajpastor.dd_functions.ddExamples import Log;
+                    lf = Log(self);
+                    
+                    R = sage.categories.pushout.pushout(other.parent(), lf.parent());
+                    g = R(other); lf = R(lf);
+                    R = R.to_depth(R.depth()+1);
+                    
+                    if((g(x=0) != 0)):                    
+                        raise ValueError("The exponent must have initial value 0");
                     
                     newName = None;
-                    if(not(self.__name is None)):
-                        newName = DinamicString("(_1)^%s" %(other), self.__name);
-                    self.__pows[other].__name = newName;
-                except TypeError:
-                    raise TypeError("Impossible to compute (%s)^(%s) within the basic field %s" %(f.getInitialValue(0 ), other, f.parent().base_ring()));
-                except ValueError:
-                    raise NotImplementedError("Powering to an element of %s not implemented" %(other.parent()));
+                    if((not is_DDFunction(g)) or (g._DDFunction__name is not None)):
+                        newName = DinamicString("(_1)^(_2)", [self.__name, repr(other)]);
+                    
+                    self.__pows[other] = R.element([-(lf*other).derivative(),1],[1],name=newName);
+                else:
+                    try:
+                        newDDRing = DDRing(self.parent());
+                        other = self.parent().base_ring()(other);
+                        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.getInitialValueList(1 )], check_init=False);
+                        
+                        newName = None;
+                        if(not(self.__name is None)):
+                            newName = DinamicString("(_1)^%s" %(other), self.__name);
+                        self.__pows[other].__name = newName;
+                    except TypeError:
+                        raise TypeError("Impossible to compute (%s)^(%s) within the basic field %s" %(f.getInitialValue(0 ), other, f.parent().base_ring()));
+                    except ValueError:
+                        raise NotImplementedError("Powering to an element of %s not implemented" %(other.parent()));
         return self.__pows[other];
         
             
