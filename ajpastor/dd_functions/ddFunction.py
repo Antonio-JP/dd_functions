@@ -1958,13 +1958,32 @@ class DDFunction (IntegralDomainElement):
   
     # Integer powering
     def __pow__(self, other):
-        try:
-            return self.__pows[other];
-        except KeyError:
-            f = self;
-            if(f.is_null): ## Trivial case when order is 0
+        '''
+            Method to compute the power of a DDFunction to other object. The current implementation allow the user to compute the power to:
+                - Integers
+                - Rational numbers (to be done)
+                - Elements in self.parent().base_field (to be done)
+                - Other DDFunctions (with some conditions)
+                
+            The method works as follows:
+                1 - Tries to compute integer or rational power.
+                2 - If 'other' is neither in ZZ nor QQ, then try to cast 'other' to a DDFunction.
+                3 - Check if self(0) != 0. If self(0) != 1, check log(self(0)) in self.parent().base_field and set f2 = self/self(0).
+                4 - If other(0) != 0, compute g2 = other - other(0) and return self**other(0) * self**g2
+                5 - If other(0) == 0, compute ((log(self(0)) + log(f2))other)', and return the function with initial value 1.
+                
+                
+            The only case that is not included is when self(0) = 0 or self**other(0) is not implemented.
+        '''
+        if(other not in self.__pows):
+            f = self; g = other; f0 = f(x=0);
+            if(f.is_null or other == 0):
+                raise ValueError("Value 0**0 not well defined");
+            if(f.is_null): # Trivial case when f == 0, then f**g = 0.
                 self.__pows[other] = f;
-            elif(other in ZZ): ## Trying integer power
+            elif(g == 0): # Second trivial case when f != 0 and g == 0. Then f**g = 1
+                self.__pows[other] = f.parent().one();
+            elif(other in ZZ): # Integer case: can always be computed
                 other = int(other);
                 if(other >= 0 ):
                     a = other >> 1 ;
@@ -1981,10 +2000,31 @@ class DDFunction (IntegralDomainElement):
                     except Exception:
                         raise ZeroDivisionError("Impossible to compute the inverse");
                     return inverse.__pow__(-other);
-            else: ## Trying a generic power
-                if(is_DDFunction(other) or other in self.parent()):
-                    if(self(x=0) != 1):
-                        raise ValueError("The base of exponentiation must have initial value 1");
+            elif(g in f.parent().base_field): # Constant case: need extra condition (f(0) != 0 and f(0)**g is a valid element
+                g = f.parent().base_field(g);
+                if(f0 == 0):
+                    raise NotImplementedError("The powers for elements with f(0) == 0 is not implemented");
+                try:
+                    h0 = f0**g;
+                    if(not h0 in f.parent().base_field):
+                        raise ValueError("The initial value is not in the base field");
+                except Exception as e:
+                    raise ValueError("The power %s^%s could not be computed, hence the initial values can not be properly computed.\n\tReason: %s" %(f0,g,e));
+                R = f.parent().to_depth(f.parent().depth()+1);
+                name = None;
+                if(f.has_name()):
+                    name = DinamicString("(_1)^(%s)" %g, [repr(f)]);
+                self.__pows[other] = R.element([-other*f.derivative(), f], [h0]);
+            else: # Generic case: need extra condition (f(0) != 0, log(f(0)) and f(0)**g(0) are valid elements)
+                if(f0 == 0):
+                    raise NotImplementedError("The powers for elements with f(0) == 0 is not implemented");
+                lf0 = log(f0);
+                if(log(f0) not in f.parent().base_field):
+                    raise ValueError("Invalid value for log(f(0)). Need to be an element of %s, but got %s" %(f.parent().base_field, log(f0)));
+                lf0 = f.parent().base_field(lf0);
+                f = f/f0;
+                
+                if(is_DDFunction(g) or g in self.parent()):
                     from ajpastor.dd_functions.ddExamples import Log;
                     lf = Log(self);
                     
@@ -1992,28 +2032,30 @@ class DDFunction (IntegralDomainElement):
                     g = R(other); lf = R(lf);
                     R = R.to_depth(R.depth()+1);
                     
-                    if((g(x=0) != 0)):                    
-                        raise ValueError("The exponent must have initial value 0");
-                    
-                    newName = None;
-                    if((not is_DDFunction(g)) or (g._DDFunction__name is not None)):
-                        newName = DinamicString("(_1)^(_2)", [self.__name, repr(other)]);
-                    
-                    self.__pows[other] = R.element([-(lf*other).derivative(),1],[1],name=newName);
-                else:
-                    try:
-                        newDDRing = DDRing(self.parent());
-                        other = self.parent().base_ring()(other);
-                        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.getInitialValueList(1 )], check_init=False);
+                    g0 = g(x=0);
+                    if(g0 != 0):
+                        self.__pows[other] = self**g0 * self**(g-g0);
+                    else:
+                        name = None;
+                        if(g.has_name() and f.has_name()):
+                            nname = DinamicString("(_1)^(_2)", [f.__name, g.__name]);
                         
-                        newName = None;
-                        if(not(self.__name is None)):
-                            newName = DinamicString("(_1)^%s" %(other), self.__name);
-                        self.__pows[other].__name = newName;
-                    except TypeError:
-                        raise TypeError("Impossible to compute (%s)^(%s) within the basic field %s" %(f.getInitialValue(0 ), other, f.parent().base_ring()));
-                    except ValueError:
-                        raise NotImplementedError("Powering to an element of %s not implemented" %(other.parent()));
+                        self.__pows[other] = R.element([-((lf + lf0)*g).derivative(),1],[1],name=name);
+                else:
+                    raise NotImplementedError("No path found for this __pow__ computation:\n\t- base: %s\n\t- expo: %s" %(repr(self),repr(other)));
+                #    try:
+                #        newDDRing = DDRing(self.parent());
+                #        other = self.parent().base_ring()(other);
+                #        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.getInitialValueList(1 )], check_init=False);
+                #        
+                #        newName = None;
+                #        if(not(self.__name is None)):
+                #            newName = DinamicString("(_1)^%s" %(other), self.__name);
+                #        self.__pows[other].__name = newName;
+                #    except TypeError:
+                #        raise TypeError("Impossible to compute (%s)^(%s) within the basic field %s" %(f.getInitialValue(0 ), other, f.parent().base_ring()));
+                #    except ValueError:
+                #        raise NotImplementedError("Powering to an element of %s not implemented" %(other.parent()));
         return self.__pows[other];
         
             
