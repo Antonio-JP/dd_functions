@@ -210,7 +210,7 @@ class _LazyElement(IntegralDomainElement):
         
     def is_zero(self):
         result = (self.poly() == _sage_const_0 );
-        if((not result) and (self(**{str(self.parent().base().variables()[_sage_const_0 ]):_sage_const_0 }) == _sage_const_0 )):
+        if((not result) and (self(**{repr(self.parent().base().variables()[_sage_const_0 ]):_sage_const_0 }) == _sage_const_0 )):
             if(not (self.__raw is None)):
                 result = self.raw() == _sage_const_0 ;
             else:

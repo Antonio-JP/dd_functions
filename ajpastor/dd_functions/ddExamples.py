@@ -104,9 +104,8 @@ def Sin(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    
-    if(is_DDFunction(input)):
-        return Sin(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Sin(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -138,8 +137,8 @@ def Cos(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Cos(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Cos(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -171,8 +170,8 @@ def Tan(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Tan(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Tan(x)(input);
     if(input == x):
         return DDFinite.element([-_sage_const_2,0,Cos(x)**2],[0,1]);
     g, dR = __decide_parent(input, ddR,_sage_const_2 );
@@ -221,8 +220,8 @@ def Sinh(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Sinh(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Sinh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -254,8 +253,8 @@ def Cosh(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Cosh(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Cosh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -294,8 +293,8 @@ def Log(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Log(x+_sage_const_1 )(input-1);
+    #if(is_DDFunction(input)):
+    #    return Log(x+_sage_const_1 )(input-1);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -327,8 +326,8 @@ def Log1(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Log1(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Log1(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -362,8 +361,8 @@ def Exp(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    if(is_DDFunction(input)):
-        return Exp(x)(input);
+    #if(is_DDFunction(input)):
+    #    return Exp(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -958,7 +957,7 @@ def HillD(a='a',q='q',init=()):
             - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(is_DDFunction(q)):
-        destiny_ring = DDRing(q.parent());
+        destiny_ring = q.parent().to_depth(q.parent().depth());
         parent, new_all = __check_list([a] + list(init), [str(el) for el in DFinite.variables()]);
         
         if(not (parent is QQ)):

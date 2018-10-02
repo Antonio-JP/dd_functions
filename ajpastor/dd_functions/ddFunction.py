@@ -674,7 +674,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         elif(len(input) == 0 ):
             return element;
         
-        raise NotImplementedError("Not implemented evaluation of an element of this ring (%s) with the parameters %s and %s" %(self,rx,input));
+        raise NotImplementedError("Not implemented evaluation of an element of this ring (%s) with the parameters %s and %s" %(self,repr(rx),input));
         
     def get_recurrence(self, *args, **kwds):
         if(self.__get_recurrence is None):
@@ -1531,13 +1531,24 @@ class DDFunction (IntegralDomainElement):
     #####################################
     ### Differential methods
     #####################################
-    def derivative(self, *args):
+    def derivative(self, *args, **kwds):
         '''
         Method to get a DDFunction `g` that satisfies `D(self) = g`.
         
         INPUT:
             - ``args``: ignored input
+            - ''kwds'': if times is included, we compute the times-th derivative
         '''
+        if('times' in kwds):
+            if(kwds['times'] in ZZ):
+                times = kwds['times'];
+                if(times < 0):
+                    raise ValueError("Negative derivatives can not be computed");
+                elif(times == 0):
+                    return self;
+                elif(times > 1):
+                    return self.derivative(times=times-1).derivative();
+                
         if(self.__derivative is None):
             if(self.is_constant):
                 ### Special case: is a constant
@@ -1838,12 +1849,29 @@ class DDFunction (IntegralDomainElement):
             to_mult *= value;
         return float(res),float(abs(to_sum));
         
+    @cached_method
     def to_symbolic(self):
         evaluation = sage_eval(str(self.__name).replace("'", ".derivative()").replace("^", "**"), locals=globals());
         if(isinstance(evaluation, sage.symbolic.expression.Expression)):
             evaluation = evaluation.simplify_full();
             
         return evaluation;
+    
+    @cached_method
+    def to_simpler(self):
+        try:
+            R = self.parent().base();
+            if(is_DDRing(R)):
+                return R(self).to_simpler();
+            elif(is_PolynomialRing(R)):
+                if(self.getOrder() == 1):
+                    degree = abs(self[0].lc());
+                    if(self.derivative(times=degree+1).is_null):
+                        x = self.parent().variables()[0];
+                        return sum(self.getSequenceElement(i)*x**i for i in range(degree+1));
+        except:
+            pass;
+        return self;
             
     def quick_equals(self,other): ### TO REVIEW
         '''
