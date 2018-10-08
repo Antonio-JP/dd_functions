@@ -104,8 +104,8 @@ def Sin(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Sin(x)(input);
+    if(is_DDFunction(input)):
+        return Sin(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -137,8 +137,8 @@ def Cos(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Cos(x)(input);
+    if(is_DDFunction(input)):
+        return Cos(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -170,8 +170,8 @@ def Tan(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Tan(x)(input);
+    if(is_DDFunction(input)):
+        return Tan(x)(input);
     if(input == x):
         return DDFinite.element([-_sage_const_2,0,Cos(x)**2],[0,1]);
     g, dR = __decide_parent(input, ddR,_sage_const_2 );
@@ -220,8 +220,8 @@ def Sinh(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Sinh(x)(input);
+    if(is_DDFunction(input)):
+        return Sinh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -253,8 +253,8 @@ def Cosh(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Cosh(x)(input);
+    if(is_DDFunction(input)):
+        return Cosh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -293,8 +293,8 @@ def Log(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Log(x+_sage_const_1 )(input-1);
+    if(is_DDFunction(input)):
+        return Log(x+_sage_const_1 )(input-1);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -326,8 +326,8 @@ def Log1(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Log1(x)(input);
+    if(is_DDFunction(input)):
+        return Log1(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
@@ -361,8 +361,8 @@ def Exp(input, ddR = None):
             
         This function can be converted into symbolic expressions.
     '''
-    #if(is_DDFunction(input)):
-    #    return Exp(x)(input);
+    if(is_DDFunction(input)):
+        return Exp(x)(input);
     f,dR = __decide_parent(input, ddR);
     
     evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );

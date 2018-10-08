@@ -166,6 +166,9 @@ class ConversionSystem(object):
                 - Matrices or vectors with polynomials rocignized by the Conversion system
                 - Elements in `self.base()`
         '''
+        from sage.structure.element import is_Matrix;
+        from sage.structure.element import is_Vector;
+        
         if(element in self.poly_ring()):
             try:
                 return self.poly_ring()(element).reduce(self._relations());
@@ -182,12 +185,12 @@ class ConversionSystem(object):
             return set([self.simplify(el) for el in element]);
         elif(isinstance(element, tuple)):
             return tuple([self.simplify(el) for el in element]);
-        elif(isinstance(element, sage.matrix.matrix.Matrix)):
+        elif(is_Matrix(element)):
             R = self.poly_ring();
             if(element.parent().base().is_field()):
                 R = self.poly_field();
             return Matrix(R, [[self.simplify(el) for el in row] for row in element]);
-        elif(isinstance(element, sage.modules.free_module_element.FreeModuleElement)):
+        elif(is_Vector(element)):
             R = self.poly_ring();
             if(element.parent().base().is_field()):
                 R = self.poly_field();

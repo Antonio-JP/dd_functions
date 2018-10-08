@@ -1864,13 +1864,24 @@ class DDFunction (IntegralDomainElement):
             if(is_DDRing(R)):
                 return R(self).to_simpler();
             elif(is_PolynomialRing(R)):
-                if(self.getOrder() == 1):
-                    degree = abs(self[0].lc());
-                    if(self.derivative(times=degree+1).is_null):
-                        x = self.parent().variables()[0];
-                        return sum(self.getSequenceElement(i)*x**i for i in range(degree+1));
-        except:
-            pass;
+                degs = [self[i].degree() - i for i in range(self.getOrder()+1)];
+                m = max(degs);
+                maxs = [i for i in range(len(degs)) if degs[i] == m];
+                
+                if(len(maxs) <= 1):
+                    raise ValueError("1:Function %s is not a polynomial" %repr(self));
+                
+                x = R.gens()[0];
+                pol = sum(falling_factorial(x,i)*self[i].lc() for i in maxs);
+
+                root = max(root[0] for root in pol.roots() if (root[0] in ZZ and root[0] > 0));
+                pol = sum(x**i*self.getSequenceElement(i) for i in range(root+1));
+
+                if(pol == self):
+                    return pol;
+                raise ValueError("2:Function %s is not a polynomial" %repr(self));
+        except Exception as e:
+            print e;
         return self;
             
     def quick_equals(self,other): ### TO REVIEW
