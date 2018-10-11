@@ -166,7 +166,7 @@ def toDifferentiallyAlgebraic_Below(poly):
     dict_to_vectors = {};
     S = 0;
     for i in range(len(coefficients)):
-        coeff = coefficients[i]; monomial = goal_ring(monomials[i]);
+        coeff = coefficients[i]; monomial = goal_ring(str(monomials[i]));
         if(coeff in dw_ddring):
             if(1 not in dict_to_vectors):
                 S += 1;
