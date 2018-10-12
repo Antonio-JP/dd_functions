@@ -3,6 +3,7 @@ from sage.all_cmdline import *   # import sage library
 
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing; 
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
+from sage.rings.fraction_field import is_FractionField;
 
 from ajpastor.dd_functions.ddFunction import *;
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing;
@@ -203,6 +204,7 @@ def toDifferentiallyAlgebraic_Below(poly):
             rows += [row for row in matrix_of_dMovement(C, vector(goal_ring, dict_to_vectors[el]), infinite_derivative, S)];
         
     M = Matrix(rows);
+    print M;
     return M.determinant().numerator();
 
 def diff_to_diffalg(func):
@@ -220,9 +222,46 @@ def diff_to_diffalg(func):
     else:
         R = PolynomialRing(PolynomialRing(QQ,x).fraction_field, "y_0");
         return R.gens()[0] - func;
+    
+def inverse_DA(poly, vars=None):
+    '''
+        Method that computes the DA equation for the multiplicative inverse 
+        of the solutions of a DA equation.
+        
+        We assume that the variables given by vars are the variables representing
+        the solution, namely vars[i+1] = vars[i].derivative().
+        If vars is not provided, we take all the variables from the polynomial
+        that is given.
+    '''
+    ## Checking that poly is a polynomial
+    
+    parent = poly.parent();
+    if(is_FractionField(parent)):
+        parent = parent.base();
+    if(is_InfinitePolynomialRing(parent)):
+        poly = fromInfinityPolynomial_toFinitePolynomial(poly);
+        return inverse_DA(poly, vars);
+    if(not (is_PolynomialRing(parent) or is_MPolynomialRing(parent))):
+        raise TypeError("No polynomial is given");
+    poly = parent(poly);
+    
+    ## Getting the list of variables
+    if(vars is None):
+        g = poly.parent().gens();
+    else:
+        if(any(v not in poly.parent().gens())):
+            raise TypeError("The variables given are not in the polynomial ring");
+        g = vars;
+        
+    ## Computing the derivative of the inverse using Faa di Bruno's formula
+    derivatives = [1/g[0]] + [sum((falling_factorial(-1, k)/g[0]**(k+1))*bell_polynomial(n,k)(*g[1:n-k+2]) for k in range(1,n+1)) for n in range(1,len(g
+))];
+    
+    ## Computing the final equation
+    return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
 
 
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA"];

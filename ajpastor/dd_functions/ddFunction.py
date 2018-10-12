@@ -1861,15 +1861,40 @@ class DDFunction (IntegralDomainElement):
     def to_simpler(self):
         try:
             R = self.parent().base();
-            if(is_DDRing(R)):
-                return R(self).to_simpler();
+            if(self.is_constant):
+                return self.parent().base_field(self.getInitialValue(0));
+            elif(is_DDRing(R)):
+                coeffs = [el.to_simpler() for el in self.equation.getCoefficients()];
+                parents = [el.parent() for el in coeffs];
+                final_base = reduce(lambda p,q : pushout(p,q), parents, parents[0]);
+                
+                dR = None;
+                if(is_DDRing(final_base)):
+                    dR = final_base.to_depth(final_base.depth()+1);
+                    
+                elif(not is_DDRing(final_base)):
+                    params = [str(g) for g in final_base.gens()];
+                    var = repr(self.parent().variables()[0]);
+                    
+                    if(var in params):
+                        params.remove(var);
+                    hyper_base = DDRing(PolynomialRing(QQ,[var]));
+                    if(len(params) > 0):
+                        dR = ParametrizedDDRing(hyper_base, params);
+                    else:
+                        dR = hyper_base;
+                else:
+                    raise TypeError("1:No optimization found in the simplifacion");
+                
+                return dR.element([dR.base()(el) for el in coeffs], self.getInitialValueList(self.equation.jp_value+1), name=self.__name).to_simpler();
+                        
             elif(is_PolynomialRing(R)):
                 degs = [self[i].degree() - i for i in range(self.getOrder()+1)];
                 m = max(degs);
                 maxs = [i for i in range(len(degs)) if degs[i] == m];
                 
                 if(len(maxs) <= 1):
-                    raise ValueError("1:Function %s is not a polynomial" %repr(self));
+                    raise ValueError("2:Function %s is not a polynomial" %repr(self));
                 
                 x = R.gens()[0];
                 pol = sum(falling_factorial(x,i)*self[i].lc() for i in maxs);
@@ -1879,9 +1904,9 @@ class DDFunction (IntegralDomainElement):
 
                 if(pol == self):
                     return pol;
-                raise ValueError("2:Function %s is not a polynomial" %repr(self));
+                raise ValueError("3:Function %s is not a polynomial" %repr(self));
         except Exception as e:
-            print e;
+            pass;
         return self;
             
     def quick_equals(self,other): ### TO REVIEW
@@ -2067,7 +2092,7 @@ class DDFunction (IntegralDomainElement):
                     from ajpastor.dd_functions.ddExamples import Log;
                     lf = Log(self);
                     
-                    R = sage.categories.pushout.pushout(other.parent(), lf.parent());
+                    R = pushout(other.parent(), lf.parent());
                     g = R(other); lf = R(lf);
                     R = R.to_depth(R.depth()+1);
                     
