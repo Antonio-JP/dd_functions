@@ -119,10 +119,12 @@ def fromInfinityPolynomial_toFinitePolynomial(poly):
     parent = PolynomialRing(base, gens);
     return parent(str(poly));
     
-def toDifferentiallyAlgebraic_Below(poly):
+def toDifferentiallyAlgebraic_Below(poly, _debug=False):
     '''
     Method that receives a polynomial with variables y_0,...,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
     with coefficients in R.
+    
+    The optional input '_debug' allow the user to print extra information as the matrix that the determinant is computed.
     '''
     ### Preprocessing the input
     parent = poly.parent();
@@ -204,10 +206,21 @@ def toDifferentiallyAlgebraic_Below(poly):
             rows += [row for row in matrix_of_dMovement(C, vector(goal_ring, dict_to_vectors[el]), infinite_derivative, S)];
         
     M = Matrix(rows);
-    print M;
+    if(_debug): print M;
     return M.determinant().numerator();
 
-def diff_to_diffalg(func):
+def diff_to_diffalg(func, _debug=False):
+    '''
+        Method that compute an differentially algebraic equation for the obect func.
+        This objet may be any element in QQ(x) or an element in some DDRing. In the first case
+        the equation returned is the simple "y_0 - func". In the latter, we compute the differential
+        equation using the linear differential representation of the obect.
+        
+        The result is always a polynomial with variables "y_*" where the number in the index
+        represent the derivative.
+    
+        The optional argument _debug allows the user to see during execution more data of the computation.
+    '''
     try:
         parent = func.parent();
     except AttributeError:
@@ -217,7 +230,7 @@ def diff_to_diffalg(func):
         R = InfinitePolynomialRing(parent.base(), "y");
         p = sum([R("y_%d" %i)*func[i] for i in range(func.getOrder()+1)], R.zero());
         for i in range(parent.depth()-1):
-            p = toDifferentiallyAlgebraic_Below(p);
+            p = toDifferentiallyAlgebraic_Below(p, _debug);
         return p;
     else:
         R = PolynomialRing(PolynomialRing(QQ,x).fraction_field, "y_0");
@@ -247,7 +260,7 @@ def inverse_DA(poly, vars=None):
     
     ## Getting the list of variables
     if(vars is None):
-        g = poly.parent().gens();
+        g = list(poly.parent().gens()); g.reverse();
     else:
         if(any(v not in poly.parent().gens())):
             raise TypeError("The variables given are not in the polynomial ring");
