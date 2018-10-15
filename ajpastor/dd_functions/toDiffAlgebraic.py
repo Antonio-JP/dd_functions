@@ -273,7 +273,47 @@ def inverse_DA(poly, vars=None):
     ## Computing the final equation
     return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
 
-
+def guess_DA_DDfinite(poly):
+    '''
+        Method that tries to compute a DD-finite differential equation
+        for a DA-function with constant coefficients.
+        
+        It just tries all the possibilities. It uses the Composition class
+        to get the possibilities of the orders for the coefficients.
+    '''
+    if(not poly.is_homogeneous()):
+        raise TypeError("We require a homogeneous polynomial");
+    
+    S = poly.degree(); d = S - poly.parent().ngens() + 2;
+    
+    compositions = Compositions(S, length = d+1);
+    coeffs = [["a_%d_%d" %(i,j) for j in range(S)] for i in range(d+1)];
+    R = ParametrizedDDRing(DFinite, sum(coeffs, []));
+    R2 = R.to_depth(2);
+    coeffs = [[R.parameter(coeffs[i][j]) for j in range(S)] for i in range(d+1)];
+    for c in compositions:
+        ## Building the parametrized guess
+        e = [R.element([coeffs[i][j] for j in range(c[i])] + [1],[1] + (c[i]-1)*[0]) for i in range(d+1)];
+        f = R2.element(e);
+        
+        ## Computing the DA equation
+        poly2 = diff_to_diffalg(f);
+        
+        ## Comparing the algebraic equations
+        m = poly.monomials();
+        m2 = poly2.monomials();
+        
+        eqs = [];
+        for mon in m2:
+            if(mon in m):
+                eqs += [poly2.coefficient(mon) - poly.coefficient(mon)];
+            else:
+                eqs += [poly2.coefficient(mon)];
+        P = R.base_field.base(); eqs = [P(str(el)) for el in eqs];
+        gb = ideal(eqs).groebner_basis();
+        if(1 not in gb):
+            return f,gb;
+    raise ValueError("No relation of the coefficients found for the polynomial %s" %poly);
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
