@@ -273,48 +273,107 @@ def inverse_DA(poly, vars=None):
     ## Computing the final equation
     return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
 
-def guess_DA_DDfinite(poly):
+def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
     '''
         Method that tries to compute a DD-finite differential equation
         for a DA-function with constant coefficients.
         
         It just tries all the possibilities. It uses the Composition class
         to get the possibilities of the orders for the coefficients.
+        
+        INPUT:
+            - poly: polynomial with the differential equation we want to mimic with DD-finite elements
+            - init: initial values of the solution of poly
+            - bS: bound to the sum of orders in the DD-finite equation
+            - db: bound to the order of the DD-finite equation
+            - all: compute all the posibles equations
     '''
     if(not poly.is_homogeneous()):
         raise TypeError("We require a homogeneous polynomial");
     
-    S = poly.degree(); d = S - poly.parent().ngens() + 2;
+    if(bS is None):
+        S = poly.degree(); 
+    else:
+        S = bS;
+    if(bd is None):
+        d = S - poly.parent().ngens() + 2;
+    else:
+        d = bd;
     
     compositions = Compositions(S, length = d+1);
     coeffs = [["a_%d_%d" %(i,j) for j in range(S)] for i in range(d+1)];
-    R = ParametrizedDDRing(DFinite, sum(coeffs, []));
+    cInit = [["i_%d_%d" %(i,j) for j in range(S-1)] for i in range(d+1)];
+    R = ParametrizedDDRing(DFinite, sum(coeffs, [])+sum(cInit,[]));
     R2 = R.to_depth(2);
     coeffs = [[R.parameter(coeffs[i][j]) for j in range(S)] for i in range(d+1)];
+    cInit = [[R.parameter(cInit[i][j]) for j in range(S-1)] for i in range(d+1)];
+    sols = [];
+    
     for c in compositions:
         ## Building the parametrized guess
-        e = [R.element([coeffs[i][j] for j in range(c[i])] + [1],[1] + (c[i]-1)*[0]) for i in range(d+1)];
+        e = [R.element([coeffs[i][j] for j in range(c[i])] + [1],cInit[i]) for i in range(d+1)];
         f = R2.element(e);
+        if(len(init) > 0):
+            try:
+                f = f.change_init_values([init[i] for i in range(min(len(init), f.equation.jp_value+1))]);
+            except ValueError:
+                continue;
         
         ## Computing the DA equation
         poly2 = diff_to_diffalg(f);
         
-        ## Comparing the algebraic equations
+        ###############################################
+        ### Comparing the algebraic equations
+        ## Getting a possible constant difference
         m = poly.monomials();
         m2 = poly2.monomials();
-        
         eqs = [];
+        C = None;
         for mon in m2:
-            if(mon in m):
-                eqs += [poly2.coefficient(mon) - poly.coefficient(mon)];
+            c2 = poly2.coefficient(mon);
+            if(poly2.parent().base()(poly2.coefficient(mon)).is_constant()):
+                C = poly.coefficient(poly.parent()(mon))/c2;
+                break;
+        if(C is None):
+            C = 1;
+        elif(C == 0):
+            continue;
+        
+        ### Building all equations from the algebraic equation
+        for mon in m2:
+            c2 = poly2.coefficient(mon); c = poly.coefficient(poly.parent()(mon));
+            eqs += [C*c2 - c];
+        
+        ##################################################
+        ### Comparing the initial values
+        for i in range(min(len(init), f.equation.jp_value+1),len(init)):
+            try:
+                eqs += [f.getInitialValue(i) - init[i]];
+            except TypeError:
+                break; ## Case when no initial value can be computed
+            
+        ##################################################
+        ### Solving the system (groebner basis)
+        P = R.base_field.base(); 
+        fEqs = [];
+        for el in eqs:
+            if(el.parent().is_field()):
+                fEqs += [P(str(el.numerator()))];
             else:
-                eqs += [poly2.coefficient(mon)];
-        P = R.base_field.base(); eqs = [P(str(el)) for el in eqs];
-        gb = ideal(eqs).groebner_basis();
+                fEqs += [P(str(el))];
+                
+        gb = ideal(fEqs).groebner_basis();
         if(1 not in gb):
-            return f,gb;
-    raise ValueError("No relation of the coefficients found for the polynomial %s" %poly);
+            sols += [(f,gb)];
+            if(not all):
+                break;
+        
+        
+    if(len(sols) > 0 and not all):
+        return sols[0];
+    
+    return sols;
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "guess_DA_DDfinite"];
