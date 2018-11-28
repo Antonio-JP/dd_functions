@@ -1493,6 +1493,8 @@ class DDFunction (IntegralDomainElement):
             return self.parent().zero();
         if(other.is_constant):
             return self.scalar(1 /other.getInitialValue(0 ));
+        if(self == other):
+            return self.parent().one();
             
         s_ze = self.zero_extraction;
         o_ze = other.zero_extraction;
@@ -1519,6 +1521,9 @@ class DDFunction (IntegralDomainElement):
         if(self.is_null):
             return other;
         elif(other.is_null):
+            return self;
+        
+        if(self == other):
             return self;
             
         X = self.parent().variables()[0 ];
@@ -2225,12 +2230,13 @@ class DDFunction (IntegralDomainElement):
             res += "\t\t";
         
         ## Adding the arithmetic symbol
-        if(not(first) and string[0 ] != '-'):
+        is_negative = (string[0] == '-' and ((string[1] == '(' and self.__matching_par__(string,1) == len(string)-1) or (string[1] != '(' and string.find(' ') == -1)));
+        if(not(first) and (not is_negative)):
             res += '+ ';
-        elif(string[0 ] == '-'):
+        elif(is_negative):
             res += '- ';
-            if(string[1 ] == '('):
-                string = string[1 :-1 ];
+            if(string[1] == '(' and self.__matching_par__(string,1) == len(string)-1):
+                string = string[2 :-1 ];
             else:
                 string = string[1 :];
         else:
@@ -2249,6 +2255,21 @@ class DDFunction (IntegralDomainElement):
             res += "* (%s)" %string;
         
         return res;
+    
+    def __matching_par__(self, string, par):
+        if(string[par] != '('):
+            return len(string);
+        
+        n = 1; i = par+1;
+        while(i < len(string) and n > 0):
+            if(string[i] == '('):
+                n += 1;
+            elif(string[i] == ')'):
+                n -= 1;
+            i += 1;
+        if(n > 0):
+            return len(string);
+        return i-1;
         
     def __repr__(self):
         '''

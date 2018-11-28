@@ -32,6 +32,9 @@ def ddExamples(functions = False, names=False):
             - Tan
             - Sinh
             - Cosh
+            - Arcsin
+            - Arccos
+            - Arctan
         ** EXPONENTIAL FUNCTIONS
             - Exp
             - Log
@@ -172,8 +175,6 @@ def Tan(input, ddR = None):
     '''
     if(is_DDFunction(input)):
         return Tan(x)(input);
-    if(input == x):
-        return DDFinite.element([-_sage_const_2,0,Cos(x)**2],[0,1]);
     g, dR = __decide_parent(input, ddR,_sage_const_2 );
     
     
@@ -188,12 +189,15 @@ def Tan(input, ddR = None):
     newOperator = dR.element([dg**_sage_const_3 *c,dg**_sage_const_2 *b-ddg*a,dg*a]).equation;
         
     ### Now, we compute the initial values required
-    required = newOperator.get_jp_fo()+_sage_const_1 ;
-        
-    init_tan = Tan(x).getInitialValueList(required);
-    init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
-        
-    newInit = [init_tan[_sage_const_0 ]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    if(input == x):
+        newInit = [0,1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_tan = Tan(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_tan[_sage_const_0 ]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     
@@ -269,6 +273,157 @@ def Cosh(input, ddR = None):
         newName = f._DDFunction__name;
     
     return dR.element([-df**_sage_const_3 ,-df2,df],[_sage_const_1 ,_sage_const_0 ,evaluate(df)**_sage_const_2 ], name=DinamicString("cosh(_1)", newName)); 
+
+@cached_function
+def Arcsin(input, ddR = None):
+    '''
+        DD-finite implementation of the Arcsine function (arcsin(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseSine.html
+            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arcsin(x)(input);
+    g, dR = __decide_parent(input, ddR);
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arcsin(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (_sage_const_1-g**2)*dg;
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([a,b,c]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [_sage_const_0,_sage_const_1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arcsin = Arcsin(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arcsin[_sage_const_0 ]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arcsin(_1)",newName);
+    
+    return result;
+
+@cached_function
+def Arccos(input, ddR = None):
+    '''
+        DD-finite implementation of the Arccosine function (arccos(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseSine.html
+            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arccos(x)(input);
+    g, dR = __decide_parent(input, ddR);
+    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arccos(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (_sage_const_1-g**2)*dg;
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([a,b,c]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [pi/2,-_sage_const_1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arccos = Arccos(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arccos[_sage_const_0 ]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arccos(_1)",newName);
+    
+    return result;
+
+@cached_function
+def Arctan(input, ddR = None):
+    '''
+        DD-finite implementation of the Arctangent function (arctan(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseTangent.html
+            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arctan(x)(input);
+    g, dR = __decide_parent(input, ddR);
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arctan(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
+    a = dR.base().zero(); b = (2*g*dg**2 - (1+g**2)*ddg); c = (1+g**2)*dg;
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([a,b,c]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [_sage_const_0,_sage_const_1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arctan = Arctan(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arctan[_sage_const_0 ]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arctan(_1)",newName);
+    return result;
 
 ##################################################################################
 ##################################################################################
