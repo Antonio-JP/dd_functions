@@ -273,6 +273,25 @@ def inverse_DA(poly, vars=None):
     ## Computing the final equation
     return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
 
+def func_inverse_DA(func, _debug=False):
+    equation = diff_to_diffalg(func, _debug=_debug);
+    
+    if(_debug): print equation;
+    
+    parent = equation.parent();
+    y = parent.gens()[0];
+    
+    n = len(equation.variables());
+        
+    quot = [FaaDiBruno_polynomials(i, parent)[0]/FaaDiBruno_polynomials(i,parent)[1] for i in range(n)];
+    coeffs = [el(**{str(parent.base().gens()[0]) : y[0]}) for el in equation.coefficients()];
+    monomials = equation.monomials();
+    
+    sol = sum(monomials[i](**{str(y[j]) : quot[j] for j in range(n)})*coeffs[i] for i in range(len(monomials)));
+    if(hasattr(sol, "numerator")):
+        return parent(sol.numerator());
+    return parent(sol);
+
 def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
     '''
         Method that tries to compute a DD-finite differential equation
@@ -373,7 +392,35 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
         return sols[0];
     
     return sols;
+
+###################################################################################################
+### FAA DI BRUNO functions
+###################################################################################################
+@cached_function
+def FaaDiBruno_polynomials(n, parent):
+    if(n < 0):
+        raise ValueError("No Faa Di Bruno polynomial can be computed for negative index");
+    elif(not(is_InfinitePolynomialRing(parent))):
+        if((not(is_PolynomialRing(parent))) and (not(is_MPolynomialRing(parent)))):
+            raise TypeError("The parent ring is not valid: needed polynomial rings or InfinitePolynomialRing");
+        return FaaDiBruno_polynomials(n, InfinitePolynomialRing(parent, "y"));        
+    
+    if(parent.base().ngens() == 0 or parent.base().gens()[0] == 1):
+        raise TypeError("Needed a inner variable in the coefficient ring");
+        
+        
+    x = parent.base().gens()[0];
+    y = parent.gens()[0];
+    if(n == 0):
+        return (parent(parent.base().gens()[0]), parent.one());
+    if(n == 1):
+        return (parent.one(), y[1]);
+    else:
+        prev = [FaaDiBruno_polynomials(k, parent) for k in range(n)];
+        ele = -sum(prev[k][0]*bell_polynomial(n,k)(**{"x%d" %i : y[i+1] for i in range(n-k+1)})/prev[k][1] for k in range(1,n))/(y[1]**n);
+        return (ele.numerator(), ele.denominator());
+    S
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "guess_DA_DDfinite"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "FaaDiBruno_polynomials"];

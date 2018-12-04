@@ -2728,6 +2728,7 @@ def _get_initial_poly(poly, dic, m):
         return result;
     else:
         raise ValueError("An impossible point was reached");
+    
 
 ###################################################################################################
 ### COMMAND CONVERSION OF DD_FUNCTIONS
