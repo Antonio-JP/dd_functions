@@ -118,6 +118,22 @@ def fromInfinityPolynomial_toFinitePolynomial(poly):
     
     parent = PolynomialRing(base, gens);
     return parent(str(poly));
+
+def fromFinitePolynomial_toInfinitePolynomial(poly):
+    parent = poly.parent();
+    if(is_InfinitePolynomialRing(poly) and (not is_MPolynomialRing(parent))):
+        return poly;
+    
+    
+    names = [str(el) for el in poly.parent().gens()];
+    pos = names[0].rfind("_");
+    if(pos == -1):
+        return poly;
+    prefix = names[0][:pos];
+    if(not all(el.find(prefix) == 0 for el in names)):
+        return poly;
+    R = InfinitePolynomialRing(parent.base(), prefix);
+    return R(str(poly));
     
 def toDifferentiallyAlgebraic_Below(poly, _debug=False):
     '''
@@ -274,7 +290,7 @@ def inverse_DA(poly, vars=None):
     return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
 
 def func_inverse_DA(func, _debug=False):
-    equation = diff_to_diffalg(func, _debug=_debug);
+    equation = fromFinitePolynomial_toInfinitePolynomial(diff_to_diffalg(func, _debug=_debug));
     
     if(_debug): print equation;
     
@@ -285,9 +301,15 @@ def func_inverse_DA(func, _debug=False):
         
     quot = [FaaDiBruno_polynomials(i, parent)[0]/FaaDiBruno_polynomials(i,parent)[1] for i in range(n)];
     coeffs = [el(**{str(parent.base().gens()[0]) : y[0]}) for el in equation.coefficients()];
-    monomials = equation.monomials();
+    monomials = [el(**{str(y[j]) : quot[j] for j in range(n)}) for el in equation.monomials()];
     
-    sol = sum(monomials[i](**{str(y[j]) : quot[j] for j in range(n)})*coeffs[i] for i in range(len(monomials)));
+    if(_debug):
+        print monomials;
+        print coeffs;
+    
+    sol = sum(monomials[i]*coeffs[i] for i in range(len(monomials)));
+    
+    if(_debug): print sol;
     if(hasattr(sol, "numerator")):
         return parent(sol.numerator());
     return parent(sol);
