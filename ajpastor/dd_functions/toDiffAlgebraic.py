@@ -6,13 +6,14 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
 from sage.rings.fraction_field import is_FractionField;
 
 from ajpastor.dd_functions.ddFunction import *;
+from ajpastor.dd_functions.ddExamples import *;
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing;
 
 from ajpastor.misc.matrix import matrix_of_dMovement;
 
 ################################################################################
 ###
-### Second approach: use an infinite polynomial field
+### Utilities functions for InfinitePolynomialRings
 ###
 ################################################################################
 def is_InfinitePolynomialRing(parent):
@@ -109,6 +110,11 @@ def infinite_derivative(element, times=1, var=x):
         monomials = [parent(el) for el in element.monomials()];
         return sum([infinite_derivative(coefficients[i])*monomials[i] + coefficients[i]*infinite_derivative(monomials[i]) for i in range(len(monomials))]);
     
+################################################################################
+###
+### Changes from and to InfinitePolynomialRings and MultivariatePolynomialRings
+###
+################################################################################
 def fromInfinityPolynomial_toFinitePolynomial(poly):
     if(not is_InfinitePolynomialRing(poly.parent())):
         return poly;
@@ -133,15 +139,26 @@ def fromFinitePolynomial_toInfinitePolynomial(poly):
     if(not all(el.find(prefix) == 0 for el in names)):
         return poly;
     R = InfinitePolynomialRing(parent.base(), prefix);
-    return R(str(poly));
+    return R(poly);
     
-def toDifferentiallyAlgebraic_Below(poly, _debug=False):
+################################################################################
+###
+### Methods for computing Diff. Algebraic equations with simpler coefficients
+###
+################################################################################
+def toDifferentiallyAlgebraic_Below(poly, _infinite=False, _debug=False):
     '''
     Method that receives a polynomial with variables y_0,...,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
     with coefficients in R.
     
     The optional input '_debug' allow the user to print extra information as the matrix that the determinant is computed.
     '''
+    ## Processing the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+    
     ### Preprocessing the input
     parent = poly.parent();
     if(not is_InfinitePolynomialRing(parent)):
@@ -171,7 +188,7 @@ def toDifferentiallyAlgebraic_Below(poly, _debug=False):
     ### Now poly is in a InfinitePolynomialRing with one generator "y_*" and some base ring.
     if(not isinstance(parent.base(), DDRing)):
         print "The base ring is not a DDRing. Returning the original polynomial (reached the bottom)";
-        return fromInfinityPolynomial_toFinitePolynomial(poly);
+        return r_method(poly);
     
     up_ddring = parent.base()
     dw_ddring = up_ddring.base();
@@ -223,9 +240,9 @@ def toDifferentiallyAlgebraic_Below(poly, _debug=False):
         
     M = Matrix(rows);
     if(_debug): print M;
-    return M.determinant().numerator();
+    return r_method(M.determinant().numerator());
 
-def diff_to_diffalg(func, _debug=False):
+def diff_to_diffalg(func, _infinite=False, _debug=False):
     '''
         Method that compute an differentially algebraic equation for the obect func.
         This objet may be any element in QQ(x) or an element in some DDRing. In the first case
@@ -237,22 +254,37 @@ def diff_to_diffalg(func, _debug=False):
     
         The optional argument _debug allows the user to see during execution more data of the computation.
     '''
+    ## Processing the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+    
+    ## Computations
     try:
         parent = func.parent();
     except AttributeError:
-        return PolynomialRing(QQ,"y_0")("y_0 + %s" %func);
+        return r_method(PolynomialRing(QQ,"y_0")("y_0 + %s" %func));
     
     if(isinstance(parent, DDRing)):
         R = InfinitePolynomialRing(parent.base(), "y");
         p = sum([R("y_%d" %i)*func[i] for i in range(func.getOrder()+1)], R.zero());
         for i in range(parent.depth()-1):
-            p = toDifferentiallyAlgebraic_Below(p, _debug);
-        return p;
+            p = toDifferentiallyAlgebraic_Below(p, _infinite=True, _debug=_debug);
+        return r_method(p);
     else:
         R = PolynomialRing(PolynomialRing(QQ,x).fraction_field, "y_0");
-        return R.gens()[0] - func;
+        return r_method(R.gens()[0] - func);
     
-def inverse_DA(poly, vars=None):
+################################################################################
+###
+### Methods for computing Diff. Algebraic equation for inverses
+### 
+###     - Multiplicative inverse from DA equation
+###     - Functional inverse from Dn-finite equation
+###
+################################################################################
+def inverse_DA(poly, vars=None, _infinite=False):
     '''
         Method that computes the DA equation for the multiplicative inverse 
         of the solutions of a DA equation.
@@ -262,6 +294,12 @@ def inverse_DA(poly, vars=None):
         If vars is not provided, we take all the variables from the polynomial
         that is given.
     '''
+    ## Processing the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+        
     ## Checking that poly is a polynomial
     
     parent = poly.parent();
@@ -269,7 +307,7 @@ def inverse_DA(poly, vars=None):
         parent = parent.base();
     if(is_InfinitePolynomialRing(parent)):
         poly = fromInfinityPolynomial_toFinitePolynomial(poly);
-        return inverse_DA(poly, vars);
+        return inverse_DA(poly, vars, _infinite=_infinite);
     if(not (is_PolynomialRing(parent) or is_MPolynomialRing(parent))):
         raise TypeError("No polynomial is given");
     poly = parent(poly);
@@ -287,9 +325,19 @@ def inverse_DA(poly, vars=None):
 ))];
     
     ## Computing the final equation
-    return poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator();
+    return r_method(poly(**{str(g[i]): derivatives[i] for i in range(len(g))}).numerator());
 
-def func_inverse_DA(func, _debug=False):
+def func_inverse_DA(func, _inifnite=False, _debug=False):
+    '''
+        TODO: Add documentation
+    '''
+    ## Processing the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+        
+    ## Computations
     equation = fromFinitePolynomial_toInfinitePolynomial(diff_to_diffalg(func, _debug=_debug));
     
     if(_debug): print equation;
@@ -312,7 +360,20 @@ def func_inverse_DA(func, _debug=False):
     if(_debug): print sol;
     if(hasattr(sol, "numerator")):
         return parent(sol.numerator());
-    return parent(sol);
+    return r_method(parent(sol));
+
+
+################################################################################
+###
+### Methods for compute Dn-finite equations from DA-equations
+###
+################################################################################
+def guess_Dnfinite(poly, init):
+    ## TODO: Method not public
+    res = guess_homogeneous_DNfinite(poly, init);
+    if(is_DDFunction(res)):
+        return res;
+    return guess_DA_DDfinite(poly, init);
 
 def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
     '''
@@ -329,6 +390,8 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
             - db: bound to the order of the DD-finite equation
             - all: compute all the posibles equations
     '''
+    poly = fromInfinityPolynomial_toFinitePolynomial(poly);
+    
     if(not poly.is_homogeneous()):
         raise TypeError("We require a homogeneous polynomial");
     
@@ -415,8 +478,117 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
     
     return sols;
 
+def guess_homogeneous_DNfinite(poly, init):
+    '''
+        Method that tries to compute a Dn-finite differential equation
+        for a DA-function defined from an homogeneous equation.
+        
+        This method simplifies the equation supposing that the solution
+        is of the form y(x) = exp(int(u(x))), getting a differential equation
+        for u(x) of less order.
+        
+        If we end up with a linear equation, then we can return a Dn-finite function
+        where n depends on how many iterations we needed.
+        
+        If the final algebraic equation is not linear, then we return this
+        last equation together with the number of iterations done.
+        
+        INPUT:
+            - poly: polynomial with the differential equation we want to mimic with DD-finite elements
+            - init: initial values of the solution of poly (must be enough).
+    '''
+    new_poly, depth = simplify_homogeneous(poly);
+    parent = new_poly.parent(); base = parent.base(); y = parent.gens()[0];
+    
+    order = max(get_InfinitePolynomialRingGen(parent, v, True)[1] for v in new_poly.variables());
+    
+    if(new_poly.degree() == 1 and new_poly.is_homogeneous()): ## We can build something
+        coeffs = [];
+        for i in range(order+1):
+            if(y[i] in new_poly.variables()):
+                coeffs += new_poly.coefficients()[new_poly.monomials().index(y[i])];
+            else:
+                coeffs += [0];
+        
+        inhom = new_poly.constant_coefficient();
+        if(is_DDRing(base)):
+            base_field = base.base_field;
+            base = base.to_depth(base.depth()+1);
+        else:
+            base_field = base.fraction_field();
+            base = DDRing(PolynomialRing(base_field, 'x'));
+        
+        ## We can build a D(depth+1)-finite function
+        deep_init = build_initial_from_homogeneous(tuple(init), order, depth, base_field);
+                
+        res = base.element(coeffs, deep_init, inhomogeneous=inhom);
+        for i in range(depth):
+            res = Exp(res.integrate(0));
+        return res;
+    
+    else:
+        return (new_poly, depth);
+    
+
+@cached_function
+def build_initial_from_homogeneous(init, n, depth, base):
+    ## Checking we have enough data
+    if(len(init) < n+depth):
+        raise TypeError("Not enought initial data was provided (required %d)" %(n+depth));
+    elif(len(init) > n+depth):
+        return build_initial_from_homogeneous(tuple(list(init)[:n+depth]), n, depth, base);
+    
+    ## Base case with depth = 0
+    if(depth == 0):
+        return init[:n];
+    
+    ## Casting the input to the desired ring
+    init = [base(el) for el in init];
+    
+    ## Checking the initial condition init[0]
+    if(init[0] == 0):
+        raise ValueError("Initial condition is zero. Impossible to compute a solution of the form e(int(u(x)))");
+    
+    ## Computing the initial conditions for depth "depth-1"
+    new_init = [init[1]/init[0]];
+    
+    parent = Exponential_polynomials(1,base).parent(); y = parent.gens()[0];
+    
+    for i in range(1,n+depth-1):
+        poly = fromInfinityPolynomial_toFinitePolynomial(-(Exponential_polynomials(i+1, parent) - y[i]));
+        new_init += [base(poly(**{str(y[j]) : new_init[j] for j in range(i)})) + init[i+1]/init[0]];
+        
+    ## Returning the recurive call with one less depth
+    return build_initial_from_homogeneous(tuple(new_init), n, depth-1, base);
+
+@cached_function
+def simplify_homogeneous(poly):
+    '''
+        Given an homogeneous differential polynomial 'poly', we reduce the order of the equation by 1
+        using the change of variables y(x) = exp(int(u(x))).
+        
+        This leads to a differentially algebraic equation of order 1 less than 'poly'. If we obtain a 
+        new homogeneous equation, we can iterate. The return of this function is this final result toether
+        with the number of steps performed.
+    '''
+    poly = fromFinitePolynomial_toInfinitePolynomial(poly);
+    parent = poly.parent(); y = parent.gens()[0];
+    
+    if(not(poly.is_homogeneous()) or (poly.degree() == 1)):
+        return (poly,0);
+    
+    d = {str(y[0]) : parent.one()};
+    for v in poly.variables():
+        if(v != y[0]):
+            d[str(v)] = Exponential_polynomials(get_InfinitePolynomialRingGen(parent, v, True)[1], parent);
+                
+    new_poly = poly(**d);
+    result,n = simplify_homogeneous(new_poly);
+    
+    return (result, n+1);
+    
 ###################################################################################################
-### FAA DI BRUNO functions
+### Polynomial functions
 ###################################################################################################
 @cached_function
 def FaaDiBruno_polynomials(n, parent):
@@ -441,8 +613,23 @@ def FaaDiBruno_polynomials(n, parent):
         prev = [FaaDiBruno_polynomials(k, parent) for k in range(n)];
         ele = -sum(prev[k][0]*bell_polynomial(n,k)(**{"x%d" %i : y[i+1] for i in range(n-k+1)})/prev[k][1] for k in range(1,n))/(y[1]**n);
         return (ele.numerator(), ele.denominator());
-    S
+
+@cached_function
+def Exponential_polynomials(n, parent):
+    if(n <= 0):
+        raise ValueError("No Exponential polynomial can be computed for non-positive index");
+    elif(not(is_InfinitePolynomialRing(parent))):
+        return Exponential_polynomials(n, InfinitePolynomialRing(parent, "y"));
+    
+    y = parent.gens()[0];
+    
+    if(n == 1):
+        return y[0];
+    else:
+        prev = Exponential_polynomials(n-1,parent);
+        return infinite_derivative(prev) + y[0]*prev;
+    
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "FaaDiBruno_polynomials"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
