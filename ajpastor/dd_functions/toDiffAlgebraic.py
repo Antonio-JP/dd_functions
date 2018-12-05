@@ -562,7 +562,7 @@ def build_initial_from_homogeneous(init, n, depth, base):
     return build_initial_from_homogeneous(tuple(new_init), n, depth-1, base);
 
 @cached_function
-def simplify_homogeneous(poly):
+def simplify_homogeneous(poly, _stop_linear=True):
     '''
         Given an homogeneous differential polynomial 'poly', we reduce the order of the equation by 1
         using the change of variables y(x) = exp(int(u(x))).
@@ -574,7 +574,7 @@ def simplify_homogeneous(poly):
     poly = fromFinitePolynomial_toInfinitePolynomial(poly);
     parent = poly.parent(); y = parent.gens()[0];
     
-    if(not(poly.is_homogeneous()) or (poly.degree() == 1)):
+    if(not(poly.is_homogeneous()) or (_stop_linear and poly.degree() == 1)):
         return (poly,0);
     
     d = {str(y[0]) : parent.one()};
