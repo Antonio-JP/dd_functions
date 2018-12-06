@@ -32,9 +32,13 @@ def ddExamples(functions = False, names=False):
             - Tan
             - Sinh
             - Cosh
+            - Tanh
             - Arcsin
             - Arccos
             - Arctan
+            - Arcsinh
+            - Arccosh
+            - Arctanh
         ** EXPONENTIAL FUNCTIONS
             - Exp
             - Log
@@ -195,7 +199,7 @@ def Tan(input, ddR = None):
         required = newOperator.get_jp_fo()+_sage_const_1 ;
             
         init_tan = Tan(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
         newInit = [init_tan[_sage_const_0 ]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
     
@@ -275,6 +279,57 @@ def Cosh(input, ddR = None):
     return dR.element([-df**_sage_const_3 ,-df2,df],[_sage_const_1 ,_sage_const_0 ,evaluate(df)**_sage_const_2 ], name=DinamicString("cosh(_1)", newName)); 
 
 @cached_function
+def Tanh(input, ddR = None):
+    '''
+        DD-finite implementation of the Tangent hyperbolic function (tanh(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/HyperbolicTangent.html 
+            - https://en.wikipedia.org/wiki/Hyperbolic_function
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Tanh(x)(input);
+    g, dR = __decide_parent(input, ddR,_sage_const_2 );
+    
+    
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute tan(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
+    a = Cosh(input)**_sage_const_2 ; 
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([2*dg**3, -ddg*a, dg*a]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [0,1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_tanh = Tanh(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_tanh[_sage_const_0 ]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("tanh(_1)",newName);
+    return result;
+
+@cached_function
 def Arcsin(input, ddR = None):
     '''
         DD-finite implementation of the Arcsine function (arcsin(x)).
@@ -311,7 +366,7 @@ def Arcsin(input, ddR = None):
         required = newOperator.get_jp_fo()+_sage_const_1 ;
             
         init_arcsin = Arcsin(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
         newInit = [init_arcsin[_sage_const_0 ]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
     
@@ -330,7 +385,7 @@ def Arccos(input, ddR = None):
         DD-finite implementation of the Arccosine function (arccos(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseSine.html
+            - http://mathworld.wolfram.com/InverseCosine.html
             - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
@@ -362,7 +417,7 @@ def Arccos(input, ddR = None):
         required = newOperator.get_jp_fo()+_sage_const_1 ;
             
         init_arccos = Arccos(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
         newInit = [init_arccos[_sage_const_0 ]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
     
@@ -412,7 +467,7 @@ def Arctan(input, ddR = None):
         required = newOperator.get_jp_fo()+_sage_const_1 ;
             
         init_arctan = Arctan(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.base().getSequenceElement(g,i) for i in range(required)];
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
         newInit = [init_arctan[_sage_const_0 ]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
     
@@ -423,6 +478,155 @@ def Arctan(input, ddR = None):
         newName = input._DDFunction__name;
     
     result._DDFunction__name = DinamicString("arctan(_1)",newName);
+    return result;
+
+@cached_function 
+def Arcsinh(input, ddR = None):
+    '''
+        DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseHyperbolicSine.html
+            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arcsinh(x)(input);
+    g, dR = __decide_parent(input, ddR);
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arcsinh(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2+1
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [_sage_const_0,_sage_const_1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arcsinh = Arcsinh(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arcsinh[_sage_const_0 ]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arcsinh(_1)",newName);
+    
+    return result;
+
+@cached_function
+def Arccosh(input, ddR = None):
+    '''
+        DD-finite implementation of the hyperbolic Arccosine function (arccosh(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseHyperbolicCosine.html
+            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arccosh(x)(input);
+    g, dR = __decide_parent(input, ddR);
+    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.base_field.gens()[0];
+    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arccosh(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2-1
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [I*pi/2,-I];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arccosh = Arccosh(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arccosh[_sage_const_0 ]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arccosh(_1)",newName);
+    
+    return result;
+
+@cached_function 
+def Arctanh(input, ddR = None):
+    '''
+        DD-finite implementation of the hyperbolic Arctangent function (arctanh(x)).
+        
+        References:
+            - http://mathworld.wolfram.com/InverseHyperbolicTangent.html
+            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+            
+        This functions allows the user to fix the argument. The argument can be:
+            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            
+        This function can be converted into symbolic expressions.
+    '''
+    if(is_DDFunction(input)):
+        return Arctanh(x)(input);
+    g, dR = __decide_parent(input, ddR);
+        
+    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
+    if(evaluate(g) != _sage_const_0 ):
+        raise ValueError("Impossible to compute arctanh(f) with f(0) != 0");
+    
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = 1-g**2;
+    
+    ### First we compute the new linear differential operator
+    newOperator = dR.element([dR.base().zero(), -(ddg*a + g*dg**2*2), dg*a]).equation;
+        
+    ### Now, we compute the initial values required
+    if(input == x):
+        newInit = [_sage_const_0,_sage_const_1];
+    else:
+        required = newOperator.get_jp_fo()+_sage_const_1 ;
+            
+        init_arctanh = Arctanh(x).getInitialValueList(required);
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+            
+        newInit = [init_arctanh[_sage_const_0 ]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+    
+    result = dR.element(newOperator,newInit);
+    
+    newName = repr(input);
+    if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
+        newName = input._DDFunction__name;
+    
+    result._DDFunction__name = DinamicString("arctanh(_1)",newName);
     return result;
 
 ##################################################################################

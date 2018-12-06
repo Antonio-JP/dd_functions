@@ -569,42 +569,40 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             Method to compute a random element in this ring. This method relies in a random generator of the self.base() ring and a generator of
             elements of the ring self.base_ring().
             This method accepts different named arguments:
-		- "min_order": minimal order for the equation we would get (default to 1)
-		- "max_order": maximal order for the equation we would get (default to 3)
-		- "simple": if True, the leading coefficient will always be one (default True)
+                - "min_order": minimal order for the equation we would get (default to 1)
+                - "max_order": maximal order for the equation we would get (default to 3)
+                - "simple": if True, the leading coefficient will always be one (default True)
         '''
-	## Getting the arguments values
-	min_order = kwds.get("min_order", 1);
-	max_order = kwds.get("max_order", 3);
-	simple = kwds.get("simple", True);
+        ## Getting the arguments values
+        min_order = kwds.get("min_order", 1);
+        max_order = kwds.get("max_order", 3);
+        simple = kwds.get("simple", True);
 
-	## Checking the argument values
-	min_order = max(min_order,0); ## Need at least order 1
-	max_order = max(min_order, max_order); ## At least the maximal order must be equal to the minimal
-	if(simple != True and simple != False):
+        ## Checking the argument values
+        min_order = max(min_order,0); ## Need at least order 1
+        max_order = max(min_order, max_order); ## At least the maximal order must be equal to the minimal
+        if(simple != True and simple != False):
             simple = False;
 
         ## Computing the list of coefficients
-	R = self.base(); S = self.base_field;
+        R = self.base(); S = self.base_field;
         coeffs = [R.random_element() for i in range(randint(min_order,max_order)+1)];
-	
-	init_values = [0];
-	while(init_values[0] == 0):
+        
+        init_values = [0];
+        while(init_values[0] == 0):
             init_values[0] = S.random_element();
 
-	## If we want simple elements, we can compute the initial values directly
-	if(simple):
-	    coeffs[-1] = R.one();
-	    init_values += [S.random_element() for i in range(len(coeffs)-2)];
-	    return self.element(coeffs,init_values);
-	## Otherwise, we need to know the initial value condition
+        ## If we want simple elements, we can compute the initial values directly
+        if(simple):
+            coeffs[-1] = R.one();
+            init_values += [S.random_element() for i in range(len(coeffs)-2)];
+            return self.element(coeffs,init_values);
+        ## Otherwise, we need to know the initial value condition
         equation = self.element(coeffs).equation;
         warnings.warn("Not-simple random element not implemented. Returning zero", DDFunctionWarning, stacklevel=2);
 
-	return self.zero();
+        return self.zero();
 
-	
-   
     def characteristic(self):
         '''
             Method inherited from the Ring SAGE class. It returns the characteristic of the coefficient ring.
@@ -622,6 +620,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         
     def to_depth(self, dest):
         return DDRing(self.original_ring(), depth = dest, base_field = self.base_field, invertibility = self.base_inversionCriteria, derivation = self.base_derivation, default_operator = self.default_operator);
+    
+    def extend_base_field(self, new_field):
+        return DDRing(pushout(self.original_ring(), new_field), depth = self.depth(), base_field = pushout(self.base_field, new_field), invertibility = self.base_inversionCriteria, derivation = self.base_derivation, default_operator = self.default_operator);
         
     def is_field(self, **kwds):
         return False;
@@ -854,6 +855,10 @@ class ParametrizedDDRing(DDRing):
     # Override to_depth method from DDRing
     def to_depth(self, dest):
         return ParametrizedDDRing(self.base_ddRing().to_depth(dest), self.parameters(True));
+    
+    # Override extend_base_field method from DDRing
+    def extend_base_field(self, new_field):
+        return ParametrizedDDRing(self.base_ddRing().extend_base_field(new_field), self.parameters(True));
             
     # Override eval method from DDRing
     def eval(self, element, X=None, **input):
