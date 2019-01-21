@@ -191,7 +191,7 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     
     ## Step 2: simplification of coefficients
     __dprint("-- Starting step 2", _debug);
-    poset, relation = __simplify_coefficients(R, coeffs, l_of_derivatives, _debug);
+    poset, relations = __simplify_coefficients(R, coeffs, l_of_derivatives, _debug);
     maximal_elements = poset.maximal_elements();
     
     ## Detecting case: all coefficients are already simpler
@@ -205,23 +205,23 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
                 
     ## Step 3: simplification with the derivatives
     __dprint("-- Starting step 3", _debug);
-    drelation = __simplify_derivatives(l_of_derivatives, _debug);
+    drelations = __simplify_derivatives(l_of_derivatives, _debug);
     
     ## Building the vector of final generators
     gens = [];
     if(-1 in poset):
         gens = [1];
-    gens = sum([l_of_derivatives[:drelation[i]] for i in range(len(coeffs))], gens);
+    gens = sum([l_of_derivatives[i][:drelations[i][0]] for i in range(len(coeffs))], gens);
     S = len(gens);
     __dprint("Resulting vector of generators: %s" %gens, _debug);
     
     ## Step 4: build the derivation matrix
     __dprint("-- Starting step 4", _debug);
-    C = __build_derivation_matrix(coeffs, drelation, _debug);
+    C = __build_derivation_matrix(gens, coeffs, drelations, _debug);
     
     ## Step 5: build the vector v
     __dprint("-- Starting step 5", _debug);
-    v = __build_vector(ocoeffs, monomials, poset, relation, drelation, _debug);
+    v = __build_vector(ocoeffs, monomials, poset, relations, drelations, gens, _debug);
     
     ## Step 6: build the square matrix M = (v, v',...)
     __dprint("-- Starting step 6", _debug);
@@ -270,7 +270,7 @@ def __check_input(poly, _debug=False):
     
     return (parent, poly, dR);
 
-def __simplify_coefficients(R, coeffs, derivatives, _debug=False):
+def __simplify_coefficients(base, coeffs, derivatives, _debug=False):
     '''
     Method that get the relations for the coefficients within their derivatives. The list 'coeffs' is the list to simplify
     and ;derivatives' is a list of lists with the derivatives of each element of 'coeffs' that we will consider.
@@ -290,7 +290,7 @@ def __simplify_coefficients(R, coeffs, derivatives, _debug=False):
     
     # Checking the simplest cases (coeff[i] in R)
     for i in range(n):
-        if(coeffs[i] in R):
+        if(coeffs[i] in base):
             if((-1) not in E):
                 E += [-1];
             R += [(i,-1)];
@@ -349,11 +349,14 @@ def __find_relation(g,df, _debug=False):
     It returns a tuple (k,res) where:
         - k: the first index which we found a relation
         - res: the relation (see __find_linear_relation to see how such relation is expressed).
+        
+    Then the following statement is always True:
+        g == df[k]*res[0] + res[1]
     '''
-    for k in range(len(derivatives)):
+    for k in range(len(df)):
         res = __find_linear_relation(df[k], g);
         if(not (res is None)):
-            __dprint("Found relation:\n\t(%s) == [%s]*(%s) + [%s]" %(repr(g),repr(res[0]), repr(res[1]), repr(df[k]), _debug);
+            __dprint("Found relation:\n\t(%s) == [%s]*(%s) + [%s]" %(repr(g),repr(res[0]), repr(df[k]), repr(res[1])), _debug);
             return (k,res);
     
     return None;
@@ -367,8 +370,9 @@ def __find_linear_relation(f,g):
         raise TypeError("find_linear_relation: The functions are not DDFunctions");
     
     try:
-        of = 1; while(f.getSequenceElement(of) == 0): of += 1;
-        og = 1; while(g.getSequenceElement(og) == 0): og += 1;
+        of = 1; og = 1;
+        while(f.getSequenceElement(of) == 0): of += 1;
+        while(g.getSequenceElement(og) == 0): og += 1;
         
         if(of == og):
             c = f.getSequenceElement(of)/g.getSequenceElement(og);
@@ -387,11 +391,96 @@ def __find_linear_relation(f,g):
     elif(g.is_constant):
         return None;
     
-def __build_derivation_matrix(coeffs, drelations, _debug=False):
-    ## TODO: Implement this
-    raise NotImplementedError("__build_derivation_matrix: method not implemented");
+def __build_derivation_matrix(gens, coeffs, drelations, _debug=False):
+    '''
+        Method to build a derivation matrix 'C' for the vector of generators 'gen'.
+        
+        All the information about the coefficients and their relations are given
+        by the arguments 'coeffs' (list of basic elements for 'gens') and 
+        'drelations' (relations between elements in 'coeffs' and the last derivative
+        on 'gens').
+        
+        It could be that gens[0] == 1. This element must be treated in a specific
+        way collecting all the relations on 'drelations'. 
+    '''
+    __dprint("Building derivation matrix for %s" %gens, _debug);
+    
+    rows = []; # Variable for the rows of the matrix M
+    
+    constant = (gens[0] == 1); # Flag variable for gens[0] == 1
+    coeff_order = []; # Collecting the real order of each coefficient in the vector space
+    for i in range(len(coeffs)):
+        if(drelations[i][0] is None):
+            coeff_order += [coeffs[i].getOrder()];
+        else:
+            coeff_order += [drelations[i][0]];
+    coeff_index = [0]; # Variable for the index of coeff[i] in gens
+    if(constant): coeff_index[0] = 1;
+    for i in range(1, len(coeffs)): coeff_index += [coeff_index[-1]+coeff_order[i-1]];
+    
+    __dprint("Is there constant: %s" %constant, _debug);
+    __dprint("Orders: %s\nIndices: %s" %(coeff_order, coeff_index), _debug);
+    
+    ## Considering the case that gens[0] == -1
+    if(constant):
+        new_row = [0];
+        for i in range(len(coeffs)):
+            new_row += [0 for j in range(coeff_order[i])];
+            if(not (drelations[i][1] is None)):
+                new_row[-1] = drelations[i][1][1][1];
+        rows += [new_row];
+        
+    ## Now we loop through all the coefficients in coeffs
+    for i in range(len(coeffs)):
+        com = coeffs[i].equation.companion();
+        for j in range(coeff_order[i]):
+            ## Building the jth row for coeff[i]
+            new_row = [0 for k in range(coeff_index[i])]; # First columns for the row
+            
+            ## Middle columns for the row
+            new_row += [com[j][k] for k in range(coeff_order[i]-1)];
+            if((not (drelations[i][0] is None)) and (drelations[i][1][0] == j)):
+                new_row += [drelations[i][1][1][0]];
+            else:
+                new_row += [com[j][coeff_order[i]-1]];
+            
+            new_row += [0 for k in range(coeff_index[i]+coeff_order[i], len(gens))]; # Last columns for the row
+            
+            ## Adding the resulting row
+            rows += [new_row];
+            
+    if(_debug):
+        print "Matrix:";
+        for row in rows:
+            print row;
+            
+    return Matrix(rows);
 
-def __build_vector(coeffs, monomials, poset, relation, drelation, _debug=False):
+def __build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug=False):
+    '''
+        This method builds a vector that represent the polynomial generated by
+        'coeffs' and 'monomials' using the relations contained in 'poset', 'relations'
+        and 'drelations' w.r.t. the vector 'gens'.
+        
+        The output vector v satisfies:
+            sum(coeff[i]*monomials[i]) == sum(v[j]*gens[j])
+    '''
+
+    ## Getting the minimal chain for each coefficient up to a maximal coefficient
+    maximal_elements = poset.maximal_elements();
+    chains = {i : [el for el in poset.chains() if (len(el) > 0 and el[0] == i and (el[-1] in maximal_elements)] for i in range(len(coeffs))};
+    min_chains = [];
+    for i in range(len(coeffs)):
+        current = chains[i];
+        shortest = current[0];
+        for j in range(1,len(current)):
+            if(len(shortest) > len(current[j])):
+                shortest = current[j];
+        min_chains += [shortest];
+    
+    ## For each coefficient, compute the representation in gens
+    ## We must follow the shortest chain to a maximal element to know where and
+    ## how put the coefficients in the final vector.
     ## TODO: Implement this
     raise NotImplementedError("__build_vector: method not implemented");
     
@@ -892,11 +981,11 @@ def __dprint(obj, _debug):
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "diffalg_reduction", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
 
-
-def simplify_coefficients(R, coeffs, derivatives, _debug=True):
-    return __simplify_coefficients(R,coeffs,derivatives,_debug);
+# Extra functions for debugging
+def simplify_coefficients(base, coeffs, derivatives, _debug=True):
+    return __simplify_coefficients(base,coeffs,derivatives,_debug);
 
 def simplify_derivatives(derivatives, _debug=True):
     return __simplify_derivatives(derivatives, _debug)
@@ -907,10 +996,10 @@ def find_relation(g,df, _debug=True):
 def find_linear_relation(f,g):
     return __find_linear_relation(g,df);
     
-def build_derivation_matrix(coeffs, drelations, _debug=True):
-    return __build_derivation_matrix(coeffs, drelations, _debug);
+def build_derivation_matrix(gens, coeffs, drelations, _debug=True):
+    return __build_derivation_matrix(gens, coeffs, drelations, _debug);
 
-def build_vector(coeffs, monomials, poset, relation, drelation, _debug=True):
-    return __build_vector(coeffs, monomials, poset, relation, drelation, _debug);
-# Extra functions for debuggin
+def build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug=True):
+    return __build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug);
+
 __all__ += ["simplify_coefficients", "simplify_derivatives", "find_relation", "find_linear_relation", "build_derivation_matrix", "build_vector"];
