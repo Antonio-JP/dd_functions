@@ -146,6 +146,260 @@ def fromFinitePolynomial_toInfinitePolynomial(poly):
 ### Methods for computing Diff. Algebraic equations with simpler coefficients
 ###
 ################################################################################
+def diffalg_reduction(poly, _infinite=False, _debug=False):
+    '''
+    Method that recieves a polynomial 'poly' with variables y_0,...,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
+    'result' with coefficients in R where, for any function f(x) such that poly(f) == 0, result(f) == 0.
+    
+    The algorithm works as follows:
+        1 - Collect all the coefficients and their derivatives
+        2 - Perform the simplification to each pair of coefficients
+        3 - Perform the simplification for the last derivatives of the remaining coefficients --> gens
+        4 - Build the final derivation matrix for 'gens'
+        5 - Create a vector v for represent 'poly' w.r.t. 'gens'
+        6 - Build a square matrix --> M = (v | v' | ... | v^(n))
+        7 - Return det(M)
+    
+    INPUT:
+        - poly: a polynomial with variables y_0,...,y_m. Also an infinite polynomial with variable y_* is valid.
+        - _infinite: if True the result polynomial will be an infinite polynomial. Otherwise, a finite variable polynomial will be returned.
+        - _debug: if True, the steps of the algorithm will be printed.
+    '''
+    ## Processing the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+        
+    ### Preprocessing the input poly
+    parent, poly, dR = __check_input(poly, _debug);
+    
+    if(not is_DDRing(dR)):
+        raise TypeError("diffalg_reduction: polynomial is not over a DDRing");
+    
+    R = dR.base();
+    
+    ## Step 1: collecting function and derivatives
+    __dprint("---- DEBUGGING PRINTING FOR diffalg_reduction", _debug);
+    __dprint("poly: %s" %poly, _debug);
+    __dprint("R: %s" %R, _debug);
+    __dprint("-- Starting step 1", _debug);
+    coeffs = poly.coefficients(); # List of original coefficients
+    ocoeffs = coeffs; # Extra variable with the same list
+    monomials = poly.monomials(); # List of monomials
+    l_of_derivatives = [[f.derivative(times=i) for i in range(f.getOrder())] for f in coeffs]; # List of derivatives for each coefficient
+    
+    ## Step 2: simplification of coefficients
+    __dprint("-- Starting step 2", _debug);
+    poset, relation = __simplify_coefficients(R, coeffs, l_of_derivatives, _debug);
+    maximal_elements = poset.maximal_elements();
+    
+    ## Detecting case: all coefficients are already simpler
+    if(len(maximal_elements) == 1 and maximal_elements[0] == -1):
+        __dprint("Detected simplicity: returning the same polynomial over the basic ring");
+        return r_method(InfinitePolynomialRing(R, names=["y"])(poly));
+    
+    # Reducing the considered coefficients
+    coeffs = [coeffs[i] for i in maximal_elements if i != (-1)]; 
+    l_of_derivatives = [l_of_derivatives[i] for i in maximal_elements if i != (-1)]; 
+                
+    ## Step 3: simplification with the derivatives
+    __dprint("-- Starting step 3", _debug);
+    drelation = __simplify_derivatives(l_of_derivatives, _debug);
+    
+    ## Building the vector of final generators
+    gens = [];
+    if(-1 in poset):
+        gens = [1];
+    gens = sum([l_of_derivatives[:drelation[i]] for i in range(len(coeffs))], gens);
+    S = len(gens);
+    __dprint("Resulting vector of generators: %s" %gens, _debug);
+    
+    ## Step 4: build the derivation matrix
+    __dprint("-- Starting step 4", _debug);
+    C = __build_derivation_matrix(coeffs, drelation, _debug);
+    
+    ## Step 5: build the vector v
+    __dprint("-- Starting step 5", _debug);
+    v = __build_vector(ocoeffs, monomials, poset, relation, drelation, _debug);
+    
+    ## Step 6: build the square matrix M = (v, v',...)
+    __dprint("-- Starting step 6", _debug);
+    derivative = None; # TODO: set this derivation
+    M = matrix_of_dMovement(C, v, derivative, S);
+    
+    return r_method(M.determinant());
+
+################################################################################
+################################################################################
+### Some private methods for diffalg_reduction
+################################################################################
+################################################################################
+
+def __check_input(poly, _debug=False):
+    '''
+    Method that check and cast the polynomial input accordingly to our standards.
+    
+    The element 'poly' must be a polynomial with variables y_0,...,y_m with coefficients in some ring
+    '''
+    parent = poly.parent();
+    if(not is_InfinitePolynomialRing(parent)):
+        if(not is_MPolynomialRing(parent)):
+            if(not is_PolynomialRing(parent)):
+                raise TypeError("__check_input: the input is not a valid polynomial. Obtained something in %s" %parent);
+            if(not str(parent.gens()[0]).startswith("y_")):
+                raise TypeError("The input is not a valid polynomial. Obtained %s but wanted something with variables y_*" %poly);
+            parent = InfinitePolynomialRing(parent.base(), "y");
+        else:
+            gens = list(parent.gens());
+            to_delete = [];
+            for gen in gens:
+                if(str(gen).startswith("y_")):
+                    to_delete += [gen];
+            if(len(to_delete) == 0):
+                raise TypeError("__check_input: the input is not a valid polynomial. Obtained %s but wanted something with variables y_*" %poly);
+            for gen in to_delete:
+                gens.remove(gen);
+            parent = InfinitePolynomialRing(PolynomialRing(parent.base(), gens), "y");
+    else:
+        if(parent.ngens() > 1 or repr(parent.gen()) != "y_*"):
+            raise TypeError("__check_input: the input is not a valid polynomial. Obtained %s but wanted something with variables y_*" %poly);
+    
+    poly = parent(poly);
+    dR = parent.base();
+    
+    return (parent, poly, dR);
+
+def __simplify_coefficients(R, coeffs, derivatives, _debug=False):
+    '''
+    Method that get the relations for the coefficients within their derivatives. The list 'coeffs' is the list to simplify
+    and ;derivatives' is a list of lists with the derivatives of each element of 'coeffs' that we will consider.
+    
+    It returns a pair (poset, relations) where:
+        - poset: the Partially Oriented Set of the indices
+        - relations: a dictionary which tells for each i < j, how the ith coefficient is related with the jth coefficient
+            (see __find_relation to know how that relation is expressed).
+    '''
+    # Checking the input
+    n = len(coeffs);
+    if(len(derivatives) < n):
+        raise ValueError("__simplify_coefficients: error in size of the input 'derivatives'");
+    
+    E = range(n);
+    R = [];
+    
+    # Checking the simplest cases (coeff[i] in R)
+    for i in range(n):
+        if(coeffs[i] in R):
+            if((-1) not in E):
+                E += [-1];
+            R += [(i,-1)];
+    
+    # Starting the comparison
+    relations = {};
+    for i in range(n):
+        for j in range(i+1, n):
+            # Checking (j,i)
+            rel = __find_relation(coeffs[j], derivatives[i], _debug);
+            if(not(rel is None)):
+                R += [(j,i)];
+                relations[(j,i)] = rel;
+                continue;
+            # Checking (i,j)
+            rel = __find_relation(coeffs[i], derivatives[j], _debug);
+            if(not(rel is None)):
+                R += [(i,j)];
+                relations[(i,j)] = rel;
+    
+    # Checking if the basic case will be used because of the relations
+    if((-1) not in E and any(rel[1][1] != 0 for rel in relations.values())):
+        E += [-1];
+    
+    # Building the poset and returning
+    __dprint("All relations: %s" %R, _debug);
+    poset = Poset((E,R));
+    
+    return (poset, relations);
+
+def __simplify_derivatives(derivatives, _debug=False):
+    '''
+    Method to get the relations for the derivatives of the coefficients. The argument 'derivatives' contains a list of lists for which
+    one we will see if the last elements have relations with the firsts.
+    
+    It returns a list of tuples 'res' where 'res[i][0] = k' if the kth fucntion in 'derivatives[i]' is the first element on the list
+    with relations with the previous elements and 'res[i][1]' is the relation found.
+    If no relation is found, a tuple (None,None) is added to the list.
+    '''
+    res = [];
+    for i in range(len(derivatives)):
+        for k in range(len(derivatives[i])-1,0,-1):
+            relation = __find_relation(derivatives[i][k], derivatives[i][:k-1], _debug);
+            if(not (relation is None)):
+                res += [(k,relation)];
+                break;
+            res += [(None,None)];
+            
+    __dprint("Found relations with derivatives: %s" %res, _debug);
+    return res;
+    
+def __find_relation(g,df, _debug=False):
+    '''
+    Method that get the relation between g and the list df. 
+    
+    It returns a tuple (k,res) where:
+        - k: the first index which we found a relation
+        - res: the relation (see __find_linear_relation to see how such relation is expressed).
+    '''
+    for k in range(len(derivatives)):
+        res = __find_linear_relation(df[k], g);
+        if(not (res is None)):
+            __dprint("Found relation:\n\t(%s) == [%s]*(%s) + [%s]" %(repr(g),repr(res[0]), repr(res[1]), repr(df[k]), _debug);
+            return (k,res);
+    
+    return None;
+    
+def __find_linear_relation(f,g):
+    '''
+    This method receives two DDFunctions and return two constants (c,d) such that f = cg+d. 
+    None is return if those constants do not exist.
+    '''
+    if(not (is_DDFunction(f) and is_DDFunction(g))):
+        raise TypeError("find_linear_relation: The functions are not DDFunctions");
+    
+    try:
+        of = 1; while(f.getSequenceElement(of) == 0): of += 1;
+        og = 1; while(g.getSequenceElement(og) == 0): og += 1;
+        
+        if(of == og):
+            c = f.getSequenceElement(of)/g.getSequenceElement(og);
+            d = f(0) - c*g(0);
+            
+            if(f == c*g + d):
+                return (c,d);
+    except Exception:
+        pass;
+    
+    return None;
+    
+    ## Simplest case: some of the functions are constants is a constant
+    if(f.is_constant):
+        return (f.parent().zero(), f(0));
+    elif(g.is_constant):
+        return None;
+    
+def __build_derivation_matrix(coeffs, drelations, _debug=False):
+    ## TODO: Implement this
+    raise NotImplementedError("__build_derivation_matrix: method not implemented");
+
+def __build_vector(coeffs, monomials, poset, relation, drelation, _debug=False):
+    ## TODO: Implement this
+    raise NotImplementedError("__build_vector: method not implemented");
+    
+    
+################################################################################
+################################################################################
+################################################################################
+
 def toDifferentiallyAlgebraic_Below(poly, _infinite=False, _debug=False):
     '''
     Method that receives a polynomial with variables y_0,...,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
@@ -629,7 +883,34 @@ def Exponential_polynomials(n, parent):
         prev = Exponential_polynomials(n-1,parent);
         return infinite_derivative(prev) + y[0]*prev;
     
+###################################################################################################
+### Private functions
+###################################################################################################
+def __dprint(obj, _debug):
+    if(_debug): print obj;
+    
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
 __all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
+
+
+def simplify_coefficients(R, coeffs, derivatives, _debug=True):
+    return __simplify_coefficients(R,coeffs,derivatives,_debug);
+
+def simplify_derivatives(derivatives, _debug=True):
+    return __simplify_derivatives(derivatives, _debug)
+    
+def find_relation(g,df, _debug=True):
+    return __find_relation(g,df,_debug);
+    
+def find_linear_relation(f,g):
+    return __find_linear_relation(g,df);
+    
+def build_derivation_matrix(coeffs, drelations, _debug=True):
+    return __build_derivation_matrix(coeffs, drelations, _debug);
+
+def build_vector(coeffs, monomials, poset, relation, drelation, _debug=True):
+    return __build_vector(coeffs, monomials, poset, relation, drelation, _debug);
+# Extra functions for debuggin
+__all__ += ["simplify_coefficients", "simplify_derivatives", "find_relation", "find_linear_relation", "build_derivation_matrix", "build_vector"];
