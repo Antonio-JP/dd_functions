@@ -1,6 +1,8 @@
    
 from sage.all_cmdline import *   # import sage library
 
+from sage.graphs.digraph import DiGraph;
+
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing; 
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
 from sage.rings.fraction_field import is_FractionField;
@@ -10,6 +12,7 @@ from ajpastor.dd_functions.ddExamples import *;
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing;
 
 from ajpastor.misc.matrix import matrix_of_dMovement;
+from ajpastor.misc.matrix import differential_movement;
 
 ################################################################################
 ###
@@ -36,7 +39,7 @@ def get_InfinitePolynomialRingVaribale(parent, gen, number):
     return parent(repr(gen).replace("*", str(number)));
     
 #### TODO: Review this function
-def infinite_derivative(element, times=1, var=x):
+def infinite_derivative(element, times=1, var=x, _infinite=True):
     '''
         Method that takes an element and compute its times-th derivative
         with respect to the variable given by var.
@@ -51,6 +54,12 @@ def infinite_derivative(element, times=1, var=x):
             as derivative the variable "#_{n+1}", i.e., the same name but with
             one higher index.
     '''
+    ## Checking the input _infinite
+    if(_infinite):
+        r_method = fromFinitePolynomial_toInfinitePolynomial;
+    else:
+        r_method = fromInfinityPolynomial_toFinitePolynomial;
+    
     if(not ((times in ZZ) and times >=0)):
         raise ValueError("The argument 'times' must be a non-negative integer");
     elif(times > 1): # Recursive call
@@ -78,12 +87,15 @@ def infinite_derivative(element, times=1, var=x):
     ## Symbolic case?
     if(sage.symbolic.ring.is_SymbolicExpressionRing(parent.base())):
         raise TypeError("Base ring for the InfinitePolynomialRing not valid (found SymbolicRing)");
+    ## Zero case
+    if(element == 0):
+        return 0;
     ### Monomial case
     if(element.is_monomial()):
         ## Case of degree 1 (add one to the index of the variable)
         if(len(element.variables()) == 1 and element.degree() == 1):
             g,n = get_InfinitePolynomialRingGen(parent, element, True);
-            return get_InfinitePolynomialRingVaribale(parent, g,n+1);
+            return r_method(get_InfinitePolynomialRingVaribale(parent, g,n+1));
         ## Case of higher degree
         else:
             # Computing the variables in the monomial and their degrees (in order)
@@ -103,12 +115,12 @@ def infinite_derivative(element, times=1, var=x):
                     each_sum += [degrees[i]*infinite_derivative(parent(variables[i]))*part_prod];
             
             ## Computing the final result
-            return com_factor*sum(each_sum);
+            return r_method(com_factor*sum(each_sum));
     ### Non-monomial case
     else:
         coefficients = element.coefficients();
         monomials = [parent(el) for el in element.monomials()];
-        return sum([infinite_derivative(coefficients[i])*monomials[i] + coefficients[i]*infinite_derivative(monomials[i]) for i in range(len(monomials))]);
+        return r_method(sum([infinite_derivative(coefficients[i])*monomials[i] + coefficients[i]*infinite_derivative(monomials[i]) for i in range(len(monomials))]));
     
 ################################################################################
 ###
@@ -191,8 +203,8 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     
     ## Step 2: simplification of coefficients
     __dprint("-- Starting step 2", _debug);
-    poset, relations = __simplify_coefficients(R, coeffs, l_of_derivatives, _debug);
-    maximal_elements = poset.maximal_elements();
+    graph = __simplify_coefficients(R, coeffs, l_of_derivatives, _debug);
+    maximal_elements = __digraph_roots(graph, _debug);
     
     ## Detecting case: all coefficients are already simpler
     if(len(maximal_elements) == 1 and maximal_elements[0] == -1):
@@ -209,7 +221,7 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     
     ## Building the vector of final generators
     gens = [];
-    if(-1 in poset):
+    if(-1 in maximal_elements):
         gens = [1];
     gens = sum([l_of_derivatives[i][:drelations[i][0]] for i in range(len(coeffs))], gens);
     S = len(gens);
@@ -218,14 +230,15 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     ## Step 4: build the derivation matrix
     __dprint("-- Starting step 4", _debug);
     C = __build_derivation_matrix(gens, coeffs, drelations, _debug);
+    cR = InfinitePolynomialRing(C.base_ring(), names=["y"]);
     
     ## Step 5: build the vector v
     __dprint("-- Starting step 5", _debug);
-    v = __build_vector(ocoeffs, monomials, poset, relations, drelations, gens, _debug);
+    v = __build_vector(ocoeffs, monomials, graph, drelations, cR, _debug);
     
     ## Step 6: build the square matrix M = (v, v',...)
     __dprint("-- Starting step 6", _debug);
-    derivative = None; # TODO: set this derivation
+    derivative = infinite_derivative; # TODO: set this derivation
     M = matrix_of_dMovement(C, v, derivative, S);
     
     return r_method(M.determinant());
@@ -275,8 +288,8 @@ def __simplify_coefficients(base, coeffs, derivatives, _debug=False):
     Method that get the relations for the coefficients within their derivatives. The list 'coeffs' is the list to simplify
     and ;derivatives' is a list of lists with the derivatives of each element of 'coeffs' that we will consider.
     
-    It returns a pair (poset, relations) where:
-        - poset: the Partially Oriented Set of the indices
+    It returns a pair (graph, relations) where:
+        - graph: a forest of the points of minimal depth with all the relations
         - relations: a dictionary which tells for each i < j, how the ith coefficient is related with the jth coefficient
             (see __find_relation to know how that relation is expressed).
     '''
@@ -293,33 +306,32 @@ def __simplify_coefficients(base, coeffs, derivatives, _debug=False):
         if(coeffs[i] in base):
             if((-1) not in E):
                 E += [-1];
-            R += [(i,-1)];
+            R += [(-1,i,(0,0,coeffs[i]))];
     
     # Starting the comparison
-    relations = {};
     for i in range(n):
         for j in range(i+1, n):
             # Checking (j,i)
             rel = __find_relation(coeffs[j], derivatives[i], _debug);
             if(not(rel is None)):
-                R += [(j,i)];
-                relations[(j,i)] = rel;
+                R += [(i,j,rel)];
                 continue;
             # Checking (i,j)
             rel = __find_relation(coeffs[i], derivatives[j], _debug);
             if(not(rel is None)):
-                R += [(i,j)];
-                relations[(i,j)] = rel;
+                R += [(j,i,rel)];
     
     # Checking if the basic case will be used because of the relations
-    if((-1) not in E and any(rel[1][1] != 0 for rel in relations.values())):
+    if((-1) not in E and any(e[2][1][1] != 0 for e in R)):
         E += [-1];
     
-    # Building the poset and returning
+    # Building the graph and returning
     __dprint("All relations: %s" %R, _debug);
-    poset = Poset((E,R));
+    graph = DiGraph([E,R]);
+    __dprint("Edges: %s" %graph.edges(), _debug);
     
-    return (poset, relations);
+    # Deleting spurious relations and returning
+    return __min_span_tree(graph, _debug);
 
 def __simplify_derivatives(derivatives, _debug=False):
     '''
@@ -391,6 +403,34 @@ def __find_linear_relation(f,g):
     elif(g.is_constant):
         return None;
     
+def __min_span_tree(digraph, _debug=False):
+    '''
+    Method that computes a forest from a directed graph containing all vertices and having the minimal depth.
+    
+    It is computed with a breadth first search.
+    '''
+    to_search = __digraph_roots(digraph, _debug);
+    i = 0;
+    done = [];
+    edges = [];
+    while(i < len(to_search)):
+        v = to_search[i];
+        if(not (v in done)):
+            for e in digraph.outgoing_edges(v):
+                if(not(e[1] in to_search)):
+                    to_search += [e[1]];
+                    edges += [e];
+            done += [v];
+        i += 1;
+    return DiGraph([digraph.vertices(),edges]);
+
+def __digraph_roots(digraph, _debug=False):
+    '''
+    Method that computes the roots of a directed graph. We consider a vertex v to be a root if there
+    are not edges (v,w) in the graph.
+    '''
+    return [v for v in digraph.vertices() if digraph.in_degree(v) == 0];
+    
 def __build_derivation_matrix(gens, coeffs, drelations, _debug=False):
     '''
         Method to build a derivation matrix 'C' for the vector of generators 'gen'.
@@ -456,33 +496,93 @@ def __build_derivation_matrix(gens, coeffs, drelations, _debug=False):
             
     return Matrix(rows);
 
-def __build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug=False):
+def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
     '''
         This method builds a vector that represent the polynomial generated by
-        'coeffs' and 'monomials' using the relations contained in 'poset', 'relations'
+        'coeffs' and 'monomials' using the relations contained in 'graph'
         and 'drelations' w.r.t. the vector 'gens'.
         
         The output vector v satisfies:
-            sum(coeff[i]*monomials[i]) == sum(v[j]*gens[j])
+            sum(coeffs[i]*monomials[i]) == sum(v[j]*gens[j])
     '''
-
-    ## Getting the minimal chain for each coefficient up to a maximal coefficient
-    maximal_elements = poset.maximal_elements();
-    chains = {i : [el for el in poset.chains() if (len(el) > 0 and el[0] == i and (el[-1] in maximal_elements)] for i in range(len(coeffs))};
-    min_chains = [];
+    # Computing important data for each coefficient
+    maximal_elements = [el for el in __digraph_roots(graph) if el != -1];
+    coeff_order = [];
     for i in range(len(coeffs)):
-        current = chains[i];
-        shortest = current[0];
-        for j in range(1,len(current)):
-            if(len(shortest) > len(current[j])):
-                shortest = current[j];
-        min_chains += [shortest];
+        if(i in maximal_elements and (not (drelations[maximal_elements.index(i)][0] is None))):
+            coeff_order += [drelations[maximal_elements.index(i)][0]];
+        else:
+            coeff_order += [coeffs[i].getOrder()];
+    constant = (-1 in graph.vertices());
     
-    ## For each coefficient, compute the representation in gens
-    ## We must follow the shortest chain to a maximal element to know where and
-    ## how put the coefficients in the final vector.
-    ## TODO: Implement this
-    raise NotImplementedError("__build_vector: method not implemented");
+    # Computing vectors and companion matrices for each element
+    vectors = [vector(cR, [monomials[i]] + [0 for i in range(coeff_order[i]-1)]) for i in range(len(coeffs))];
+    trans = [];
+    for i in range(len(coeffs)):
+        if(i in maximal_elements and (not (drelations[maximal_elements.index(i)][0] is None))):
+            relation = drelations[maximal_elements.index(i)];
+            C = [];
+            for j in range(relation[0]):
+                new_row = [el for el in coeffs[i].equation.companion()[j][:relation[0]-1]] + [0];
+                if(j == relation[1][0]):
+                    new_row[-1] = relation[1][1][0];
+                C += [new_row];
+            C = Matrix(C);
+            trans += [(drelations[maximal_elements.index(i)][1][1][1], C)];
+        else:
+            trans += [(0, coeffs[i].equation.companion())];
+    
+    const_val = 0;    
+    # Doing a Tree Transversal in POstorder in the graph to pull up the vectors
+    stack = copy(maximal_elements); stack.reverse();
+    # Case for -1
+    if(constant):
+        maximal_elements = [-1] + maximal_elements;
+        const_val = sum(cR(coeffs[e[1]])*monomials[coeffs[e[1]]] for e in graph.outgoing_edges(-1));
+        
+    # Rest of the graph
+    ready = [];
+    while(len(stack) > 0):
+        current = stack[-1];
+        if(current in ready):
+            if(not (current in maximal_elements)):
+                # Visit the node: pull-up the vector
+                edge = graph.incoming_edges(current)[0];
+                cu_vector = vectors[current];
+                de_vector = vectors[edge[0]];
+                relation = edge[2];
+                C = trans[edge[0]][1];
+                            
+                # Building vectors for all the required derivatives
+                ivectors = [vector(cR, [0 for i in range(relation[0])] + [1] + [0 for i in range(relation[0]+1,coeff_order[edge[0]])])];
+                extra_cons = [relation[1][1]];
+                
+                for i in range(len(cu_vector)):
+                    extra_cons += [ivectors[-1][-1]*trans[edge[0]][0]];
+                    ivectors += [differential_movement(C, ivectors[-1], infinite_derivative)];
+                
+                vectors[edge[0]] = sum([vector(cR,[cu_vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(cu_vector))], de_vector);
+                const_val += sum([cu_vector[i]*extra_cons[i] for i in range(len(cu_vector))]);
+                
+            # Getting out the element of the stack
+            stack.pop();
+        else:
+            # Add the children and visit them
+            ready += [current];
+            for e in graph.outgoing_edges(current):
+                stack.append(e[1]);
+        
+    final_vector = [];
+    for i in maximal_elements:
+        if(i == -1):
+            final_vector += [const_val];
+        else:
+            final_vector += [el for el in vectors[i]];
+            
+    final_vector = vector(cR, final_vector);
+    __dprint("Vector: %s" %final_vector, _debug);
+    
+    return vector(final_vector);
     
     
 ################################################################################
@@ -999,7 +1099,7 @@ def find_linear_relation(f,g):
 def build_derivation_matrix(gens, coeffs, drelations, _debug=True):
     return __build_derivation_matrix(gens, coeffs, drelations, _debug);
 
-def build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug=True):
-    return __build_vector(coeffs, monomials, poset, relations, drelations, gens, _debug);
+def build_vector(coeffs, monomials, graph, drelations, cR, _debug=True):
+    return __build_vector(coeffs, monomials, graph, drelations, cR, _debug);
 
 __all__ += ["simplify_coefficients", "simplify_derivatives", "find_relation", "find_linear_relation", "build_derivation_matrix", "build_vector"];
