@@ -193,10 +193,11 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     
     ## Step 1: collecting function and derivatives
     __dprint("---- DEBUGGING PRINTING FOR diffalg_reduction", _debug);
-    __dprint("poly: %s" %poly, _debug);
     __dprint("R: %s" %R, _debug);
     __dprint("-- Starting step 1", _debug);
     coeffs = poly.coefficients(); # List of original coefficients
+    __dprint("Coefficients: %s" %("["+reduce(lambda p,q : p+", "+q, [repr(coeff) for coeff in coeffs])+"]"), _debug);            
+        
     ocoeffs = coeffs; # Extra variable with the same list
     monomials = poly.monomials(); # List of monomials
     l_of_derivatives = [[f.derivative(times=i) for i in range(f.getOrder())] for f in coeffs]; # List of derivatives for each coefficient
@@ -238,9 +239,14 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     
     ## Step 6: build the square matrix M = (v, v',...)
     __dprint("-- Starting step 6", _debug);
-    derivative = infinite_derivative; # TODO: set this derivation
+    __dprint("Computing derivatives from the vector (step 5) using the matrix (step 4)", _debug);
+    derivative = infinite_derivative;
     M = matrix_of_dMovement(C, v, derivative, S);
     
+    __dprint("Vector of generators:\n\t%s" %gens, _debug);
+    __dprint("Final matrix (vector in rows):\n\t%s" %(str(M.transpose()).replace('\n', '\n\t')), _debug);
+    __dprint("Returning the determinant", _debug);
+    __dprint("---- DEBUGGING PRINTING FOR diffalg_reduction (finished)", _debug);
     return r_method(M.determinant());
 
 ################################################################################
@@ -311,12 +317,12 @@ def __simplify_coefficients(base, coeffs, derivatives, _debug=False):
     # Starting the comparison
     for i in range(n):
         for j in range(i+1, n):
-            # Checking (j,i)
+            # Checking (i,j)
             rel = __find_relation(coeffs[j], derivatives[i], _debug);
             if(not(rel is None)):
                 R += [(i,j,rel)];
                 continue;
-            # Checking (i,j)
+            # Checking (j,i)
             rel = __find_relation(coeffs[i], derivatives[j], _debug);
             if(not(rel is None)):
                 R += [(j,i,rel)];
@@ -489,12 +495,11 @@ def __build_derivation_matrix(gens, coeffs, drelations, _debug=False):
             ## Adding the resulting row
             rows += [new_row];
             
-    if(_debug):
-        print "Matrix:";
-        for row in rows:
-            print row;
-            
-    return Matrix(rows);
+    rows = Matrix(rows);
+    
+    __dprint("** Matrix:\n%s\n*******" %rows, _debug);
+    
+    return rows;
 
 def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
     '''
@@ -515,6 +520,8 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
             coeff_order += [coeffs[i].getOrder()];
     constant = (-1 in graph.vertices());
     
+    __dprint("Is there constant: %s" %constant, _debug);
+    
     # Computing vectors and companion matrices for each element
     vectors = [vector(cR, [monomials[i]] + [0 for i in range(coeff_order[i]-1)]) for i in range(len(coeffs))];
     trans = [];
@@ -531,6 +538,12 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
             trans += [(drelations[maximal_elements.index(i)][1][1][1], C)];
         else:
             trans += [(0, coeffs[i].equation.companion())];
+            
+    if(_debug):
+        print "--- Transitions to nodes:";
+        for i in range(len(trans)):
+            print "+++ %s --> Cosntant: %s; Matrix:\n%s" %(i, trans[i][0], trans[i][1]);
+        print "-------------------------";
     
     const_val = 0;    
     # Doing a Tree Transversal in POstorder in the graph to pull up the vectors
@@ -545,6 +558,7 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
     while(len(stack) > 0):
         current = stack[-1];
         if(current in ready):
+            __dprint("Visiting node %s" %current, _debug);
             if(not (current in maximal_elements)):
                 # Visit the node: pull-up the vector
                 edge = graph.incoming_edges(current)[0];
@@ -552,6 +566,13 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
                 de_vector = vectors[edge[0]];
                 relation = edge[2];
                 C = trans[edge[0]][1];
+                
+                __dprint("** Reducing node %d to %d" %(current, edge[0]), _debug);
+                __dprint("\t- Current vector: %s" %(cu_vector), _debug);
+                __dprint("\t- Destiny vector: %s" %(de_vector), _debug);
+                __dprint("\t- Relation: %s" %(str(relation)), _debug);
+                __dprint("\t- Matrix:\n\t\t%s" %(str(C).replace('\n','\n\t\t')), _debug); 
+                __dprint("\t- Prev. constant: %s" %const_val, _debug);
                             
                 # Building vectors for all the required derivatives
                 ivectors = [vector(cR, [0 for i in range(relation[0])] + [1] + [0 for i in range(relation[0]+1,coeff_order[edge[0]])])];
@@ -563,6 +584,10 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
                 
                 vectors[edge[0]] = sum([vector(cR,[cu_vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(cu_vector))], de_vector);
                 const_val += sum([cu_vector[i]*extra_cons[i] for i in range(len(cu_vector))]);
+                
+                __dprint("\t- New vector: %s" %vectors[edge[0]], _debug);
+                __dprint("\t- New constant: %s" %const_val, _debug);
+                __dprint("*************************", _debug);
                 
             # Getting out the element of the stack
             stack.pop();
