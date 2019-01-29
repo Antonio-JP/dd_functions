@@ -35,9 +35,6 @@ def get_InfinitePolynomialRingGen(parent, var, with_number = False):
                 return gen;
     return None;
     
-def get_InfinitePolynomialRingVaribale(parent, gen, number):
-    return parent(repr(gen).replace("*", str(number)));
-    
 #### TODO: Review this function
 def infinite_derivative(element, times=1, var=x, _infinite=True):
     '''
@@ -95,7 +92,7 @@ def infinite_derivative(element, times=1, var=x, _infinite=True):
         ## Case of degree 1 (add one to the index of the variable)
         if(len(element.variables()) == 1 and element.degree() == 1):
             g,n = get_InfinitePolynomialRingGen(parent, element, True);
-            return r_method(get_InfinitePolynomialRingVaribale(parent, g,n+1));
+            return r_method(g[n+1]);
         ## Case of higher degree
         else:
             # Computing the variables in the monomial and their degrees (in order)
@@ -208,8 +205,8 @@ def diffalg_reduction(poly, _infinite=False, _debug=False):
     maximal_elements = __digraph_roots(graph, _debug);
     
     ## Detecting case: all coefficients are already simpler
-    if(len(maximal_elements) == 1 and maximal_elements[0] == -1):
-        __dprint("Detected simplicity: returning the same polynomial over the basic ring");
+    if(len(maximal_elements) == 1 and maximal_elements[0] == -1 and len(graph.outgoing_edges(-1)) == len(graph.edges())):
+        __dprint("Detected simplicity: returning the same polynomial over the basic ring", _debug);
         return r_method(InfinitePolynomialRing(R, names=["y"])(poly));
     
     # Reducing the considered coefficients
@@ -308,24 +305,29 @@ def __simplify_coefficients(base, coeffs, derivatives, _debug=False):
     R = [];
     
     # Checking the simplest cases (coeff[i] in R)
+    simpler = [];
     for i in range(n):
         if(coeffs[i] in base):
             if((-1) not in E):
                 E += [-1];
             R += [(-1,i,(0,0,coeffs[i]))];
+            simpler += [i];
     
+    __dprint("Simpler coefficiets (related with -1): %s" %simpler, _debug);
     # Starting the comparison
     for i in range(n):
         for j in range(i+1, n):
             # Checking (i,j)
-            rel = __find_relation(coeffs[j], derivatives[i], _debug);
-            if(not(rel is None)):
-                R += [(i,j,rel)];
-                continue;
+            if(not(j in simpler)):
+                rel = __find_relation(coeffs[j], derivatives[i], _debug);
+                if(not(rel is None)):
+                    R += [(i,j,rel)];
+                    continue;
             # Checking (j,i)
-            rel = __find_relation(coeffs[i], derivatives[j], _debug);
-            if(not(rel is None)):
-                R += [(j,i,rel)];
+            if(not(i in simpler)):
+                rel = __find_relation(coeffs[i], derivatives[j], _debug);
+                if(not(rel is None)):
+                    R += [(j,i,rel)];
     
     # Checking if the basic case will be used because of the relations
     if((-1) not in E and any(e[2][1][1] != 0 for e in R)):
@@ -350,12 +352,13 @@ def __simplify_derivatives(derivatives, _debug=False):
     '''
     res = [];
     for i in range(len(derivatives)):
+        to_add = (None,None);
         for k in range(len(derivatives[i])-1,0,-1):
             relation = __find_relation(derivatives[i][k], derivatives[i][:k-1], _debug);
             if(not (relation is None)):
-                res += [(k,relation)];
+                to_add = (k,relation);
                 break;
-            res += [(None,None)];
+        res += [to_add];
             
     __dprint("Found relations with derivatives: %s" %res, _debug);
     return res;
@@ -371,11 +374,14 @@ def __find_relation(g,df, _debug=False):
     Then the following statement is always True:
         g == df[k]*res[0] + res[1]
     '''
+    __dprint("** Checking relations between %s and %s" %(repr(g), df), _debug);
     for k in range(len(df)):
-        res = __find_linear_relation(df[k], g);
+        res = __find_linear_relation(g,df[k]);
         if(not (res is None)):
             __dprint("Found relation:\n\t(%s) == [%s]*(%s) + [%s]" %(repr(g),repr(res[0]), repr(df[k]), repr(res[1])), _debug);
+            __dprint("*************************", _debug);
             return (k,res);
+    __dprint("Nothing found\n*************************", _debug);
     
     return None;
     
@@ -386,6 +392,12 @@ def __find_linear_relation(f,g):
     '''
     if(not (is_DDFunction(f) and is_DDFunction(g))):
         raise TypeError("find_linear_relation: The functions are not DDFunctions");
+    
+    ## Simplest case: some of the functions are constants is a constant
+    if(f.is_constant):
+        return (f.parent().zero(), f(0));
+    elif(g.is_constant):
+        return None;
     
     try:
         of = 1; og = 1;
@@ -402,12 +414,6 @@ def __find_linear_relation(f,g):
         pass;
     
     return None;
-    
-    ## Simplest case: some of the functions are constants is a constant
-    if(f.is_constant):
-        return (f.parent().zero(), f(0));
-    elif(g.is_constant):
-        return None;
     
 def __min_span_tree(digraph, _debug=False):
     '''
@@ -547,11 +553,11 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
     
     const_val = 0;    
     # Doing a Tree Transversal in POstorder in the graph to pull up the vectors
-    stack = copy(maximal_elements); stack.reverse();
     # Case for -1
     if(constant):
         maximal_elements = [-1] + maximal_elements;
-        const_val = sum(cR(coeffs[e[1]])*monomials[coeffs[e[1]]] for e in graph.outgoing_edges(-1));
+    #    const_val = sum(cR(coeffs[e[1]])*monomials[coeffs[e[1]]] for e in graph.outgoing_edges(-1));
+    stack = copy(maximal_elements); stack.reverse();
         
     # Rest of the graph
     ready = [];
@@ -563,31 +569,42 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
                 # Visit the node: pull-up the vector
                 edge = graph.incoming_edges(current)[0];
                 cu_vector = vectors[current];
-                de_vector = vectors[edge[0]];
-                relation = edge[2];
-                C = trans[edge[0]][1];
                 
-                __dprint("** Reducing node %d to %d" %(current, edge[0]), _debug);
-                __dprint("\t- Current vector: %s" %(cu_vector), _debug);
-                __dprint("\t- Destiny vector: %s" %(de_vector), _debug);
-                __dprint("\t- Relation: %s" %(str(relation)), _debug);
-                __dprint("\t- Matrix:\n\t\t%s" %(str(C).replace('\n','\n\t\t')), _debug); 
-                __dprint("\t- Prev. constant: %s" %const_val, _debug);
-                            
-                # Building vectors for all the required derivatives
-                ivectors = [vector(cR, [0 for i in range(relation[0])] + [1] + [0 for i in range(relation[0]+1,coeff_order[edge[0]])])];
-                extra_cons = [relation[1][1]];
+                ## Constant case; reducing to the constant term
+                if(edge[0] == -1):
+                    __dprint("** Reducing node %d to constant" %(current), _debug);
+                    __dprint("\t- Current vector: %s" %(cu_vector), _debug);
+                    __dprint("\t- Prev. constant: %s" %const_val, _debug);
+                    const_val += sum(cu_vector[i]*cR(coeffs[current].derivative(times=i)) for i in range(len(cu_vector)));
+                    __dprint("\t- New constant: %s" %const_val, _debug);
                 
-                for i in range(len(cu_vector)):
-                    extra_cons += [ivectors[-1][-1]*trans[edge[0]][0]];
-                    ivectors += [differential_movement(C, ivectors[-1], infinite_derivative)];
-                
-                vectors[edge[0]] = sum([vector(cR,[cu_vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(cu_vector))], de_vector);
-                const_val += sum([cu_vector[i]*extra_cons[i] for i in range(len(cu_vector))]);
-                
-                __dprint("\t- New vector: %s" %vectors[edge[0]], _debug);
-                __dprint("\t- New constant: %s" %const_val, _debug);
-                __dprint("*************************", _debug);
+                ## General case
+                else:                
+                    de_vector = vectors[edge[0]];
+                    relation = edge[2];
+                    C = trans[edge[0]][1];
+                    
+                    __dprint("** Reducing node %d to %d" %(current, edge[0]), _debug);
+                    __dprint("\t- Current vector: %s" %(cu_vector), _debug);
+                    __dprint("\t- Destiny vector: %s" %(de_vector), _debug);
+                    __dprint("\t- Relation: %s" %(str(relation)), _debug);
+                    __dprint("\t- Matrix:\n\t\t%s" %(str(C).replace('\n','\n\t\t')), _debug); 
+                    __dprint("\t- Prev. constant: %s" %const_val, _debug);
+                                
+                    # Building vectors for all the required derivatives
+                    ivectors = [vector(cR, [0 for i in range(relation[0])] + [1] + [0 for i in range(relation[0]+1,coeff_order[edge[0]])])];
+                    extra_cons = [relation[1][1]];
+                    
+                    for i in range(len(cu_vector)):
+                        extra_cons += [ivectors[-1][-1]*trans[edge[0]][0]];
+                        ivectors += [differential_movement(C, ivectors[-1], infinite_derivative)];
+                    
+                    vectors[edge[0]] = sum([vector(cR,[cu_vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(cu_vector))], de_vector);
+                    const_val += sum([cu_vector[i]*extra_cons[i] for i in range(len(cu_vector))]);
+                    
+                    __dprint("\t- New vector: %s" %vectors[edge[0]], _debug);
+                    __dprint("\t- New constant: %s" %const_val, _debug);
+                    __dprint("*************************", _debug);
                 
             # Getting out the element of the stack
             stack.pop();
@@ -1106,14 +1123,14 @@ def __dprint(obj, _debug):
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "get_InfinitePolynomialRingVaribale", "infinite_derivative", "diffalg_reduction", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "infinite_derivative", "diffalg_reduction", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials"];
 
 # Extra functions for debugging
 def simplify_coefficients(base, coeffs, derivatives, _debug=True):
     return __simplify_coefficients(base,coeffs,derivatives,_debug);
 
 def simplify_derivatives(derivatives, _debug=True):
-    return __simplify_derivatives(derivatives, _debug)
+    return __simplify_derivatives(derivatives, _debug);
     
 def find_relation(g,df, _debug=True):
     return __find_relation(g,df,_debug);
