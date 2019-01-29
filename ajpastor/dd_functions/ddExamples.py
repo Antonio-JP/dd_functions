@@ -1149,8 +1149,8 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
         get_op = lambda p : destiny_ring.element(p).equation;
-        op_num = prod(get_op([el,x]) for el in numerator,x);
-        op_den = prod(get_op([el-_sage_const_1 ,x]) for el in denominator, get_op([_sage_const_0 ,x]));
+        op_num = prod((get_op([el,x]) for el in numerator),x);
+        op_den = prod((get_op([el-_sage_const_1 ,x]) for el in denominator), get_op([_sage_const_0 ,x]));
         op = op_num - op_den;
         
         f = destiny_ring.element(op);

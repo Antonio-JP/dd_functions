@@ -15,6 +15,8 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as is
 from ajpastor.lazy.conversion import ConversionSystem;
 from ajpastor.dd_functions.ddFunction import *;
 
+from ajpastor.misc.matrix import differential_movement;
+
 ####################################################################################################
 ####################################################################################################
 ### ELEMENT CLASS
@@ -352,7 +354,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
                 v = vector(self, v);
                 
                 ## Going to a root with the vector
-                v,dest = self.__pullup_vector(v, current);
+                v,const,dest = self.__pullup_vector(v, self.__poly_ring().zero(), current);
                 
                 ## Returning the appropriate polynomial using the final vector
                 return self.__vector_to_poly(v, dest);
@@ -365,11 +367,16 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
                 self.__add_function(element, gen=True);
                 self.__r_graph.add_edge((element, root, relation));
                 
-                return self.__map_to_vars[element];        
+                # Removing root as a generator
+                index = self.__gens.index(self.__gen[self.__map_to_vars[root]]);
+                for i in range(self.__trans[root][1].nrows()):
+                    self.__gens.pop(index);
+                
+                return self.__gen[self.__map_to_vars[element]];
             
         ## Otherwise, we add the element to the variables and return it
         self.__add_function(element, gen=True);
-        return self.__map_to_vars[element];
+        return self.__gen[self.__map_to_vars[element]];
         
     ################################################################################################
     ### Other Methods for LazyRing
@@ -393,22 +400,11 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__gens = [];
         self.__map_of_derivatives = {};
     
+    def derivative(self, el, times=1):
+        raise NotImplementedError("method derivative not implemented");
+    
     def get_derivative(self, el):
-        if(el in self.__map_of_derivatives):
-            return self.__map_of_derivatives[el];
-            
-        if(el in self.__constants):
-            return _sage_const_0 ;
-        else:
-            try:
-                el = self.poly_ring()(el);
-                if(el in self.poly_ring().gens()):
-                    new_poly = self.to_poly(self.map_of_vars()[str(el)].derivative());
-                    self.__map_of_derivatives[el] = new_poly;
-                    return new_poly;
-            except:
-                pass;
-        raise ValueError("Method 'get_derivative' can only be summoned with variables.\nGot: %s -- %s" %(el, el.parent()));
+        raise NotImplementedError("method get_derivative not implemented");
         
     ################################################################################################
     ### Other Integral Domain methods 
@@ -521,7 +517,35 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         
     ################################################################################################
     ### Private methods
-    ################################################################################################   
+    ################################################################################################
+    def __pullup_vector(self, vector, constant, current):
+        if(self.__r_graph.in_degree(current) == 0):
+            return (vector, constant, current);
+            
+        ## Getting all data for this case
+        cR = self.__poly_field;
+        edge = self.__r_graph.incoming_edges(current)[0];
+        C = self.__trans[edge[0]][1];
+        trans_const = self.__trans[edge[0]][0];
+        relation = edge[2];
+        
+        ## Computing the derivatives of current in his father vector space
+        ivectors = [vector(cR, [0 for i in range(relation[0])] + [1] + [0 for i in range(relation[0]+1,self.__trans[current][1].nrows())])];
+        extra_cons = [relation[1][1]];
+        
+        for i in range(len(vector)):
+            extra_cons += [ivectors[-1][-1]*trans_const];
+            ivectors += [differential_movement(C, ivectors[-1], self.derivative)];
+            
+        res_vector = sum([vector(cR,[vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(vector))]);
+        res_constant = sum([vector[i]*extra_cons[i] for i in range(len(vector))], constant);
+        
+        return self.__pollup_vector(res_vector, res_constant, edge[0]);
+        
+    def __vector_to_poly(self, vector, current):
+        gen_index = self.__map_to_vars[current];
+        return sum(vector[i]*self.__gen[gen_index+i] for i in range(len(vector)) if vector[i] != 0);
+            
     def __add_function(self, f, gen=False):
         ## We look for relations with the derivatives of itself
         derivatives = [f.derivative(times=i) for i in range(f.getOrder())];
@@ -559,7 +583,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             for i in range(order):
                 self.__gens += [self.__gen[self.__used]];
                 self.__map_of_vars[self.__gens[-1]] = current;
-                self.__map_to_vars[current] = self.__gens[-1];
+                self.__map_to_vars[current] = self.__used;
                 self.__used += 1;
                 current = current.derivative();
         
