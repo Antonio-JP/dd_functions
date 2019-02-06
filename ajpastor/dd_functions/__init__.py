@@ -14,6 +14,10 @@ try:
     from .toDiffAlgebraic import *;
 except Exception:
     print "Error loading module dd_functions.toDiffAlgebraic";
+try:
+    from .lazyDDRing import *;
+except Exception:
+    print "Error loading module dd_functions.lazyDDRing";
 
 from pkgutil import extend_path;
 __path__ = extend_path(__path__, __name__);

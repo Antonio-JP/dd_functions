@@ -5,6 +5,8 @@ from sage.all_cmdline import *   # import sage library
 _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial;
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
+from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_dense as isDenseIPolynomial;                                                                 
+from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_sparse as isSparseIPolynomial;
 
 class ConversionSystem(object):
     ## Main bulder
@@ -34,7 +36,10 @@ class ConversionSystem(object):
         '''
             Returns a Boolean value that show if there are variables in this conversion system.
         '''
-        return (isUniPolynomial(self.poly_ring()) or isMPolynomial(self.poly_ring()));
+        return (isUniPolynomial(self.poly_ring()) or 
+        isMPolynomial(self.poly_ring()) or 
+        isinstance(self.poly_ring(),isDenseIPolynomial) or 
+        isinstance(self.poly_ring(),isSparseIPolynomial));
         
     def poly_ring(self):
         '''
@@ -132,7 +137,12 @@ class ConversionSystem(object):
         if(poly in self.poly_ring()):
             if(not self.is_polynomial()):
                 return self.base()(poly);
-            return self._to_real_element(self.poly_ring()(poly));
+            try:
+                n = self._to_real_element(self.poly_ring()(poly.numerator()));
+                d = self._to_real_element(self.poly_ring()(poly.denominator()));
+                return n/d;
+            except AttributeError:
+                return self._to_real_element(self.poly_ring()(poly));
         elif(poly in self.poly_field()):
             n = self.to_real(poly.numerator());
             d = self.to_real(poly.denominator());
@@ -170,10 +180,16 @@ class ConversionSystem(object):
         from sage.structure.element import is_Vector;
         
         if(element in self.poly_ring()):
-            try:
-                return self.poly_ring()(element).reduce(self._relations());
+            element = self.poly_ring()(element);
+            try: # Weird case: fraction field fall in polynomial field
+                n = self.poly_ring()(element.numerator()).reduce(self._relations());
+                d = self.poly_ring()(element.denominator()).reduce(self._relations());
+                return n/d;
             except AttributeError:
-                return self.poly_ring()(element);
+                try:
+                    return self.poly_ring()(element).reduce(self._relations());                
+                except AttributeError:
+                    return self.poly_ring()(element);
         elif(element in self.poly_field()):
             element = self.poly_field()(element);
             n = self.simplify(element.numerator());
@@ -250,7 +266,7 @@ class ConversionSystem(object):
             
             This method can be overwritten if needed.
         '''
-        variables = polynomial.parent().gens();
+        variables = polynomial.variables();
         multi = (len(variables) > _sage_const_1 );
         res = self.base().zero();
         for (k,v) in polynomial.dict().items():
