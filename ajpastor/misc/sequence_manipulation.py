@@ -1,3 +1,6 @@
+from sage.functions.other import factorial;
+from sage.combinat.combinat import bell_polynomial;
+from sage.arith.misc import falling_factorial;
 
 ################################################################################
 ################################################################################
@@ -11,6 +14,12 @@ def hadamard_product(f,g):
 
 def cauchy_product(f,g):
     return lambda n : sum(f(m)*g(n-m) for m in range(n+1));
+
+def standard_derivation(f):
+    return lambda n : (n+1)*f(n+1);
+
+def shift(f):
+    return lambda n : f(n+1);
         
 def composition(f,g):   
     if(g(0) != 0):                     
@@ -30,6 +39,8 @@ def egf_ogf(f):
     '''
         Method that receives a sequence in the form of a black-box function
         and return a sequence h(n) such that egf(f) = ogf(h).
+        
+        Then h(n) = f(n)/factorial(n)
     '''
     return lambda n: f(n)/factorial(n);
 
@@ -37,6 +48,8 @@ def ogf_egf(f):
     '''
         Method that receives a sequence in the form of a black-box function
         and return a sequence h(n) such that egf(h) = ogf(f).
+        
+        Then h(n) = f(n)*factorial(n)
     '''
     return lambda n: f(n)*factorial(n);
 
@@ -45,8 +58,8 @@ def inv_lagrangian(f):
         raise ValueError("Power serie not invertible");
     if(f(1) == 0):
         raise NotImplementedError("Case with order higher than 1 not implemented");
-    f = egf_ogf(f);
-    def _inverse(n):
+    f = ogf_egf(f);
+    def _inverse_egf(n):
         if(n == 0):
             return 0;
         elif(n == 1):
@@ -57,10 +70,14 @@ def inv_lagrangian(f):
                 poly = bell_polynomial(n-1,k);
                 #print poly;
                 variables = poly.variables();
-                #print variables;
-                extra = (-1)^k*falling_factorial(n+k-1,k);
-                result += extra*poly(**{str(variables[i]):f(i+1)/((i+1)*f(1)) for i in range(len(v
-ariables))});
-            return (1/((f(1)^n)*factorial(n))) * result;
-    return ogf_egf(_inverse);
+                extra = ((-1)**k)*falling_factorial(n+k-1, k);
+                if(k == n-1):
+                    evaluation = poly(x=f(2)/2/f(1));
+                else:
+                    evaluation = poly(**{"x%d" %(i) : f(i+2)/(i+2)/f(1) for i in range(n-k)});
+                
+                result += extra*evaluation;
+                
+            return (1/(f(1)**n)) * result;
+    return egf_ogf(_inverse_egf);
 
