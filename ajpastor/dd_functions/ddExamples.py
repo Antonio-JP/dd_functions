@@ -1908,6 +1908,40 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ## Returning the DDFunction
     ##################################################
     return destiny_ring.element(equation, init);
+    
+def polynomial_inverse(polynomial):
+    '''
+        Method that computes the functional inverse for a polynomial. As the functional
+        inverse of a polynomial is an algebraic series, then it is D-finite.
+        
+        The polynomial provided must be univariate.
+    '''
+    ## Local imports
+    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
+    from ajpastor.misc.sequence_manipulation import inv_lagrangian;
+    
+    ###############################################
+    ## Dealing with the polynomial input
+    ###############################################
+    parent = polynomial.parent();
+    if(not (isPolynomial(parent) or isMPolynomial(parent))):
+        raise TypeError("The minimal polynomial is NOT a polynomial");
+        
+    if(polynomial.constant_coefficient() != 0):
+        raise ValueError("Non-invertible polynomial given: %s" %polynomial);
+    
+    ## Building the extra variable needed for algebraicity    
+    x = parent.gens()[0];   
+    y = str(x)+"_y";
+    R = PolynomialRing(parent.fraction_field(), [y]);
+    y = R.gens()[0];
+    
+    ## Building the initial conditions
+    coeffs = polynomial.coefficients(False);
+    inv = inv_lagrangian(lambda n : factorial(n)*coeffs[n]);
+    init = [inv(i) for i in range(len(coeffs))];
+    
+    return DAlgebraic(polynomial(**{str(x):y})-x, init);
   
 ##################################################################################
 ##################################################################################
@@ -1926,9 +1960,15 @@ def __decide_parent(input, parent = None, depth = 1):
         as the coefficient of a differential equation.
         
         If 'parent' is None, then several considerations are made:
-            - If 'input' is a Symbolic Expression, we take the variables of it, consider everyone but 'x' as parameters and create the corresponding ParametrizedDDRing of the depth given. The argument 'input' MUST be a polynomial in 'x' and a rational function in any other variable.
-            - If 'input' is a polynomial, then the first generator will be consider as the variable of a DDRing and the others as parameters. Then we create the corresponding ParametrizedDDRing with the depth given.
-            - Otherwise, we create the DDRing of the parent of 'input' of the given depth and try to work with that ring.
+            - If 'input' is a Symbolic Expression, we take the variables of it, consider 
+            everyone but 'x' as parameters and create the corresponding ParametrizedDDRing 
+            of the depth given. The argument 'input' MUST be a polynomial in 'x' and a 
+            rational function in any other variable.
+            - If 'input' is a polynomial, then the first generator will be consider as the 
+            variable of a DDRing and the others as parameters. Then we create the corresponding
+            ParametrizedDDRing with the depth given.
+            - Otherwise, we create the DDRing of the parent of 'input' of the given depth 
+            and try to work with that ring.
     '''
     dR = parent;
     if(dR is None):
@@ -1997,5 +2037,3 @@ def __check_list(list_of_elements, invalid_vars=[]):
         list_of_elements = [parent(el) for el in list_of_elements];
     
     return (parent, list_of_elements);
-    
-
