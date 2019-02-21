@@ -8,7 +8,7 @@ from ajpastor.dd_functions.ddFunction import *;
 
 from ajpastor.misc.dinamic_string import *;
 
-_sage_const_3 = Integer(3); _sage_const_2 = Integer(2); _sage_const_1 = Integer(1); _sage_const_0 = Integer(0); _sage_const_6 = Integer(6);
+from ajpastor.misc.exceptions import *;
 
 def ddExamples(functions = False, names=False):
     '''
@@ -115,8 +115,8 @@ def Sin(input, ddR = None):
         return Sin(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute sin(f) with f(0) != 0");
     
     df = dR.base_derivation(f);
@@ -126,7 +126,7 @@ def Sin(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([df**_sage_const_3 ,-df2,df],[_sage_const_0 ,evaluate(df),evaluate(df2)], name=DinamicString("sin(_1)", newName)); 
+    return dR.element([df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sin(_1)", newName)); 
 
 @cached_function    
 def Cos(input, ddR = None):
@@ -148,8 +148,8 @@ def Cos(input, ddR = None):
         return Cos(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute cos(f) with f(0) != 0");
     
     df = dR.base_derivation(f);
@@ -159,7 +159,7 @@ def Cos(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([df**_sage_const_3 ,-df2,df],[_sage_const_1 ,_sage_const_0 ,-evaluate(df)**_sage_const_2 ], name=DinamicString("cos(_1)",newName)); 
+    return dR.element([df**3 ,-df2,df],[1,0,-evaluate(df)**2 ], name=DinamicString("cos(_1)",newName)); 
 
 @cached_function
 def Tan(input, ddR = None):
@@ -179,29 +179,29 @@ def Tan(input, ddR = None):
     '''
     if(is_DDFunction(input)):
         return Tan(x)(input);
-    g, dR = __decide_parent(input, ddR,_sage_const_2 );
+    g, dR = __decide_parent(input, ddR,2 );
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute tan(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = Cos(input)**_sage_const_2 ; b = dR.base().zero(); c = dR.base()(-_sage_const_2 );
+    a = Cos(input)**2 ; b = dR.base().zero(); c = dR.base()(-2 );
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([dg**_sage_const_3 *c,dg**_sage_const_2 *b-ddg*a,dg*a]).equation;
+    newOperator = dR.element([dg**3 *c,dg**2 *b-ddg*a,dg*a]).equation;
         
     ### Now, we compute the initial values required
     if(input == x):
         newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_tan = Tan(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_tan[_sage_const_0 ]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_tan[0]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     
@@ -232,8 +232,8 @@ def Sinh(input, ddR = None):
         return Sinh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute sin(f) with f(0) != 0");
     
     df = dR.base_derivation(f);
@@ -243,7 +243,7 @@ def Sinh(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([-df**_sage_const_3 ,-df2,df],[_sage_const_0 ,evaluate(df),evaluate(df2)], name=DinamicString("sinh(_1)",newName)); 
+    return dR.element([-df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sinh(_1)",newName)); 
 
 @cached_function    
 def Cosh(input, ddR = None):
@@ -265,8 +265,8 @@ def Cosh(input, ddR = None):
         return Cosh(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute cos(f) with f(0) != 0");
     
     df = dR.base_derivation(f);
@@ -276,7 +276,7 @@ def Cosh(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([-df**_sage_const_3 ,-df2,df],[_sage_const_1 ,_sage_const_0 ,evaluate(df)**_sage_const_2 ], name=DinamicString("cosh(_1)", newName)); 
+    return dR.element([-df**3 ,-df2,df],[1,0,evaluate(df)**2 ], name=DinamicString("cosh(_1)", newName)); 
 
 @cached_function
 def Tanh(input, ddR = None):
@@ -296,15 +296,15 @@ def Tanh(input, ddR = None):
     '''
     if(is_DDFunction(input)):
         return Tanh(x)(input);
-    g, dR = __decide_parent(input, ddR,_sage_const_2 );
+    g, dR = __decide_parent(input, ddR,2 );
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute tan(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = Cosh(input)**_sage_const_2 ; 
+    a = Cosh(input)**2 ; 
     
     ### First we compute the new linear differential operator
     newOperator = dR.element([2*dg**3, -ddg*a, dg*a]).equation;
@@ -313,12 +313,12 @@ def Tanh(input, ddR = None):
     if(input == x):
         newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_tanh = Tanh(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_tanh[_sage_const_0 ]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_tanh[0]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     
@@ -349,26 +349,26 @@ def Arcsin(input, ddR = None):
         return Arcsin(x)(input);
     g, dR = __decide_parent(input, ddR);
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arcsin(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (_sage_const_1-g**2)*dg;
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg;
     
     ### First we compute the new linear differential operator
     newOperator = dR.element([a,b,c]).equation;
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [_sage_const_0,_sage_const_1];
+        newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arcsin = Arcsin(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arcsin[_sage_const_0 ]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arcsin[0]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     newName = repr(input);
@@ -400,26 +400,26 @@ def Arccos(input, ddR = None):
     g, dR = __decide_parent(input, ddR);
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arccos(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (_sage_const_1-g**2)*dg;
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg;
     
     ### First we compute the new linear differential operator
     newOperator = dR.element([a,b,c]).equation;
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [pi/2,-_sage_const_1];
+        newInit = [pi/Integer(2),-1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arccos = Arccos(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arccos[_sage_const_0 ]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arccos[0]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     newName = repr(input);
@@ -450,8 +450,8 @@ def Arctan(input, ddR = None):
         return Arctan(x)(input);
     g, dR = __decide_parent(input, ddR);
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arctan(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
@@ -462,14 +462,14 @@ def Arctan(input, ddR = None):
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [_sage_const_0,_sage_const_1];
+        newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arctan = Arctan(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arctan[_sage_const_0 ]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arctan[0]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     
@@ -500,8 +500,8 @@ def Arcsinh(input, ddR = None):
         return Arcsinh(x)(input);
     g, dR = __decide_parent(input, ddR);
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arcsinh(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2+1
@@ -511,14 +511,14 @@ def Arcsinh(input, ddR = None):
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [_sage_const_0,_sage_const_1];
+        newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arcsinh = Arcsinh(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arcsinh[_sage_const_0 ]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arcsinh[0]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     newName = repr(input);
@@ -551,8 +551,8 @@ def Arccosh(input, ddR = None):
     dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.base_field.gens()[0];
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arccosh(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2-1
@@ -564,12 +564,12 @@ def Arccosh(input, ddR = None):
     if(input == x):
         newInit = [I*pi/2,-I];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arccosh = Arccosh(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arccosh[_sage_const_0 ]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arccosh[0]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     newName = repr(input);
@@ -600,8 +600,8 @@ def Arctanh(input, ddR = None):
         return Arctanh(x)(input);
     g, dR = __decide_parent(input, ddR);
         
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(g) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arctanh(f) with f(0) != 0");
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = 1-g**2;
@@ -611,14 +611,14 @@ def Arctanh(input, ddR = None):
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [_sage_const_0,_sage_const_1];
+        newInit = [0,1];
     else:
-        required = newOperator.get_jp_fo()+_sage_const_1 ;
+        required = newOperator.get_jp_fo()+1;
             
         init_arctanh = Arctanh(x).getInitialValueList(required);
         init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
             
-        newInit = [init_arctanh[_sage_const_0 ]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[_sage_const_1 :i-j+_sage_const_2 ]) for j in range(_sage_const_1 ,i+_sage_const_1 )]) for i in range(_sage_const_1 ,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arctanh[0]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
     
     result = dR.element(newOperator,newInit);
     
@@ -653,11 +653,11 @@ def Log(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Log(x+_sage_const_1 )(input-1);
+        return Log(x+1)(input-1);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_1 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 1):
         raise ValueError("Impossible to compute ln(f) with f(0) != 1");
     
     df = dR.base_derivation(f);
@@ -667,7 +667,7 @@ def Log(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([_sage_const_0 ,df**_sage_const_2 -df2*f,df*f],[_sage_const_0 ,evaluate(df), evaluate(df2)-evaluate(df)**_sage_const_2 ], name=DinamicString("log(_1)",newName));
+    return dR.element([0,df**2 -df2*f,df*f],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1)",newName));
     
 @cached_function 
 def Log1(input, ddR = None):
@@ -689,20 +689,20 @@ def Log1(input, ddR = None):
         return Log1(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute cos(f) with f(0) != 0");
     
     df = dR.base_derivation(f);
     df2 = dR.base_derivation(df);
     
-    f1 = f+_sage_const_1 ;
+    f1 = f+1;
     
     newName = repr(f);
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
     
-    return dR.element([_sage_const_0 ,df**_sage_const_2 -df2*f1,df*f1],[_sage_const_0 ,evaluate(df), evaluate(df2)-evaluate(df)**_sage_const_2 ], name=DinamicString("log(_1+1)", newName)); 
+    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1+1)", newName)); 
     
 @cached_function 
 def Exp(input, ddR = None):
@@ -724,15 +724,15 @@ def Exp(input, ddR = None):
         return Exp(x)(input);
     f,dR = __decide_parent(input, ddR);
     
-    evaluate = lambda p : dR.getSequenceElement(p,_sage_const_0 );
-    if(evaluate(f) != _sage_const_0 ):
+    evaluate = lambda p : dR.getSequenceElement(p,0);
+    if(evaluate(f) != 0):
         raise ValueError("Impossible to compute exp(f) with f(0) != 0");
     
     newName = repr(f);
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name;
         
-    return dR.element([-dR.base_derivation(f),_sage_const_1 ],[_sage_const_1 ], name=DinamicString("exp(_1)", newName));
+    return dR.element([-dR.base_derivation(f),1],[1], name=DinamicString("exp(_1)", newName));
 
 ##################################################################################
 ##################################################################################
@@ -744,7 +744,7 @@ def Exp(input, ddR = None):
 ##### BESSEL TYPE FUNCTIONS
 ### Bessel Functions
 @cached_function 
-def BesselD(input = 'P', kind = _sage_const_1 ):
+def BesselD(input = 'P', kind = 1):
     '''
         DD-finite implementation of the Bessel functions (J_n(x), Y_n(x)).
         
@@ -776,12 +776,12 @@ def BesselD(input = 'P', kind = _sage_const_1 ):
         par = parent.base()(par);
     x = parent.variables()[0];
         
-    if(kind == _sage_const_1 ):
+    if(kind == 1):
         func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_J(_1,_2)", [repr(par),"x"]));
         if(par in ZZ):
             alpha = ZZ(par);
-            func = func.change_init_values([_sage_const_0  for i in range(alpha)] + [_sage_const_1 /_sage_const_2 **alpha, _sage_const_0 , -((alpha+_sage_const_2 )/(_sage_const_2 **(alpha+_sage_const_2 )))], name = func._DDFunction__name);
-    elif(kind == _sage_const_2 ):
+            func = func.change_init_values([0 for i in range(alpha)] + [Integer(1)/Integer(2) **alpha, 0, -((alpha+Integer(2))/(Integer(2) **(alpha+2 )))], name = func._DDFunction__name);
+    elif(kind == 2 ):
         func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_Y(_1,_2)", [repr(par),"x"]));
     else:
         raise ValueError("Impossible to manage Bessel functions of %sth kind" %(kind));
@@ -834,8 +834,8 @@ def StruveD(mu='P',kind=1):
         parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
     f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", [repr(par),"x"]));
     if(par in ZZ and par >= 0):
-        num = factorial(par+_sage_const_1)*pi*(_sage_const_1/_sage_const_2)**(par+_sage_const_1);
-        den = gamma(_sage_const_3/_sage_const_2)*gamma(par+_sage_const_3/_sage_const_2);
+        num = factorial(par+1)*pi*(Integer(1)/Integer(2))**(par+1);
+        den = gamma(Integer(3)/Integer(2))*gamma(par+Integer(3)/Integer(2));
         val = QQ(num/den);
         f = f.change_init_values([0 for i in range(par+1)] + [val], name=f._DDFunction__name);
     
@@ -845,37 +845,27 @@ def StruveD(mu='P',kind=1):
 ###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials 
 def __init_value_associated_legendre(n,m,kind):
-    S1_2 = _sage_const_1/_sage_const_2;
-    S2 = _sage_const_2;
-    S1 = _sage_const_1;
+    S1_2 = Integer(1)/Integer(2);
+    S2 = Integer(2);
+    S1 = Integer(1);
     
     if(kind == 1):
         res = (2**m*sqrt(pi))/gamma((n-m)/S2 + S1)/gamma(S1_2-(n+m)/S2);
-        #num = 2**m*sqrt(pi);
-        #den = gamma((n-m)/2 + 1)*gamma(S1_2-(n+m)/2);
     else:
         res = -(S2**(m-S1)*sqrt(pi)*sin((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1_2)/gamma((n-m)/S2 + S1);
-        #num = -2**(m-1)*sqrt(pi)*sin((S1_2)*(n+m)*pi)*gamma((n+m)/2 + S1_2);
-        #den = gamma((n-m)/2 + 1);
-    #
-    #return num/den; 
+
     return res;
 
 def __first_derivative_associated_legendre(n,m,kind):
-    S1_2 = _sage_const_1/_sage_const_2;
-    S2 = _sage_const_2;
-    S1 = _sage_const_1;
+    S1_2 = Integer(1)/Integer(2);
+    S2 = Integer(2);
+    S1 = Integer(1);
     
     if(kind == 1):
         res = -(S2**(m+S1)*sqrt(pi))/gamma((n-m)/S2 + S1_2)/gamma(-(n+m)/S2);
-        #num = -2**(m+1)*sqrt(pi);
-        #den = gamma((n-m)/2 + S1_2)*gamma(-(n+m)/2);
     else:
         res = (S2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1)/gamma((n-m)/S2 + S1_2);
-        #num = 2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi)*gamma((n+m)/2 + 1)
-        #den = gamma((n-m)/2 + S1_2);
-    #        
-    #return num/den;
+
     return res;
 
 @cached_function 
@@ -1057,7 +1047,7 @@ def ChebyshevD(input='n', kind = 1, poly=True):
 ### Hypergeometric Functions
 __CACHED_HYPERGEOMETRIC = {};
 @cached_function
-def HypergeometricFunction(a='a',b='b',c='c', init = _sage_const_1 ):
+def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     '''
         D-finite implementation of the Gauss Hypergeometric function
         
@@ -1086,7 +1076,7 @@ def HypergeometricFunction(a='a',b='b',c='c', init = _sage_const_1 ):
     '''
     return GenericHypergeometricFunction([a,b],[c],init);
 
-def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
+def GenericHypergeometricFunction(num=[],den=[],init=1):
     '''
         D-finite implementation of the Generalized Hypergeometric Functions qFp(a_1,...,a_q;b_1,...,b_m;x)
         
@@ -1130,13 +1120,13 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
         destiny_ring = DFinite;
         
     ## Cleaning repeated values 
-    i = _sage_const_0 ;
-    while(i < len(numerator) and len(denominator) > _sage_const_0 ):
+    i = 0;
+    while(i < len(numerator) and len(denominator) > 0):
         if(numerator[i] in denominator):
             denominator.remove(numerator[i]);
             numerator.remove(numerator[i]);
         else:
-            i += _sage_const_1 ;
+            i += 1;
     
     ## Sort list for cannonical input
     numerator.sort(); denominator.sort();
@@ -1148,17 +1138,21 @@ def GenericHypergeometricFunction(num=[],den=[],init=_sage_const_1 ):
     global __CACHED_HYPERGEOMETRIC;
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
-        get_op = lambda p : destiny_ring.element(p).equation;
+        # Lambda method to get the operator in the appropriate operator ring
+        get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation); 
+        
+        ## Getting the operator for the numerator and for the denominator
         op_num = prod((get_op([el,x]) for el in numerator),x);
-        op_den = prod((get_op([el-_sage_const_1 ,x]) for el in denominator), get_op([_sage_const_0 ,x]));
+        op_den = prod((get_op([el-1,x]) for el in denominator), get_op([0,x]));
+        
         op = op_num - op_den;
         
         f = destiny_ring.element(op);
         
         initVals = [initial];
         
-        if(initial == _sage_const_1 ):
-            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([_sage_const_1 ],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]));
+        if(initial == 1):
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([1],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]));
         else:
             __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DinamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]));
         
@@ -1197,7 +1191,7 @@ def MathieuD(a='a',q='q',init=()):
         destiny_ring = DDFinite;
     x = destiny_ring.variables()[0];
     
-    return destiny_ring.element([ra-_sage_const_2 *rq*Cos(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:_sage_const_2 ]),repr(x)]));
+    return destiny_ring.element([ra-2 *rq*Cos(2 *x), 0, 1], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]));
 
 @cached_function
 def MathieuSin(a='a',q='q'):
@@ -1212,7 +1206,7 @@ def MathieuSin(a='a',q='q'):
         This is the sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuD(a,q,(0,1)).
     '''
-    return MathieuD(a,q,(_sage_const_0 ,_sage_const_1 ));
+    return MathieuD(a,q,(0,1));
     
 @cached_function
 def MathieuCos(a='a',q='q'):
@@ -1227,7 +1221,7 @@ def MathieuCos(a='a',q='q'):
         This is the cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuD(a,q,(1,0)).
     '''
-    return MathieuD(a,q,(_sage_const_1 ,_sage_const_0 ));
+    return MathieuD(a,q,(1,0));
 
 ### Modified Mathieu's Functions
 @cached_function
@@ -1259,7 +1253,7 @@ def MathieuH(a='a',q='q',init=()):
         destiny_ring = DDFinite;
     x = destiny_ring.variables()[0];
     
-    return destiny_ring.element([-ra-_sage_const_2 *rq*Cosh(_sage_const_2 *x), _sage_const_0 , _sage_const_1 ], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:_sage_const_2 ]),repr(x)]));
+    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]));
 
 @cached_function
 def MathieuSinh(a='a',q='q'):
@@ -1273,7 +1267,7 @@ def MathieuSinh(a='a',q='q'):
         This is the hyperbolic sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuH(a,q,(0,1)).
     '''
-    return MathieuH(a,q,(_sage_const_0 ,_sage_const_1 ));
+    return MathieuH(a,q,(0,1));
     
 @cached_function
 def MathieuCosh(a='a',q='q'):
@@ -1287,7 +1281,7 @@ def MathieuCosh(a='a',q='q'):
         This is the hyperbolic cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuH(a,q,(1,0)).
     '''
-    return MathieuH(a,q,(_sage_const_1 ,_sage_const_0 ));
+    return MathieuH(a,q,(1,0));
 
 ### Hill's equation
 @cached_function
@@ -1339,7 +1333,7 @@ def HillD(a='a',q='q',init=()):
             
             destiny_ring = ParametrizedDDRing(DFinite, new_vars);
             
-    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:_sage_const_2 ])),"x"]));
+    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:2 ])),"x"]));
 
 ###### AIRY TYPE FUNCTIONS
 ### Airy's functions
@@ -1812,26 +1806,26 @@ def DAlgebraic(polynomial, init=[], dR=None):
     F = None;  
     poly_ring = parent;
     if(isMPolynomial(parent)):
-        base_ring = PolynomialRing(parent.base(),parent.gens()[:-_sage_const_1 ]);
-        poly_ring = PolynomialRing(base_ring.fraction_field(), parent.gens()[-_sage_const_1 ]);
+        base_ring = PolynomialRing(parent.base(),parent.gens()[:-1]);
+        poly_ring = PolynomialRing(base_ring.fraction_field(), parent.gens()[-1]);
     else:
-        if(isinstance(parent.base().construction()[_sage_const_0 ], FractionField)):
+        if(isinstance(parent.base().construction()[0], FractionField)):
             base_ring = parent.base().base();
         else:
             base_ring = parent.base();
             if(not parent.base().is_field()):
-                poly_ring = PolynomialRing(parent.base().fraction_field(), parent.gens()[-_sage_const_1 ]);
+                poly_ring = PolynomialRing(parent.base().fraction_field(), parent.gens()[-1]);
                 
     F = poly_ring.base();
-    y = poly_ring.gens()[-_sage_const_1 ];
+    y = poly_ring.gens()[-1];
     ## At this point we have the following
     ##   - F is a field
     ##   - y is a variable
     ##   - poly_ring == F[y]
     polynomial = poly_ring(polynomial); ## Now the structure is univariate
-    if(polynomial.degree() == _sage_const_1 ):
-        return -polynomial[_sage_const_0 ]/polynomial[_sage_const_1 ];
-    elif(polynomial.degree() <= _sage_const_0 ):
+    if(polynomial.degree() == 1):
+        return -polynomial[0]/polynomial[1];
+    elif(polynomial.degree() <= 0):
         raise TypeError("Constant polynomial given for algebraic function: IMPOSSIBLE!!");
         
     #################################################
@@ -1846,7 +1840,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
         if((coercion is None) or (coercion is False)):
             raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring));
             
-    dest_var = repr(destiny_ring.variables()[_sage_const_0 ]);
+    dest_var = repr(destiny_ring.variables()[0]);
     
     ##################################################
     ## Computing the differential equation
@@ -1856,30 +1850,30 @@ def DAlgebraic(polynomial, init=[], dR=None):
     
     ## Getting its gcd with the polynomial
     g,r,s = polynomial.xgcd(dy);
-    if((g != _sage_const_1 ) or (not(g in poly_ring.base()))):
+    if((g != 1) or (not(g in poly_ring.base()))):
         raise ValueError("No irreducible polynomial given");
         
     ## Computing the coefficient-wise derivation of polynomial
-    mon = poly_ring(_sage_const_1 );
-    ky = poly_ring(_sage_const_0 );
-    for i in range(polynomial.degree()+_sage_const_1 ):
+    mon = poly_ring(1);
+    ky = poly_ring(0);
+    for i in range(polynomial.degree()+1):
         ky += (polynomial[i].derivative())*mon;
         mon *= y;
         
     ## Getting the polynomial expression of y', y'',..., y^{(deg(polynomial))}
-    rows = [[_sage_const_0 ]*polynomial.degree()];
-    mon = poly_ring(_sage_const_1 );
-    for i in range(polynomial.degree()-_sage_const_1 ):
-        rows += [((-(i+_sage_const_1 )*mon*s*ky)%polynomial).coefficients(False)];
+    rows = [[0]*polynomial.degree()];
+    mon = poly_ring(1);
+    for i in range(polynomial.degree()-1):
+        rows += [((-(i+1)*mon*s*ky)%polynomial).coefficients(False)];
         mon *= y;
         
     ## Building the derivation matrix of <1,y,y^2,...>
     M = Matrix(F, rows).transpose();
     ## Creating the vector representing y
-    y_vector = vector(F, [_sage_const_0 ,_sage_const_1 ] + [_sage_const_0 ]*(polynomial.degree()-_sage_const_2 ));
+    y_vector = vector(F, [0,1] + [0]*(polynomial.degree()-2 ));
     ## Building ans solving the system
-    to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+_sage_const_1 );
-    v = to_solve.right_kernel_matrix()[_sage_const_0 ];
+    to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+1);
+    v = to_solve.right_kernel_matrix()[0];
     
     ## Cleaning denominators
     cleaning = lcm(el.denominator() for el in v);
@@ -1893,16 +1887,16 @@ def DAlgebraic(polynomial, init=[], dR=None):
         ## We try to compute the new initial values
         init = [init];
         go_on = True;
-        for i in range(_sage_const_1 ,min(equation.get_jp_fo()+_sage_const_2 , to_solve.ncols())):
+        for i in range(1,min(equation.get_jp_fo()+2 , to_solve.ncols())):
             try:
-                init += [sum(to_solve[j,i](**{dest_var:_sage_const_0 })*init[_sage_const_0 ]**j for j in range(polynomial.degree()))];
+                init += [sum(to_solve[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree()))];
             except ZeroDivisionError:
                 go_on = False;
                 break;
         
-        if(go_on and (equation.get_jp_fo()+_sage_const_2  > to_solve.ncols())):
-            extra = move(M, vector(F,[el[_sage_const_0 ] for el in to_solve[:,-_sage_const_1 ]]), equation.get_jp_fo()+_sage_const_2 -to_solve.ncols());
-            init += [sum(extra[j,i](**{dest_var:_sage_const_0 })*init[_sage_const_0 ]**j for j in range(polynomial.degree())) for i in range(extra.ncols())];
+        if(go_on and (equation.get_jp_fo()+2  > to_solve.ncols())):
+            extra = move(M, vector(F,[el[0] for el in to_solve[:,-1]]), equation.get_jp_fo()+2 -to_solve.ncols());
+            init += [sum(extra[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree())) for i in range(extra.ncols())];
     
     ##################################################
     ## Returning the DDFunction
