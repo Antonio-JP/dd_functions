@@ -1,9 +1,6 @@
 
 from sage.all_cmdline import *   # import sage library
 
-_sage_const_1en10 = RealNumber('1e-10');
-_sage_const_0 = Integer(0);
-
 # Python imports
 import warnings;
 
@@ -60,7 +57,7 @@ def _aux_derivation(p):
         R = p.parent();
         return derivative(p,R(x));
     except Exception:
-        return _sage_const_0 ;
+        return 0 ;
         
 #####################################################
 ### Class for DD-Rings
@@ -71,14 +68,14 @@ def is_DDRing(ring):
 class DDRing (Ring_w_Sequence, IntegralDomain):
     Element = None;
     
-    _Default_Base = PolynomialRing(QQ,x);
+    #_Default_Base = PolynomialRing(QQ,x);
     _Default_Depth = 1 ;
     _Default_Base_Field = None;
     _Default_Invertibility = None;
     _Default_Derivation = None;
     _Default_Operator = None;
     _Default_Parameters = [
-        ("base", _Default_Base),
+        ("base", None),
         ("depth", _Default_Depth),
         ("base_field", _Default_Base_Field),
         ("invertibility", _Default_Invertibility),
@@ -193,7 +190,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                 final_args += [[DDRing._Default_Parameters[i][0 ], args[i]]];
             current = len(args);
         
-        for i in range(current, len(DDRing._Default_Parameters)):
+        for i in range(max(1,current), len(DDRing._Default_Parameters)):
             final_args += [[DDRing._Default_Parameters[i][0 ], kwds.get(DDRing._Default_Parameters[i][0 ],DDRing._Default_Parameters[i][1 ])]];
             
         ## Managing the depth over DDRings
@@ -217,7 +214,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
        
         return DDRing._CACHED_DD_RINGS[cls][to_hash];
     
-    def __init__(self, base=_Default_Base, depth = _Default_Depth, base_field = _Default_Base_Field, invertibility = _Default_Invertibility, derivation = _Default_Derivation, default_operator = _Default_Operator):
+    def __init__(self, base, depth = _Default_Depth, base_field = _Default_Base_Field, invertibility = _Default_Invertibility, derivation = _Default_Derivation, default_operator = _Default_Operator):
         '''
             Class representing the Ring of Differentially Definable Functions with coefficients over a base ring. It can be built using different parameter configurations:
                 - ``base``: is the ring where the coefficients of the differential equation will be. It is set by default as `\mathbb{Q}[x]`.
@@ -676,6 +673,35 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             return element;
         
         raise NotImplementedError("Not implemented evaluation of an element of this ring (%s) with the parameters %s and %s" %(self,repr(rx),input));
+        
+    def interlace_sequence(self, *functions):
+        '''
+            Method that computes a function in 'self' which sequence is the interlacing of the sequences 
+            given as input in 'functions'. These functions must be contained in 'self' or an error will be
+            raised.
+            
+            INPUT:
+                - functions: list of function in 'self' which we want to interlace
+            
+            OUTPUT:
+                - DDFunction 'f' in 'self' such that for all n
+                    f.getSequenceElement(n) == functions[n%len(functions)].getSequenceElement(n//len(functions))
+                    
+            ERRORS:
+                - TypeError is raised if any of the functions can not be casted to 'self'
+        '''
+        if(len(functions) == 1 and type(functions[0]) == list):
+            functions = functions[0];
+        
+        ## Getting the main variable for the functions
+        x = self.variables()[-1];
+        n = len(functions);
+        
+        ## Computing the dilated functions
+        functions = [self(el)(x=x**n) for el in functions];
+        
+        ## Returning the resulting function
+        return sum(x**i*functions[i] for i in range(n));
         
     def get_recurrence(self, *args, **kwds):
         if(self.__get_recurrence is None):
@@ -1389,7 +1415,7 @@ class DDFunction (IntegralDomainElement):
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return directly 0
         if ((other.is_null) or (self.is_null)):
-            return _sage_const_0 ;
+            return 0 ;
         if(self.is_one):
             return other;
         elif(other.is_one):
@@ -1493,6 +1519,21 @@ class DDFunction (IntegralDomainElement):
             result.change_built("polynomial", (PolynomialRing(self.parent().base_field,[repr(X),'x1']).fraction_field()('x1/(%s^%d)' %(repr(X),n)), {repr(X):self.parent()(X),'x1':self}));
             return (n,result);
         
+    def min_coefficient(self):
+        '''
+            Method that computes the first non-zero coefficient. IN case 'self' is zero, this method returns 0.
+        '''
+        return self.zero_extraction[1](0);
+    
+    def contraction(self, level):
+        '''
+            Method that tries to compute the contraction of a sequence jumping through the elements 0 (mod level).
+            
+            This is equivalent to compose self(pow(x,1/level)) if 'self' only has non-zero element in the positions 0 (mod level).
+        '''
+        ## Computing the resulting differential equation
+        raise NotImplementedError("Method not yet implemented: contraction");
+        
     def divide(self, other):
         if(self.is_null):
             return self.parent().zero();
@@ -1537,6 +1578,67 @@ class DDFunction (IntegralDomainElement):
         oe = other.zero_extraction;
         
         return self.parent()(X**min(se[0 ],oe[0 ])*gcd(se[1 ].getInitialValue(0 ),oe[1 ].getInitialValue(0 )));
+    
+    #####################################
+    ### Sequence methods
+    #####################################
+    def split_sequence(self, parts=2):
+        '''
+            Method that returns a list of 'parts' elements such that the interlacing of their sequence
+            is equal to the sequence of 'self'.
+            
+            INPUT:
+                - parts: positive integer
+                
+            OUTPUT:
+                - A list 'result' of 'parts' elements such that 
+                    'result[0].interlace(result[1:]) == self'
+                    
+            ERRORS:
+                - TypeError is raised if parts is not an integer
+                - ValueError is raised if 'parts' is smaller or equal to zero.
+        '''
+        try:
+            parts = ZZ(parts);
+        except:
+            raise TypeError("Argument 'parts' is not an integer (split_sequence)");
+        
+        if(parts <= 0):
+            raise ValueError("Argument 'parts' is smaller than 1 (split_sequence)");
+        
+        if(parts == 1):
+            return self;
+        elif(parts == 2):
+            f = self;
+            f1 = (f + f(-x))/2;
+            f2 = ((f - f(-x))/2).zero_extraction[1];
+            f = [f1,f2];
+        else:
+            raise NotImplementedError("Method 'split_sequence' not implemented for 3 or more parts");
+            
+        R = PolynomialRing(QQ[x], 'y'); y = R.gens()[0];
+        p = y^parts - x;
+            
+        return [el.compose_algebraic(p, lambda n : el.getSequenceElement(parts*n)*factorial(n)) for el in f];
+    
+    def interlace(self, *others):
+        '''
+            Method that computes a functions which sequence is the interlacing between 'self'
+            and all the 'others' functions.
+            
+            See method 'interlace_sequence' on class DDRing for further information.
+        '''
+        ## Checking the argument so 'others' is a list of elements
+        if(len(others) == 1 and type(others[0]) == list):
+            others = [others[0]];
+            
+        ## Computing the common parent for all elements
+        po = self.parent();
+        for el in others:
+            po = pushout(po, el.parent());
+            
+        ## Calling the method in the DDRing level
+        return po.interlace_sequence([self]+list(others));
     
     #####################################
     ### Differential methods
@@ -1664,7 +1766,6 @@ class DDFunction (IntegralDomainElement):
         ######################################
         destiny_ring = None;
         ## First, compute the pushout fo the parents
-        from sage.categories.pushout import pushout;
         sp = self.parent(); op = other.parent();
         push = pushout(sp, op);
         
@@ -1714,6 +1815,73 @@ class DDFunction (IntegralDomainElement):
                 new_name = din_m_replace(self.__name, {"x":repr(other)}, True);
         
         return destiny_ring.element(new_equation, new_init, name=new_name);
+    
+    def compose_algebraic(self, poly, init):
+        '''
+            Method to compute the composition of 'self' with an algebraic function over some DDRing
+            
+            The method first compute the new ring where the composition will belong and then relies on the method 'compose_algebraic_solution' of the Operator class.
+            
+            Then, it uses the initial values given by init.
+            
+            INPUT:
+                - 'self': a DDFunction
+                - 'poly': polynomial in variable 'y' with coefficient in some DDRing or QQ[x]
+                - 'init': initial values. This can be given as a list or a method that receives integers and return a sequence
+            
+            OUTPUT:
+                - A new DDFunction 'f' representing the composition of 'self' with an algebraic function.
+                
+            ERRORS:
+                - ValueError: if other(0) != 0
+                - TypeError: if we can not compute a destination ring
+                - Any error from Operator.compose_algebraic_solution
+                
+            WARNINGS:
+                - If the depth of the resulting DDFunction is greater than 3, a warning will be shown
+        '''
+        ### Checking the input
+        ## Checking 'poly' is a polynomial
+        if(not(is_Polynomial(poly) or is_MPolynomial(poly))):
+            raise TypeError("'compose_algebraic': the input 'poly' is not a polynomial");
+        
+        ## Checkig that 'y' is a variable
+        gens = [v for v in poly.parent().gens()];
+        if(all(str(v) != 'y')):
+            raise TypeError("'compose_algebraic': the input poly has no variable 'y'");
+        
+        if(len(gens) == 1):
+            R = poly.parent().base();
+            if(is_DDRing(R)):
+                raise NotImplementedError("'compose_algebraic': composition with algebraic over DDFunction not implemented");
+            else:
+                F = DFinite.base().fraction_field();
+                Q = PolynomialRing(F, 'y');
+                poly = Q(poly);
+                destiny_ring = self.parent();
+        elif(len(gens) > 1):
+            # If multivariate, we only accept 2 variables
+            if(len(gens) > 2):
+                raise ValueError("'compose_algerbaic': the input 'poly' can only be bivariate polynomials");
+            R = poly.parent().base();
+            if(is_DDRing(R)):
+                raise NotImplementedError("'compose_algebraic': composition with algebraic over DDFunction not implemented");
+            else:
+                y = gens[([str(v) for v in gens]).index('y')];
+                gens = [v for v in gens if v != y];
+                
+                F = PolynomialRing(R, gens).fraction_field();
+                Q = PolynomialRing(F, 'y');
+                poly = Q(poly);
+                destiny_ring = self.parent();
+            
+        ## At this point, we have a polynomial in 'y' with coefficients either polynomial in 'x' or DDFunctions
+        # F: field of fractions of the coefficients
+        # Q = F[y]
+        # poly in Q
+        # destiny_ring: final DDRing where the result will belong
+        
+        raise NotImplementedError("Method 'compose_algebraic' is not yet implemented");
             
     #####################################
     ### Equality methods
@@ -1828,7 +1996,7 @@ class DDFunction (IntegralDomainElement):
             ### If an error occur, then other can not be substracted from self, so they can not be equals
             return False;
             
-    def numerical_solution(self, value, delta=_sage_const_1en10 , max_depth=100 ):
+    def numerical_solution(self, value, delta=RealNumber('1e-10'), max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
             if(self.equation.getCoefficients()[-1 ](0 ) != 0 ):
@@ -2177,7 +2345,7 @@ class DDFunction (IntegralDomainElement):
         '''
             Missing method for DDFuntions.
         '''
-        return _sage_const_0 ;
+        return 0 ;
         
     def __str__(self, detail=True):
         '''
@@ -2659,7 +2827,7 @@ def _get_derivation_matrix(poly, dic, simpl = False):
 ## TODO Saved function from the console
 def get_sequences(a,b):
     M = [[tensor_power(get_vector_prime(n+1),i+1) for i in range(a)] for n in range(b)]
-    return [[[list(M[i][j]).index(k^(j+1))+1 for k in [1] + [el for el in primes_first_n(i)]] for j in range(5)] for i in range(5)];
+    return [[[list(M[i][j]).index(k**(j+1))+1 for k in [1] + [el for el in primes_first_n(i)]] for j in range(5)] for i in range(5)];
 
     
 __CACHED_INIT_POLY = {};
@@ -2671,7 +2839,7 @@ def _get_initial_poly(poly, dic, m):
     ## Constant case
     if(poly.is_constant()):
         if(m > 0):
-            return _sage_const_0;
+            return 0;
         return poly.parent().base()(poly);
     
     ## Non-constant polynomial
@@ -2770,7 +2938,7 @@ try:
     DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator);
 except ImportError:
     ## No ore_algebra package found
-    warnings.warn("Package ore_algebra was not found. It is hightly recommended to get this package built by M. Kauers and M. Mezzaroba (http://marc.mezzarobba.net/code/ore_algebra-analytic/ or http://www.kauers.de/software.html)", NoOreAlgebraWarning);
+    warnings.warn("Package ore_algebra was not found. It is hightly recommended to get this package by M. Kauers and M. Mezzaroba (http://marc.mezzarobba.net/code/ore_algebra-analytic/ or http://www.kauers.de/software.html)", NoOreAlgebraWarning);
     DFinite = DDRing(PolynomialRing(QQ,x));
 DDFinite = DDRing(DFinite);
 DFiniteP = ParametrizedDDRing(DFinite, [var('P')]);

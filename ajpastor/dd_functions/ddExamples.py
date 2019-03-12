@@ -52,6 +52,8 @@ def ddExamples(functions = False, names=False):
         ** HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
             - HypergeometricFunction
             - GenericHypergeometricFunction
+        ** RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
+            - RiccatiD
         ** MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
             - MathieuD
             - MathieuSin
@@ -1159,6 +1161,66 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)];
     
+###### RICCATI DIFFERENTIAL EQUATION
+### Basic Riccati differential equation
+@cached_function
+def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
+    '''
+        Implementation using DDFunctions of the solutions for the Ricatti differential equation.
+        
+        References:
+            - https://en.wikipedia.org/wiki/Riccati_equation
+            
+        The Riccati differential equation is a non-linear differential equation of order one of the shape
+            u' = a + bu + cu^2
+        
+        In particular, this represent all the monomials of degree 2 or less. It can be shown that if
+        a and b are Dn-finite and c is D(n-1)-finite, then u(x) will be the logarithmic derivative
+        of a D(n+1)-finite function (w), and hence, it is D(n+2)-finite. More precisely:
+            w'' - (b + c'/c) w' + acw = 0
+            
+        Given the initial condition u(0) is enough to determined all the coefficients of the solution.
+        
+        INPUT:
+            - a: function to represent the constant term in the quadratic polynomial that is the derivative of u(x)
+            - b: function to represent the linear term in the quadratic polynomial that is the derivative of u(x)
+            - c: function to represent the leading term in the quadratic polynomial that is the dericative of u(x)
+            - init: initial condition u(0) of the solution. None is also valid
+            - ddR: basic DDRing where to put all the inputs a,b,c if they are not DDFunctions
+            - full: if True, it returns also the function w used to build the solution in a tuple (solution, w)
+            - name: name the system will give to the function w. By default this is "w"
+    '''
+    ## Considering the three parameters
+    from sage.categories.pushout import pushout;
+    
+    if(is_DDFunction(a)):
+        da, dRa = (a.parent().depth(), a.parent());
+    else:
+        a, dRa = __decide_parent(a, ddR); da = dRa.depth()-1;
+    if(is_DDFunction(b)):
+        db, dRb = (b.parent().depth(), b.parent());
+    else:
+        b, dRb = __decide_parent(b, ddR); db = dRb.depth()-1;
+    if(is_DDFunction(c)):
+        dc, dRc = (c.parent().depth(), c.parent());
+    else:
+        c, dRc = __decide_parent(c, ddR); dc = dRc.depth()-1;
+        
+    R = pushout(dRa, pushout(dRb, dRc));
+    R = R.to_depth(max(da+1, db+1, dc+2));
+    
+    x = R.variables()[0];
+    
+    w = R.base().element([a*c, -b + c.derivative()/c,1], [1, -c(0)*init],name=DinamicString("_1(_2)", [name,repr(x)]));
+    solution = -w.derivative()*(c*w).inverse;
+    solution._DDFunction__name = DinamicString("Riccati(_1,_2,_3;_4)(_5)", [repr(a),repr(b),repr(c),str(init),repr(x)]);
+    
+    if(full):
+        return solution,w;
+    return solution;
+    
+    
+    
 ###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
@@ -1967,7 +2029,9 @@ def __decide_parent(input, parent = None, depth = 1):
     dR = parent;
     if(dR is None):
         R = input.parent();
-        if(isinstance(R, sage.symbolic.ring.SymbolicRing)):
+        if(input in QQ):
+            dR = DFinite.to_depth(depth);
+        elif(isinstance(R, sage.symbolic.ring.SymbolicRing)):
             parameters = set([str(el) for el in input.variables()])-set(['x']);
             if(len(parameters) > 0 ):
                 dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters);
