@@ -38,8 +38,11 @@ class _LazyDDFunction(IntegralDomainElement):
             try:
                 self.__poly = parent.poly_field()(el);
             except:
-                self.__raw = parent.base()(el);
-                self.__poly = self.parent().to_poly(self.__raw);
+                try:
+                    self.__poly = self.parent().to_poly(el);
+                except:
+                    self.__raw = parent.base()(el);
+                    self.__poly = self.parent().to_poly(self.__raw);
             
         self.simplify(); # We try to simplify the element from the beginning
          
@@ -67,6 +70,7 @@ class _LazyDDFunction(IntegralDomainElement):
         
     def simplify(self):
         self.__poly = self.parent().simplify(self.poly());
+        return self;
         
     def variables(self):
         '''
@@ -176,8 +180,8 @@ class _LazyDDFunction(IntegralDomainElement):
     @cached_method
     def is_zero(self):
         result = (self.poly() == 0 );
-        map_to_values = {repr(var) : self.parent().to_real(var)(0)};
-        if((not result) and (self(**map_to_values) == 0 )):
+        map_to_values = {repr(var) : self.parent().to_real(var)(0) for var in self.poly().variables()};
+        if((not result) and (self.poly()(**map_to_values) == 0)):
             if(not (self.__raw is None)):
                 result = (self.raw() == 0);
             else:
@@ -265,6 +269,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__poly_field = self.__poly_ring.fraction_field();
         self.__gen = self.__poly_ring.gens()[0];
         self.__used = 0;
+        self.stop = False;
         
         ## Initializing the map of variables
         self.__map_of_vars = {}; # Map where each variable is associated with a 'base' object
@@ -298,7 +303,9 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return tuple(self.poly_ring()(key) for key in self.map_of_vars().keys());
     
     def _to_poly_element(self, element):
-        if(not (element in self.base())):
+        if(element.parent() is self):
+            return element.poly();
+        elif(not (element in self.base())):
             raise TypeError("Element is not in the base ring.\n\tExpected: %s\n\tGot: %s" %(element.parent(), self.base()));
             
         ## We try to cast to a polynomial. If we can do it, it means no further operations has to be done
@@ -377,6 +384,37 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         ## Otherwise, we add the element to the variables and return it
         self.__add_function(element, gen=True);
         return self.__gen[self.__map_to_vars[element]];
+    
+    def _relations(self):
+        '''
+            Returns a Groebner Basis of the relations ideals known in this conversion system.
+        '''
+        if(self._ConversionSystem__relations is None):
+            self._ConversionSystem__relations = [];
+            self._ConversionSystem__rel_ideal = ideal([Integer(0)]);
+            
+        return self._ConversionSystem__relations;
+    
+    def _groebner_basis(self):
+        if(len(self._ConversionSystem__relations) >= 1):
+            gens_in_relations = list(set(sum([[str(v) for v in el.variables()] for el in self._ConversionSystem__relations], [])));
+            Poly = PolynomialRing(self.poly_ring().base_ring(), gens_in_relations, order='deglex');
+            rels = [Poly(el) for el in self._ConversionSystem__relations];
+            self._ConversionSystem__rel_ideal = ideal(Poly, rels);
+            return self._ConversionSystem__rel_ideal.groebner_basis();
+        return [self.poly_ring().base_ring().zero()];
+    
+    def _simplify(self, poly):
+        gens = list(set([str(g) for g in self._ConversionSystem__rel_ideal.parent().ring().gens() if g != 1] + [str(g) for g in poly.variables()]));
+        Poly = PolynomialRing(self.poly_ring().base_ring(), gens);
+        try:
+            poly = Poly(poly);
+        except TypeError:
+            return poly;
+        try:
+            return self.poly_ring()(poly.reduce([Poly(el) for el in self._ConversionSystem__relations]));
+        except AttributeError:
+            return self.poly_ring()(poly);
         
     ################################################################################################
     ### Other Methods for LazyRing
@@ -401,10 +439,36 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__map_of_derivatives = {};
     
     def derivative(self, el, times=1):
-        raise NotImplementedError("method derivative not implemented");
+        '''
+            Method that computes the derivative of an element in the LazyDDRing. It performs a casting to 'self' before starting the algorithm.
+        '''
+        el = self(el);
+        
+        if(times == 0):
+            return el;
+        elif(times > 1):
+            return self.derivative(self.derivative(el, times-1));
+        
+        ## Splitting the derivative into the monomials
+        poly = el.poly();
+        if(poly == 0):
+            return self.zero();
+        coeffs = poly.coefficients();
+        monomials = poly.monomials();
+        
+        ## Base case (monomial case)
+        if(len(monomials) == 1):
+            gens = poly.variables();
+            degrees = [poly.degree(g) for g in gens];
+            
+            res = sum(prod(gens[j]**(degrees[j]-kronecker_delta(i,j)) for j in range(len(gens)))*degrees[i]*self.get_derivative(gens[i]) for i in range(len(gens)));
+        
+            return self(coeffs[0]*res);
+        else: ## Generic case (polynomial)
+            return self(sum(coeffs[i]*self.derivative(monomials[i]) for i in range(len(coeffs))));
     
     def get_derivative(self, el):
-        raise NotImplementedError("method get_derivative not implemented");
+        return self(self.__map_of_derivatives[el]).poly();
         
     ################################################################################################
     ### Other Integral Domain methods 
@@ -489,7 +553,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
                 ## For each variable in X.poly(), we get the new polynomial            
                 translate = {}
                 for var in X.variables():
-                    translate[var] = self.to_poly(other.map_of_vars()[var]);
+                    translate[var] = self.to_poly(other.map_of_vars()[str(var)]);
                     
                 ## We now plugin the expressions
                 return _LazyDDFunction(self, pol(**translate));
@@ -518,7 +582,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     def __str__(self):
         final = "%s with %d variables\n{\n" %(repr(self),len(self.__gens));
         for g in self.__gens:
-            final += "\t%s : %s,\n" %(g, repr(self.__map_of_vars[g]));
+            final += "\t%s : %s,\n" %(g, repr(self.__map_of_vars[str(g)]));
         final += "}";
         return final
         
@@ -568,9 +632,12 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
                 break;
             
         ## Create the tranformation into f
+        
+        # Companion matrix
+        companion = f.equation.companion();
+        companion = Matrix(self, [[self(companion[i][j]) for j in range(companion.ncols())] for i in range(companion.nrows())]);
         if(order < f.getOrder()): # Relation found
             C = [];
-            companion = f.equation.companion();
             for i in range(order):
                 new_row = [companion[i][j] for j in range(order)];
                 if(i == relation[0]):
@@ -579,7 +646,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             C = Matrix(self,C);
             self.__trans[f] = (relation[1][1],C);
         else:
-            self.__trans[f] = (self.poly_ring().zero(),Matrix(self, f.equation.companion()));
+            self.__trans[f] = (self.poly_ring().zero(),Matrix(self, companion));
             
         ## Adding f as a vertex (edges must be added outside this function)
         self.__r_graph.add_vertex(f);
@@ -587,12 +654,18 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         ## If f will become a generator, add it to the used variables
         if(gen):
             current = f;
+            before = self.__used;
             for i in range(order):
+                print "** Adding a new variable (%d)" %self.__used;
                 self.__gens += [self.__gen[self.__used]];
-                self.__map_of_vars[self.__gens[-1]] = current;
+                self.__map_of_vars[str(self.__gens[-1])] = current;
                 self.__map_to_vars[current] = self.__used;
+                self.__map_of_derivatives[self.__gen[self.__used]] = self.__gen[self.__used+1];
                 self.__used += 1;
                 current = current.derivative();
+            
+            trans = self.__trans[f];
+            self.__map_of_derivatives[self.__gen[before+order-1]] = sum([self.__gen[before+i]*trans[1][i][-1] for i in range(order)], trans[0]);
         
         return;
         

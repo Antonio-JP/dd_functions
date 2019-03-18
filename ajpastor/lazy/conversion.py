@@ -8,6 +8,9 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as is
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_dense as isDenseIPolynomial;                                                                 
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_sparse as isSparseIPolynomial;
 
+from sage.structure.element import is_Matrix;
+from sage.structure.element import is_Vector;
+
 class ConversionSystem(object):
     ## Main bulder
     def __init__(self, base):
@@ -62,21 +65,33 @@ class ConversionSystem(object):
     ## Pulbic methods
     def add_relations(self, *relations):
         if(self.is_polynomial()):
-            try:
-                ## Adding the new relations
-                self._relations(); # We make sure the relations are initialized
-                    
-                self.__add_relation(relations);
-                    
-                ## Changing the ideal and computing a groebner basis
-                if(len(self.__relations) >= _sage_const_1 ):
-                    self.__rel_ideal = ideal(self.poly_ring(), self.__relations);
-                    self.__relations = self.__rel_ideal.groebner_basis();
-            except TypeError as e:
-                raise e;
+            ## Adding the new relations
+            self._relations(); # We make sure the relations are initialized
+               
+            self.__add_relation(relations);
+                
+            ## Changing the ideal and computing a groebner basis
+            self.__relations = self._groebner_basis();
     
     def clean_relations(self):
         self.__relations = [];
+        
+    def _add_relation(self, poly):
+        '''
+            Auxiliar method to add a polynomial to the relations of the conversion system
+        '''
+        reduced = self.simplify(poly);
+        if(reduced != _sage_const_0 ):
+            self.__relations += [reduced];
+            
+    def _groebner_basis(self):
+        '''
+            Auxiliar method to compute the groebner basis for the current set of relations on the conversion system
+        '''
+        if(len(self.__relations) >= _sage_const_1 ):
+            self.__rel_ideal = ideal(self.poly_ring(), self.__relations);
+            return self.__rel_ideal.groebner_basis();
+        return [self.poly_ring().zero()];
                 
     def to_poly(self, element):
         '''
@@ -100,12 +115,22 @@ class ConversionSystem(object):
             n = self.to_poly(element.numerator());
             d = self.to_poly(element.denominator());
             return self.poly_field()(n/d);
-        elif(isinstance(element, sage.matrix.matrix.Matrix)):
+        elif(isinstance(element.parent(), ConversionSystem)):
+            if(element.parent() is self):
+                return self._to_poly_element(element);
+            poly = element.parent().to_poly(element);
+            try:
+                n = self.to_poly(element.parent().to_real(poly.numerator()));
+                d = self.to_poly(element.parent().to_real(poly.denominator()));
+                return self.poly_field()(n/d);
+            except AttributeError:
+                return self.to_poly(element.parent().to_real(poly));
+        elif(is_Matrix(element)):
             R = self.poly_ring();
             if(element.parent().base().is_field()):
                 R = self.poly_field();
             return Matrix(R, [self.to_poly(row) for row in element]);
-        elif(isinstance(element, sage.modules.free_module_element.FreeModuleElement)):
+        elif(is_Vector(element)):
             R = self.poly_ring();
             if(element.parent().base().is_field()):
                 R = self.poly_field();
@@ -114,7 +139,7 @@ class ConversionSystem(object):
             return [self.to_poly(el) for el in element];
         elif(isinstance(element, set)):
             return set([self.to_poly(el) for el in element]);
-        elif(isinstance(relation, tuple)):
+        elif(isinstance(element, tuple)):
             return tuple([self.to_poly(el) for el in element]);
         else:
             raise TypeError("Wrong type: Impossible to get polynomial value of element (%s)" %(element));
@@ -147,12 +172,12 @@ class ConversionSystem(object):
             n = self.to_real(poly.numerator());
             d = self.to_real(poly.denominator());
             return n/d;
-        elif(isinstance(poly, sage.matrix.matrix.Matrix)):
+        elif(is_Matrix(poly)):
             R = self.base();
             if(poly.parent().base().is_field()):
                 R = R.fraction_field();
             return Matrix(R, [self.to_real(row) for row in poly]);
-        elif(isinstance(poly, sage.modules.free_module_element.FreeModuleElement)):
+        elif(is_Vector(poly)):
             R = self.base();
             if(poly.parent().base().is_field()):
                 R = R.fraction_field();
@@ -182,12 +207,12 @@ class ConversionSystem(object):
         if(element in self.poly_ring()):
             element = self.poly_ring()(element);
             try: # Weird case: fraction field fall in polynomial field
-                n = self.poly_ring()(element.numerator()).reduce(self._relations());
-                d = self.poly_ring()(element.denominator()).reduce(self._relations());
+                n = self._simplify(self.poly_ring()(element.numerator()));
+                d = self._simplify(self.poly_ring()(element.denominator()));
                 return n/d;
             except AttributeError:
                 try:
-                    return self.poly_ring()(element).reduce(self._relations());                
+                    return self._simplify(self.poly_ring()(element));
                 except AttributeError:
                     return self.poly_ring()(element);
         elif(element in self.poly_field()):
@@ -215,6 +240,15 @@ class ConversionSystem(object):
             return self.to_real(self.simplify(self.to_poly(element)));
         else:
             return element;
+        
+    def _simplify(self, poly):
+        '''
+            Auxiliar method that make the simplification of an element in self.poly_ring().
+        '''
+        try:
+            return poly.reduce(self._relations());
+        except AttributeError:
+            return poly;
             
     def mix_conversion(self, conversion):
         '''
@@ -266,12 +300,13 @@ class ConversionSystem(object):
             
             This method can be overwritten if needed.
         '''
+        polynomial = self.poly_ring()(polynomial);
         variables = polynomial.variables();
 
         if(len(variables) == 0):
             return self.base()(polynomial);
 
-        return polynomial(**{str(v) : self.map_of_vars()[str(v)] for v in variables});
+        return self.base()(polynomial(**{str(v) : self.map_of_vars()[str(v)] for v in variables}));
 #        multi = (len(variables) > _sage_const_1 );
 #        res = self.base().zero();
 #        for (k,v) in polynomial.dict().items():
@@ -311,13 +346,9 @@ class ConversionSystem(object):
             for el in relation:
                 self.__add_relation(el);
         elif(relation in self.poly_ring()):
-            reduced = self.simplify(relation);
-            if(reduced != _sage_const_0 ):
-                self.__relations += [reduced];
+            self._add_relation(self.poly_ring()(relation));
         elif(relation in self.poly_field()):
-            reduced = self.simplify(relation.numerator());
-            if(reduced != _sage_const_0 ):
-                self.__relations += [reduced];
+            self._add_relation(self.poly_ring()(relation.numerator()));
         else:
             try:
                 self.__add_relation(self.to_poly(relation));

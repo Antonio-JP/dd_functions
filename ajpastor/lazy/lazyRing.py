@@ -318,7 +318,9 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             self.__create_poly_field();
     
     def _to_poly_element(self, element):
-        if(not (element in self.base())):
+        if(element.parent() is self):
+            return element.poly();
+        elif(not (element in self.base())):
             raise TypeError("Element is not in the base ring.\n\tExpected: %s\n\tGot: %s" %(element.parent(), self.base()));
             
         ## We try to cast to a polynomial. If we can do it, it means no further operations has to be done
