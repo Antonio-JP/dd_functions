@@ -214,7 +214,7 @@ class ConversionSystem(object):
                 try:
                     return self._simplify(self.poly_ring()(element));
                 except AttributeError:
-                    return self.poly_ring()(element);
+                    return element;
         elif(element in self.poly_field()):
             element = self.poly_field()(element);
             n = self.simplify(element.numerator());

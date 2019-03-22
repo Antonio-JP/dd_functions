@@ -5,6 +5,7 @@ from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
 
 from ajpastor.dd_functions.ddFunction import *;
+from ajpastor.dd_functions.lazyDDRing import LazyDDRing;
 
 from ajpastor.misc.dinamic_string import *;
 
@@ -1862,24 +1863,33 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ###############################################
     parent = polynomial.parent();
     if(not (isPolynomial(parent) or isMPolynomial(parent))):
-        raise TypeError("The minimal polynomial is NOT a polynomial");
+        raise TypeError("DAlgebraic: the input polynomial is NOT a polynomial");
     
     base_ring = None;  
     F = None;  
     poly_ring = parent;
     if(isMPolynomial(parent)):
-        base_ring = PolynomialRing(parent.base(),parent.gens()[:-1]);
-        poly_ring = PolynomialRing(base_ring.fraction_field(), parent.gens()[-1]);
+        ## Only valid for 2 variables
+        if(parent.ngens() > 2):
+            raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables");
+        base_ring = PolynomialRing(parent.base(),parent.gens()[0]);
+        F = base_ring.fraction_field();  
     else:
         if(isinstance(parent.base().construction()[0], FractionField)):
             base_ring = parent.base().base();
         else:
             base_ring = parent.base();
-            if(not parent.base().is_field()):
-                poly_ring = PolynomialRing(parent.base().fraction_field(), parent.gens()[-1]);
-                
-    F = poly_ring.base();
+        
+        if(is_DDRing(base_ring)):
+            F = LazyDDRing(base_ring);
+        elif(not parent.base().is_field()):
+            F = parent.base().fraction_field();
+        else:
+            F = base_ring;
+            
+    poly_ring = PolynomialRing(F, parent.gens()[-1]);
     y = poly_ring.gens()[-1];
+    
     ## At this point we have the following
     ##   - F is a field
     ##   - y is a variable
@@ -1888,7 +1898,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     if(polynomial.degree() == 1):
         return -polynomial[0]/polynomial[1];
     elif(polynomial.degree() <= 0):
-        raise TypeError("Constant polynomial given for algebraic function: IMPOSSIBLE!!");
+        raise TypeError("DAlgebraic: constant polynomial given for algebraic function: IMPOSSIBLE!!");
         
     #################################################
     ## Building and checking the destiny ring
@@ -1898,7 +1908,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
         destiny_ring = DDRing(base_ring);
     else:
         destiny_ring = dR;
-        coercion = destiny_ring._coerce_map_from_(base_ring);
+        coercion = destiny_ring.base()._coerce_map_from_(base_ring);
         if((coercion is None) or (coercion is False)):
             raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring));
             
@@ -1909,33 +1919,60 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ##################################################
     ## Computing the derivative
     dy = polynomial.derivative(y);
-    
-    ## Getting its gcd with the polynomial
-    g,r,s = polynomial.xgcd(dy);
-    if((g != 1) or (not(g in poly_ring.base()))):
-        raise ValueError("No irreducible polynomial given");
         
     ## Computing the coefficient-wise derivation of polynomial
-    mon = poly_ring(1);
-    ky = poly_ring(0);
-    for i in range(polynomial.degree()+1):
-        ky += (polynomial[i].derivative())*mon;
-        mon *= y;
+    ky = sum(polynomial[i].derivative()*y**i for i in range(polynomial.degree()+1));
+    
+    ### WARNING From this point until said otherwise, in the case base_ring is DDRing
+    ### we change the poylnomials to a finite setting because when this was code, 
+    ### computing remainders with InfinitePolynomial coefficients broke the program.
+    ###
+    ### For further information about it, please check the track: (pending)
+    ### The code that should work once that is solved is the following:
+    if(is_DDRing(base_ring)): 
+        # Changing to a finite setting
+        def get_sub_vars(*polys):
+            if(len(polys) > 1):
+                return get_sub_vars(polys);
+            return list(set(sum([sum([list(el[i].variables()) for i in range(el.degree()+1)],[]) for el in polys[0]],[])));
         
-    ## Getting the polynomial expression of y', y'',..., y^{(deg(polynomial))}
-    rows = [[0]*polynomial.degree()];
-    mon = poly_ring(1);
-    for i in range(polynomial.degree()-1):
-        rows += [((-(i+1)*mon*s*ky)%polynomial).coefficients(False)];
-        mon *= y;
-        
+        sub_vars = get_sub_vars([polynomial, dy, ky]);
+        poly_ring_fin = PolynomialRing(PolynomialRing(base_ring.base_ring(), sub_vars).fraction_field(), poly_ring.gens_dict().items()[0][0]);
+        polynomial = poly_ring_fin(str(polynomial))
+        dy = poly_ring_fin(str(dy));
+        ky = poly_ring_fin(str(ky));
+        y = poly_ring_fin.gens()[0];
+                            
+    ## Getting its gcd with the polynomial
+    g,r,s = polynomial.xgcd(dy);
+    if((g != 1) and (g.degree() != 0)):
+        raise ValueError("DAlgebraic: no irreducible polynomial (%s) given" %polynomial);
+    
+    ## Getting the polynomial expression of y'
+    yp = (-ky*s)%polynomial;
+    
     ## Building the derivation matrix of <1,y,y^2,...>
+    rows = [[0]*polynomial.degree()];
+    for i in range(1,polynomial.degree()):
+        # (y^i)' = i*y^(i-1)*y'
+        current = ((i*yp*y**(i-1))%polynomial).coefficients(False);
+        current += [0 for i in range(len(current),polynomial.degree())];
+        rows += [current];
+    
     M = Matrix(F, rows).transpose();
     ## Creating the vector representing y
     y_vector = vector(F, [0,1] + [0]*(polynomial.degree()-2 ));
-    ## Building ans solving the system
+    
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
+    
+    ## Building and solving the system
     to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+1);
+    
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
+    
     v = to_solve.right_kernel_matrix()[0];
+    
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
     
     ## Cleaning denominators
     cleaning = lcm(el.denominator() for el in v);

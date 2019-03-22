@@ -69,7 +69,11 @@ class _LazyDDFunction(IntegralDomainElement):
         return self.__poly;
         
     def simplify(self):
-        self.__poly = self.parent().simplify(self.poly());
+        if(self.__poly != 0):
+            # First we remove common factors in numerator and denominator
+            n_pol = self.__poly.parent()(prod(self.__poly.factor()));
+            # We then call the simplify method from parent
+            self.__poly = self.parent().simplify(n_pol);
         return self;
         
     def variables(self):
@@ -269,7 +273,6 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__poly_field = self.__poly_ring.fraction_field();
         self.__gen = self.__poly_ring.gens()[0];
         self.__used = 0;
-        self.stop = False;
         
         ## Initializing the map of variables
         self.__map_of_vars = {}; # Map where each variable is associated with a 'base' object
@@ -449,8 +452,19 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         elif(times > 1):
             return self.derivative(self.derivative(el, times-1));
         
-        ## Splitting the derivative into the monomials
+        ## COmputing the derivative of the polynomial associated
         poly = el.poly();
+        ## Rational function case
+        try:
+            if(poly.denominator() != 1):
+                n = self(poly.numerator()); dn = self.derivative(n);
+                d = self(poly.denominator()); dd = self.derivative(d);
+                
+                return (dn*d - dd*n)/d**2;
+        except AttributeError:
+            pass;
+        
+        ## Splitting the derivative into the monomials
         if(poly == 0):
             return self.zero();
         coeffs = poly.coefficients();
@@ -494,8 +508,9 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     ################################################################################################
     ### Other Ring methods 
     ################################################################################################
-    def is_field(self):
+    def is_field(self, proof=False):
         return self.base().is_field();
+        #return True;
     
     def is_finite(self):
         return self.base().is_finite();
@@ -505,6 +520,38 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         
     def is_noetherian(self):
         return self.base().is_noetherian();
+    
+    def _xgcd_univariate_polynomial(self, a, b):
+        '''
+        Return an extended gcd of ``a`` and ``b``.
+
+            INPUT:
+
+            - ``a``, ``b`` -- two univariate polynomials defined over ``self``
+
+            OUTPUT:
+
+            A tuple ``(t, r, s)`` of polynomials such that ``t`` is the
+            greatest common divisor (monic or zero) of ``a`` and ``b``,
+            and ``r``, ``s`` satisfy ``t = r*a + s*b``.
+        '''
+        SY = a.parent();
+        ## Casting the polynomials a and b to polynomials with rational functions coefficients
+        # Getting the variables
+        coeffs = [self.to_poly(el) for el in a.coefficients() + b.coefficients()];
+        gens = list(set(sum([[str(g) for g in poly.variables()] for poly in coeffs], [])));
+        # Building the rational functions
+        F = PolynomialRing(self.base_ring(), gens).fraction_field();
+        # Building the polynomial ring
+        y = a.parent().gens_dict().items()[0][0];
+        R = PolynomialRing(F, y);
+        a = R(str(a)); b = R(str(b));
+        
+        ## Computing the xgcd in that extended field using the standard algorithm
+        t,r,s = F._xgcd_univariate_polynomial(a,b);
+        
+        ## Returning the result casted to Lazy Elements
+        return (SY(t.coefficients(False)), SY(r.coefficients(False)), SY(s.coefficients(False)));
         
     ################################################################################################
     ### Coercion methods

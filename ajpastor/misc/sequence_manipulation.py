@@ -1,6 +1,7 @@
 from sage.functions.other import factorial;
 from sage.combinat.combinat import bell_polynomial;
 from sage.arith.misc import falling_factorial;
+from sage.misc.cachefunc import cached_function
 
 ################################################################################
 ################################################################################
@@ -24,6 +25,7 @@ def shift(f):
 def composition(f,g):   
     if(g(0) != 0):                     
         raise ValueError("Impossible compose with g(0) != 0");
+    @cached_function
     def _composition(n):                                     
         if(n == 0):                                                                
             return f(0);
@@ -59,6 +61,7 @@ def inv_lagrangian(f):
     if(f(1) == 0):
         raise NotImplementedError("Case with order higher than 1 not implemented");
     f = ogf_egf(f);
+    @cached_function
     def _inverse_egf(n):
         if(n == 0):
             return 0;
