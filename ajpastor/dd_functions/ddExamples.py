@@ -53,6 +53,7 @@ def ddExamples(functions = False, names=False):
         ** HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
             - HypergeometricFunction
             - GenericHypergeometricFunction
+            - Polylogarithms
         ** RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
             - RiccatiD
         ** MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
@@ -1161,6 +1162,23 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)];
+    
+@cached_function
+def PolylogarithmD(s=1):
+    if((not (s in ZZ)) or s < 1):
+        raise ValueError("The parameter 's' must be a positive integer. Got %d" %s);
+    
+    destiny_ring = DFinite;
+    
+    get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation); 
+    pos_part = prod((get_op([1,x]) for i in range(1,s+2)), get_op([1]));
+    neg_part = prod((get_op([1,x]) for i in range(1,s+1)), get_op([1])).derivative();
+    
+    final_eq = pos_part-neg_part;
+    Li_x = DFinite.element(final_eq, [Integer(1)/(n**s) *factorial(n-1) for n in range(1,s+1)]);
+    result = Li_x*x;
+    result._DDFunction__name = DinamicString("Li(_1;_2)", [str(s), "x"]);
+    return result;
     
 ###### RICCATI DIFFERENTIAL EQUATION
 ### Basic Riccati differential equation
