@@ -75,7 +75,7 @@ def infinite_derivative(element, times=1, var=x, _infinite=True):
         parent = parent.base();
         n = parent(element.numerator()); dn = infinite_derivative(n);
         d = parent(element.denominator()); dd = infinite_derivative(d);
-        return (dn*d - n*dd)/d**2;
+        return (n*dd - dn*d)/d**2;
     
     ## Simple call: not an InfinitePolynomialRing
     if(not is_InfinitePolynomialRing(parent)):
@@ -1135,23 +1135,6 @@ def Logarithmic_polynomials(n, parent):
     else:
         return infinite_derivative(Logarithmic_polynomials(n-1, parent));
     
-def change_variable(poly, new_var):
-    parent = poly.parent();
-    if(not (new_var in parent.fraction_field())):
-        raise TypeError("The new value must be in the same InfinitePolynomialRing");
-    elif(not is_InfinitePolynomialRing(parent)):
-        raise TypeError("The parent must be an InfinitePolynomialRing");
-    
-    gens = poly.polynomial().parent().gens();
-        
-    index = [get_InfinitePolynomialRingGen(parent, v, True)[1] for v in gens]; m = max(index);
-    derivatives = [new_var];
-    for i in range(m):
-        derivatives += [infinite_derivative(derivatives[-1])];
-    to_plug = [derivatives[i] for i in index];
-    
-    return parent.fraction_field()(poly.polynomial()(**{str(gens[i]) : to_plug[i] for i in range(len(gens))}));
-    
 def is_Riccati(poly):
     '''
         Method that checks if a non-linear differential equation is of Riccatti type 
@@ -1160,56 +1143,16 @@ def is_Riccati(poly):
     '''
     poly = fromFinitePolynomial_toInfinitePolynomial(poly);
     parent = poly.parent(); y = parent.gens()[0];
-    var = poly.polynomial().parent().gens(); index = [get_InfinitePolynomialRingGen(parent, v, True)[1] for v in var];
-    order = max(index);
     
-    ## Checking the degree of y[0] is appropriate in the therm of y[order-1]
-    try:
-        if(not poly.degrees()[var.index(y[order-1])] == 1):
-            raise ValueError("The degree of the function in the equation is not valid");
-    except:
-        raise TypeError("Error getting the degree of the function in the equation");
+    var = poly.variables(); index = [get_InfinitePolynomialRingGen(parent, v, True) for v in var];
+    to_plug = [Logarithmic_polynomials(i, parent) for i in index];
     
-    C = poly.coefficient(y[order-1]*y[0]);
-    ## Simple case: no element inside or is not in the base field
-    if(C == 0 or (not C in parent.base())):
-        return False, poly;
+    new_poly = poly(**{str(var[i]): to_plug[i] for i in range(len(var))});
     
-    ## The coefficient is in the appropriate place
-    try:
-        if(C.derivative(x) != 0):
-            new_eq = change_variable(poly, y[0]/C)*C;
-            print "Recursion in Raccati, new equation: %s" %new_eq; 
-            return is_Riccati(new_eq);
-    except:
-        # Impossible to compute the derivative -- Assuming zero
-        pass;
+    if(new_poly.degree() <= 1):
+        return new_poly, y[1]/y[0];
     
-    ## Computing the constant
-    C = C/(order+1);
-    
-    to_plug = [Logarithmic_polynomials(i, parent)/C for i in index];
-    
-    new_poly = poly.polynomial()(**{str(var[i]): to_plug[i] for i in range(len(var))});
-    
-    if(is_FractionField(new_poly.parent())):
-        new_poly = new_poly.numerator();
-    if(is_InfinitePolynomialRing(new_poly.parent())):
-        new_poly = new_poly.polynomial();
-    
-    var = new_poly.parent().gens(); min_degree = {v:new_poly.degree() for v in var};
-    for m in new_poly.monomials():
-        for v in var:
-            d = m.degree(v);
-            if(d < min_degree[v]):
-                min_degree[v] = d;
-    gcd = prod([v**min_degree[v] for v in var], new_poly.parent().one());
-    new_poly = new_poly.parent()(new_poly/gcd);
-    
-    if(new_poly.degree() == 1):
-        return True, new_poly;
-    
-    return False, new_poly;
+    return None;
     
 ###################################################################################################
 ### Private functions
@@ -1220,7 +1163,7 @@ def __dprint(obj, _debug):
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
 ####################################################################################################
-__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "infinite_derivative", "diffalg_reduction", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials", "Logarithmic_polynomials", "is_Riccati", "change_variable"];
+__all__ = ["is_InfinitePolynomialRing", "get_InfinitePolynomialRingGen", "infinite_derivative", "diffalg_reduction", "toDifferentiallyAlgebraic_Below", "diff_to_diffalg", "inverse_DA", "func_inverse_DA", "guess_DA_DDfinite", "guess_homogeneous_DNfinite", "FaaDiBruno_polynomials", "Exponential_polynomials", "Logarithmic_polynomials", "is_Riccati"];
 
 # Extra functions for debugging
 def simplify_coefficients(base, coeffs, derivatives, _debug=True):
