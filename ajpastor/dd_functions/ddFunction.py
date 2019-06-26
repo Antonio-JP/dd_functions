@@ -412,10 +412,12 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         except:
             pass;
         if(F is None):
-            raise TypeError("Incompatible original structures:\n\t- %s\n\t- %s" %(pself, pS));
+            return None;
+            #raise TypeError("Incompatible original structures:\n\t- %s\n\t- %s" %(pself, pS));
         
         if(not F in IntegralDomains()):
-            raise TypeError("Pushout of the original structures is not an integral domain:\n\t- %s" %F);
+            return None;
+            #raise TypeError("Pushout of the original structures is not an integral domain:\n\t- %s" %F);
         if(not F.is_field()):
             F = F.fraction_field();
             
@@ -423,7 +425,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         polys = {str(el[0 ]):el[1 ] for el in gens_self['algebraic']}
         for el in gens_S['algebraic']:
             if(polys.get(str(el[0 ]), el[1 ]) != el[1 ]):
-                raise TypeError("Incompatible names in algebraic extensions:\n\t- %s\n\t- %s" %(el,(el[0 ],polys[str(el[0 ])])));
+                return None;
+                #raise TypeError("Incompatible names in algebraic extensions:\n\t- %s\n\t- %s" %(el,(el[0 ],polys[str(el[0 ])])));
             polys[str(el[0 ])] = el[1 ];
             
         sorted_names = sorted(polys);

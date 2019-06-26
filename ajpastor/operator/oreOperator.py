@@ -179,13 +179,7 @@ class w_OreOperator(Operator):
         
     def _compute_derivative_solution(self):
         d = self.__oa.gen();
-        try:
-            return w_OreOperator(self.base(), self.operator/d);
-        except ValueError:
-            c = self.getCoefficient(_sage_const_0 );
-            dc = self.derivate()(c);
-            
-            return w_OreOperator(self.base(), ((c*d - dc)*self.operator)/d);
+        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(d));
         
     def _compute_integral_solution(self):
         return w_OreOperator(self.base(),self.operator.annihilator_of_integral());
