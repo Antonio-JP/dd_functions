@@ -310,7 +310,21 @@ class ConversionSystem(object):
         try:
             return sum([self.base()(coefficients[i])*prod([self.map_of_vars()[str(v)]**monomials[i].degree(v) for v in variables],self.base().one()) for i in range(len(monomials))],self.base().zero());
         except Exception:
-            print "Error here";
+            multi = (len(variables) > _sage_const_1 );
+            res = self.base().zero();
+            for (k,v) in polynomial.dict().items():
+                term = self.base().one();
+                ## We distinguish between several variables and just one
+                ## because the return of poly.dict() is different
+                if(multi):
+                    for i in range(len(variables)):
+                        term *= (self.map_of_vars()[str(variables[i])]**k[i]);
+                else:
+                    term *= self.map_of_vars()[str(variables[_sage_const_0 ])]**k;
+                    
+                res += term*self.base()(v);
+                
+            return res;
 
 #        return self.base()(polynomial(**{str(v) : self.map_of_vars()[str(v)] for v in variables}));
 #        multi = (len(variables) > _sage_const_1 );

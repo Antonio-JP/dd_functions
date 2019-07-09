@@ -2461,6 +2461,99 @@ class DDFunction (IntegralDomainElement):
     def __critical_numbers__(self):
         return "(%d:%d:%d)" %(self.getOrder(),self.equation.get_jp_fo(),self.size());
     
+    def _latex_(self, name="f"):
+        ## Building all coefficients in the differential equation
+        equ, simpl = self._latex_coeffs_();
+        
+        ## Building the starting part
+        res = "\\left\\{\\begin{array}{c}\n"
+        
+        ## Building the differential equation
+        res += "%s = 0,\\\\\n" %equ;
+        
+        ## Adding the non-polynomial coefficients
+        if(any(el != True for el in simpl)):
+            res += "where\\\\\n";
+            for i in range(len(simpl)):
+                if(simpl[i] != True):
+                    res += self[i]._latex_() + "\\\\\n";
+        
+        ## Adding the initial conditions
+        res += "\\hdashline\n";
+        res += self._latex_ic_();
+        
+        ## Closing the environment
+        res += "\\end{array}\\right.";
+        
+        return res;
+        
+    def _latex_coeffs_(self, c_name="f"):
+        next_name = chr(ord(c_name[0])+1);
+        parent = self.parent();
+        coeffs = [self[i] for i in range(self.getOrder()+1)];
+        simpl = [(not is_DDRing(parent.base()))]*(self.getOrder()+1);
+        sgn = ['+']*(self.getOrder()+1);
+        for i in range(len(coeffs)):
+            ## Computing the sign and string for the coefficient
+            current = coeffs[i];
+            
+            if(not simpl[i] and current.is_constant): # Recursive and constant case
+                current = current.getInitialValue(0); # Reduced to constant case
+                simpl[i] = True;
+            
+            ## Constant cases
+            if(current == -1):
+                sgn[i] = "-"
+                coeffs[i] = "";
+            elif(current == 1):
+                coeffs[i] = "";
+            elif(simpl[i]==True and current < 0):
+                sgn[i] = "-"
+                coeffs[i] = latex(current);
+            elif(simpl[i] == True): # Non constant and simple case
+                coeffs[i] = "\\left(" + latex(current) + "\\right)";
+            else: # Recursive cases
+                simpl[i] = "%s_{%d}" %(next_name, i);
+                coeffs[i] = "%s(x)" %simpl[i];
+            
+            ## Computing the corresponding function factor
+            if(i == 0):
+                coeffs[i] += "%s(x)" %c_name;
+            elif(i == 1):
+                coeffs[i] += "%s'(x)" %c_name;
+            elif(i == 2):
+                coeffs[i] += "%s''(x)" %c_name;
+            else:
+                coeffs[i] += "%s^{(%d)}(x)" %c_name;
+                
+        ## Building the final line from the highest order to the minimal
+        coeffs.reverse(); sgn.reverse();
+        
+        final = "";
+        for i in range(len(coeffs)):
+            ## If it is a non-zero coefficient
+            if(self[i] != 0):
+                ## Adding the sign
+                if(i > 0 or sgn[i] == '-'):
+                    final += "%s " %sgn[i];
+                ## Adding the value
+                final += coeffs[i];
+                
+        return final, simpl;
+    
+    def _latex_ic_(self):
+        res = [];
+        for i in range(self.equation.get_jp_fo()+1):
+            if(i == 0):
+                res += ["f(0) = %s" %latex(self.getInitialValue(i))];
+            elif(i == 1):
+                res += ["f'(0) = %s" %latex(self.getInitialValue(i))];
+            elif(i == 2):
+                res += ["f''(0) = %s" %latex(self.getInitialValue(i))];
+            else:
+                res += ["f^{(%d)}(0) = %s" %latex(self.getInitialValue(i))];
+        return ", ".join(res);        
+    
     def _to_command_(self):
         if(self.__name is None):
             return "%s.element(%s,%s)" %(command(self.parent()), _command_list(self.getOperator().getCoefficients()), self.getInitialValueList(self.getOrder()));
