@@ -1,33 +1,70 @@
 SHELL:=/bin/bash
-BASE=ajpastor
 ZIP=diff_defined_functions# ZIP name
-VERSION=$(shell cat ./package-version.txt)
+VERSION=$(shell cat ./VERSION)
 
-all: 
-	sage -sh sage-pip-install .
+# change to your sage command if needed
+SAGE = sage
+
+# Package folder
+PACKAGE = ajpastor
+
+all: install test
 	
 create:
 	@echo "Creating main directories..."
-	@mkdir -p ./$(BASE)
+	@mkdir -p ./$(PACKAGE)
 	@mkdir -p ./releases/old
-	@echo "from pkgutil import extend_path;" > ./$(BASE)/__init__.py
-	@echo "__path__ = extend_path(__path__, __name__);" >> ./$(BASE)/__init__.py
+	@echo "from pkgutil import extend_path;" > ./$(PACKAGE)/__init__.py
+	@echo "__path__ = extend_path(__path__, __name__);" >> ./$(PACKAGE)/__init__.py
 	
-zip: clean_pyc
+# Installing commands
+install:
+	$(SAGE) -pip install --upgrade --no-index -v .
+
+uninstall:
+	$(SAGE) -pip uninstall $(PACKAGE)
+
+develop:
+	$(SAGE) -pip install --upgrade -e .
+
+test:
+	$(SAGE) setup.py test
+
+coverage:
+	$(SAGE) -coverage $(PACKAGE)/*
+	
+# Documentation commands
+doc:
+	cd docs && $(SAGE) -sh -c "make html"
+
+doc-pdf:
+	cd docs && $(SAGE) -sh -c "make latexpdf"
+	
+# Distribution commands
+	
+zip: clean
 	@echo "Compressing the project into file" $(ZIP)".zip"...
 	@rm -f ./releases/$(ZIP)__$(VERSION).zip
-	@zip -r ./releases/$(ZIP)__$(VERSION).zip $(BASE) type SPKG.txt setup.py package-version.txt Makefile dependencies
+	@zip -r ./releases/$(ZIP)__$(VERSION).zip $(PACKAGE) type SPKG.txt setup.py package-version.txt Makefile dependencies
 	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip
 	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/$(ZIP).zip
-	
-clean_pyc:
-	@echo "Cleaning the Python precompiled files (.pyc)"
-	@find . -name "*.pyc" -exec rm {} +
 	
 git: zip
 	@echo "Pushing changes to public git repository"
 	@git add -A
 	@git commit
 	@git push
-    
+	
+# Cleaning commands
+clean: clean_doc clean_pyc
+
+clean_doc:
+	@echo "Cleaning documentation"
+	@cd docs && $(SAGE) -sh -c "make clean"
+	
+clean_pyc:
+	@echo "Cleaning the Python precompiled files (.pyc)"
+	@find . -name "*.pyc" -exec rm {} +
+
+.PHONY: all install develop test coverage clean clean_doc doc doc-pdf
 	

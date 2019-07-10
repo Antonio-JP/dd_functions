@@ -16,7 +16,6 @@ from sage.categories.pushout import ConstructionFunctor;
 
 #ajpastor imports
 from ajpastor.operator.operator import Operator;
-from ajpastor.operator.oreOperator import w_OreOperator;
 from ajpastor.operator.directStepOperator import DirectStepOperator;
 from ajpastor.operator.fullLazyOperator import FullLazyOperator;
 
@@ -3031,6 +3030,8 @@ def _command_list(elements):
 # Some global pre-defined DD-Rings
 DFinite = None;
 try:
+    from ore_algebra import *;
+    from ajpastor.operator.oreOperator import w_OreOperator;
     DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator);
 except ImportError:
     ## No ore_algebra package found
