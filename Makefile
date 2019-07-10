@@ -6,7 +6,7 @@ VERSION=$(shell cat ./VERSION)
 SAGE = sage
 
 # Package folder
-PACKAGE = sage_sample
+PACKAGE = ajpastor
 
 all: install test
 	
@@ -66,5 +66,5 @@ clean_pyc:
 	@echo "Cleaning the Python precompiled files (.pyc)"
 	@find . -name "*.pyc" -exec rm {} +
 
-.PHONY: all install develop test coverage clean clean-doc doc doc-pdf
+.PHONY: all install develop test coverage clean clean_doc doc doc-pdf
 	

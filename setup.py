@@ -42,7 +42,12 @@ setup(
       'Programming Language :: Python :: 2.7',
     ], # classifiers list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
     keywords = "holonomic SageMath dfinite",
-    packages = ["ajpastor"],
+    packages = ["ajpastor",
+        "ajpastor.dd_functions",
+        "ajpastor.operator",
+        "ajpastor.lazy",
+        "ajpastor.misc",
+        "ajpastor.tests"],
     cmdclass = {'test': SageTest}, # adding a special setup command for tests
     setup_requires   = ['sage-package'],
     install_requires = ['sage-package', 'sphinx'],
