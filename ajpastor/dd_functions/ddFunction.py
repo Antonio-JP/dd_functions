@@ -2463,7 +2463,7 @@ class DDFunction (IntegralDomainElement):
     
     def _latex_(self, name="f"):
         ## Building all coefficients in the differential equation
-        equ, simpl = self._latex_coeffs_();
+        equ, simpl = self._latex_coeffs_(c_name=name);
         
         ## Building the starting part
         res = "\\left\\{\\begin{array}{c}\n"
@@ -2476,11 +2476,11 @@ class DDFunction (IntegralDomainElement):
             res += "where\\\\\n";
             for i in range(len(simpl)):
                 if(simpl[i] != True):
-                    res += self[i]._latex_() + "\\\\\n";
+                    res += simpl[i] + ":" + self[i]._latex_(name=simpl[i]) + "\\\\\n";
         
         ## Adding the initial conditions
         res += "\\hdashline\n";
-        res += self._latex_ic_();
+        res += self._latex_ic_(name=name);
         
         ## Closing the environment
         res += "\\end{array}\\right.";
@@ -2509,7 +2509,7 @@ class DDFunction (IntegralDomainElement):
                 coeffs[i] = "";
             elif(simpl[i]==True and current < 0):
                 sgn[i] = "-"
-                coeffs[i] = latex(current);
+                coeffs[i] = latex(-current);
             elif(simpl[i] == True): # Non constant and simple case
                 coeffs[i] = "\\left(" + latex(current) + "\\right)";
             else: # Recursive cases
@@ -2532,7 +2532,7 @@ class DDFunction (IntegralDomainElement):
         final = "";
         for i in range(len(coeffs)):
             ## If it is a non-zero coefficient
-            if(self[len(coeffs)-i-1] != 0):
+            if(not self[len(coeffs)-i-1] == Integer(0)):
                 ## Adding the sign
                 if(i > 0 or sgn[i] == '-'):
                     final += "%s " %sgn[i];
@@ -2541,17 +2541,17 @@ class DDFunction (IntegralDomainElement):
                 
         return final, simpl;
     
-    def _latex_ic_(self):
+    def _latex_ic_(self, name="f"):
         res = [];
         for i in range(self.equation.get_jp_fo()+1):
             if(i == 0):
-                res += ["f(0) = %s" %latex(self.getInitialValue(i))];
+                res += ["%s(0) = %s" %(name,latex(self.getInitialValue(i)))];
             elif(i == 1):
-                res += ["f'(0) = %s" %latex(self.getInitialValue(i))];
+                res += ["%s'(0) = %s" %(name,latex(self.getInitialValue(i)))];
             elif(i == 2):
-                res += ["f''(0) = %s" %latex(self.getInitialValue(i))];
+                res += ["%s''(0) = %s" %(name, latex(self.getInitialValue(i)))];
             else:
-                res += ["f^{(%d)}(0) = %s" %(i,latex(self.getInitialValue(i)))];
+                res += ["%s^{(%d)}(0) = %s" %(name, i,latex(self.getInitialValue(i)))];
         return ", ".join(res);        
     
     def _to_command_(self):
