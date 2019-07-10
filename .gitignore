@@ -1,2 +1,5 @@
+# Directory files for Dolphin configuration
+.directory
 
+# Compiled files
 *.pyc
