@@ -2524,7 +2524,7 @@ class DDFunction (IntegralDomainElement):
             elif(i == 2):
                 coeffs[i] += "%s''(x)" %c_name;
             else:
-                coeffs[i] += "%s^{(%d)}(x)" %c_name;
+                coeffs[i] += "%s^{(%d)}(x)" %(c_name, i);
                 
         ## Building the final line from the highest order to the minimal
         coeffs.reverse(); sgn.reverse();
@@ -2532,7 +2532,7 @@ class DDFunction (IntegralDomainElement):
         final = "";
         for i in range(len(coeffs)):
             ## If it is a non-zero coefficient
-            if(self[i] != 0):
+            if(self[len(coeffs)-i-1] != 0):
                 ## Adding the sign
                 if(i > 0 or sgn[i] == '-'):
                     final += "%s " %sgn[i];
@@ -2551,7 +2551,7 @@ class DDFunction (IntegralDomainElement):
             elif(i == 2):
                 res += ["f''(0) = %s" %latex(self.getInitialValue(i))];
             else:
-                res += ["f^{(%d)}(0) = %s" %latex(self.getInitialValue(i))];
+                res += ["f^{(%d)}(0) = %s" %(i,latex(self.getInitialValue(i)))];
         return ", ".join(res);        
     
     def _to_command_(self):
