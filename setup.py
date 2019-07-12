@@ -21,10 +21,10 @@ setup(
     name = "dd_functions",
     version = readfile("VERSION").strip(), # the VERSION file is shared with the documentation
     description='A Sage package for DD-finite functions',
-    ong_description = readfile("README.txt"), # get the long description from the README
+    # long_description = readfile("README.txt"), # get the long description from the README
     # For a Markdown README replace the above line by the following two lines:
-    #  long_description = readfile("README.md"),
-    #  long_description_content_type="text/markdown",
+    long_description = readfile("README.md"),
+    long_description_content_type="text/markdown",
     url='https://www.dk-compmath.jku.at/Members/antonio/sage-package-dd_functions',
     author = "Antonio Jimenez-Pastor",
     author_email = "antonio.jimenez-pastor@dk-compmath.jku.at",
@@ -47,7 +47,8 @@ setup(
         "ajpastor.operator",
         "ajpastor.lazy",
         "ajpastor.misc",
-        "ajpastor.tests"],
+        "ajpastor.tests",
+        "ajpastor.tests.dd_functions"],
     cmdclass = {'test': SageTest}, # adding a special setup command for tests
     setup_requires   = ['sage-package'],
     install_requires = ['sage-package', 'sphinx'],

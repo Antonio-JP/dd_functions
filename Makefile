@@ -34,7 +34,7 @@ coverage:
 	$(SAGE) -coverage $(PACKAGE)/*
 	
 # Documentation commands
-doc:
+doc: install
 	cd docs && $(SAGE) -sh -c "make html"
 
 doc-pdf:

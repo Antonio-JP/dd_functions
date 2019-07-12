@@ -1,3 +1,36 @@
+r"""
+Python file for DD-functions and DD-rings
+
+This packages provides all the functionality for computing with Differentially Definable Functions (DD-functions) and 
+the rings they form (DD-rings). It allows to create further DD-rings, compare them and add constant parameters to the
+computations. The user can also compute several closure properties on te DD-functions such as addition, product, division
+composition, etc.
+
+EXAMPLES::
+
+    sage: from ajpastor.dd_functions import *
+    sage: DFinite
+    DD-Ring over (Univariate Polynomial Ring in x over Rational Field)
+    sage: f = DFinite.element([-1,1],[1])
+    sage: f.getInitialValueList(10) == [1]*10
+    True
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 
 from sage.all_cmdline import *   # import sage library
 
@@ -28,9 +61,9 @@ from ajpastor.misc.ring_w_sequence import sequence;
 #####################################################
 ### Definition of some exceptions
 #####################################################
-class DevelopementError(NotImplementedError):
-    def __init__(self, name):
-        NotImplementedError.__init__(self, "Method %s still under construction. Please be patient and wait until it is finished." %name);
+# class DevelopementError(NotImplementedError):
+#     def __init__(self, name):
+#         NotImplementedError.__init__(self, "Method %s still under construction. Please be patient and wait until it is finished." %name);
 
 #####################################################
 ### Definition of the particular warnings we are interested to raise
@@ -62,17 +95,46 @@ def _aux_derivation(p):
 ### Class for DD-Rings
 #####################################################
 def is_DDRing(ring):
+    '''
+        Method that checks if an object is a DDRing. 
+
+        This method provides a general function to check the class of an object without knowing 
+        exactly the name of the basic class of the module. This is basically an alias for the command 
+        ``isinstance(ring, DDRing)``.
+
+        INPUT:
+            - ``ring`` -- object to be checked.
+
+        OUTPUT: True or False depending if ``ring`` is a DDRing or not.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *;
+            sage: is_DDRing(DFinite)
+            True
+            sage: is_DDRing(DDRing(QQ))
+            True
+            sage: is_DDRing(QQ)
+            False
+
+        Also ``ParametrizedDDRing`` return True with this method::
+
+            sage: is_DDRing(ParametrizedDDRing(DFinite, ['a']))
+            True
+
+        SEE ALSO:
+            * "DDRing"
+    '''
     return isinstance(ring, DDRing);
 
 class DDRing (Ring_w_Sequence, IntegralDomain):
     Element = None;
     
-    #_Default_Base = PolynomialRing(QQ,x);
-    _Default_Depth = 1 ;
-    _Default_Base_Field = None;
-    _Default_Invertibility = None;
-    _Default_Derivation = None;
-    _Default_Operator = None;
+    _Default_Depth = 1 ; # Default value for the depth argument in __init__
+    _Default_Base_Field = None; # Default value for the base_field argument in __init__
+    _Default_Invertibility = None; # Default value for the invertibility argument in __init__
+    _Default_Derivation = None; # Default value for the base_derivation argument in __init__
+    _Default_Operator = None; # Default value for the default_operator argument in __init__
     _Default_Parameters = [
         ("base", None),
         ("depth", _Default_Depth),
@@ -81,9 +143,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         ("derivation", _Default_Derivation),
         ("default_operator", _Default_Operator)];
     
-    _CACHED_DD_RINGS = {};
+    _CACHED_DD_RINGS = {}; # Variable for cached DDRings (Unique Representation idea)
     
-    _Default_variable = 'x';
+    _Default_variable = 'x'; # Stati name for the default variable
     
     #################################################
     ### Static methods
@@ -101,15 +163,23 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         from sage.categories.pushout import AlgebraicExtensionFunctor as algebraic;
         const_S = S.construction(); const_R = R.construction();
         
-        if(not(isinstance(const_S[0 ],algebraic) and isinstance(const_R[0 ], algebraic))):
+        ## Checking both elements are constructed as AlgebraicExtension
+        if(not(isinstance(const_S[0],algebraic) and isinstance(const_R[0], algebraic))):
+            ## If not, returning the equality operator
             return R==S;
         
-        if(const_S[1 ] != const_R[1 ]):
+        ## If the base field is different, the result is False
+        if(const_S[1] != const_R[1]):
             return False;
         
-        polys_R = const_R[0 ].polys; polys_S = const_S[0 ].polys;
-        names_R = const_R[0 ].names; names_S = const_S[0 ].names;
+        # Getting the defining polynomials of the extensions
+        polys_R = const_R[0].polys; polys_S = const_S[0].polys;
+        # Getting the names defining the new variables on the extensions
+        names_R = const_R[0].names; names_S = const_S[0].names;
         
+        # We know comapre the four lists. We do not care about the order, so 
+        # QQ(i)(sqrt(2)) == QQ(sqrt(2))(i). We check that the corresponding 
+        # polynomials defined the same name.
         if(len(polys_R) != len(polys_S)):
             return False;
         
@@ -120,30 +190,48 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                     return False;
             except ValueError:
                 return False;
+
+        # We check all the generators of R are in the generators of S 
+        # and they have the same length. Hence they are equal
         return True;
         
     @staticmethod
     def __get_gens__(parent):
+        '''
+            Static method that retrieves the complete list of a Parent object until the method gens returns nothing or `1`.
+
+            This method is particularly focused on Algebraic extensions, Polynomial extenstions and Fraction Fields.
+        '''
         from sage.categories.pushout import AlgebraicExtensionFunctor as algebraic;
         from sage.categories.pushout import PolynomialFunctor as polynomial;
         from sage.categories.pushout import MultiPolynomialFunctor as multi_polynomial;
         from sage.categories.pushout import FractionField as fraction;
         
+        # We start from the current parent and go step by step in its construction getting
+        # all the generators
         current = parent; 
+
+        # Checking the parent object is a constructed object
         try:
             const = parent.construction(); 
         except AttributeError:
             raise RuntimeError("Impossible to get construction of %s" %parent);
+
+        # Getting the generators of the current element
         gens = [el for el in parent.gens()];
         
+        # The result will distinguish between algebraic extensions, polynomial extenstions and other type of generators.
         res = {'algebraic' : [], 'polynomial': [], 'other' : []};
         
+        # We start the main loop
         while((not(const is None)) and (not (1  in gens))):
-            if(isinstance(current, DDRing) or isinstance(const[0 ], polynomial) or isinstance(const[0 ], multi_polynomial)):
+            # If the last construction is DDRing or polynomial, we add the generators as polynomial generators
+            if(isinstance(current, DDRing) or isinstance(const[0], polynomial) or isinstance(const[0], multi_polynomial)):
                 res['polynomial'] += list(current.gens());
-            elif(isinstance(const[0 ], algebraic)):
-                for i in range(len(const[0 ].polys)):
-                    name = const[0 ].names[i];
+            # If the construction is an algebraic extension, we add the generators as algebraic generators
+            elif(isinstance(const[0], algebraic)):
+                for i in range(len(const[0].polys)):
+                    name = const[0].names[i];
                     found = None;
                     for gen in current.gens():
                         if(current(name) == gen):
@@ -151,15 +239,19 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                             break;
                     if(found is None):
                         raise TypeError("Impossible error: no generator for a name!!");
-                    res['algebraic'] += [(found, const[0 ].polys[i], const[1 ])];
-            elif(not isinstance(const[0 ], fraction)):
+                    # Algebraic generators are store with defining polynomial + algebraic functor
+                    res['algebraic'] += [(found, const[0].polys[i], const[1])];
+            # Otherwise we get all the generators skipping the FractionField construction
+            elif(not isinstance(const[0], fraction)):
                 res['other'] += list(current.gens());
                 
-            current = const[1 ];
+            current = const[1];
             const = current.construction();
             
-        ## Cleaning "1" from the result
-        ## Put everything as tuples
+        # At this point we have all the generators (including maybe a 1) splitted in the type of extension
+
+        # Cleaning "1" from the result
+        # Put everything as tuples
         try:
             if(1  in res['algebraic']):
                 raise TypeError("1 is a generator of an algebraic extension");
@@ -172,7 +264,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             res['other'] = tuple(set(res['other']));
         except TypeError:
             raise RuntimeError("Non hashable object found");
-            
+        
+
+        # Returning the basic parent structure and the list and types of generators    
         return res, current;
         
     #################################################
@@ -180,29 +274,36 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     #################################################
     @staticmethod
     def __classcall__(cls, *args, **kwds):
+        '''
+            Particular builder for DDRings. 
+
+            This method do a special checking of uniqueness for two DDRings. It maps all the arguments provided by the user
+            and transform them into a standard notation that will be hashable and will allow the system to recognize two
+            exact DDRings.
+        '''
         final_args = [];
                 
         ## We first compile the parameters the user send
         current = 0 ;
-        if(len(args) != 1  or args[0 ] != None):
+        if(len(args) != 1  or args[0] != None):
             for i in range(len(args)):
-                final_args += [[DDRing._Default_Parameters[i][0 ], args[i]]];
+                final_args += [[DDRing._Default_Parameters[i][0], args[i]]];
             current = len(args);
         
         for i in range(max(1,current), len(DDRing._Default_Parameters)):
-            final_args += [[DDRing._Default_Parameters[i][0 ], kwds.get(DDRing._Default_Parameters[i][0 ],DDRing._Default_Parameters[i][1 ])]];
+            final_args += [[DDRing._Default_Parameters[i][0], kwds.get(DDRing._Default_Parameters[i][0],DDRing._Default_Parameters[i][1])]];
             
         ## Managing the depth over DDRings
-        if(isinstance(final_args[0 ][1 ], DDRing)):
-            final_args[1 ][1 ] = final_args[1 ][1 ]+final_args[0 ][1 ].depth();
-            final_args[0 ][1 ] = final_args[0 ][1 ]._DDRing__original;
+        if(isinstance(final_args[0][1], DDRing)):
+            final_args[1][1] = final_args[1][1]+final_args[0][1].depth();
+            final_args[0][1] = final_args[0][1]._DDRing__original;
             
         ## Casting to tuple (so is hashable)
-        to_hash = tuple(tuple(el) for el in final_args[:2 ]);
+        to_hash = tuple(tuple(el) for el in final_args[:2]);
         final_args = tuple(tuple(el) for el in final_args);
         
-        if(final_args[1 ][1 ] == 0 ):
-            return final_args[0 ][1 ];
+        if(final_args[1][1] == 0 ):
+            return final_args[0][1];
             
         if(not cls in DDRing._CACHED_DD_RINGS):
             DDRing._CACHED_DD_RINGS[cls] = {};
@@ -215,12 +316,38 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     
     def __init__(self, base, depth = _Default_Depth, base_field = _Default_Base_Field, invertibility = _Default_Invertibility, derivation = _Default_Derivation, default_operator = _Default_Operator):
         '''
-            Class representing the Ring of Differentially Definable Functions with coefficients over a base ring. It can be built using different parameter configurations:
-                - ``base``: is the ring where the coefficients of the differential equation will be. It is set by default as `\mathbb{Q}[x]`.
-                - ``invertibility``: a function to decide if the argument is a unit in the ring we are building.
-                - ``derivation``: a function to derivate elements in the coefficients ring.
+            Class for Differentially Definable Rings (or DDRing).
+
+            This class represents the Ring of Differentially Definable Functions with coefficients over a base ring. This rings contains all the functions
+            (formal power series) that satisfy a linear differential equation with coefficients in a base ring.
+
+            INPUT::
+                - ``base`` -- an integral domain. Will provide the coefficients for the differential equations.
+                - ``depth`` -- positive integer. Points how many iterations of this construction we want.
+                - ``base_field`` -- a field. The elements of ``self`` will be formal power series over this field.
+                - ``invertibility`` -- method. This method checks if an element of ``base`` is invertible or not.
+                - ``derivation`` -- method. This method computes the derivative of elements in ``base``.
+                - ``default_operator`` -- class. Class inheriting from ``ajpastor.operator.Operator`` for the differential equations.
+
+            More formally, ``(base,derivation)`` is a Differential Integral Domain and ``(self, self.derivative)`` a Differential Extension.
+
+            Note that this objects are unique, so calling the constructor with the same arguments retrieve the same object.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *;
+                sage: DDRing(QQ)
+                DD-Ring over (Rational Field)
+                sage: DDRing(QQ) is DDRing(QQ)
+                True
                 
-            More formally, ``(base,derivation)`` should be a Differential Ring and the result (represented by this class) will be another Differential Ring which extends the original.
+            We can iterate the process using an iterative call of the constructor or the ``depth`` argument::
+
+                sage: DDRing(QQ, depth=2)
+                DD-Ring over (DD-Ring over (Rational Field))
+                sage: DDRing(QQ, depth=2) is DDRing(DDRing(QQ))
+                True
+
         '''
         ## Other attributes initialization
         self.__variables = None;
@@ -256,8 +383,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                     from sage.categories.pushout import PolynomialFunctor, FractionField;
                     current = base;
                     const = base.construction();
-                    while((not (const is None)) and (isinstance(const[0 ], PolynomialFunctor) or isinstance(const[0 ],FractionField))):
-                        current = const[1 ];
+                    while((not (const is None)) and (isinstance(const[0], PolynomialFunctor) or isinstance(const[0],FractionField))):
+                        current = const[1];
                         const = current.construction();
                         
                     if(not current.is_field()):
@@ -274,7 +401,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             ### Saving the invertibility criteria
             if(invertibility is None):
                 try:
-                    self_var = self.variables(True,False)[0 ];
+                    self_var = self.variables(True,False)[0];
                     self.base_inversionCriteria = lambda p : p(**{self_var : 0 }) == 0 ;
                 except IndexError:
                     self.base_inversionCriteria = lambda p : self.base()(p)==0 ;
@@ -284,7 +411,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             ### Saving the base derivation
             if(derivation is None):
                 try:
-                    self_var = self.variables(True,False)[0 ];
+                    self_var = self.variables(True,False)[0];
                     self.base_derivation = lambda p : p.derivative(self.base()(self_var));
                 except IndexError:
                     self.base_derivation = lambda p : 0 ;
@@ -343,7 +470,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             looking = gens_S['algebraic'][i];
             found = False;
             for el in gens_self['algebraic']:
-                if(el[1 ] == looking[1 ] and str(el[0 ]) == str(looking[0 ])):
+                if(el[1] == looking[1] and str(el[0]) == str(looking[0])):
                     found = True;
                     break;
             if(not found):
@@ -358,6 +485,11 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             return S.depth() <= self.depth();
         
     def __is_polynomial(self, S):
+        '''
+            Method that checks if an object is a polynomial ring. 
+
+            This method checks if any object is either a Univariate Polynomial ring or a Multivariate Polynomial ring
+        '''
         from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial;
         from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
         
@@ -421,12 +553,12 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             F = F.fraction_field();
             
         ## Extending the field with algebraic extensions
-        polys = {str(el[0 ]):el[1 ] for el in gens_self['algebraic']}
+        polys = {str(el[0]):el[1] for el in gens_self['algebraic']}
         for el in gens_S['algebraic']:
-            if(polys.get(str(el[0 ]), el[1 ]) != el[1 ]):
+            if(polys.get(str(el[0]), el[1]) != el[1]):
                 return None;
-                #raise TypeError("Incompatible names in algebraic extensions:\n\t- %s\n\t- %s" %(el,(el[0 ],polys[str(el[0 ])])));
-            polys[str(el[0 ])] = el[1 ];
+                #raise TypeError("Incompatible names in algebraic extensions:\n\t- %s\n\t- %s" %(el,(el[0],polys[str(el[0])])));
+            polys[str(el[0])] = el[1];
             
         sorted_names = sorted(polys);
         sorted_polys = [polys[el] for el in sorted_names];
@@ -459,18 +591,26 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         return R;
         
     def _has_coerce_map_from(self, S):
+        '''
+            Standard implementation for ``_has_coerce_map_from``
+        '''
         coer =  self._coerce_map_from_(S);
         return (not(coer is False) and not(coer is None));
         
     def _element_constructor_(self, *args, **kwds):
+        '''
+            Implementation of _element_onstructor_.
+
+            This method describes how to interpret the arguments that a DDRing can received to cast one element to a DDFunction in ``self``.
+        '''
         el_class = self.element_class;
         if(len(args) < 1 ):
             raise ValueError("Impossible to build a lazy element without arguments");
         
-        if(args[0 ] is self):
-            X = args[1 ];
+        if(args[0] is self):
+            X = args[1];
         else:
-            X = args[0 ];
+            X = args[0];
            
         try:
             if(isinstance(X, DDFunction)):
@@ -508,7 +648,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
                     return el.change_init_values([sequence(X,i)*factorial(i) for i in range(el.equation.get_jp_fo()+1 )], name=name);
                 except AttributeError:
                     try:
-                        return self.element([1 ],[], self.base()(X), name=str(X));
+                        return self.element([1],[], self.base()(X), name=str(X));
                     except Exception:
                         print "WHAT??";
                         return self(str(element));
@@ -516,6 +656,15 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e));
             
     def gens(self):
+        '''
+            Implementation of the method ``gens``.
+
+            This method returns a list with all the generators of the ``DDRing``. This usually means nothing, although some ``DDRing`` can 
+            retrieve some special variables or its parameter as genertors.
+
+            OUTPUT::
+                List of generators provided by this ``DDRing``.
+        '''
         return ();
     
     def ngens(self):
@@ -659,14 +808,14 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         element = self(element);
             
         rx = X;
-        self_var = str(self.variables(True)[0 ]);
+        self_var = str(self.variables(True)[0]);
         if((rx is None) and (self_var in input)):
             rx = input.pop(self_var);
         if not (rx is None):
             if(rx == 0 ):
                 return element.getInitialValue(0 );
             elif(rx in self.base_field):
-                return element.numerical_solution(rx,**input)[0 ];
+                return element.numerical_solution(rx,**input)[0];
             try:
                 return element.compose(rx);
             except ValueError:
@@ -752,9 +901,9 @@ class ParametrizedDDRing(DDRing):
     @staticmethod
     def __classcall__(cls, *args, **kwds):
         ## In order to call the __classcall__ of DDRing we treat the arguments received
-        base_ddRing = args[0 ]; 
+        base_ddRing = args[0]; 
         if(len(args) > 1 ):
-            parameters = args[1 ];
+            parameters = args[1];
         else:
             parameters = kwds.get('parameters',None);
         names = kwds.get('names',None);
@@ -791,21 +940,21 @@ class ParametrizedDDRing(DDRing):
         base_field = base_ddRing.base_field;
         constructions = [base_ddRing.construction()]; # Here is the DD-Ring operator
             
-        while(constructions[-1 ][1 ] != base_field):
-            constructions += [constructions[-1 ][1 ].construction()];
+        while(constructions[-1][1] != base_field):
+            constructions += [constructions[-1][1].construction()];
              
         new_basic_field = PolynomialRing(base_field, parameters).fraction_field();  
         current = new_basic_field;
         for i in range(1 ,len(constructions)):
-            current = constructions[-i][0 ](current);
+            current = constructions[-i][0](current);
             
-        if(constructions[0 ][0 ].depth() > 1 ):
-            base_ring = ParametrizedDDRing(DDRing(base_ddRing.original_ring(),depth=constructions[0 ][0 ].depth()-1 ), parameters);
+        if(constructions[0][0].depth() > 1 ):
+            base_ring = ParametrizedDDRing(DDRing(base_ddRing.original_ring(),depth=constructions[0][0].depth()-1 ), parameters);
             ring = DDRing.__classcall__(cls, base_ring, 1 , base_field = new_basic_field, default_operator = base_ddRing.default_operator);
             Ring_w_Sequence.__init__(ring, base_ring, method = lambda p,n : ring(p).getSequenceElement(n));
             IntegralDomain.__init__(ring, base_ring, category=IntegralDomains());
         else:
-            ring = DDRing.__classcall__(cls, current, depth = constructions[0 ][0 ].depth(), base_field = new_basic_field, default_operator = base_ddRing.default_operator);
+            ring = DDRing.__classcall__(cls, current, depth = constructions[0][0].depth(), base_field = new_basic_field, default_operator = base_ddRing.default_operator);
             
         ring.__init__(base_ddRing, parameters);
         return ring;
@@ -846,7 +995,7 @@ class ParametrizedDDRing(DDRing):
         return self.__baseDDRing;
         
     def _repr_(self):
-        res = "(%s" %str(self.parameters()[0 ]);
+        res = "(%s" %str(self.parameters()[0]);
         for i in range(1 ,len(self.parameters())):
             res += ", " + str(self.parameters()[i]);
         res += ")";
@@ -891,7 +1040,7 @@ class ParametrizedDDRing(DDRing):
     # Override eval method from DDRing
     def eval(self, element, X=None, **input):
         rx = X;
-        self_var = str(self.variables(True)[0 ]);
+        self_var = str(self.variables(True)[0]);
         if(X is None and self_var in input):
             rx = input.pop(self_var);
         ### If X is not None, then we evaluate the variable of the ring
@@ -975,8 +1124,8 @@ class DDFunction (IntegralDomainElement):
                 for el in init_values:
                     if (not el == 0 ):
                         raise ValueError("Incompatible equation (%s) and initial values (%s)" %(input, init_values));
-                init = [0 ];
-                equation = [0 ,1 ];
+                init = [0];
+                equation = [0 ,1];
                 inhom = 0 ;
         else:
             equation = input;
@@ -1272,7 +1421,7 @@ class DDFunction (IntegralDomainElement):
         if(self.getOrder() == 0 ):
             raise ZeroDivisionError("Impossible to invert the zero function");
         elif(self.getOrder() == 1 ):
-            return self.parent().element([-coeffs[0 ],coeffs[1 ]], [1 /self.getInitialValue(0 )], check_init=False, name=newName);
+            return self.parent().element([-coeffs[0],coeffs[1]], [1 /self.getInitialValue(0 )], check_init=False, name=newName);
         else:
             newDDRing = DDRing(self.parent());
             return newDDRing.element([self.derivative(), self], [1 /self.getInitialValue(0 )], check_init=False, name=newName);
@@ -1297,7 +1446,7 @@ class DDFunction (IntegralDomainElement):
         ### Computing the new name
         newName = None;
         if(not(self.__name is None) and (not(other.__name is None))):
-            if(other.__name[0 ] == '-'):
+            if(other.__name[0] == '-'):
                 newName = DinamicString("_1_2", [self.__name, other.__name]); 
             else:
                 newName = DinamicString("_1+_2", [self.__name, other.__name]); 
@@ -1308,7 +1457,7 @@ class DDFunction (IntegralDomainElement):
             result = None;
             if(self.is_constant and other.is_constant):
                 parent = self.parent();
-                newOperator = [0 ,1 ];
+                newOperator = [0 ,1];
                 newInit = [self(0 )+other(0 )];
                 result = parent.element(newOperator, newInit, check_init = False, name=newName);
             elif(other.is_constant):
@@ -1369,7 +1518,7 @@ class DDFunction (IntegralDomainElement):
             result = None;
             if(self.is_constant and other.is_constant):
                 parent = self.parent();
-                newOperator = [0 ,1 ];
+                newOperator = [0 ,1];
                 newInit = [self(0 )-other(0 )];
                 result = parent.element(newOperator, newInit, check_init = False, name=newName);
             elif(other.is_constant):
@@ -1503,7 +1652,7 @@ class DDFunction (IntegralDomainElement):
             while(self.getInitialValue(n) == 0 ):
                 n = n+1 ;
                 
-            X = self.parent().variables()[0 ];
+            X = self.parent().variables()[0];
             if(n == 0 ):
                 return (0 ,self);
             else:
@@ -1547,8 +1696,8 @@ class DDFunction (IntegralDomainElement):
         s_ze = self.zero_extraction;
         o_ze = other.zero_extraction;
         
-        if(s_ze[0 ] >= o_ze[0 ]):
-            result = self.parent()(x)**(s_ze[0 ]-o_ze[0 ])*(s_ze[1 ]*o_ze[1 ].inverse);
+        if(s_ze[0] >= o_ze[0]):
+            result = self.parent()(x)**(s_ze[0]-o_ze[0])*(s_ze[1]*o_ze[1].inverse);
             
             ### Computing the new name
             newName=None;
@@ -1558,7 +1707,7 @@ class DDFunction (IntegralDomainElement):
             result.__name = newName;
             return result;
         else:
-            raise ValueError("Impossible perform a division if the x factor of the denominator (%d) is greater than in the numerator (%d)"%(o_ze[0 ],s_ze[0 ]));
+            raise ValueError("Impossible perform a division if the x factor of the denominator (%d) is greater than in the numerator (%d)"%(o_ze[0],s_ze[0]));
             
     def gcd(self, other):
         if(other in self.parent()):
@@ -1574,12 +1723,12 @@ class DDFunction (IntegralDomainElement):
         if(self == other):
             return self;
             
-        X = self.parent().variables()[0 ];
+        X = self.parent().variables()[0];
         
         se = self.zero_extraction;
         oe = other.zero_extraction;
         
-        return self.parent()(X**min(se[0 ],oe[0 ])*gcd(se[1 ].getInitialValue(0 ),oe[1 ].getInitialValue(0 )));
+        return self.parent()(X**min(se[0],oe[0])*gcd(se[1].getInitialValue(0 ),oe[1].getInitialValue(0 )));
     
     #####################################
     ### Sequence methods
@@ -1673,12 +1822,12 @@ class DDFunction (IntegralDomainElement):
             
                 ### We get the required initial values (depending of the order of the next derivative)
                 initList = self.getInitialValueList(newOperator.get_jp_fo()+2 );
-                newInit = [initList[i+1 ] for i in range(min(len(initList)-1 ,newOperator.get_jp_fo()+1 ))];
+                newInit = [initList[i+1] for i in range(min(len(initList)-1 ,newOperator.get_jp_fo()+1 ))];
                 
                 ### Computing the new name
                 newName = None;
                 if(not(self.__name is None)):
-                    if(self.__name[-1 ] == "'"):
+                    if(self.__name[-1] == "'"):
                         newName = DinamicString("_1'", self.__name);
                     else:
                         newName = DinamicString("(_1)'", self.__name); 
@@ -1749,7 +1898,7 @@ class DDFunction (IntegralDomainElement):
             
         ## If we have the basic function we return the same element
         ## Also, if self is a constant, the composition is again the constant
-        self_var = self.parent().variables(True)[0 ];
+        self_var = self.parent().variables(True)[0];
         if(self_var == other or self.is_constant):
             return self;
             
@@ -1801,9 +1950,9 @@ class DDFunction (IntegralDomainElement):
         try:
             init_g = g.getInitialValueList(required);
         except AttributeError:
-            init_g = [0 ] + [factorial(n)*new_equation.base().sequence(g,n) for n in range(1 ,required)];
+            init_g = [0] + [factorial(n)*new_equation.base().sequence(g,n) for n in range(1 ,required)];
         ## Computing the new initial values
-        new_init = [init_f[0 ]]+[sum([init_f[j]*bell_polynomial(i,j)(*init_g[1 :i-j+2 ]) for j in range(1 ,i+1 )]) for i in range(1 ,min(len(init_f), len(init_g), required))]; ## See Faa di Bruno's formula
+        new_init = [init_f[0]]+[sum([init_f[j]*bell_polynomial(i,j)(*init_g[1 :i-j+2]) for j in range(1 ,i+1 )]) for i in range(1 ,min(len(init_f), len(init_g), required))]; ## See Faa di Bruno's formula
         
         
         ######################################
@@ -1917,7 +2066,7 @@ class DDFunction (IntegralDomainElement):
         ## Test zero and if not, check if a constant can be solution
         try:
             if(not self.is_null):
-                return self.equation[0 ] == 0  and all(self.getInitialValue(i) == 0  for i in range(1 , self.equation.get_jp_fo()+1 ));
+                return self.equation[0] == 0  and all(self.getInitialValue(i) == 0  for i in range(1 , self.equation.get_jp_fo()+1 ));
             return True;
         except TypeError:
             return False;
@@ -2001,7 +2150,7 @@ class DDFunction (IntegralDomainElement):
     def numerical_solution(self, value, delta=RealNumber('1e-10'), max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
-            if(self.equation.getCoefficients()[-1 ](0 ) != 0 ):
+            if(self.equation.getCoefficients()[-1](0 ) != 0 ):
                 sol = self.equation.operator.numerical_solution(self.getSequenceList(self.getOrder()), [0 ,value],delta);
                 return sol.center(), sol.diameter();
             else:
@@ -2360,7 +2509,7 @@ class DDFunction (IntegralDomainElement):
             res = "%s %s in %s:\n" %(self.__critical_numbers__(),repr(self),self.parent());
         else:
             res = "%s" %(repr(self));
-            if(res[0 ] != '('):
+            if(res[0] != '('):
                 res += " in %s" %(self.parent());
             res += ":\n";
         res += '-------------------------------------------------\n\t';
@@ -2411,7 +2560,7 @@ class DDFunction (IntegralDomainElement):
         elif(is_negative):
             res += '- ';
             if(string[1] == '(' and self.__matching_par__(string,1) == len(string)-1):
-                string = string[2 :-1 ];
+                string = string[2 :-1];
             else:
                 string = string[1 :];
         else:
@@ -2781,221 +2930,221 @@ def _m_indices(string, *seps):
 def _m_replace(string, to_replace, escape=("(",")")):
     ## Checking if ther are scape characters
     if(not escape is None):
-        pos_init = string.find(escape[0 ]);
+        pos_init = string.find(escape[0]);
         if(pos_init >= 0 ):
             ## Escape initial character found, skipping outside the escape
             pos_end = len(string);
-            pos_end = string.rfind(escape[1 ]);
+            pos_end = string.rfind(escape[1]);
             if(pos_end <= pos_init):
                 pos_end = len(string);
                 
-            return string[:pos_init+1 ] + _m_replace(string[pos_init+1 :pos_end], to_replace, None) + string[pos_end:];
+            return string[:pos_init+1] + _m_replace(string[pos_init+1 :pos_end], to_replace, None) + string[pos_end:];
     
     ## No escape characters: doing normal computation
     all_index = _m_indices(string, *to_replace.keys());
     res = ""; current_index = 0 ;
     for el in all_index:
-        res += string[current_index:el[0 ]] + to_replace[el[1 ]];
-        current_index = el[0 ]+len(el[1 ]);
+        res += string[current_index:el[0]] + to_replace[el[1]];
+        current_index = el[0]+len(el[1]);
     res += string[current_index:]
     return res;
     
-def _get_equation_poly(poly, dic):  
-    '''
-        Method that computes the differential equation that the evaluation 
-        of a polynomial over some functions satisfies.
+# def _get_equation_poly(poly, dic):  
+#     '''
+#         Method that computes the differential equation that the evaluation 
+#         of a polynomial over some functions satisfies.
         
-        This procedure has 5 main steps:
-            (1) Compute a vector space $W$ generated by a vector of generators $(g1,...,gk)$
-            (2) Compute a derivation matrix $D$ for $W$ w.r.t. the generators
-            (3) Compute a initial vector $v_0$ that represents poly in $W$.
-            (4) Compute the ansatz system $S$
-            (5) Solve the ansatz system
+#         This procedure has 5 main steps:
+#             (1) Compute a vector space $W$ generated by a vector of generators $(g1,...,gk)$
+#             (2) Compute a derivation matrix $D$ for $W$ w.r.t. the generators
+#             (3) Compute a initial vector $v_0$ that represents poly in $W$.
+#             (4) Compute the ansatz system $S$
+#             (5) Solve the ansatz system
             
-        The steps (1), (2), (3) can be done simultaneously in the method _get_derivation_matrix(poly,dic).
-        The step (4) use the inductive formula $v_{i+1} = Dv_i + \partial v_i$. Then $S = (v0 | v1 | ...)$.
-        The step (5) will be done using Bareiss Algorithm.
-    '''
-    ### Steps (1)-(3)
-    D, v0 = _get_derivation_matrix(poly, dic);
+#         The steps (1), (2), (3) can be done simultaneously in the method _get_derivation_matrix(poly,dic).
+#         The step (4) use the inductive formula $v_{i+1} = Dv_i + \partial v_i$. Then $S = (v0 | v1 | ...)$.
+#         The step (5) will be done using Bareiss Algorithm.
+#     '''
+#     ### Steps (1)-(3)
+#     D, v0 = _get_derivation_matrix(poly, dic);
     
-    ### Step 4
-    R = D[0][0].parent();
-    if(sage.rings.fraction_field.is_FractionField(R)):
-        R = R.base();
-    F = R.fraction_field();
+#     ### Step 4
+#     R = D[0][0].parent();
+#     if(sage.rings.fraction_field.is_FractionField(R)):
+#         R = R.base();
+#     F = R.fraction_field();
     
-    v = [v0];
-    for i in range(D.nrows()):
-        v += [D*v[-1] + vector(F, [el.derivative() for el in v[-1]])];
+#     v = [v0];
+#     for i in range(D.nrows()):
+#         v += [D*v[-1] + vector(F, [el.derivative() for el in v[-1]])];
         
-    S = Matrix(F, v).transpose();
+#     S = Matrix(F, v).transpose();
     
-    ### Step 5
-    ## TODO We rely on the system solver of the operator of the functions we are 
-    ## plug-in to the polynomial.
-    solution = dic.keys()[0].equation._get_element_nullspace(S);
+#     ### Step 5
+#     ## TODO We rely on the system solver of the operator of the functions we are 
+#     ## plug-in to the polynomial.
+#     solution = dic.keys()[0].equation._get_element_nullspace(S);
     
-    ## We create the final operator
-    return dic.keys()[0].parent().element([el for el in solution]).equation;
+#     ## We create the final operator
+#     return dic.keys()[0].parent().element([el for el in solution]).equation;
 
-def _get_derivation_matrix(poly, dic, simpl = False):
-    '''
-        Method that computes the derivation matrix of a vector space that
-        contains the vector space generated by the evaluation of poly
-        using the dictionary dic and a vector that represent poly into 
-        that vector space.
+# def _get_derivation_matrix(poly, dic, simpl = False):
+#     '''
+#         Method that computes the derivation matrix of a vector space that
+#         contains the vector space generated by the evaluation of poly
+#         using the dictionary dic and a vector that represent poly into 
+#         that vector space.
         
         
-        This method has a recursive structure:
-            - If for any key in dic, dic[key][i] appears in poly for i > 0,
-            then we simplify the polynomial so it only contains the variables
-            dic[key][0]. We return the matrix obtained with that polyomial and 
-            the associated vector.
-            - If poly has multiple terms, we return the direct sum of the matrices
-            for each term and the direct sum of the vectors.
-            - If poly is a monomial with multiple variables, we return the Kronecker
-            sum of the matrices of the result and the tensor product of the vectors.
-            - If poly is a monomial with just one variable, we compute the
-            Kronecker sum of the companion matrix associated with the function
-            related with that variable degree times and return the vector (1,0,...,0).
+#         This method has a recursive structure:
+#             - If for any key in dic, dic[key][i] appears in poly for i > 0,
+#             then we simplify the polynomial so it only contains the variables
+#             dic[key][0]. We return the matrix obtained with that polyomial and 
+#             the associated vector.
+#             - If poly has multiple terms, we return the direct sum of the matrices
+#             for each term and the direct sum of the vectors.
+#             - If poly is a monomial with multiple variables, we return the Kronecker
+#             sum of the matrices of the result and the tensor product of the vectors.
+#             - If poly is a monomial with just one variable, we compute the
+#             Kronecker sum of the companion matrix associated with the function
+#             related with that variable degree times and return the vector (1,0,...,0).
         
-        WARNING:
-            - The argument simpl must never be called with True but within this method
-            - The very base case can be improve using the fact that we are computing
-            the power of an element.
-    '''
-    ## Simplification step
-    #if(not simpl):
-    #    non_simple = sum([dic[key][1:] for key in dic], []);
-    #    if(any(var in poly.variables() for var in non_simple)):
-    #        to_eval = {}
-    #        for key in dic:
-    #            current = dic[key];
-    #            for i in range(1,len(current)):
-    #                to_eval[str(current[i])] = current[0];
-    #        D, v = _get_derivation_matrix(poly(**to_eval, dic, simpl=True);
-    #        ## TODO
-    #        raise DevelopementError("_get_derivation_matrix");
+#         WARNING:
+#             - The argument simpl must never be called with True but within this method
+#             - The very base case can be improve using the fact that we are computing
+#             the power of an element.
+#     '''
+#     ## Simplification step
+#     #if(not simpl):
+#     #    non_simple = sum([dic[key][1:] for key in dic], []);
+#     #    if(any(var in poly.variables() for var in non_simple)):
+#     #        to_eval = {}
+#     #        for key in dic:
+#     #            current = dic[key];
+#     #            for i in range(1,len(current)):
+#     #                to_eval[str(current[i])] = current[0];
+#     #        D, v = _get_derivation_matrix(poly(**to_eval, dic, simpl=True);
+#     #        ## TODO
+#     #        raise DevelopementError("_get_derivation_matrix");
     
-    ## From this point on, we can assume only simplified polynomials appears
-    ## Case non-monomial
-    if(not poly.is_monomial()):
-        coeffs = poly.coefficients();
-        sols = [_get_derivation_matrix(mon, dic, simpl=True) for mon in poly.monomials()];
-        D = Matrix.block_diagonal(*[sol[1] for sol in sols]);
-        v = vector(D[0][0].parent(), sum([[coeffs[i]*el for el in sols[i][2]] for i in range(len(sols))], []))
+#     ## From this point on, we can assume only simplified polynomials appears
+#     ## Case non-monomial
+#     if(not poly.is_monomial()):
+#         coeffs = poly.coefficients();
+#         sols = [_get_derivation_matrix(mon, dic, simpl=True) for mon in poly.monomials()];
+#         D = Matrix.block_diagonal(*[sol[1] for sol in sols]);
+#         v = vector(D[0][0].parent(), sum([[coeffs[i]*el for el in sols[i][2]] for i in range(len(sols))], []))
         
-        return D,v;
-    ## More than one variable
-    elif(len(poly.variables()) > 1):
-        var = poly.variables()[0];
-        deg = poly.degree(var);
-        oth = poly.parent()(poly/(var**deg));
+#         return D,v;
+#     ## More than one variable
+#     elif(len(poly.variables()) > 1):
+#         var = poly.variables()[0];
+#         deg = poly.degree(var);
+#         oth = poly.parent()(poly/(var**deg));
         
-        D1,v1 = _get_derivation_matrix(var**deg, dic);
-        D2,v2 = _get_derivation_matrix(oth, dic);
+#         D1,v1 = _get_derivation_matrix(var**deg, dic);
+#         D2,v2 = _get_derivation_matrix(oth, dic);
         
-        D = ajpastor.misc.Matrix.kronecker_sum(D1, D2);
-        v = vector(v1.parent().base(), sum(([el for el in row] for row in v1.tensor_product(v2)), []));
+#         D = ajpastor.misc.Matrix.kronecker_sum(D1, D2);
+#         v = vector(v1.parent().base(), sum(([el for el in row] for row in v1.tensor_product(v2)), []));
         
-        return D,v;
-    ## A power of a variable (using Faa di Bruno's formula)
-    elif(len(poly.variables()) == 1):
-        var = poly.variables()[0];
-        deg = poly.degree();
-        ## Getting the function and the offset for the initial values
-        func = None;
-        for key in dic.keys():
-            if(var in dic[key]):
-                func = key;
-                offset = dic[key].index(var);
-                break;
-        ## Checking the variable can be easily represent
-        if(offset > func.getOrder()):
-            raise DevelopementError("_get_derivation_matrix");
-        ## TODO Go on from here
+#         return D,v;
+#     ## A power of a variable (using Faa di Bruno's formula)
+#     elif(len(poly.variables()) == 1):
+#         var = poly.variables()[0];
+#         deg = poly.degree();
+#         ## Getting the function and the offset for the initial values
+#         func = None;
+#         for key in dic.keys():
+#             if(var in dic[key]):
+#                 func = key;
+#                 offset = dic[key].index(var);
+#                 break;
+#         ## Checking the variable can be easily represent
+#         if(offset > func.getOrder()):
+#             raise DevelopementError("_get_derivation_matrix");
+#         ## TODO Go on from here
         
     
-    raise DevelopementError("_get_derivation_matrix");
+#     raise DevelopementError("_get_derivation_matrix");
 
-## TODO Saved function from the console
-def get_sequences(a,b):
-    M = [[tensor_power(get_vector_prime(n+1),i+1) for i in range(a)] for n in range(b)]
-    return [[[list(M[i][j]).index(k**(j+1))+1 for k in [1] + [el for el in primes_first_n(i)]] for j in range(5)] for i in range(5)];
+# ## TODO Saved function from the console
+# def get_sequences(a,b):
+#     M = [[tensor_power(get_vector_prime(n+1),i+1) for i in range(a)] for n in range(b)]
+#     return [[[list(M[i][j]).index(k**(j+1))+1 for k in [1] + [el for el in primes_first_n(i)]] for j in range(5)] for i in range(5)];
 
     
-__CACHED_INIT_POLY = {};
-def _get_initial_poly(poly, dic, m):    
-    '''
-        Method that computes the ith initial value of the polynomial
-        given when evaluated using the dictionary dic.
-    '''
-    ## Constant case
-    if(poly.is_constant()):
-        if(m > 0):
-            return 0;
-        return poly.parent().base()(poly);
+# __CACHED_INIT_POLY = {};
+# def _get_initial_poly(poly, dic, m):    
+#     '''
+#         Method that computes the ith initial value of the polynomial
+#         given when evaluated using the dictionary dic.
+#     '''
+#     ## Constant case
+#     if(poly.is_constant()):
+#         if(m > 0):
+#             return 0;
+#         return poly.parent().base()(poly);
     
-    ## Non-constant polynomial
-    ## Checking the Cache
-    global __CACHED_INIT_POLY;
-    if(not poly in __CACHED_INIT_POLY):
-        __CACHED_INIT_POLY[poly] = [];
+#     ## Non-constant polynomial
+#     ## Checking the Cache
+#     global __CACHED_INIT_POLY;
+#     if(not poly in __CACHED_INIT_POLY):
+#         __CACHED_INIT_POLY[poly] = [];
     
-    found = False;
-    for el in __CACHED_INIT_POLY[poly]:
-        if(el[0] == dic):
-            found = True;
-            if(m in el[1]):
-                return el[1][m];
-            break;
-    if(not found):
-        __CACHED_INIT_POLY[poly] += [(dic, {})];
+#     found = False;
+#     for el in __CACHED_INIT_POLY[poly]:
+#         if(el[0] == dic):
+#             found = True;
+#             if(m in el[1]):
+#                 return el[1][m];
+#             break;
+#     if(not found):
+#         __CACHED_INIT_POLY[poly] += [(dic, {})];
         
-    result = None;
-    ## General case (poly is not a monomial)
-    if(not (poly.is_monomial())):
-        c = poly.coefficients(); mo = poly.monomials();
-        result = sum(c[j]*_get_initial_poly(mo[j],dic,m) for j in range(len(mo)));
+#     result = None;
+#     ## General case (poly is not a monomial)
+#     if(not (poly.is_monomial())):
+#         c = poly.coefficients(); mo = poly.monomials();
+#         result = sum(c[j]*_get_initial_poly(mo[j],dic,m) for j in range(len(mo)));
         
-    ## More than one variable
-    elif(len(poly.variables()) > 1):
-        var = poly.variables()[0];
-        deg = poly.degree(var);
-        oth = poly.parent()(poly/(var**deg));
+#     ## More than one variable
+#     elif(len(poly.variables()) > 1):
+#         var = poly.variables()[0];
+#         deg = poly.degree(var);
+#         oth = poly.parent()(poly/(var**deg));
         
-        result = sum(binomial(m,k)*_get_initial_poly(var**deg, dic, k)*_get_initial_poly(oth, dic, m-k) for k in range(m+1));
+#         result = sum(binomial(m,k)*_get_initial_poly(var**deg, dic, k)*_get_initial_poly(oth, dic, m-k) for k in range(m+1));
     
-    ## A power of a variable (using Faa di Bruno's formula)
-    elif(len(poly.variables()) == 1):
-        var = poly.variables()[0];
-        deg = poly.degree();
-        ## Getting the function and the offset for the initial values
-        func = None;
-        for key in dic.keys():
-            if(var in dic[key]):
-                func = key;
-                offset = dic[key].index(var);
-                break;
+#     ## A power of a variable (using Faa di Bruno's formula)
+#     elif(len(poly.variables()) == 1):
+#         var = poly.variables()[0];
+#         deg = poly.degree();
+#         ## Getting the function and the offset for the initial values
+#         func = None;
+#         for key in dic.keys():
+#             if(var in dic[key]):
+#                 func = key;
+#                 offset = dic[key].index(var);
+#                 break;
         
-        init = lambda n : func.getInitialValue(offset+n);
+#         init = lambda n : func.getInitialValue(offset+n);
         
-        ## Computing the final result
-        if(m > 0):
-            result = sum(falling_factorial(deg,k)*(init(0)**(deg-k))*bell_polynomial(m,k)(*[init(j+1) for j in range(m-k+1)]) for k in range(min(deg,m)+1));
-        else:
-            result = init(0)**deg;
+#         ## Computing the final result
+#         if(m > 0):
+#             result = sum(falling_factorial(deg,k)*(init(0)**(deg-k))*bell_polynomial(m,k)(*[init(j+1) for j in range(m-k+1)]) for k in range(min(deg,m)+1));
+#         else:
+#             result = init(0)**deg;
     
-    if(not(result is None)):
-        ## Saving the result
-        for el in __CACHED_INIT_POLY[poly]:
-            if(el[0] == dic):
-                el[1][m] = result;
-                break;
-        return result;
-    else:
-        raise ValueError("An impossible point was reached");
+#     if(not(result is None)):
+#         ## Saving the result
+#         for el in __CACHED_INIT_POLY[poly]:
+#             if(el[0] == dic):
+#                 el[1][m] = result;
+#                 break;
+#         return result;
+#     else:
+#         raise ValueError("An impossible point was reached");
     
 
 ###################################################################################################
@@ -3018,7 +3167,7 @@ def _command_list(elements):
     for i in range(len(elements)-1 ):
         res += command(elements[i]) + ", ";
     if(len(elements) > 0 ):
-        res += command(elements[-1 ]);
+        res += command(elements[-1]);
     res += "]";
     
     return res;
@@ -3063,7 +3212,7 @@ def __get_recurrence(f):
                 m = i;
                 break;
     
-    n = op._Operator__polynomialRing.gens()[0 ];
+    n = op._Operator__polynomialRing.gens()[0];
     
     rec = [op.get_recursion_polynomial(i)(n=n+m) for i in range(m,op.forward_order + 1 )];
     rec_gcd = gcd(rec);

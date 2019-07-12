@@ -11,8 +11,8 @@ from ajpastor.misc.dinamic_string import *;
 
 from ajpastor.misc.exceptions import *;
 
-def ddExamples(functions = False, names=False):
-    '''
+def ddExamples_log(functions = False, names=False):
+    r'''
         Welcome to ddExamples documentation. Here we describe the functions
         available in this module. For further information on each function, 
         please access the documentation for that particular function.
@@ -53,7 +53,7 @@ def ddExamples(functions = False, names=False):
         ** HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
             - HypergeometricFunction
             - GenericHypergeometricFunction
-            - Polylogarithms
+            - Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
         ** RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
             - RiccatiD
         ** MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
@@ -101,19 +101,30 @@ def ddExamples(functions = False, names=False):
 ##################################################################################
 @cached_function
 def Sin(input, ddR = None):
-    '''
+    r'''
         D-finite implementation of the Sine function (sin(x)).
-        
+           
         References:
             - http://mathworld.wolfram.com/Sine.html
             - https://en.wikipedia.org/wiki/Sine
-            
+                
         This functions allows the user to fix the argument. The argument can be:
             - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
             - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
             - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
-            
+                
         This function can be converted into symbolic expressions.
+        
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import Sin
+            sage: Sin(x).getInitialValueList(10)
+            [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
+            sage: Sin(x)[0]
+            1
+            sage: Sin(x)[1]
+            0
+            sage: Sin(x).derivative()^2 + Sin(x)^2 == 1
+            True
     '''
     if(is_DDFunction(input)):
         return Sin(x)(input);
@@ -1165,6 +1176,20 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     
 @cached_function
 def PolylogarithmD(s=1):
+    '''
+        Implementation using DDFunctions of the Polylogarithms
+
+        References:
+            - https://en.wikipedia.org/wiki/Polylogarithm
+            - http://mathworld.wolfram.com/Polylogarithm.html
+            - https://dlmf.nist.gov/25.12
+
+        The s-Polylogarithm is the power series defined with the sequence (1/n^s) for n >= 0. It can be computed
+        recursively using and integral formula using the (s-1)-Polylogarithm.
+
+        INPUT:
+            - s: Integer and positive value. All other possible powers are not accepted so far.
+    '''
     if((not (s in ZZ)) or s < 1):
         raise ValueError("The parameter 's' must be a positive integer. Got %d" %s);
     
@@ -1813,10 +1838,42 @@ def CoulombF(m='m', l='l'):
 ################################################################################## 
 @cached_function
 def Catalan():
+    r'''
+        Implementation using DDFunctions of the generating function for Catalan numbers.
+
+        References:
+            - https://en.wikipedia.org/wiki/Catalan_number
+
+        The Catalan sequence is defined with a closed formula `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
+        and it is known that this sequence satisfies a linear recurrence:
+        $$c_{n+1+} = \sum_{i=0}^n c_i c_{n-i},$$
+        which leads to the functional equation:
+        $$C(x) = 1+ xC(x)^2,$$
+        where $C(x)$ is the ordinary generating function for the sequence $(c_n)$. This algebraic equation implies
+        that $C(x)$ is D-finite with differential equation:
+        $$(4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.$$
+    '''
     return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1]);
 
 @cached_function
-def Fibonacci(init=(1,1)):
+def Fibonacci(init=(0,1)):
+    r'''
+        Implementation using DDFunctions of the generating function for the Fibonacci sequence.
+
+        References:
+            - https://oeis.org/A000045
+            - https://en.wikipedia.org/wiki/Fibonacci_number
+
+        The Fibonacci sequence $(f_n)_n$ is defined classically with the linear recurrence
+        $$f_{n+2} = f_{n+1} + f_{n},$$
+        starting with initial values `f_0 = 0`, `f_1 = 1`. 
+
+        This linear recurrence implies that the ordinary generating function for the fibonacci sequence
+        is D-finite independently to initial conditions `f_0`, `f_1`.
+
+        This method returns the DDFunction object for the ordinary generating function for a particular
+        Fibonacci sequence provided the initial conditions `f_0` and `f_1`.
+    '''
     parent, rinit = __check_list([el for el in init], [str(el) for el in DFinite.variables()]);
     params = [str(v) for v in parent.gens()];
     pos = ord('a');
