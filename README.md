@@ -1,6 +1,7 @@
-# **DD-finite functions in Sage**
 
-`dd_functions` is a Sage package free to get from the git repository http://git.risc.jku.at/gitweb/?p=ajpastor/diff_defined_functions.git/ hosted by RISC (Research Intitute for Symbolic Computation). This package was developed in the research funded by the Austrian Science Fund  (FWF): W1214-N15, project DK15.
+# **DD-finite functions in Sage** [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
+
+`dd_functions` is a Sage package free to get from the git repository in https://github.com/Antonio-JP/dd_functions.git (GitHub). This package was developed in the research funded by the Austrian Science Fund  (FWF): W1214-N15, project DK15.
 
 This package allows Sage users to use _naturally_ DD-finite functions on the computer. This README includes a guide to how to install the package.
 
