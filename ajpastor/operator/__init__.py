@@ -28,7 +28,10 @@ AUTHORS:
 # ****************************************************************************
 
 from .operator import Operator;
-from .oreOperator import w_OreOperator as OreOperator;
+try:
+    from .oreOperator import w_OreOperator as OreOperator;
+except ImportError:
+    print "Package ore_algebra not available";
 from .directStepOperator import DirectStepOperator;
 from .polynomialLazyOperator import PolynomialLazyOperator;
 
