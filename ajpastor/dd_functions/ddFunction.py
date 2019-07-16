@@ -44,6 +44,7 @@ from sage.rings.polynomial.multi_polynomial import is_MPolynomial;
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
 from sage.structure.element import IntegralDomainElement;
 from sage.categories.integral_domains import IntegralDomains;
+from sage.categories.fields import Fields;
 from sage.categories.pushout import pushout;
 from sage.categories.pushout import ConstructionFunctor;
 
@@ -664,16 +665,112 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
 
             OUTPUT::
                 List of generators provided by this ``DDRing``.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *;
+                sage: DFinite.gens()
+                ()
+                sage: R = ParametrizedDDRing(DFinite, ['a']); R.gens()
+                (a,)
+                sage: ParametrizedDDRing(R, ['b']).gens()
+                (b, a)
         '''
         return ();
     
     def ngens(self):
-        return 0 ;
+        '''
+            Return the number of generators of ``self``.
+
+            General method for Parent structures that returns the number of generators required to generate ``self``.
+
+            OUTPUT::
+                Number of generators obtainded by ``selg.gens()``.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *;
+                sage: DFinite.ngens()
+                0
+                sage: DDFinite.ngens()
+                0
+                sage: R = ParametrizedDDRing(DFinite, ['a']); R.ngens()
+                1
+                sage: ParametrizedDDRing(R, ['b']).ngens()
+                2
+        '''
+        return len(self.gens());
             
     def construction(self):
+        '''
+            Returns a functor that built the DDRing.
+
+            Method that returns a functor `F` and an Integral Domain `R` such that ``self == F(R)``. This method allows the 
+            coerce system in Sage to handle ``DDFunctions`` and ``DDRings`` appropriately.
+
+            OUTPUT::
+                - A DDRingFunctor `F`
+                - An Integral Domain `R`
+            Such that ``F(R) == self``. Moreover, ``R in IntegralDomains()`` and ``isintance(DDRingFunctor, F)`` are both True.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *;
+                sage: from ajpastor.dd_functions.ddFunction import DDRingFunctor;
+                sage: from ajpastor.dd_functions.ddFunction import ParametrizedDDRingFunctor;
+                sage: F,R = DFinite.construction();
+                sage: F == DDRingFunctor(1,QQ)
+                True
+                sage: R == QQ[x]
+                True
+                sage: F,R = DDFinite.construction();
+                sage: F == DDRingFunctor(2,QQ)
+                True
+                sage: R == QQ[x]
+                True
+
+            The functor for Paramterized DDRings works a bit differently: it adds the parameters to the appropriate DDRing
+                sage: S = ParametrizedDDRing(DDFinite, ['a','b'])
+                sage: F, R = S.construction();
+                sage: F == ParametrizedDDRingFunctor(2, QQ, set([var('a'), var('b')]))
+                True
+                sage: R == QQ[x]
+                True
+        '''
         return (DDRingFunctor(self.depth(), self.base_field), self.__original);
         
     def __contains__(self, X):
+        '''
+            Decide if an element belongs to ``self``.
+
+            The method is implemented in a very generic way, looking if the parent of the input is related or has a coercion
+            with ``self``. In addition, we try to call the method ``_element_onstructor_`` of ``self`` to build an element from the input X,
+            whatever it is.
+
+            See ``self._element_onstructor_?``, and ``self._has_coerce_map_from?`` for furhter information.
+
+            OUTPUT::
+                ``True`` or ``False`` depending if ``X`` can be casted to an element of ``self`` or not.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *;
+                sage: Exp(x) in DFinite
+                True
+                sage: Exp(Sin(x)) in DFinite
+                False
+                sage: Exp(Sin(x)) in DDFinite
+                True
+                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2); 
+                sage: R = DDRing(F[x]);
+                sage: Exp(x) in R
+                True
+                sage: Exp(x) in DDFinite
+                True
+                sage: e2 = R.element([-s2,1], [1]);
+                sage: e2 in R
+                True
+                sage: e2 in DFinite
+                False
+                sage: e2 in DDFinite
+                False
+        '''
         try:
             if((X.parent() is self) or (self._has_coerce_map_from(X.parent()))):
                 return True;
@@ -689,6 +786,26 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     ### Magic python methods
     #################################################
     def __eq__(self, other):
+        '''
+            Method to check equality of this Parent structure
+
+            We consider that a Parent structure is equal to another if there are coercion maps from both structures.
+
+            INPUT::
+                * ``other`` -- a Sage object.
+
+            OUTPUT::
+                ``True`` if ``self`` and ``other`` are the same parent structure.
+
+            TESTS::
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite == DFinite # implicit test
+                True
+                sage: DDFinite == DDFinite # implicit test
+                True
+                sage: DFinite == DDFinite # implicit test
+                False
+        '''
         if(isinstance(other, DDRing)):
             return self._has_coerce_map_from(other) and other._has_coerce_map_from(self);
         return False;
@@ -696,11 +813,29 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     ## Other magic methods   
     def _repr_(self):
         '''
-            Method implementing the __repr__ magic python method. Returns a string telling that self is a DDRing and which Ring is its base.
+            Method implementing the __repr__ magic python method. 
+
+            Returns a string telling that self is a DDRing and which Ring is its base.
         '''
         return "DD-Ring over (%s)" %(self.base());
+
+    def _latex_(self):
+        '''
+            Method creating the LaTeX representation for a DDRing.
+
+            Returns a valid LaTeX string in math mode to print the DDRing in appropriate notation
+        '''
+        return "\\text{D}\\left(%s\\right)" %latex(self.base());
         
     def _to_command_(self):
+        '''
+            Return the Sage command to create again the same DDRing
+
+            This method returns a string that can be directly executed in Sage (once loaded the package) that
+            can recreate the object DDRing.
+
+            This methos is called by the more general methos ``command`` provided by ``ajpastor.dd_functions``.
+        '''
         return "DDRing(%s)" %command(self.base());
             
     #################################################
@@ -708,18 +843,24 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
     #################################################
     def _an_element_(self):
         '''
+            Create the element `1` for this ring.
+
             Method inherited from Ring SAGE class. It returns an example of object that is in the DDRing. It simply returns the 1 element.        
+
+            OUTPUT::
+                A DDFunction representing the element `1` in ``self``.
         '''
         return self.one();
     
     def random_element(self,**kwds):
         '''
-            Method to compute a random element in this ring. This method relies in a random generator of the self.base() ring and a generator of
-            elements of the ring self.base_ring().
+            Method to compute a random element in this ring. 
+
+            This method relies in a random generator of the self.base() ring and a generator of elements of the ring self.base_ring().
             This method accepts different named arguments:
-                - "min_order": minimal order for the equation we would get (default to 1)
-                - "max_order": maximal order for the equation we would get (default to 3)
-                - "simple": if True, the leading coefficient will always be one (default True)
+                * "min_order" -- minimal order for the equation we would get (default to 1)
+                * "max_order" -- maximal order for the equation we would get (default to 3)
+                * "simple" -- if True, the leading coefficient will always be one (default True)
         '''
         ## Getting the arguments values
         min_order = kwds.get("min_order", 1);
@@ -758,12 +899,84 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         return self.base().characteristic();
         
     def base_ring(self):
+        '''
+            Return the base field for the coefficients of the elements.
+
+            This is a required method for extending rings. In this case, we return the same as ``self.base_field()``.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *;
+                sage: DFinite.base_ring() is DFinite.base_field()
+                True
+                sage: DFinite.base_ring() == QQ
+                True
+                sage: DDFinite.base_ring() == QQ
+                True
+                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2);
+                sage: R = DDRing(F[x]);
+                sage: R.base_ring() == QQ
+                False
+                sage: R.base_ring() == F
+                True
+                sage: R.base_ring() is R.base_field()
+
+            In the case of ParametrizedDDRing, the base field contains the parameters::
+                sage: S = ParametrizedDDRing(DFinite, ['a','b']);
+                sage: pars = S.parameters();
+                sage: S.base_ring() == FractionField(PolynomialRing(QQ, pars));
+                True
+        '''
         return self.base_field;
         
     def original_ring(self):
+        '''
+            Return the original ring from which we build the iterative DDRing.
+
+            This method returns the original ring from which `self` can be constructed iteratively as a DDRing. 
+            See ``self.depth?`` for further information.
+
+            OUTPUT::
+                A integral domain `R` such that ``DDRing(R, depth=self.depth())`` is ``self``.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite.original_ring() == QQ[x]
+                True
+                sage: DDFinite.original_ring() == QQ[x]
+                True
+
+            As usual, the ParametrizedDDRing will include the parameters in the base field::
+                sage: R = ParametrizedDDRing(DDFinite, ['a','b']);
+                sage: vars = R.parameters();
+                sage: R.original_ring() == FractionField(PolynomialRing(QQ, vars))[x]
+                True
+        '''
         return self.__original;
         
     def depth(self):
+        '''
+            Return the depth on iteration of the construction of ``self`` as a Differentially Definable Ring.
+
+            The method returns the depth of ``self`` as a DDRing. This is measure on how many times we iterate the
+            process of building a differentially definable ring from ``self.original_field()``. See
+            ``self.original_ring?`` for further information.
+
+            OUTPUT::
+                A (strictly) positive integer `n` such that ``DDRing(self.original_ring(), n)`` is ``self``.
+
+            EXAMPLES::
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite.depth()
+                1
+                sage: DDFinite.depth()
+                2
+
+            The ParametrizedDDRing will share the depth of the rings from where they are built::
+                sage: ParametrizedDDRing(DDFinite, ['a','b']).depth()
+                2
+                sage: ParametrizedDDRing(DDRing(QQ[x], depth=10), ['a','b']).depth()
+                10
+        '''
         return self.__depth;
         
     def to_depth(self, dest):
@@ -773,12 +986,51 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
         return DDRing(pushout(self.original_ring(), new_field), depth = self.depth(), base_field = pushout(self.base_field, new_field), invertibility = self.base_inversionCriteria, derivation = self.base_derivation, default_operator = self.default_operator);
         
     def is_field(self, **kwds):
+        '''
+            Generic method for checking if ``self`` is a field.
+
+            As we always work on the Formal Ring of power series on ``self.base_ring()``, this is never a field
+
+            OUTPUT::
+                False
+
+            TESTS::
+                sage: from ajpastor.dd_functions import *
+                sage: all(F.is_field() is False for F in [DFinite, DDFinite])
+                True
+        '''
         return False;
         
     def is_finite(self, **kwds):
+        '''
+            Generic method for checking if ``self`` is finite.
+
+            As we always work on the Formal Ring of power series on ``self.base_ring()``, this is never finite
+
+            OUTPUT::
+                False
+
+            TESTS::
+                sage: from ajpastor.dd_functions import *
+                sage: all(F.is_finite() is False for F in [DFinite, DDFinite])
+                True
+        '''
         return False;
         
     def is_noetherian(self, **kwds):
+        '''
+            Generic method for checking if ``self`` is noetherian.
+
+            As we always work on the Formal Ring of power series on ``self.base_ring()``, this is always noetherian.
+
+            OUTPUT::
+                True
+
+            TESTS::
+                sage: from ajpastor.dd_functions import *
+                sage: all(F.is_noetherian() is True for F in [DFinite, DDFinite])
+                True
+        '''
         return True;
 
     #################################################
@@ -876,18 +1128,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain):
             if(len(self.__variables) == 0  and fill):
                 return tuple([self.base()(var(DDRing._Default_variable))]);
             return tuple(self.base()(el) for el in self.__variables);
-        
-    #def getBaseMatrixSpace(self,nrows, ncols):
-    #    '''
-    #        Method to get a MatrixSpace with coefficients in the coefficient Ring of the current DDRing with an specified dimension.
-    #        
-    #        INPUT:
-    #            - ``nrows``: number or rows of the new MatrixSpace.
-    #            - ``rcols``: number of columns of the new MatrixSpace.
-    #    '''
-    #    return self.matrixSpace.matrix_space(nrows,ncols);
-        
-        
+                
 #############################################################################
 ###
 ### Ring class for Parametrized DD Functions
@@ -983,7 +1224,7 @@ class ParametrizedDDRing(DDRing):
         return not(not(coer));
             
     def construction(self):
-        return (ParametrizedDDRingFunctor(self.depth(), self.base_field, set(self.__parameters)), self.__baseDDRing);
+        return (ParametrizedDDRingFunctor(self.depth(), self.__baseDDRing.base_field, set(self.__parameters)), self.__baseDDRing._DDRing__original);
             
     def base_ddRing(self):
         '''
@@ -2719,6 +2960,11 @@ class DDFunction (IntegralDomainElement):
 #####################################################
 class DDRingFunctor (ConstructionFunctor):
     def __init__(self, depth, base_field):
+        if(depth <= 0):
+            raise ValueError("Depth can not be lower than 1 (DDRingFunctor)");
+        if(not (base_field in Fields())):
+            raise TypeError("The base field must be a field (DDRingFunctor");
+
         self.rank = 11 ;
         self.__depth = depth;
         self.__base_field = base_field;
@@ -2728,8 +2974,8 @@ class DDRingFunctor (ConstructionFunctor):
     def _coerce_into_domain(self, x):
         if(x not in self.domain()):
             raise TypeError("The object [%s] is not an element of [%s]" %(x, self.domain()));
-        if(isinstance(x, DDRing)):
-            return x.base();
+        #if(isinstance(x, DDRing)):
+        #    return x.base();
         return x;
         
     def _apply_functor(self, x):
@@ -2741,9 +2987,25 @@ class DDRingFunctor (ConstructionFunctor):
     def __eq__(self, other):
         if(other.__class__ == self.__class__):
             return ((other.__depth == self.__depth) and (other.__base_field == self.__base_field))
+
+    def merge(self, other):
+        '''
+            Merging two DDRingFunctors or return None.
+
+            For merging two DDRingFunctors, we need to be able to compute a common base field from both functors
+            and then go to the highest depth. It is interesting to remark that this is not the same as composing
+            two of these functors.
+        '''
+        if(other.__class__ == self.__class__):
+            return DDRingFunctor(max(self.depth(), other.depth()), pushout(self.__base_field, other.__base_field));
+
+        return None;
         
     def depth(self):
         return self.__depth;
+
+    def base_field(self):
+        return self.__base_field;
         
 class ParametrizedDDRingFunctor (DDRingFunctor):
     def __init__(self, depth, base_field, var = set([])):
@@ -2758,18 +3020,28 @@ class ParametrizedDDRingFunctor (DDRingFunctor):
         return x;
         
     def _repr_(self):
-        return "ParametrizedDDRing(*,%s)" %(self.__vars);
+        return "ParametrizedDDRing(*,%d,%s,%s)" %(self.depth(), self.base_field(),self.__vars);
         
     def _apply_functor(self, x):
-        return ParametrizedDDRing(x, self.__vars);
+        return ParametrizedDDRing(DDRing(x, depth = self.depth(), base_field = self.base_field), self.__vars);
         
     def merge(self, other):
-        if(isinstance(other, ParametrizedDDRingFunctor)):
-            return ParametrizedDDRingFunctor(self.__vars.union(other.__vars));
+        '''
+            Merging ``self`` with another DDRingFunctor or return None.
+
+            This method is able to merge the functor with a DDRingFunctor in addition with the standard ParametrizedDDRingFunctor.
+            The merging goes as follows: getting a common base field, computing the union of the (possibly empty) set of parameters
+            and going to the bigges depth provided in the functors
+        '''
+        if(isinstance(other, DDRingFunctor)):
+            depth = max(self.depth(), other.depth());
+            vars = self.__vars;
+            base_field = pushout(self.base_field(), other.base_field());
+            if(isinstance(other, ParametrizedDDRingFunctor)):
+                vars = vars.union(other.__vars);
+
+            return ParametrizedDDRingFunctor(depth, base_field, vars);
         return None;
-        
-    def __repr__(self):
-        return super(ParametrizedDDRingFunctor, self).__repr__() + " - " + repr(self.__vars);
         
 #####################################################
 ### General Morphism for return to basic rings
