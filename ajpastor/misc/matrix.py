@@ -1,3 +1,32 @@
+r"""
+Python file for matrix operations and utilities
+
+This module offers several methods to build matrices and operate with them in a very general fashion.
+It also provides several method for differential linear algebra.
+
+EXAMPLES::
+	sage: from ajpastor.misc.matrix import *
+
+TODO::
+	* Complete the Examples section of this documentation
+	* Document the package
+	* Review the functionality of the package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.all import *   # import sage library
 

@@ -1,6 +1,34 @@
+r"""
+Python file for a dynamic string
 
-################################################################################
-################################################################################
+This module offers an implementation of a class (DinamicString) that behaves like a string 
+but can be built using different common pieces so it is possible to perform simultaneos
+substitutions on the string.
+
+EXAMPLES::
+	sage: from ajpastor.misc.dinamic_string import *
+
+TODO::
+	* Complete the Examples section of this documentation
+	* Document the package
+	* Review the functionality of the package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 ################################################################################
 ### Class DinamicString
 class DinamicString(object):

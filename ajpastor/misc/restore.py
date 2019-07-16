@@ -1,3 +1,32 @@
+"""
+Python file for linear restoring the system
+
+This module provides a bunch of methods to save and restore the state of the Python session.
+
+EXAMPLES::
+	sage: from ajpastor.misc.restore import *
+
+TODO::
+	* Complete the Examples section of this documentation
+	* Document the package
+	* Review the functionality of the package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 ##########################################
 ###
 ### RESTORING SESSION METHODS

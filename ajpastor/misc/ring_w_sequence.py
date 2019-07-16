@@ -1,3 +1,32 @@
+"""
+Python file for Ring with Sequences
+
+This module implements a Ring Parent structure in Sage such that all its elements define a sequence in some space. This
+implies that the elements of a Ring with Sequence must provide a method (getSequenceElement).
+
+EXAMPLES::
+	sage: from ajpastor.misc.ring_w_sequence import *
+
+TODO::
+	* Complete the Examples section of this documentation
+	* Document the package
+	* Review the functionality of the package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.all import *   # import sage library
 

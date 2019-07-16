@@ -1,3 +1,34 @@
+"""
+Python file for sequence manipulations
+
+This module provides several methods for manipulating sequences in a black-box format, i.e., when the
+sequence is given as a function that recieves the index and returns the corresponding element
+of the sequence.
+
+EXAMPLES::
+	sage: from ajpastor.sequence_manipulation import *
+
+TODO::
+	* Complete the Examples section of this documentation
+	* Document the package
+	* Review the functionality of the package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 from sage.functions.other import factorial;
 from sage.combinat.combinat import bell_polynomial;
 from sage.arith.misc import falling_factorial;

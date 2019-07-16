@@ -1,3 +1,100 @@
+r"""
+Python file for DD-examples
+
+With this package the user has access to many special functions with the DDFunction structure.
+Here we describe the functions available in this module. For further information on each function, 
+please access the documentation for that particular function.
+        
+All the elements that are returned in this module are DDFunction, i.e.,
+formal power series defined with a linear differential equation and
+some appropriate initial values.
+        
+When possible, the functions returned by this module are associated with
+the usual implementation of those functions in SAGE, so using the 
+method "to_symbolic()" returns the same object in the Symbolic Ring.
+        
+The functions available in this module are the following:
+        
+* TRIGONOMETRIC FUNCTIONS
+	- Sin
+	- Cos
+	- Tan
+	- Sinh
+	- Cosh
+	- Tanh
+	- Arcsin
+	- Arccos
+	- Arctan
+	- Arcsinh
+	- Arccosh
+	- Arctanh
+* EXPONENTIAL FUNCTIONS
+	- Exp
+	- Log
+	- Log1
+* BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov)
+	- BesselD
+	- StruveD
+* ORTHOGONAL POLRNOMAILS
+	- LegendreD (see chapter 14 in https://dlmf.nist.gov)
+	- ChebyshevD (see chapter 18 in https://dlmf.nist.gov)
+* HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
+	- HypergeometricFunction
+	- GenericHypergeometricFunction
+	- Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
+* RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
+	- RiccatiD
+* MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
+	- MathieuD
+	- MathieuSin
+	- MathieuCos
+	- MathieuH
+	- MathieuSinh
+	- MathieuCosh
+	- HillD
+* AIRY'S FUNCTIONS
+	- AiryD
+* PARABOLIC-CYLINDER TYPE FUNCTIONS
+	- ParabolicCylinderD
+* ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov)
+	- EllipticLegendreD
+* SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov)
+	- CoulombSpheroidalFunctionD
+	- SpheroidalWaveFunctionD
+* HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov)
+	- FuschianD
+	- HeunD
+* COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov)
+	- CoulombF
+            
+* COMBINATORIAL FUNCTIONS
+	- Catalan
+	- Fibonacci
+
+EXAMPLES::
+	sage: from ajpastor.dd_functions import *
+	sage: Exp(x).getInitialValueList(10) == [1]*10
+	True
+
+TODO::
+	* Improve the Examples section of this doc
+	* Improve the documentation of the functions in this package
+
+AUTHORS:
+
+    - Antonio Jimenez-Pastor (2016-10-01): initial version
+
+"""
+
+# ****************************************************************************
+#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.all_cmdline import *   # import sage library
 
@@ -10,87 +107,6 @@ from ajpastor.dd_functions.lazyDDRing import LazyDDRing;
 from ajpastor.misc.dinamic_string import *;
 
 from ajpastor.misc.exceptions import *;
-
-def ddExamples_log(functions = False, names=False):
-    r'''
-        Welcome to ddExamples documentation. Here we describe the functions
-        available in this module. For further information on each function, 
-        please access the documentation for that particular function.
-        
-        All the elements that are returned in this module are DDFunction, i.e.,
-        formal power series defined with a linear differential equation and
-        some appropriate initial values.
-        
-        When possible, the functions returned by this module are associated with
-        the usual implementation of those functions in SAGE, so using the 
-        method "to_symbolic()" returns the same object in the Symbolic Ring.
-        
-        The functions available in this module are the following:
-        
-        ** TRIGONOMETRIC FUNCTIONS
-            - Sin
-            - Cos
-            - Tan
-            - Sinh
-            - Cosh
-            - Tanh
-            - Arcsin
-            - Arccos
-            - Arctan
-            - Arcsinh
-            - Arccosh
-            - Arctanh
-        ** EXPONENTIAL FUNCTIONS
-            - Exp
-            - Log
-            - Log1
-        ** BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov)
-            - BesselD
-            - StruveD
-        ** ORTHOGONAL POLRNOMAILS
-            - LegendreD (see chapter 14 in https://dlmf.nist.gov)
-            - ChebyshevD (see chapter 18 in https://dlmf.nist.gov)
-        ** HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
-            - HypergeometricFunction
-            - GenericHypergeometricFunction
-            - Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
-        ** RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
-            - RiccatiD
-        ** MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
-            - MathieuD
-            - MathieuSin
-            - MathieuCos
-            - MathieuH
-            - MathieuSinh
-            - MathieuCosh
-            - HillD
-        ** AIRY'S FUNCTIONS
-            - AiryD
-        ** PARABOLIC-CYLINDER TYPE FUNCTIONS
-            - ParabolicCylinderD
-        ** ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov)
-            - EllipticLegendreD
-        ** SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov)
-            - CoulombSpheroidalFunctionD
-            - SpheroidalWaveFunctionD
-        ** HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov)
-            - FuschianD
-            - HeunD
-        ** COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov)
-            - CoulombF
-            
-        ** COMBINATORIAL FUNCTIONS
-            - Catalan
-            - Fibonacci
-    '''
-    if(not functions):
-        print ddExamples.__doc__;
-    else:
-        funcs =  [Sin,Cos,Tan,Sinh,Cosh,Exp,Log,Log1,BesselD,StruvD,LegendreD,ChebyshevD,HypergeometricFunction,GenericHypergeometricFunction,MathieuD,MathieuSin,MathieuCos,ModifiedMathieuD,ModifiedMathieuSin,ModifiedMathieuCos,HillD,AiryD,ParabolicCylinderD,EllipticLegendreD,CoulombSpheroidalFunctionD,SpheroidalWaveFunctionD,FuschianD,HeunD,CoulombF];
-        
-        if(names):
-            return [el.__name__ for el in funcs];
-        return funcs;
 
 ##################################################################################
 ##################################################################################
@@ -105,13 +121,13 @@ def Sin(input, ddR = None):
         D-finite implementation of the Sine function (sin(x)).
            
         References:
-            - http://mathworld.wolfram.com/Sine.html
-            - https://en.wikipedia.org/wiki/Sine
+	- http://mathworld.wolfram.com/Sine.html
+	- https://en.wikipedia.org/wiki/Sine
                 
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
                 
         This function can be converted into symbolic expressions.
         
@@ -149,13 +165,13 @@ def Cos(input, ddR = None):
         D-finite implementation of the Cosine function (cos(x)).
         
         References:
-            - http://mathworld.wolfram.com/Cosine.html
-            - https://en.wikipedia.org/wiki/Cosine
+	- http://mathworld.wolfram.com/Cosine.html
+	- https://en.wikipedia.org/wiki/Cosine
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -182,13 +198,13 @@ def Tan(input, ddR = None):
         DD-finite implementation of the Tangent function (tan(x)).
         
         References:
-            - http://mathworld.wolfram.com/Tangent.html
-            - https://en.wikipedia.org/wiki/Tangent
+	- http://mathworld.wolfram.com/Tangent.html
+	- https://en.wikipedia.org/wiki/Tangent
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -233,13 +249,13 @@ def Sinh(input, ddR = None):
         DD-finite implementation of the Hyperbolic Sine function (sinh(x)).
         
         References:
-            - http://mathworld.wolfram.com/HyperbolicSine.html
-            - https://en.wikipedia.org/wiki/Hyperbolic_function
+	- http://mathworld.wolfram.com/HyperbolicSine.html
+	- https://en.wikipedia.org/wiki/Hyperbolic_function
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -266,13 +282,13 @@ def Cosh(input, ddR = None):
         DD-finite implementation of the Hyperbolic Cosine function (cosh(x)).
         
         References:
-            - http://mathworld.wolfram.com/HyperbolicCosine.html
-            - https://en.wikipedia.org/wiki/Hyperbolic_function
+	- http://mathworld.wolfram.com/HyperbolicCosine.html
+	- https://en.wikipedia.org/wiki/Hyperbolic_function
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -299,13 +315,13 @@ def Tanh(input, ddR = None):
         DD-finite implementation of the Tangent hyperbolic function (tanh(x)).
         
         References:
-            - http://mathworld.wolfram.com/HyperbolicTangent.html 
-            - https://en.wikipedia.org/wiki/Hyperbolic_function
+	- http://mathworld.wolfram.com/HyperbolicTangent.html 
+	- https://en.wikipedia.org/wiki/Hyperbolic_function
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -350,13 +366,13 @@ def Arcsin(input, ddR = None):
         DD-finite implementation of the Arcsine function (arcsin(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseSine.html
-            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+	- http://mathworld.wolfram.com/InverseSine.html
+	- https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -400,13 +416,13 @@ def Arccos(input, ddR = None):
         DD-finite implementation of the Arccosine function (arccos(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseCosine.html
-            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+	- http://mathworld.wolfram.com/InverseCosine.html
+	- https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -451,13 +467,13 @@ def Arctan(input, ddR = None):
         DD-finite implementation of the Arctangent function (arctan(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseTangent.html
-            - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+	- http://mathworld.wolfram.com/InverseTangent.html
+	- https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -501,13 +517,13 @@ def Arcsinh(input, ddR = None):
         DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseHyperbolicSine.html
-            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+	- http://mathworld.wolfram.com/InverseHyperbolicSine.html
+	- https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -550,13 +566,13 @@ def Arccosh(input, ddR = None):
         DD-finite implementation of the hyperbolic Arccosine function (arccosh(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseHyperbolicCosine.html
-            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+	- http://mathworld.wolfram.com/InverseHyperbolicCosine.html
+	- https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -601,13 +617,13 @@ def Arctanh(input, ddR = None):
         DD-finite implementation of the hyperbolic Arctangent function (arctanh(x)).
         
         References:
-            - http://mathworld.wolfram.com/InverseHyperbolicTangent.html
-            - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
+	- http://mathworld.wolfram.com/InverseHyperbolicTangent.html
+	- https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -657,13 +673,13 @@ def Log(input, ddR = None):
         DD-finite implementation of the Logarithm function (ln(x)).
         
         References:
-            - http://mathworld.wolfram.com/Logarithm.html
-            - https://en.wikipedia.org/wiki/Logarithm
+	- http://mathworld.wolfram.com/Logarithm.html
+	- https://en.wikipedia.org/wiki/Logarithm
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 1.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 1 when the main variable is 0.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 1.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 1.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 1 when the main variable is 0.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 1.
             
         This function can be converted into symbolic expressions.
     '''
@@ -690,13 +706,13 @@ def Log1(input, ddR = None):
         DD-finite implementation of the shifted Logarithm function (ln(x+1)). It is equivalent to Log(input+1).
         
         References:
-            - http://mathworld.wolfram.com/Logarithm.html
-            - https://en.wikipedia.org/wiki/Logarithm
+	- http://mathworld.wolfram.com/Logarithm.html
+	- https://en.wikipedia.org/wiki/Logarithm
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -725,13 +741,13 @@ def Exp(input, ddR = None):
         DD-finite implementation of the Exponential function (exp(x)).
         
         References:
-            - http://mathworld.wolfram.com/ExponentialFunction.html
-            - https://en.wikipedia.org/wiki/Exponential_function
+	- http://mathworld.wolfram.com/ExponentialFunction.html
+	- https://en.wikipedia.org/wiki/Exponential_function
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+	- A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
+	- A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
+	- A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
             
         This function can be converted into symbolic expressions.
     '''
@@ -764,22 +780,22 @@ def BesselD(input = 'P', kind = 1):
         DD-finite implementation of the Bessel functions (J_n(x), Y_n(x)).
         
         References:
-            - https://dlmf.nist.gov/10.2
-            - https://en.wikipedia.org/wiki/Bessel_function
-            - http://mathworld.wolfram.com/BesselFunction.html
+	- https://dlmf.nist.gov/10.2
+	- https://en.wikipedia.org/wiki/Bessel_function
+	- http://mathworld.wolfram.com/BesselFunction.html
             
         This method returns a function in the appropriate DD-Ring satisfying the differential equation
             x^2 f'' + xf' + (x^2-P^2)f = 0
         where 'x' is the variable and 'P' is a constant parameter (i.e. P' = 0).
         
         INPUT:
-            - input: the parameter 'n' for the Bessel differential equation. Currently, only non-negative integer are allowed. If no value is given, then the symbolic Bessel function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
-            - kind: the kind of bessel function the user want to get (default 1). It can take tha values 1 or 2. Currently, only the first kind is fully implemented.
+	- input: the parameter 'n' for the Bessel differential equation. Currently, only non-negative integer are allowed. If no value is given, then the symbolic Bessel function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
+	- kind: the kind of bessel function the user want to get (default 1). It can take tha values 1 or 2. Currently, only the first kind is fully implemented.
         
         WARNING:
-            - For power series solution this function only have non-zero solutions when the argument 'input' is a non-negative integer. Hence, initial values will also be computed for the parameter values that have power series solutions.
-            - The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
-            - When evaluating parameters, the initial values will not update and must be set by hand.
+	- For power series solution this function only have non-zero solutions when the argument 'input' is a non-negative integer. Hence, initial values will also be computed for the parameter values that have power series solutions.
+	- The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
+	- When evaluating parameters, the initial values will not update and must be set by hand.
     '''
     parent, par = __check_list([input], DFinite.variables());
     par = par[0];
@@ -810,9 +826,9 @@ def StruveD(mu='P',kind=1):
         DD-finite implementation of the Struve functions (J_n(x), Y_n(x)).
         
         References:
-            - https://dlmf.nist.gov/11.2
-            - https://en.wikipedia.org/wiki/Struve_function
-            - http://mathworld.wolfram.com/StruveFunction.html
+	- https://dlmf.nist.gov/11.2
+	- https://en.wikipedia.org/wiki/Struve_function
+	- http://mathworld.wolfram.com/StruveFunction.html
             
         Struve functions are the solutions for the inhomogeneous Bessel differential equation
         and have also a parameter 'P' involved:
@@ -828,13 +844,13 @@ def StruveD(mu='P',kind=1):
         coefficients, we work with the function f_mu(x) = pi*H_mu(x).
         
         INPUT:
-            - input: the parameter 'mu' for the Struve differential equation. Currently, only integers greater than -2 are allowed. If 'None' is given, then the symbolic Struve function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
-            - kind: the kind of Struve function the user want to get (default 1). It can take the values 1 or 2. Currently, only the first kind is fully implemented.
+	- input: the parameter 'mu' for the Struve differential equation. Currently, only integers greater than -2 are allowed. If 'None' is given, then the symbolic Struve function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
+	- kind: the kind of Struve function the user want to get (default 1). It can take the values 1 or 2. Currently, only the first kind is fully implemented.
         
         WARNING:
-            - Initial values will also be computed for the parameter values that have power series solutions.
-            - The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
-            - When evaluating parameters, the initial values will not update and must be set by hand.
+	- Initial values will also be computed for the parameter values that have power series solutions.
+	- The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
+	- When evaluating parameters, the initial values will not update and must be set by hand.
         
     '''
     parent, par = __check_list([mu], DFinite.variables());
@@ -889,9 +905,9 @@ def LegendreD(nu='n', mu = 0, kind=1):
         D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
         
         References:
-            - https://dlmf.nist.gov/18.3 & https://dlmf.nist.gov/14.2
-            - https://en.wikipedia.org/wiki/Legendre_polynomials
-            - http://mathworld.wolfram.com/LegendrePolynomial.html & http://mathworld.wolfram.com/LegendreFunctionoftheSecondKind.html
+	- https://dlmf.nist.gov/18.3 & https://dlmf.nist.gov/14.2
+	- https://en.wikipedia.org/wiki/Legendre_polynomials
+	- http://mathworld.wolfram.com/LegendrePolynomial.html & http://mathworld.wolfram.com/LegendreFunctionoftheSecondKind.html
             
         Legendre functions are the solutions to the differential equation:
             (1-x^2)f'' - 2xf' + n(n+1)f = 0
@@ -916,13 +932,13 @@ def LegendreD(nu='n', mu = 0, kind=1):
         Legendre differential equation. 
         
         INPUT:
-            - nu: the parameter 'n' on the assocaited differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - mu: the parameter 'm' on the assocaited differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - kind: the kind of the Legendre function the user want to get. It can take the values 1 and 2 (1 by default).
+	- nu: the parameter 'n' on the assocaited differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- mu: the parameter 'm' on the assocaited differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- kind: the kind of the Legendre function the user want to get. It can take the values 1 and 2 (1 by default).
             
         WARNING:
-            - Initial values will also be computed for the parameter values that have power series solutions. The second kind may have non-rational initial values and those will not be computed.
-            - When evaluating parameters, the initial values will not update and must be set by hand.
+	- Initial values will also be computed for the parameter values that have power series solutions. The second kind may have non-rational initial values and those will not be computed.
+	- When evaluating parameters, the initial values will not update and must be set by hand.
     '''
     parent, par = __check_list([nu,mu], DFinite.variables());
     n = par[0]; m = par[1];
@@ -969,9 +985,9 @@ def ChebyshevD(input='n', kind = 1, poly=True):
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
         References:
-            - https://dlmf.nist.gov/18.3
-            - https://en.wikipedia.org/wiki/Chebyshev_polynomials
-            - http://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html & http://mathworld.wolfram.com/ChebyshevPolynomialoftheSecondKind.html
+	- https://dlmf.nist.gov/18.3
+	- https://en.wikipedia.org/wiki/Chebyshev_polynomials
+	- http://mathworld.wolfram.com/ChebyshevPolynomialoftheFirstKind.html & http://mathworld.wolfram.com/ChebyshevPolynomialoftheSecondKind.html
             
         The Chebyshev polynomials of the first kind T_n(x) are the polynomial solutions 
         to the differential equation
@@ -999,13 +1015,13 @@ def ChebyshevD(input='n', kind = 1, poly=True):
         Chebyshev differential equation. 
         
         INPUT:
-            - input: the parameter 'n' on the differential equation. If not provided, it takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - kind: the kind of the Chebyshev polynomials the user want to get. It can take the values 1, 2, 3 and 4 (1 by default).
-            - poly: a boolean value that refer to the polynomial solution to the differential equation or the other power series solution. If False, the other power serie solution will be returned such that the Wronskian of this solution with the polynomial solution is 1. NOTE: when the parameter is not an integer, this parameter only makes a difference in the name of the function, adding a "P_" at the beginning.
+	- input: the parameter 'n' on the differential equation. If not provided, it takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- kind: the kind of the Chebyshev polynomials the user want to get. It can take the values 1, 2, 3 and 4 (1 by default).
+	- poly: a boolean value that refer to the polynomial solution to the differential equation or the other power series solution. If False, the other power serie solution will be returned such that the Wronskian of this solution with the polynomial solution is 1. NOTE: when the parameter is not an integer, this parameter only makes a difference in the name of the function, adding a "P_" at the beginning.
             
         WARNING:
-            - Initial values will also be computed for the integer parameter values.
-            - When evaluating parameters, the initial values will not update and must be set by hand.
+	- Initial values will also be computed for the integer parameter values.
+	- When evaluating parameters, the initial values will not update and must be set by hand.
     '''
     parent, par = __check_list([input], DFinite.variables());
     n = par[0];
@@ -1067,9 +1083,9 @@ def HypergeometricFunction(a='a',b='b',c='c', init = 1):
         D-finite implementation of the Gauss Hypergeometric function
         
         References:
-            - https://dlmf.nist.gov/15
-            - https://en.wikipedia.org/wiki/Hypergeometric_function
-            - http://mathworld.wolfram.com/HypergeometricFunction.html
+	- https://dlmf.nist.gov/15
+	- https://en.wikipedia.org/wiki/Hypergeometric_function
+	- http://mathworld.wolfram.com/HypergeometricFunction.html
             
         The Gauss Hypergeometric function is a special function represented by the hypergeometric 
         series, that includes many other special functions as specific or limiting cases. It is a 
@@ -1084,10 +1100,10 @@ def HypergeometricFunction(a='a',b='b',c='c', init = 1):
         to GenericHypergeometricFunction([a,b],[c],init).
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
     return GenericHypergeometricFunction([a,b],[c],init);
 
@@ -1096,9 +1112,9 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         D-finite implementation of the Generalized Hypergeometric Functions qFp(a_1,...,a_q;b_1,...,b_m;x)
         
         References:
-            - https://dlmf.nist.gov/16
-            - https://en.wikipedia.org/wiki/Generalized_hypergeometric_function
-            - http://mathworld.wolfram.com/GeneralizedHypergeometricFunction.html
+	- https://dlmf.nist.gov/16
+	- https://en.wikipedia.org/wiki/Generalized_hypergeometric_function
+	- http://mathworld.wolfram.com/GeneralizedHypergeometricFunction.html
             
         The Generic Hypergeometric function is a special function denoted by qFp(a_1,...,a_p;b_1,...,b_q;x) represented 
         by the hypergeometric series
@@ -1110,9 +1126,9 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
             (D(D+b_1-1)...(D+b_q-1) - x(D+a_1)...(D+a_p))(f) = 0
                 
         INPUT:
-            - num: a list with the parameters "a_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-            - den: a list with the parameters "b_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-            - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- num: a list with the parameters "a_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- den: a list with the parameters "b_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
     ## Checking arguments: num
     if (not (isinstance(num,list) or isinstance(num,set) or isinstance(num,tuple))):
@@ -1180,15 +1196,15 @@ def PolylogarithmD(s=1):
         Implementation using DDFunctions of the Polylogarithms
 
         References:
-            - https://en.wikipedia.org/wiki/Polylogarithm
-            - http://mathworld.wolfram.com/Polylogarithm.html
-            - https://dlmf.nist.gov/25.12
+	- https://en.wikipedia.org/wiki/Polylogarithm
+	- http://mathworld.wolfram.com/Polylogarithm.html
+	- https://dlmf.nist.gov/25.12
 
         The s-Polylogarithm is the power series defined with the sequence (1/n^s) for n >= 0. It can be computed
         recursively using and integral formula using the (s-1)-Polylogarithm.
 
         INPUT:
-            - s: Integer and positive value. All other possible powers are not accepted so far.
+	- s: Integer and positive value. All other possible powers are not accepted so far.
     '''
     if((not (s in ZZ)) or s < 1):
         raise ValueError("The parameter 's' must be a positive integer. Got %d" %s);
@@ -1213,7 +1229,7 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
         Implementation using DDFunctions of the solutions for the Ricatti differential equation.
         
         References:
-            - https://en.wikipedia.org/wiki/Riccati_equation
+	- https://en.wikipedia.org/wiki/Riccati_equation
             
         The Riccati differential equation is a non-linear differential equation of order one of the shape
             u' = a + bu + cu^2
@@ -1226,13 +1242,13 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
         Given the initial condition u(0) is enough to determined all the coefficients of the solution.
         
         INPUT:
-            - a: function to represent the constant term in the quadratic polynomial that is the derivative of u(x)
-            - b: function to represent the linear term in the quadratic polynomial that is the derivative of u(x)
-            - c: function to represent the leading term in the quadratic polynomial that is the dericative of u(x)
-            - init: initial condition u(0) of the solution. None is also valid
-            - ddR: basic DDRing where to put all the inputs a,b,c if they are not DDFunctions
-            - full: if True, it returns also the function w used to build the solution in a tuple (solution, w)
-            - name: name the system will give to the function w. By default this is "w"
+	- a: function to represent the constant term in the quadratic polynomial that is the derivative of u(x)
+	- b: function to represent the linear term in the quadratic polynomial that is the derivative of u(x)
+	- c: function to represent the leading term in the quadratic polynomial that is the dericative of u(x)
+	- init: initial condition u(0) of the solution. None is also valid
+	- ddR: basic DDRing where to put all the inputs a,b,c if they are not DDFunctions
+	- full: if True, it returns also the function w used to build the solution in a tuple (solution, w)
+	- name: name the system will give to the function w. By default this is "w"
     '''
     ## Considering the three parameters
     from sage.categories.pushout import pushout;
@@ -1273,9 +1289,9 @@ def MathieuD(a='a',q='q',init=()):
         DD-finite implementation of the Matheiu function
         
         References:
-            - https://dlmf.nist.gov/28.2
-            - https://en.wikipedia.org/wiki/Mathieu_function
-            - http://mathworld.wolfram.com/MathieuFunction.html
+	- https://dlmf.nist.gov/28.2
+	- https://en.wikipedia.org/wiki/Mathieu_function
+	- http://mathworld.wolfram.com/MathieuFunction.html
             
         The Mathieu functions are the solutions to the DD-finite differential equation
             f'' + (a - 2qcos(2x))f = 0.
@@ -1284,9 +1300,9 @@ def MathieuD(a='a',q='q',init=()):
         sine and cosine (for q=0, a=1), and have several physical aplications.
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
     ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
@@ -1305,9 +1321,9 @@ def MathieuSin(a='a',q='q'):
         DD-finite implementation of the Mathieu Sine function.
         
         References:
-            - https://dlmf.nist.gov/28.2
-            - https://en.wikipedia.org/wiki/Mathieu_function
-            - http://mathworld.wolfram.com/MathieuFunction.html
+	- https://dlmf.nist.gov/28.2
+	- https://en.wikipedia.org/wiki/Mathieu_function
+	- http://mathworld.wolfram.com/MathieuFunction.html
             
         This is the sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuD(a,q,(0,1)).
@@ -1320,9 +1336,9 @@ def MathieuCos(a='a',q='q'):
         DD-finite implementation of the Mathieu Cosine function.
         
         References:
-            - https://dlmf.nist.gov/28.2
-            - https://en.wikipedia.org/wiki/Mathieu_function
-            - http://mathworld.wolfram.com/MathieuFunction.html
+	- https://dlmf.nist.gov/28.2
+	- https://en.wikipedia.org/wiki/Mathieu_function
+	- http://mathworld.wolfram.com/MathieuFunction.html
             
         This is the cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuD(a,q,(1,0)).
@@ -1336,8 +1352,8 @@ def MathieuH(a='a',q='q',init=()):
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - https://dlmf.nist.gov/28.20
-            - https://en.wikipedia.org/wiki/Mathieu_function
+	- https://dlmf.nist.gov/28.20
+	- https://en.wikipedia.org/wiki/Mathieu_function
             
         The Modified Mathieu functions are the solutions to the DD-finite differential equation
             f'' - (a - 2qcosh(2x))f = 0.
@@ -1346,9 +1362,9 @@ def MathieuH(a='a',q='q',init=()):
         sinh and cosh (for q=0, a=1), and have several physical aplications.
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
     ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
@@ -1367,8 +1383,8 @@ def MathieuSinh(a='a',q='q'):
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - https://dlmf.nist.gov/28.20
-            - https://en.wikipedia.org/wiki/Mathieu_function
+	- https://dlmf.nist.gov/28.20
+	- https://en.wikipedia.org/wiki/Mathieu_function
             
         This is the hyperbolic sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuH(a,q,(0,1)).
@@ -1381,8 +1397,8 @@ def MathieuCosh(a='a',q='q'):
         DD-finite implementation of the Modified Matheiu functions.
         
         References:
-            - https://dlmf.nist.gov/28.20
-            - https://en.wikipedia.org/wiki/Mathieu_function
+	- https://dlmf.nist.gov/28.20
+	- https://en.wikipedia.org/wiki/Mathieu_function
             
         This is the hyperbolic cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuH(a,q,(1,0)).
@@ -1396,9 +1412,9 @@ def HillD(a='a',q='q',init=()):
         DD-finite implementation of the Hill equation.
         
         References:
-            - https://dlmf.nist.gov/28.29
-            - https://en.wikipedia.org/wiki/Hill_differential_equation
-            - http://mathworld.wolfram.com/HillsDifferentialEquation.html
+	- https://dlmf.nist.gov/28.29
+	- https://en.wikipedia.org/wiki/Hill_differential_equation
+	- http://mathworld.wolfram.com/HillsDifferentialEquation.html
             
         The Hill differential equation is defined as
             f'' + (a + q(x))f = 0
@@ -1411,9 +1427,9 @@ def HillD(a='a',q='q',init=()):
         any DDFunction of any depth.
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any DDFunction, rational number or any polynomial expression, which all variables (except 'x') will be considered as parameters.
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any DDFunction, rational number or any polynomial expression, which all variables (except 'x') will be considered as parameters.
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(is_DDFunction(q)):
         destiny_ring = q.parent().to_depth(q.parent().depth());
@@ -1449,9 +1465,9 @@ def AiryD(init=()):
         D-finite implementation of the Airy's functions (Ai(x), Bi(x)).
         
         References:
-            - https://dlmf.nist.gov/9.2
-            - https://en.wikipedia.org/wiki/Airy_function
-            - http://mathworld.wolfram.com/AiryFunctions.html
+	- https://dlmf.nist.gov/9.2
+	- https://en.wikipedia.org/wiki/Airy_function
+	- http://mathworld.wolfram.com/AiryFunctions.html
             
         The Airy functions are the solutions of the differential equation:
             f'' - xf = 0
@@ -1470,7 +1486,7 @@ def AiryD(init=()):
         using the gamma function and the transcendental value pi.
         
         INPUT:
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, rinit = __check_list(list(init), [str(el) for el in DFinite.variables()]);
     
@@ -1515,18 +1531,18 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
         D-finite implementation of Parabolic Cylinder functions.
         
         References:
-            - https://dlmf.nist.gov/12.2
-            - https://en.wikipedia.org/wiki/Parabolic_cylinder_function
-            - http://mathworld.wolfram.com/ParabolicCylinderDifferentialEquation.html
+	- https://dlmf.nist.gov/12.2
+	- https://en.wikipedia.org/wiki/Parabolic_cylinder_function
+	- http://mathworld.wolfram.com/ParabolicCylinderDifferentialEquation.html
             
         The parabolic cylinder function is a solution to the differential equation:
             f'' + (c + bx + ax^2)f = 0
             
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
     ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
@@ -1546,19 +1562,19 @@ def EllipticLegendreD(kind,var='phi'):
         DD-finite implementation of the Legendre elliptic integrals (F(phi,k), E(phi,k), D(phi,k)
         
         References:
-            - https://dlmf.nist.gov/19.2
-            - https://en.wikipedia.org/wiki/Legendre_form
-            - http://mathworld.wolfram.com/EllipticIntegraloftheFirstKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheSecondKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheThirdKind.html
+	- https://dlmf.nist.gov/19.2
+	- https://en.wikipedia.org/wiki/Legendre_form
+	- http://mathworld.wolfram.com/EllipticIntegraloftheFirstKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheSecondKind.html & http://mathworld.wolfram.com/EllipticIntegraloftheThirdKind.html
             
         Given a function s(t) such that s^2 is a cubic or quartic polynomial in t and r(s,t) a rational function on s and t, 
         then the integral of r(s,t) w.r.t. t is calles an elliptic integral. The Legendre elliptic integral are obtained from
         the following functions:
         
-            - First kind:
+	- First kind:
                 s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = 1/s --> F(phi,k) = int_{0}^{sin(phi)} r(s,t).
-            - Second kind:
+	- Second kind:
                 s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = s/(1-t^2) --> E(phi,k) = int_{0}^{sin(phi)} r(s,t).
-            - Third kind:
+	- Third kind:
                 s^2(t) = (1-t^2)(1-k^2t^2), r(s,t) = t^2/s --> D(phi,k) = (F(phi,k)-E(phi,k))/k^2.
                 
         These elliptic functions (called incomplete Legendre integrals) satisfies differential equations w.r.t. both k and phi.
@@ -1569,8 +1585,8 @@ def EllipticLegendreD(kind,var='phi'):
         parameter for the differential equation.
         
         INPUT:
-            - kind: determines the kind of the Legendre elliptic integral the user will get. Can only take the values 1,2 or 3 and MUST be provided.
-            - var: the variable to consider. If str(var) is 'k', then the compelte Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
+	- kind: determines the kind of the Legendre elliptic integral the user will get. Can only take the values 1,2 or 3 and MUST be provided.
+	- var: the variable to consider. If str(var) is 'k', then the compelte Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
     '''
     if(kind not in [1,2,3]):
         raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2");
@@ -1610,26 +1626,26 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
         D-finite implementation of the Coulomb speroidal function 
         
         References:
-            - https://dlmf.nist.gov/30.12
+	- https://dlmf.nist.gov/30.12
             
         This method retrieves the Coulomb Spheroidal Wave function that is a generalization of the Spheroidal Wave 
         function (see documentation of SpheroidalWaveFunctionD). This function adds a new parameter (d). There are
         two kinds of generalizations (both catched vy this function with the argumen 'kind'). They satisfy 
         the following differential equation:
-            - First kind:
+	- First kind:
                 ((1-x^2)f')' + (a + dx + b^2(1-x^2) - c^2/(1-x^2))f = 0
-            - Second kind:
+	- Second kind:
                 ((1-x^2)f')' + (a+ b^2(1-x^2) - d(d+1)/x^2 - c^2/(1-x^2))f = 0
                 
         Both equations reduce to the Spheroidal Wave differential equation when d=0.
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - kind: the kind of Coulomb Spheroidal function. Currently this can take the value 1 or 2 (1 by default).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- kind: the kind of Coulomb Spheroidal function. Currently this can take the value 1 or 2 (1 by default).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(kind not in [1,2]):
         raise TypeValue("Generalized Spheroidal functions only allowed in two different generalizations (1 or 2). Got %s" %kind);
@@ -1656,9 +1672,9 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
         D-finite implementation of the spheroidal wave function.
         
         References:
-            - https://dlmf.nist.gov/30.2
-            - https://en.wikipedia.org/wiki/Spheroidal_wave_function
-            - http://mathworld.wolfram.com/SpheroidalWaveFunction.html
+	- https://dlmf.nist.gov/30.2
+	- https://en.wikipedia.org/wiki/Spheroidal_wave_function
+	- http://mathworld.wolfram.com/SpheroidalWaveFunction.html
             
         The Spheroidal Wave functions are the solutions to the differential equation
             ((1-x^2)f')' + (a + b^2*(1-x^2) - c^2/(1-x^2))f = 0.
@@ -1669,10 +1685,10 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
         with a set of initial values.
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
     ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
@@ -1695,7 +1711,7 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
         D-finite implementation of the Fuschian equation
         
         References:
-            - https://dlmf.nist.gov/31.15
+	- https://dlmf.nist.gov/31.15
             
         The Fuschian differential equation is defined using three list of parameters of the same length
         a,gamma and q with the following formula:
@@ -1711,10 +1727,10 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
         of method HeunD) when len(a) = 3, and the parameters are appropriately addapted.
         
         INPUT:
-            - a: a TUPLE with the values for the singularity parameter. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-            - gamma: a TUPLE with the exponents values. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-            - q: a TUPLE with the accesory parameters for the equation. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-            - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- a: a TUPLE with the values for the singularity parameter. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- gamma: a TUPLE with the exponents values. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- q: a TUPLE with the accesory parameters for the equation. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+	- init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     ## Checking parameters
     if (not (isinstance(a,list) or isinstance(a,set) or isinstance(a,tuple))):
@@ -1759,9 +1775,9 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
         D-finite implementation of the Heun's functions.
         
         References:
-            - https://dlmf.nist.gov/31.2
-            - https://en.wikipedia.org/wiki/Heun_function
-            - http://mathworld.wolfram.com/HeunsDifferentialEquation.html
+	- https://dlmf.nist.gov/31.2
+	- https://en.wikipedia.org/wiki/Heun_function
+	- http://mathworld.wolfram.com/HeunsDifferentialEquation.html
             
         Heun functions are the solutions of the differential equation
             f'' + (g/x + d/(x-1) + e/(x-a))f' + (Abx - q)/(x(x-1)(x-a)) f = 0,
@@ -1774,15 +1790,15 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
         and q is called the "accesory parameter".
         
         INPUT:
-            - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - g: the parameter 'g' on the differential equation. If not provided, it takes the value 'g' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - e: the parameter 'e' on the differential equation. If not provided, it takes the value 'e' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- g: the parameter 'g' on the differential equation. If not provided, it takes the value 'g' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- e: the parameter 'e' on the differential equation. If not provided, it takes the value 'e' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
             
         WARNING:
-            - This method does not compute initial values for the solution of this differential equation as no power series solution is guaranteed due to the singularity at 0.
+	- This method does not compute initial values for the solution of this differential equation as no power series solution is guaranteed due to the singularity at 0.
     '''
     parent, new_all = __check_list([a,b,d,g,e,q], [str(el) for el in DFinite.variables()]);
     ra,rb,rd,rg,re,rq = new_all;
@@ -1798,8 +1814,8 @@ def CoulombF(m='m', l='l'):
         D-finite implementation of the regular Coulomb wave function (F_l(mu,ro)).
         
         References:
-            - https://dlmf.nist.gov/33.2
-            - https://en.wikipedia.org/wiki/Coulomb_wave_function
+	- https://dlmf.nist.gov/33.2
+	- https://en.wikipedia.org/wiki/Coulomb_wave_function
             
         The Coulomb Wave function is the solution to the differential equation
             f'' + (1-(2m)/x - (l(l+1))/x^2)f = 0
@@ -1808,8 +1824,8 @@ def CoulombF(m='m', l='l'):
         with first sequence element 1.
         
         INPUT:
-            - m: the parameter 'm' on the differential equation. If not provided, it takes the value 'm' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-            - l: the parameter 'l' on the differential equation. If not provided, it takes the value 'l' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- m: the parameter 'm' on the differential equation. If not provided, it takes the value 'm' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+	- l: the parameter 'l' on the differential equation. If not provided, it takes the value 'l' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()]);
     rm, rl = new_all;
@@ -1842,7 +1858,7 @@ def Catalan():
         Implementation using DDFunctions of the generating function for Catalan numbers.
 
         References:
-            - https://en.wikipedia.org/wiki/Catalan_number
+	- https://en.wikipedia.org/wiki/Catalan_number
 
         The Catalan sequence is defined with a closed formula `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
         and it is known that this sequence satisfies a linear recurrence:
@@ -1861,8 +1877,8 @@ def Fibonacci(init=(0,1)):
         Implementation using DDFunctions of the generating function for the Fibonacci sequence.
 
         References:
-            - https://oeis.org/A000045
-            - https://en.wikipedia.org/wiki/Fibonacci_number
+	- https://oeis.org/A000045
+	- https://en.wikipedia.org/wiki/Fibonacci_number
 
         The Fibonacci sequence $(f_n)_n$ is defined classically with the linear recurrence
         $$f_{n+2} = f_{n+1} + f_{n},$$
@@ -1909,23 +1925,23 @@ def DAlgebraic(polynomial, init=[], dR=None):
         Method that transform an algebraic function to a DD-Function.
                 
         INPUT:
-            - polynomial: the minimal polynomial of the function we want to transform.
-            - init: the initial values that the function will have. Two options are 
+	- polynomial: the minimal polynomial of the function we want to transform.
+	- init: the initial values that the function will have. Two options are 
             possible: a list is given, then we will use it directly to build the final 
             result, or a value is given an we will compute the others using the polynomial 
             equation.
-            - dR: the ring where we want to include the result. If None, an automatic 
+	- dR: the ring where we want to include the result. If None, an automatic 
             destiny ring will be computed.
             
         OUTPUT:
-            - A DDFunction in a particuar DDRing.
+	- A DDFunction in a particuar DDRing.
             
         WARNINGS:
-            - There is no control about the irreducibility of the polynomial.
+	- There is no control about the irreducibility of the polynomial.
             
         ERRORS:
-            - If the function can not be represented in dR a TypeError will be raised
-            - If any error happens with the initial values, a ValueError will be raised
+	- If the function can not be represented in dR a TypeError will be raised
+	- If any error happens with the initial values, a ValueError will be raised
     '''
     ## Local imports
     from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
@@ -2128,14 +2144,14 @@ def __decide_parent(input, parent = None, depth = 1):
         as the coefficient of a differential equation.
         
         If 'parent' is None, then several considerations are made:
-            - If 'input' is a Symbolic Expression, we take the variables of it, consider 
+	- If 'input' is a Symbolic Expression, we take the variables of it, consider 
             everyone but 'x' as parameters and create the corresponding ParametrizedDDRing 
             of the depth given. The argument 'input' MUST be a polynomial in 'x' and a 
             rational function in any other variable.
-            - If 'input' is a polynomial, then the first generator will be consider as the 
+	- If 'input' is a polynomial, then the first generator will be consider as the 
             variable of a DDRing and the others as parameters. Then we create the corresponding
             ParametrizedDDRing with the depth given.
-            - Otherwise, we create the DDRing of the parent of 'input' of the given depth 
+	- Otherwise, we create the DDRing of the parent of 'input' of the given depth 
             and try to work with that ring.
     '''
     dR = parent;
@@ -2170,9 +2186,9 @@ def __check_list(list_of_elements, invalid_vars=[]):
         to appear in the elements, raising an error if that happens.
         
         The elements on the list can be:
-            - A string: it will be consider as the name of a parameter.
-            - Any element with attribute 'variables'. All the variables found will be add as parameters.
-            - Elements of a FractionField. The base ring must provide the method 'variables'. All the variables found will be added as parameters.
+	- A string: it will be consider as the name of a parameter.
+	- Any element with attribute 'variables'. All the variables found will be add as parameters.
+	- Elements of a FractionField. The base ring must provide the method 'variables'. All the variables found will be added as parameters.
             
         Once all the variables are computed, we checked that there are no invalid variables and then we 
         build the field of rational functions in the variables found. Then we return this field together 
