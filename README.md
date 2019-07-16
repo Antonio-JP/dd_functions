@@ -38,3 +38,6 @@ Now that the package is installed, we can start using it importing the appropria
 `from ajpastor.dd_functions import *`
 
 Or start a Jupyter notebook session for Sage and launch the demo contained in `dd_functions_demo.ipynb`.
+
+If you did not want to install the package (or simply, you do not have Sage) do not worry, you can still try it at Binder:
+https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
