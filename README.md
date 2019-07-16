@@ -9,7 +9,7 @@ This package allows Sage users to use _naturally_ DD-finite functions on the com
 There are three different ways to obtain the package.
 
 #### **Public _git_ repository**
-The package can be obtained freely from the public _git_ repository from RISC (Research Institute for Symbolic Computation): click [here](http://git.risc.jku.at/gitweb/?p=ajpastor/diff_defined_functions.git) for the webpage view or [clone](git.risc.jku.at:pub/ajpastor/diff_defined_functions) the repository (git.risc.jku.at:pub/ajpastor/diff_defined_functions).
+The package can be obtained freely under GPLv3 from the the public _git_ repository at GitHub: click [here](https://github.com/Antonio-JP/dd_functions) for the webpage view or [clone](https://github.com/Antonio-JP/dd_functions.git) the repository (https://github.com/Antonio-JP/dd_functions.git).
 
 * This method allow the user to get the <font color="green">very last version</font> of the code.
 * From time to time, this means the version <font color="red">is not stable</font>.
