@@ -8,8 +8,7 @@ FROM sagemath/sagemath:8.8
 COPY --chown=sage:sage . ${HOME}
 
 ## Getting ore_algebra pacakge
-RUN git clone https://github.com/mkauers/ore_algebra/
-RUN sage -pip install ./ore_algebra
+RUN sage -pip install ore_algebra
 
 
 # Install this package and dependencies
