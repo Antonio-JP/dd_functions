@@ -68,6 +68,7 @@ The functions available in this module are the following:
 	- CoulombF
             
 * COMBINATORIAL FUNCTIONS
+	- FactorialD
 	- Catalan
 	- Fibonacci
 
@@ -1853,12 +1854,26 @@ def CoulombF(m='m', l='l'):
 ##################################################################################
 ################################################################################## 
 @cached_function
+def FactorialD():
+	r'''
+		Implementation using DDFunction of the generating function for the factorial sequence.
+
+		The factorial sequence is easily defined with the recurrence `f_{n+1} = (n+1)f_n` with `f_0 =1`
+		and it is commonly represented as `f_n = n!`. As a P-finite recurrence, its generating function
+		`Fa(x)` satisfies a linear differential equation.
+		$$ x^2 Fa''(x) + (3x-1)Fa'(x) + Fa(x) = 0.$$
+
+		This method returns the DDFunction representing this function `Fa(x)`.
+	'''
+	return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1", ["x"]));
+
+@cached_function
 def Catalan():
     r'''
         Implementation using DDFunctions of the generating function for Catalan numbers.
 
         References:
-	- https://en.wikipedia.org/wiki/Catalan_number
+			- https://en.wikipedia.org/wiki/Catalan_number
 
         The Catalan sequence is defined with a closed formula `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
         and it is known that this sequence satisfies a linear recurrence:
@@ -1877,8 +1892,8 @@ def Fibonacci(init=(0,1)):
         Implementation using DDFunctions of the generating function for the Fibonacci sequence.
 
         References:
-	- https://oeis.org/A000045
-	- https://en.wikipedia.org/wiki/Fibonacci_number
+			- https://oeis.org/A000045
+			- https://en.wikipedia.org/wiki/Fibonacci_number
 
         The Fibonacci sequence $(f_n)_n$ is defined classically with the linear recurrence
         $$f_{n+2} = f_{n+1} + f_{n},$$
