@@ -7,9 +7,5 @@ FROM sagemath/sagemath:8.8
 # Copy the contents of the repo in ${HOME}
 COPY --chown=sage:sage . ${HOME}
 
-## Getting ore_algebra pacakge
-RUN sage -pip install ore_algebra
-
-
 # Install this package and dependencies
 # RUN sage -pip install .
