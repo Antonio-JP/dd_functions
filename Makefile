@@ -27,8 +27,9 @@ uninstall:
 develop:
 	$(SAGE) -pip install --upgrade -e .
 
-test:
-	$(SAGE) setup.py test
+test: install
+	$(SAGE) -t $(PACKAGE)
+#	$(SAGE) setup.py test
 
 coverage:
 	$(SAGE) -coverage $(PACKAGE)/*

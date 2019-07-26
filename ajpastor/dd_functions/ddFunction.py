@@ -3460,6 +3460,7 @@ except ImportError:
     DFinite = DDRing(PolynomialRing(QQ,x));
 DDFinite = DDRing(DFinite);
 DFiniteP = ParametrizedDDRing(DFinite, [var('P')]);
+DFiniteI = DDRing(PolynomialRing(NumberField(x**2+1, 'I'), ['x']),base_field=NumberField(x**2+1, 'I'));
 
 def __get_recurrence(f):
     if(not f in DFinite):
@@ -3496,6 +3497,6 @@ DFinite._DDRing__get_recurrence = __get_recurrence;
 ###################################################################################################
 ### PACKAGE ENVIRONMENT VARIABLES
 ###################################################################################################
-__all__ = ["is_DDRing", "is_ParametrizedDDRing", "is_DDFunction", "DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "polynomial_computation", "ParametrizedDDRing", "DFiniteP"];
+__all__ = ["is_DDRing", "is_ParametrizedDDRing", "is_DDFunction", "DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "polynomial_computation", "ParametrizedDDRing", "DFiniteP", "DFiniteI"];
   
 
