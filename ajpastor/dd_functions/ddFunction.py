@@ -58,6 +58,7 @@ from ajpastor.misc.cached_property import derived_property;
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence;
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring;
 from ajpastor.misc.ring_w_sequence import sequence;
+from ajpastor.misc.verbose import printProgressBar;
 
 #####################################################
 ### Definition of some exceptions
@@ -2104,6 +2105,9 @@ class DDFunction (IntegralDomainElement):
         
         return self.parent().element(newOperator, newInit, check_init=False, name=newName);
         
+    #####################################
+    ### Cmpositional methods
+    #####################################
     def compose(self, other):
         '''
             Method to compute the composition of 'self' with 'other' (if possible).
@@ -2387,7 +2391,30 @@ class DDFunction (IntegralDomainElement):
         except Exception:
             ### If an error occur, then other can not be substracted from self, so they can not be equals
             return False;
+         
+    def quick_equals(self,other): ### TO REVIEW
+        '''
+            Method that checks if two DDFunctions are equal (as power-series). In orther to do so, we substract one to the other and check if the result is zero.
             
+            INPUT:
+                - ``other``: a DDFunction that can be substracted of ``self``.
+                
+            OUTPUT:
+                - True if the object ``other`` could represent the same function as ``self``.
+                - False if we are sure ``self`` is different from ``other``.
+        '''
+        try:
+            if(not isinstance(other, DDFunction)):
+                other = self.parent()(other);
+                
+            m = self.equation.get_jp_fo()+other.equation.get_jp_fo()+1 ;
+            return self.getInitialValueList(m) == other.getInitialValueList(m);
+        except Exception:
+            return False
+
+    #####################################
+    ### Numerical methods
+    #####################################   
     def numerical_solution(self, value, delta=RealNumber('1e-10'), max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
@@ -2419,6 +2446,75 @@ class DDFunction (IntegralDomainElement):
             to_mult *= value;
         return float(res),float(abs(to_sum));
         
+    def numeric_coefficient_comparison_asymptotics(self, other, max_depth=10000, step=100, verbose=False, comparison="quotient", sequence=False):
+    	r'''
+            Method to compare the coefficient sequence of two power sequence. 
+
+            This method compares two sequences via division or difference (see optional arguments) and 
+            may provide empirical evidence of similarity in asymptotics between the sequences.
+
+            INPUT::
+            	- other: the sequnce with ''self'' is compared. If it is not a DDFunction it will be casted to one.
+            	- max_depth: element of the sequence it will be compared. 
+            	- step: step-jump between comparisons. As the sequences are created recursively, this avoids a recursion overflow in Python.
+            	- verbose: if set to True, the method will print the progress of the computation.
+            	- kwds: there are several extra options that can be provided with boolean values:
+            		- comparison: the comparison can be "quotient" (''self.getSequenceElement(n)/other.getSequenceElement(n)'') 
+            		or "difference" (''self.getSequenceElement(n) - other.getSequenceElement(n)'').
+            		- sequence: the answer will be a list of comparisons in all the elements $0 (mod step)$. If not given, the answer will be just the last comparison.
+
+            OUTPUT::
+            	A value with the appropriate comparison between the ''max_depth'' element of the sequences from ''self'' and ''other''.
+
+            WARNING::
+            	This method can be interrupted at any point with Ctr-C and the last reached point will be returned.
+    	'''
+    	## Treating the arguments
+    	if(comparison == "quotient"):
+    		comp = lambda p,q : float(p/q);
+    	elif(comparison == "difference"):
+    		comp = lambda p,q : float(p-q);
+    	else:
+    		raise ValueError("Argument 'comparison' must be either \"quotient\" or \"difference\"");
+
+    	if(not is_DDFunction(other)):
+    		other = self.parent()(other);
+
+    	total = int(max_depth/step) + 1;
+    	iteration = 0;
+
+    	result = [];
+
+    	if(verbose): printProgressBar(iteration, total);
+    	while(iteration*step < max_depth):
+    		try:
+    			next = iteration*step;
+    			result += [comp(self.getSequenceElement(next), other.getSequenceElement(next))];
+    		except KeyboardInterrupt:
+    			if(verbose): print "";
+    			break;
+    		iteration+=1;
+    		if(verbose): printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]));
+
+    	## Finished loop: returning
+    	# Checking if the last iteration was made
+    	if(iteration*step >= max_depth):
+    		try:
+    			result += [comp(self.getSequenceElement(max_depth), other.getSequenceElement(max_depth))];
+    			if(verbose): printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]));
+    		except KeyboardInterrupt:
+    			if(verbose): print "";
+    			pass;
+
+    	if(sequence):
+    		return result;
+    	else:
+    		return result[-1];
+
+
+    #####################################
+    ### Simbolyc methods
+    #####################################    
     @cached_method
     def to_symbolic(self):
         evaluation = sage_eval(str(self.__name).replace("'", ".derivative()").replace("^", "**"), locals=globals());
@@ -2478,26 +2574,6 @@ class DDFunction (IntegralDomainElement):
         except Exception as e:
             pass;
         return self;
-            
-    def quick_equals(self,other): ### TO REVIEW
-        '''
-            Method that checks if two DDFunctions are equal (as power-series). In orther to do so, we substract one to the other and check if the result is zero.
-            
-            INPUT:
-                - ``other``: a DDFunction that can be substracted of ``self``.
-                
-            OUTPUT:
-                - True if the object ``other`` could represent the same function as ``self``.
-                - False if we are sure ``self`` is different from ``other``.
-        '''
-        try:
-            if(not isinstance(other, DDFunction)):
-                other = self.parent()(other);
-                
-            m = self.equation.get_jp_fo()+other.equation.get_jp_fo()+1 ;
-            return self.getInitialValueList(m) == other.getInitialValueList(m);
-        except Exception:
-            return False
         
     #####################################
     ### Magic Python methods
