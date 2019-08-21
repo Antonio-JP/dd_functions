@@ -3532,7 +3532,7 @@ try:
     DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator);
 except ImportError:
     ## No ore_algebra package found
-    warnings.warn("Package ore_algebra was not found. It is hightly recommended to get this package by M. Kauers and M. Mezzaroba (http://marc.mezzarobba.net/code/ore_algebra-analytic/ or http://www.kauers.de/software.html)", NoOreAlgebraWarning);
+    warnings.warn("Package ore_algebra was not found. It is hightly recommended to get this package by M. Kauers and M. Mezzaroba (https://github.com/mkauers/ore_algebra)", NoOreAlgebraWarning);
     DFinite = DDRing(PolynomialRing(QQ,x));
 DDFinite = DDRing(DFinite);
 DFiniteP = ParametrizedDDRing(DFinite, [var('P')]);
