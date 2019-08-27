@@ -3044,7 +3044,29 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     	if(full):
     		self.skwds()["init_values"] = aux;
 
-    
+    def save_init(self, file):
+    	is_str = isinstance(file,str);
+    	if(is_str): file = open(file, "w+");
+
+    	for i in range(max(el for el in self.__calculatedSequence)+1):
+    		file.write(str(self.getSequenceElement(i)) + "\n");
+
+    	if(is_str): file.close();
+
+    def load_init(self, file):
+    	is_str = isinstance(file,str);
+    	if(is_str): file = open(file, "r");
+
+    	init_list = file.readlines();
+    	init_list = [self.parent().base_field(el) for el in init_list];
+
+    	for i in range(self.equation.get_jp_fo()+1):
+    		if(init_list[i] != self.getSequenceElement(i)):
+    			raise ValueError("This function is not the function saved");
+
+    	for i in range(self.equation.get_jp_fo()+1, len(init_list)):
+    		self.__calculatedSequence[i] = init_list[i];
+
     def _to_command_(self):
         if(self.__name is None):
             return "%s.element(%s,%s)" %(command(self.parent()), _command_list(self.getOperator().getCoefficients()), self.getInitialValueList(self.getOrder()));
