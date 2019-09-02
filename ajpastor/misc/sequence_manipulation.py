@@ -87,6 +87,16 @@ def ogf_egf(f):
     return lambda n: f(n)*factorial(n);
 
 def inv_lagrangian(f):
+    '''
+        Inverse of a power series sequence using lagrangian inverse.
+        
+        This methods computes the functional inverse of the sequence
+        defined by ``f`` as an ordinary generating function using the lagrangian
+        inversion formula (see https://en.wikipedia.org/wiki/Lagrange_inversion_theorem
+        for further information).
+        
+        Then composition(f, inv_lagrangian(f))(n) = delta(1,n).
+    '''
     if(f(0) != 0):
         raise ValueError("Power serie not invertible");
     if(f(1) == 0):
@@ -115,3 +125,52 @@ def inv_lagrangian(f):
             return (1/(f(1)**n)) * result;
     return egf_ogf(_inverse_egf);
 
+def Richardson(f,order):
+    '''
+        Applies the Richardson transformation.
+        
+        Builds the Richarsdon's sequence of order ``order`` for the sequence given 
+        ``f``. This sequence has the same asymptotic behavior as ``f`` but it converges 
+        faster (meaning less number of elements are required to get the samy asymptotic 
+        information).
+        
+        LINKS::
+            * https://en.wikipedia.org/wiki/Richardson_extrapolation
+            * https://www3.risc.jku.at/publications/download/risc_4324/techrep.pdf
+        
+    '''
+    return lambda n : (2**order*f(2*n)-f(n))/(2**order-1);
+
+################################################################################
+################################################################################
+################################################################################
+## From list to sequence method
+def list_to_seq(input):
+    '''
+        Convert a list into a sequence (i.e., a method)
+        
+        This method convert a list or any other iterable indexed by integers into 
+        a method that receives a index as input and returns the corresponding element 
+        of the sequence.
+    '''
+    return lambda n : input[n];
+    
+def seq_to_list(f, bound=None):
+    '''
+        Convert a sequence into a list.
+        
+        This method converts a sequence into a list exploring the sequence until it is 
+        not defined or ``bound`` elements have been computed.
+        
+        WARNING:: if bound is None, the method may not finish. 
+    '''
+    result = []; i = 0;
+    while(((bound is None) or (i < bound))):
+        try:
+            result += [f(i)];
+            i += 1;
+        except Exception:
+            break;
+    return result;
+    
+    
