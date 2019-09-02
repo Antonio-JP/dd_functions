@@ -3044,28 +3044,83 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     	if(full):
     		self.skwds()["init_values"] = aux;
 
-    def save_init(self, file):
+    def save_init(self, file, init=True, bin=True, bound=None):
+        r'''
+            Method to save only the initial conditions for this function. 
+            
+            This method stores in ``file`` the initial conditions or the sequence
+            of ``self`` using the method dump from the package pickle.
+            
+            Once the values are save, they can be recovered using the method 
+            ``load_init``.
+            
+            INPUT::
+                * file: an opened file object or a string with the Path to the file.
+                * init: indicates if saving the initial values (``True``) or the sequence. 
+                * bin: a flag indicating if save the object in text mode or binary mode
+                * bound: number of elements of the sequence to save.
+        '''
+        from pickle import dump as pdump;
+        
     	is_str = isinstance(file,str);
-    	if(is_str): file = open(file, "w+");
-
-    	for i in range(max(el for el in self.__calculatedSequence)+1):
-    		file.write(str(self.getSequenceElement(i)) + "\n");
-
+    	if(is_str and bin): file = open(file, "wb+");
+    	if(is_str and not bin): file = open(file, "w+");
+    	
+    	n = max(self.equation.get_jp_fo(),max(el for el in self.__calculatedSequence));
+    	if((not (bound is None)) and (bound in ZZ) and (bound > 0)):
+    	    n = min(bound, n);
+    	
+    	if(init):
+    	    pdump(self.getInitialValueList(n+1), file);
+    	else:
+            pdump(self.getSequenceList(n+1), file);
+            
     	if(is_str): file.close();
 
-    def load_init(self, file):
+    def load_init(self, file, init=True, bin=True, check=True,bound=None):
+        r'''
+            Method to load the initial conditions for this function. 
+            
+            This method loads from ``file`` the initial conditions or the sequence
+            of ``self`` using the method load from the package pickle.
+            
+            For a proper behavior of this function, only files created with 
+            the method ``save_init`` should be used.
+            
+            INPUT::
+                * file: an opened file object or a string with the Path to the file.
+                * init: indicates if loading the initial values (``True``) or the sequence. 
+                * bin: a flag indicating if load the object in text mode or binary mode.
+                * check: a flag to check the data is valid for the equation.
+                * bound: number of elements of the sequence to load.
+        '''
+        from pickle import load as pload;
+        
     	is_str = isinstance(file,str);
-    	if(is_str): file = open(file, "r");
+    	if(is_str and bin): file = open(file, "rb+");
+    	if(is_str and not bin): file = open(file, "r+");
 
-    	init_list = file.readlines();
-    	init_list = [self.parent().base_field(el) for el in init_list];
-
-    	for i in range(self.equation.get_jp_fo()+1):
-    		if(init_list[i] != self.getSequenceElement(i)):
-    			raise ValueError("This function is not the function saved");
-
-    	for i in range(self.equation.get_jp_fo()+1, len(init_list)):
-    		self.__calculatedSequence[i] = init_list[i];
+        data = pload(file);
+        if(is_str): file.close();
+        
+        n = len(data);
+        if((not (bound is None)) and (bound in ZZ) and (bound > 0)):
+            n = min(n,bound);
+        
+        if(not init): # Converting the data into initial coditions
+            init_data = [factorial(i)*data[i] for i in range(len(data))];
+        else:
+            init_data = [el for el in data];
+            data = [init_data[i]/factorial(i) for i in range(len(init_data))];
+        
+        if(check):
+            try:
+                aux = self.change_init_values(init_data[:n]);
+                self.__calculatedSequence = aux.__calculatedSequence;  
+            except ValueError:
+                raise ValueError("Bad error conditions in %s for equation %s" %(file.name,self.equation));
+        else:
+            self.__calculatedSequence = {i : data[i] for i in range(n)}
 
     def _to_command_(self):
         if(self.__name is None):
