@@ -5,74 +5,73 @@ With this package the user has access to many special functions with the DDFunct
 Here we describe the functions available in this module. For further information on each function, 
 please access the documentation for that particular function.
         
-All the elements that are returned in this module are DDFunction, i.e.,
+All the elements that are returned in this module instances of DDFunction, i.e.,
 formal power series defined with a linear differential equation and
 some appropriate initial values.
         
 When possible, the functions returned by this module are associated with
 the usual implementation of those functions in SAGE, so using the 
-method "to_symbolic()" returns the same object in the Symbolic Ring.
+method 'to_symbolic()'' returns the same object in the Symbolic Ring.
         
-The functions available in this module are the following:
-        
-* TRIGONOMETRIC FUNCTIONS
-    - Sin
-    - Cos
-    - Tan
-    - Sinh
-    - Cosh
-    - Tanh
-    - Arcsin
-    - Arccos
-    - Arctan
-    - Arcsinh
-    - Arccosh
-    - Arctanh
-* EXPONENTIAL FUNCTIONS
-    - Exp
-    - Log
-    - Log1
-* BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov)
-    - BesselD
-    - StruveD
-* ORTHOGONAL POLRNOMAILS
-    - LegendreD (see chapter 14 in https://dlmf.nist.gov)
-    - ChebyshevD (see chapter 18 in https://dlmf.nist.gov)
-* HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov)
-    - HypergeometricFunction
-    - GenericHypergeometricFunction
-    - Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
-* RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation)
-    - RiccatiD
-* MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov)
-    - MathieuD
-    - MathieuSin
-    - MathieuCos
-    - MathieuH
-    - MathieuSinh
-    - MathieuCosh
-    - HillD
-* AIRY'S FUNCTIONS
-    - AiryD
-* PARABOLIC-CYLINDER TYPE FUNCTIONS
-    - ParabolicCylinderD
-* ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov)
-    - EllipticLegendreD
-* SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov)
-    - CoulombSpheroidalFunctionD
-    - SpheroidalWaveFunctionD
-* HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov)
-    - FuschianD
-    - HeunD
-* COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov)
-    - CoulombF
+The functions available in this module are the following::
+    * TRIGONOMETRIC FUNCTIONS:
+        * Sin
+        * Cos
+        * Tan
+        * Sinh
+        * Cosh
+        * Tanh
+        * Arcsin
+        * Arccos
+        * Arctan
+        * Arcsinh
+        * Arccosh
+        * Arctanh
+    * EXPONENTIAL FUNCTIONS:
+        * Exp
+        * Log
+        * Log1
+    * BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov):
+        * BesselD
+        * StruveD
+    * ORTHOGONAL POLRNOMAILS:
+        * LegendreD (see chapter 14 in https://dlmf.nist.gov)
+        * ChebyshevD (see chapter 18 in https://dlmf.nist.gov)
+    * HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov):
+        * HypergeometricFunction
+        * GenericHypergeometricFunction
+        * Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
+    * RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation):
+        * RiccatiD
+    * MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov):
+        * MathieuD
+        * MathieuSin
+        * MathieuCos
+        * MathieuH
+        * MathieuSinh
+        * MathieuCosh
+        * HillD
+    * AIRY'S FUNCTIONS:
+        * AiryD
+    * PARABOLIC-CYLINDER TYPE FUNCTIONS:
+        * ParabolicCylinderD
+    * ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov):
+        * EllipticLegendreD
+    * SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov):
+        * CoulombSpheroidalFunctionD
+        * SpheroidalWaveFunctionD
+    * HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov):
+        * FuschianD
+        * HeunD
+    * COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
+        * CoulombF
             
-* COMBINATORIAL FUNCTIONS
-    - FactorialD
-    - Catalan
-    - Fibonacci
-    - Bell numbers
-    - Bernoulli
+    * COMBINATORIAL FUNCTIONS:
+        * FactorialD
+        * Catalan
+        * Fibonacci
+        * Bell numbers
+        * Bernoulli
 
 EXAMPLES::
     sage: from ajpastor.dd_functions import *
@@ -122,20 +121,26 @@ from ajpastor.misc.exceptions import *;
 def Sin(input, ddR = None):
     r'''
         D-finite implementation of the Sine function (sin(x)).
-           
-        References:
-            - http://mathworld.wolfram.com/Sine.html
-            - https://en.wikipedia.org/wiki/Sine
+
+        Method to crete a DDFunction instance of a sine-type function. For more
+        information about the sine function, consult the following references::
+            * http://mathworld.wolfram.com/Sine.html
+            * https://en.wikipedia.org/wiki/Sine
                 
-        This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+        This function allows the user to fix the argument. The argument can be:
+            * A symbolic expression: all variables but "x" will be considered as 
+              parameters. Must be a polynomial expression with x as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the main 
+              variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
                 
         This function can be converted into symbolic expressions.
         
         EXAMPLES::
-            sage: from ajpastor.dd_functions.ddExamples import *
+            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan;
             sage: Sin(x).getInitialValueList(10)
             [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
             sage: Sin(x)[0]
@@ -144,11 +149,11 @@ def Sin(input, ddR = None):
             0
             sage: Sin(x)[2]
             1
-            sage: Sin(x).derivative()^2 + Sin(x)^2 == 1
-            True
             sage: Sin(x).derivative() == Cos(x)
             True
             sage: Sin(x).derivative(times=2) == -Sin(x)
+            True
+            sage: Cos(x)^2 + Sin(x)^2 == 1
             True
             sage: res = True; # Checking the object with random polynomial coefficients
             sage: for i in range(5):
@@ -164,7 +169,7 @@ def Sin(input, ddR = None):
             ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: Sin(2*x) == 2*Sin(x)*Sin(x).derivative()
+            sage: Sin(2*x) == 2*Sin(x)*Cos(x)
             True
             sage: Sin(2*x).getInitialValueList(10) == [sin(2*x).derivative(i)(x=0) for i in range(10)]
             True
@@ -176,6 +181,7 @@ def Sin(input, ddR = None):
             True
 
         We can also check identities with complex exponential::
+            sage: from ajpastor.dd_functions.ddExamples import Exp, Sinh;
             sage: I = DFiniteI.base_ring().gens()[0]; I
             I
             sage: X = DFiniteI.variables()[0]; X
@@ -222,19 +228,25 @@ def Cos(input, ddR = None):
     r'''
         D-finite implementation of the Cosine function (cos(x)).
         
-        References:
-            - http://mathworld.wolfram.com/Cosine.html
-            - https://en.wikipedia.org/wiki/Cosine
+        Method to crete a DDFunction instance of a cosine-type function. For more
+        information about the cosine function, consult the following references::
+            * http://mathworld.wolfram.com/Cosine.html
+            * https://en.wikipedia.org/wiki/Cosine
             
         This functions allows the user to fix the argument. The argument can be:
-            - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-            - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-            - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but "x" will be considered as
+              parameters. Must be a polynomial expression with x as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
 
         EXAMPLES::
-            sage: from ajpastor.dd_functions.ddExamples import Cos
+            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos;
             sage: Cos(x).getInitialValueList(10)
             [1, 0, -1, 0, 1, 0, -1, 0, 1, 0]
             sage: Cos(x)[0]
@@ -243,7 +255,11 @@ def Cos(input, ddR = None):
             0
             sage: Cos(x)[2]
             1
-            sage: Cos(x).derivative()^2 + Cos(x)^2 == 1
+            sage: Cos(x).derivative() == -Sin(x)
+            True
+            sage: Cos(x).derivative(times=2) == -Cos(x)
+            True
+            sage: Sin(x)^2 + Cos(x)^2 == 1
             True
             sage: res = True; # Checking the object with random polynomial coefficients
             sage: for i in range(5):
@@ -259,9 +275,17 @@ def Cos(input, ddR = None):
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: Cos(2*x) == Cos(x)^2 - Cos(x).derivative()^2
+            sage: Cos(2*x) == Cos(x)^2 - Sin(x)^2
             True
             sage: Cos(2*x).getInitialValueList(10) == [cos(2*x).derivative(i)(x=0) for i in range(10)]
+            True
+
+        We can also check identities with complex exponential::
+            sage: from ajpastor.dd_functions.ddExamples import Exp, Cosh;
+            sage: I = DFiniteI.base_ring().gens()[0]; X = DFiniteI.variables()[0];
+            sage: Exp(I*X) + Exp(-I*X) == 2*Cos(x)
+            True
+            sage: Sin(x) == Cosh(I*X)
             True
 
         Due to the nature of this implementation, the case for x^n for n > 2 must be treated as functions intead of
@@ -296,17 +320,58 @@ def Cos(input, ddR = None):
 def Tan(input, ddR = None):
     '''
         DD-finite implementation of the Tangent function (tan(x)).
-        
-        References:
-    - http://mathworld.wolfram.com/Tangent.html
-    - https://en.wikipedia.org/wiki/Tangent
+
+        Method to crete a DDFunction instance of a tangent-type function. For more
+        information about the tangeng function, consult the following references::
+            * http://mathworld.wolfram.com/Tangent.html
+            * https://en.wikipedia.org/wiki/Tangent
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but "x" will be considered as
+              parameters. Must be a polynomial expression with x as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will 
+              be considered as parameters. The polynomial must be divisible by 
+              the main variable.
+            * A DDFunction: the composition will be computed. The DDFunction 
+              must have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan
+            sage: Tan(x).getInitialValueList(10)
+            [0, 1, 0, 2, 0, 16, 0, 272, 0, 7936]
+            sage: Tan(x)[0]
+            -2
+            sage: Tan(x)[1]
+            0
+            sage: Tan(x)[2]
+            (cos(x))^2
+            sage: is_DDFunction(Tan(x)[2])
+            True
+            sage: Tan(x)[2] == Cos(x)^2
+            True
+            sage: Tan(x) == Sin(x)/Cos(x)
+            True
+            sage: Tan(x).derivative() == 1/(Cos(x)^2)
+            True
+            sage: Tan(x).derivative() == 1 + Tan(x)^2 # long time (> 1 min)
+            True
+            sage: res = True; # Checking the object with random polynomial coefficients
+            sage: for i in range(5):
+            ....:     p = x*QQ[x].random_element(3);
+            ....:     l1 = Tan(p).getInitialValueList(10);
+            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
+            ....:     if(not l1 == l2):
+            ....:         print(p)
+            sage: res = True; # Checking the composition with random polynomial coefficients
+            sage: for i in range(5):
+            ....:     p = x*QQ[x].random_element(3);
+            ....:     l1 = (Tan(x)(p)).getInitialValueList(10);
+            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
+            ....:     if(not l1 == l2):
+            ....:         print(p)
     '''
     if(is_DDFunction(input)):
         return Tan(x)(input);
@@ -348,16 +413,25 @@ def Sinh(input, ddR = None):
     '''
         DD-finite implementation of the Hyperbolic Sine function (sinh(x)).
         
-        References:
-    - http://mathworld.wolfram.com/HyperbolicSine.html
-    - https://en.wikipedia.org/wiki/Hyperbolic_function
+        Method to crete a DDFunction instance of a tangent-type function. For more
+        information about the tangeng function, consult the following references::
+            * http://mathworld.wolfram.com/HyperbolicSine.html
+            * https://en.wikipedia.org/wiki/Hyperbolic_function
             
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+        This functions allows the user to fix the argument. The argument can be::
+            * A symbolic expression: all variables but "x" will be considered as 
+              parameters. Must be a polynomial expression with x as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp
     '''
     if(is_DDFunction(input)):
         return Sinh(x)(input);

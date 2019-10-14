@@ -8,7 +8,7 @@ In this package the user may find the following subpackages:
 * misc: implementation of several miscellaneous utilities
 * tests: provide several tests 
 
-AUTHORS:
+AUTHORS::
 
     - Antonio Jimenez-Pastor (2016-10-01): initial version
 
