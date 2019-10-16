@@ -11,67 +11,66 @@ some appropriate initial values.
         
 When possible, the functions returned by this module are associated with
 the usual implementation of those functions in SAGE, so using the 
-method 'to_symbolic()'' returns the same object in the Symbolic Ring.
+method 'to_symbolic()' returns the same object in the Symbolic Ring.
         
 The functions available in this module are the following::
     * TRIGONOMETRIC FUNCTIONS:
-        * Sin
-        * Cos
-        * Tan
-        * Sinh
-        * Cosh
-        * Tanh
-        * Arcsin
-        * Arccos
-        * Arctan
-        * Arcsinh
-        * Arccosh
-        * Arctanh
+        * #'Sin'
+        * #'Cos'
+        * #'Tan'
+        * 'Sinh'
+        * 'Cosh'
+        * 'Tanh'
+        * 'Arcsin'
+        * 'Arccos'
+        * 'Arctan'
+        * 'Arcsinh'
+        * 'Arccosh'
+        * 'Arctanh'
     * EXPONENTIAL FUNCTIONS:
-        * Exp
-        * Log
-        * Log1
+        * 'Exp'
+        * 'Log'
+        * 'Log1'
     * BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov):
-        * BesselD
-        * StruveD
+        * 'BesselD'
+        * 'StruveD'
     * ORTHOGONAL POLRNOMAILS:
-        * LegendreD (see chapter 14 in https://dlmf.nist.gov)
-        * ChebyshevD (see chapter 18 in https://dlmf.nist.gov)
+        * 'LegendreD' (see chapter 14 in https://dlmf.nist.gov)
+        * 'ChebyshevD' (see chapter 18 in https://dlmf.nist.gov)
     * HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov):
-        * HypergeometricFunction
-        * GenericHypergeometricFunction
-        * Polylogarithms (see section 25.12 in https://dlmf.nist.gov)
+        * 'HypergeometricFunction'
+        * 'GenericHypergeometricFunction'
+        * 'Polylogarithms' (see section 25.12 in https://dlmf.nist.gov)
     * RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation):
-        * RiccatiD
+        * 'RiccatiD'
     * MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov):
-        * MathieuD
-        * MathieuSin
-        * MathieuCos
-        * MathieuH
-        * MathieuSinh
-        * MathieuCosh
-        * HillD
+        * 'MathieuD'
+        * 'MathieuSin'
+        * 'MathieuCos'
+        * 'MathieuH'
+        * 'MathieuSinh'
+        * 'MathieuCosh'
+        * 'HillD'
     * AIRY'S FUNCTIONS:
-        * AiryD
+        * 'AiryD'
     * PARABOLIC-CYLINDER TYPE FUNCTIONS:
-        * ParabolicCylinderD
+        * 'ParabolicCylinderD'
     * ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov):
-        * EllipticLegendreD
+        * 'EllipticLegendreD'
     * SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov):
-        * CoulombSpheroidalFunctionD
-        * SpheroidalWaveFunctionD
+        * 'CoulombSpheroidalFunctionD'
+        * 'SpheroidalWaveFunctionD'
     * HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov):
-        * FuschianD
-        * HeunD
-    * COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
-        * CoulombF
-            
-    * COMBINATORIAL FUNCTIONS:
-        * FactorialD
-        * Catalan
-        * Fibonacci
-        * Bell numbers
-        * Bernoulli
+        * 'FuschianD'
+        * 'HeunD'
+    * #COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
+        * 'CoulombF'  
+    * #COMBINATORIAL FUNCTIONS: 
+        * 'FactorialD'
+        * 'CatalanD'
+        * 'FibonacciD'
+        * 'BellD'
+        * 'BernoulliD'
 
 EXAMPLES::
     sage: from ajpastor.dd_functions import *
@@ -261,14 +260,14 @@ def Cos(input, ddR = None):
             True
             sage: Sin(x)^2 + Cos(x)^2 == 1
             True
-            sage: res = True; # Checking the object with random polynomial coefficients
+            sage: res = True; # Checking the method with polynomial input
             sage: for i in range(5):
             ....:     p = x*QQ[x].random_element(3);
             ....:     l1 = Cos(p).getInitialValueList(10);
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: res = True; # Checking the composition with random polynomial coefficients
+            sage: res = True; # Checking composition with polynomial coefficients
             sage: for i in range(5):
             ....:     p = x*QQ[x].random_element(3);
             ....:     l1 = (Cos(x)(p)).getInitialValueList(10);
@@ -1983,23 +1982,42 @@ def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
     return f;
 
 ###### COULOMB FUNCTIONS
-def CoulombF(m='m', l='l'):
+def FCoulombD(m='m', l='l'):
     '''
-        D-finite implementation of the regular Coulomb wave function (F_l(mu,ro)).
+        D-finite implementation of the regular Coulomb wave function `F_{l,\mu}(x)`.
         
         References:
-    - https://dlmf.nist.gov/33.2
-    - https://en.wikipedia.org/wiki/Coulomb_wave_function
+            * https://dlmf.nist.gov/33.2
+            * http://fungrim.org/topic/Coulomb_wave_functions/
+            * https://en.wikipedia.org/wiki/Coulomb_wave_function
             
         The Coulomb Wave function is the solution to the differential equation
-            f'' + (1-(2m)/x - (l(l+1))/x^2)f = 0
+        MATH::
+            f''(x) + (1-(2m)/x - (l(l+1))/x^2)f(x) = 0
             
-        If l is integer, there is a power serie solution of order l+1, and this function return that solution
-        with first sequence element 1.
+        If `l` is integer, there is a power serie solution of order `l+1`, and 
+        this function return that solution with first sequence element `1`.
         
-        INPUT:
-    - m: the parameter 'm' on the differential equation. If not provided, it takes the value 'm' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - l: the parameter 'l' on the differential equation. If not provided, it takes the value 'l' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+        INPUT::
+            * 'm': the parameter 'm' on the differential equation. If not provided, 
+              it takes the value '"m"' by default. This argument can be any 
+              rational number or any polynomial expression, which variables will 
+              be considered as parameters (so 'x' is not allowed).
+            * 'l': the parameter 'l' on the differential equation. If not provided, 
+              it takes the value 'l' by default. This argument can be any 
+              rational number or any polynomial expression, which variables will 
+              be considered as parameters (so 'x' is not allowed).
+              
+        EXAMPLE::
+            sage: from ajpastor.dd_functions.ddExamples import FCoulombD;
+            sage: F = FCoulombD(1/2,2); 
+            sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
+            0
+            sage: for l in range(-1,10): # checking with m parameter
+            ....:     F = FCoulomb('m',l);
+            ....:     m = F.parent().base_field.gens()[0];
+            ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
+            ....:         print l;
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()]);
     rm, rl = new_all;
@@ -2029,54 +2047,136 @@ def CoulombF(m='m', l='l'):
 @cached_function
 def FactorialD():
     r'''
-        Implementation using DDFunction of the generating function for the factorial sequence.
+        DDFunction of the generating function for the factorial sequence.
 
-        The factorial sequence is easily defined with the recurrence `f_{n+1} = (n+1)f_n` with `f_0 =1`
-        and it is commonly represented as `f_n = n!`. As a P-finite recurrence, its generating function
-        `Fa(x)` satisfies a linear differential equation.
-        $$ x^2 Fa''(x) + (3x-1)Fa'(x) + Fa(x) = 0.$$
+        The factorial sequence is easily defined with the recurrence 
+        `f_{n+1} = (n+1)f_n` with `f_0 =1` and it is commonly represented as 
+        `f_n = n!`. As a P-finite recurrence, its generating function
+        `Fa(x)` satisfies a linear differential equation: 
+        MATH::
+            x^2 Fa''(x) + (3x-1)Fa'(x) + Fa(x) = 0.
 
         This method returns the DDFunction representing this function `Fa(x)`.
+        
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import FactorialD
+            sage: fa = FactorialD(); fa
+            Fa(x)
+            sage: fa[0] == 1
+            True
+            sage: fa[1] == 3*x-1
+            True
+            sage: fa[2] == x^2
+            True
+            sage: fa.getSequenceList(10)
+            [1, 1, 2, 6, 24, 120, 720, 5760, 51840, 518400]
+            sage: fa.getInitialValueList(10) == [factorial(i)^2 for i in range(10)]
+            True
     '''
-    return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1", ["x"]));
+    return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1)", ["x"]));
 
 @cached_function
-def Catalan():
+def CatalanD():
     r'''
-        Implementation using DDFunctions of the generating function for Catalan numbers.
+        DDFunction of the generating function for the Catalan numbers.
 
         References:
-            - https://en.wikipedia.org/wiki/Catalan_number
+            * http://oeis.org/A000108
+            * https://en.wikipedia.org/wiki/Catalan_number
 
-        The Catalan sequence is defined with a closed formula `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
+        The Catalan sequence is defined with a closed formula 
+        `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
         and it is known that this sequence satisfies a linear recurrence:
-        $$c_{n+1+} = \sum_{i=0}^n c_i c_{n-i},$$
+        MATH::
+            c_{n+1+} = \sum_{i=0}^n c_i c_{n-i},
+        
         which leads to the functional equation:
-        $$C(x) = 1+ xC(x)^2,$$
-        where $C(x)$ is the ordinary generating function for the sequence $(c_n)$. This algebraic equation implies
-        that $C(x)$ is D-finite with differential equation:
-        $$(4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.$$
+        MATH::
+            C(x) = 1+ xC(x)^2,
+            
+        where $C(x)$ is the ordinary generating function for the sequence $(c_n)$. 
+        This algebraic equation implies that $C(x)$ is D-finite with 
+        differential equation:
+        MATH::
+            (4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.
+            
+        This method returns the DDFunction representing this function `C(x)`.
+        
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import CatalanD
+            sage: C = CatalanD(); C
+            C(x)
+            sage: C[0] == 2
+            True
+            sage: C[1] == 10*x-2
+            True
+            sage: C[2] == 4*x^2-x
+            True
+            sage: C.getSequenceList(10)
+            [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862]
+            sage: x*C^2 + 1 == C # algebraic relation
+            True
     '''
-    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1]);
+    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1], name=DinamicString("C(_1)", ["x"]));
 
 @cached_function
-def Fibonacci(init=(0,1)):
+def FibonacciD(init=('a','b')):
     r'''
-        Implementation using DDFunctions of the generating function for the Fibonacci sequence.
+        DDFunctions of the generating function for a Fibonacci-type sequence.
 
         References:
-            - https://oeis.org/A000045
-            - https://en.wikipedia.org/wiki/Fibonacci_number
+            * https://oeis.org/A000045
+            * https://en.wikipedia.org/wiki/Fibonacci_number
 
-        The Fibonacci sequence $(f_n)_n$ is defined classically with the linear recurrence
-        $$f_{n+2} = f_{n+1} + f_{n},$$
+        The Fibonacci sequence $(f_n)_n$ is defined classically with the linear 
+        recurrence 
+        MATH::
+            f_{n+2} = f_{n+1} + f_{n},
+            
         starting with initial values `f_0 = 0`, `f_1 = 1`. 
 
-        This linear recurrence implies that the ordinary generating function for the fibonacci sequence
-        is D-finite independently to initial conditions `f_0`, `f_1`.
+        This linear recurrence implies that the ordinary generating function for
+        the Fibonacci sequence is D-finite independently to initial conditions 
+        `f_0`, `f_1`.
+        
+        In fact, since the recurrence relation is C-finite (with constant 
+        coefficients), the generating function is a rational function:
+        MATH::
+            F(f_0,f_1;x) = frac{f_0 + (f_1-f_0)x}{1-x-x^2}
 
-        This method returns the DDFunction object for the ordinary generating function for a particular
-        Fibonacci sequence provided the initial conditions `f_0` and `f_1`.
+        This method returns the DDFunction object for the ordinary generating 
+        function for a particular Fibonacci-type sequence provided the initial 
+        conditions `f_0` and `f_1`.
+        
+        INPUT::
+            * 'init': a tuple with the intial conditions `f_0` and `f_1`. This
+              list can be of any length containing integer, strings or polynomials
+              with variables that will be considered as parameters. If not enough 
+              elements are provided, more parameters will be added.
+              
+              By default, this argument is the tuple ('a','b').
+              
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import FibonacciD;
+            sage: Fp = FibonacciD(); Fp
+            F(a,b;x)
+            sage: Fp.getSequenceList(5)
+            [a, b, b + a, 2*b + a, 3*b + 2*a]
+            sage: F = FibonacciD((0,1))
+            sage: F.getSequenceList(10) == [fibonacci(i) for i in range(10)]
+            True
+            sage: F == x/(1-x-x^2)
+            True
+            sage: a = Fp.getSequenceElement(0); b = Fp.getSequenceElement(1);
+            sage: x = Fp.parent().variables()[0];
+            sage: Fp == (a + (b-a)*x)/(1-x-x^2)
+            True
+            sage: FibonacciD(tuple([2*a-3*b])) # just one element tuple
+            F(2*a - 3*b,c;x)
+            sage: FibonacciD(('a','c_1')) # with strings
+            F(a,c_1;x)
+            sage: FibonacciD(('f',a*2+1,0,0,0)) # with long tuple
+            F(f,2*a + 1;x)
     '''
     parent, rinit = __check_list([el for el in init], [str(el) for el in DFinite.variables()]);
     params = [str(v) for v in parent.gens()];
@@ -2090,7 +2190,7 @@ def Fibonacci(init=(0,1)):
             while(chr(pos) in params):
                 pos += 1;
             rinit += [chr(pos)];
-        return Fibonacci(tuple(rinit));
+        return FibonacciD(tuple(rinit));
     
     if(parent is QQ):
         destiny_ring = DFinite;
@@ -2098,8 +2198,82 @@ def Fibonacci(init=(0,1)):
         destiny_ring = ParametrizedDDRing(DFinite, params);
     
     x = destiny_ring.variables()[0];
+    f = destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2));
+    f.change_name(DinamicString("F(_1,_2;_3)", [str(rinit[0]),str(rinit[1]),"x"]));
+    return f;
     
-    return destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2));
+@cached_function
+def BellD():
+    r'''
+        DDFunction of the exponential generating function for the Bell numbers.
+
+        References:
+            * https://en.wikipedia.org/wiki/Bell_number
+            * http://oeis.org/A000110
+            * http://mathworld.wolfram.com/BellNumber.html
+
+        The Bell numbers are a sequence `B_n` that counts the amount of possible
+        partitions of a set with `n` element. This sequence is well known to be
+        non holonomic. Moreover, its ordinary generating function is not 
+        differentially algebraic.
+        
+        However, if we consider its *exponential generating function*, the
+        Bell numbers can be represented with
+        MATH::
+            B(x) = \sum_{n \geq 0} B_n \frac{x^n}n! = e^{e^{x}-1}
+             
+        This formula shows that `B(x)` is DD-finite since it is the composition
+        of two exponential functions. 
+            
+        This method returns the DDFunction representing this function `B(x)`.
+        
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import Exp,BellD
+            sage: B = BellD(); B
+            B(x)
+            sage: B == Exp(Exp(x)-1)
+            True
+            sage: B.getInitialValueList(10) == [bell_number(i) for i in range(10)]
+            True
+    '''
+    return DDFinite.element([-Exp(x),1], [1], name=DinamicString("B(_1)", ["x"]));
+    
+@cached_function
+def BernoulliD():
+    r'''
+        DDFunction of the exponential generating function for the Bernoulli numbers.
+
+        References:
+            * https://en.wikipedia.org/wiki/Bernoulli_number
+            * https://oeis.org/A027641
+            * https://oeis.org/A027642
+            * http://mathworld.wolfram.com/BernoulliNumber.html
+
+        The Bernoulli numbers are a sequence `B_n` that arise in the series 
+        expansions of trigonometric functions, and are extremely important 
+        in number theory and analysis. This sequence is well known to be
+        non holonomic. 
+        
+        However, if we consider its *exponential generating function*, the
+        Bernoulli numbers can be represented with
+        MATH::
+            B(x) = \sum_{n \geq 0} B_n \frac{x^n}n! = frac{x}{e^x-1}
+             
+        This formula shows that `B(x)` is DD-finite since it is the quotient of
+        two D-finite functions.
+        
+        This method returns the DDFunction representing this function `B(x)`.
+        
+        EXAMPLES::
+            sage: from ajpastor.dd_functions.ddExamples import Exp,BernoulliD
+            sage: B = BernoulliD(); B
+            B(x)
+            sage: B == x/(Exp(x)-1)
+            True
+            sage: B.getInitialValueList(10) == [bernoulli(i) for i in range(10)]
+            True
+    '''
+    return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DinamicString("B(_1)", ["x"]));
             
 ##################################################################################
 ##################################################################################
