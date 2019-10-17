@@ -11,79 +11,79 @@ some appropriate initial values.
         
 When possible, the functions returned by this module are associated with
 the usual implementation of those functions in SAGE, so using the 
-method 'to_symbolic()' returns the same object in the Symbolic Ring.
+method ``to_symbolic()`` returns the same object in the Symbolic Ring.
         
 The functions available in this module are the following::
     * TRIGONOMETRIC FUNCTIONS:
-        * #'Sin'
-        * #'Cos'
-        * #'Tan'
-        * 'Sinh'
-        * 'Cosh'
-        * 'Tanh'
-        * 'Arcsin'
-        * 'Arccos'
-        * 'Arctan'
-        * 'Arcsinh'
-        * 'Arccosh'
-        * 'Arctanh'
+        * :func:`Sin`
+        * :func:`Cos`
+        * :func:`Tan`
+        * :func:`Sinh`
+        * :func:`Cosh`
+        * :func:`Tanh`
+        * :func:`Arcsin`
+        * :func:`Arccos`
+        * :func:`Arctan`
+        * :func:`Arcsinh`
+        * :func:`Arccosh`
+        * :func:`Arctanh`
     * EXPONENTIAL FUNCTIONS:
-        * 'Exp'
-        * 'Log'
-        * 'Log1'
+        * :func:`Exp`
+        * :func:`Log`
+        * :func:`Log1`
     * BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov):
-        * 'BesselD'
-        * 'StruveD'
+        * :func:`BesselD`
+        * :func:`StruveD`
     * ORTHOGONAL POLRNOMAILS:
-        * 'LegendreD' (see chapter 14 in https://dlmf.nist.gov)
-        * 'ChebyshevD' (see chapter 18 in https://dlmf.nist.gov)
+        * :func:`LegendreD` (see chapter 14 in https://dlmf.nist.gov)
+        * :func:`ChebyshevD` (see chapter 18 in https://dlmf.nist.gov)
     * HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov):
-        * 'HypergeometricFunction'
-        * 'GenericHypergeometricFunction'
-        * 'Polylogarithms' (see section 25.12 in https://dlmf.nist.gov)
+        * :func:`HypergeometricFunction`
+        * :func:`GenericHypergeometricFunction`
+        * :func:`PolylogarithmD` (see section 25.12 in https://dlmf.nist.gov)
     * RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation):
-        * 'RiccatiD'
+        * :func:`RiccatiD`
     * MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov):
-        * 'MathieuD'
-        * 'MathieuSin'
-        * 'MathieuCos'
-        * 'MathieuH'
-        * 'MathieuSinh'
-        * 'MathieuCosh'
-        * 'HillD'
+        * :func:`MathieuD`
+        * :func:`MathieuSin`
+        * :func:`MathieuCos`
+        * :func:`MathieuH`
+        * :func:`MathieuSinh`
+        * :func:`MathieuCosh`
+        * :func:`HillD`
     * AIRY'S FUNCTIONS:
-        * 'AiryD'
+        * :func:`AiryD`
     * PARABOLIC-CYLINDER TYPE FUNCTIONS:
-        * 'ParabolicCylinderD'
+        * :func:`ParabolicCylinderD`
     * ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov):
-        * 'EllipticLegendreD'
+        * :func:`EllipticLegendreD`
     * SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov):
-        * 'CoulombSpheroidalFunctionD'
-        * 'SpheroidalWaveFunctionD'
+        * :func:`CoulombSpheroidalFunctionD`
+        * :func:`SpheroidalWaveFunctionD`
     * HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov):
-        * 'FuschianD'
-        * 'HeunD'
-    * #COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
-        * 'CoulombF'  
-    * #COMBINATORIAL FUNCTIONS: 
-        * 'FactorialD'
-        * 'CatalanD'
-        * 'FibonacciD'
-        * 'BellD'
-        * 'BernoulliD'
+        * :func:`FuschianD`
+        * :func:`HeunD`
+    * COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
+        * :func:`FCoulombD`  
+    * COMBINATORIAL FUNCTIONS: 
+        * :func:`FactorialD`
+        * :func:`CatalanD`
+        * :func:`FibonacciD`
+        * :func:`BellD`
+        * :func:`BernoulliD`
 
 EXAMPLES::
+
     sage: from ajpastor.dd_functions import *
     sage: Exp(x).getInitialValueList(10) == [1]*10
     True
 
-TODO::
+TODO:
     * Improve the Examples section of this doc
     * Improve the documentation of the functions in this package
 
 AUTHORS:
-
-    - Antonio Jimenez-Pastor (2016-10-01): initial version
+    * Antonio Jimenez-Pastor (2016-10-01): initial version
 
 """
 
@@ -119,16 +119,16 @@ from ajpastor.misc.exceptions import *;
 @cached_function
 def Sin(input, ddR = None):
     r'''
-        D-finite implementation of the Sine function (sin(x)).
+        D-finite implementation of the Sine function (`\sin(x)`).
 
         Method to crete a DDFunction instance of a sine-type function. For more
-        information about the sine function, consult the following references::
+        information about the sine function, consult the following references:
             * http://mathworld.wolfram.com/Sine.html
             * https://en.wikipedia.org/wiki/Sine
                 
         This function allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but "x" will be considered as 
-              parameters. Must be a polynomial expression with x as a factor.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
               considered as parameters. The polynomial must be divisible by the main 
@@ -139,6 +139,7 @@ def Sin(input, ddR = None):
         This function can be converted into symbolic expressions.
         
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan;
             sage: Sin(x).getInitialValueList(10)
             [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
@@ -180,7 +181,9 @@ def Sin(input, ddR = None):
             True
 
         We can also check identities with complex exponential::
+
             sage: from ajpastor.dd_functions.ddExamples import Exp, Sinh;
+            sage: from ajpastor.dd_functions.ddFunction import DFiniteI;
             sage: I = DFiniteI.base_ring().gens()[0]; I
             I
             sage: X = DFiniteI.variables()[0]; X
@@ -191,12 +194,16 @@ def Sin(input, ddR = None):
             True
 
         And also the relation with the hypergeometric functions::
-            sage: Sin(x) == x*GenericHypergeometricFunction((),(3/2),(1))(-x^2/4)
+
+            sage: from ajpastor.dd_functions.ddExamples import F01;
+            sage: Sin(x) == x*F01(3/2)(-x^2/4)
             True
 
-        Due to the nature of this implementation, the case for x^n for n > 2 must be treated as functions intead of
-        computing directly the function. The key here is that for that kind of input, the initial conditions required
-        to define Sin(x^n) are not the first 3 but further::
+        Due to the nature of this implementation, the case for `x^n` for n > 2 
+        must be treated as functions intead of computing directly the function. 
+        The key here is that for that kind of input, the initial conditions required
+        to define ``Sin(x^n)`` are not the first 3 but further::
+
             sage: all(Sin(x^i).is_fully_defined for i in range(1,10))
             True
             sage: Sin(x^4).getInitialValueList(20) == [sin(x^4).derivative(i)(x=0) for i in range(20)]
@@ -225,15 +232,15 @@ def Sin(input, ddR = None):
 @cached_function    
 def Cos(input, ddR = None):
     r'''
-        D-finite implementation of the Cosine function (cos(x)).
+        D-finite implementation of the Cosine function (`\cos(x)`).
         
         Method to crete a DDFunction instance of a cosine-type function. For more
-        information about the cosine function, consult the following references::
+        information about the cosine function, consult the following references:
             * http://mathworld.wolfram.com/Cosine.html
             * https://en.wikipedia.org/wiki/Cosine
             
         This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but "x" will be considered as
+            * A symbolic expression: all variables but ``x`` will be considered as
               parameters. Must be a polynomial expression with x as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -245,6 +252,7 @@ def Cos(input, ddR = None):
         This function can be converted into symbolic expressions.
 
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos;
             sage: Cos(x).getInitialValueList(10)
             [1, 0, -1, 0, 1, 0, -1, 0, 1, 0]
@@ -280,16 +288,20 @@ def Cos(input, ddR = None):
             True
 
         We can also check identities with complex exponential::
+
             sage: from ajpastor.dd_functions.ddExamples import Exp, Cosh;
+            sage: from ajpastor.dd_functions.ddFunction import DFiniteI;
             sage: I = DFiniteI.base_ring().gens()[0]; X = DFiniteI.variables()[0];
             sage: Exp(I*X) + Exp(-I*X) == 2*Cos(x)
             True
-            sage: Sin(x) == Cosh(I*X)
+            sage: Cos(x) == Cosh(I*X)
             True
 
-        Due to the nature of this implementation, the case for x^n for n > 2 must be treated as functions intead of
-        computing directly the function. The key here is that for that kind of input, the initial conditions required
-        to define Cos(x^n) are not the first 3 but further::
+        Due to the nature of this implementation, the case for x^n for n > 2 must 
+        be treated as functions intead of computing directly the function. The 
+        key here is that for that kind of input, the initial conditions required
+        to define ``Cos(x^n)`` are not the first 3 but further::
+
             sage: all(Cos(x^i).is_fully_defined for i in range(1,10))
             True
             sage: Cos(x^4).getInitialValueList(20) == [cos(x^4).derivative(i)(x=0) for i in range(20)]
@@ -318,7 +330,7 @@ def Cos(input, ddR = None):
 @cached_function
 def Tan(input, ddR = None):
     '''
-        DD-finite implementation of the Tangent function (tan(x)).
+        DD-finite implementation of the Tangent function (`tan(x)`).
 
         Method to crete a DDFunction instance of a tangent-type function. For more
         information about the tangeng function, consult the following references::
@@ -326,8 +338,8 @@ def Tan(input, ddR = None):
             * https://en.wikipedia.org/wiki/Tangent
             
         This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but "x" will be considered as
-              parameters. Must be a polynomial expression with x as a factor.
+            * A symbolic expression: all variables but ``x`` will be considered as
+              parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will 
               be considered as parameters. The polynomial must be divisible by 
@@ -338,7 +350,9 @@ def Tan(input, ddR = None):
         This function can be converted into symbolic expressions.
 
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan
+            sage: from ajpastor.dd_functions.ddFunction import is_DDFunction
             sage: Tan(x).getInitialValueList(10)
             [0, 1, 0, 2, 0, 16, 0, 272, 0, 7936]
             sage: Tan(x)[0]
@@ -409,17 +423,17 @@ def Tan(input, ddR = None):
 
 @cached_function    
 def Sinh(input, ddR = None):
-    '''
-        DD-finite implementation of the Hyperbolic Sine function (sinh(x)).
+    r'''
+        DD-finite implementation of the Hyperbolic Sine function (`\sinh(x)`).
         
-        Method to crete a DDFunction instance of a tangent-type function. For more
-        information about the tangeng function, consult the following references::
+        Method to crete a DDFunction instance of a hyperbolic sine-type function. For more
+        information about the tangeng function, consult the following references:
             * http://mathworld.wolfram.com/HyperbolicSine.html
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
-        This functions allows the user to fix the argument. The argument can be::
-            * A symbolic expression: all variables but "x" will be considered as 
-              parameters. Must be a polynomial expression with x as a factor.
+        This functions allows the user to fix the argument. The argument can be:
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
               considered as parameters. The polynomial must be divisible by the 
@@ -430,7 +444,43 @@ def Sinh(input, ddR = None):
         This function can be converted into symbolic expressions.
 
         EXAMPLES::
-            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp
+
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp;
+            sage: s = Sinh(x); c = Cosh(x);
+            sage: s[0]
+            -1
+            sage: s[1]
+            0
+            sage: s[2]
+            1
+            sage: s.getInitialValueList(10) # initial values
+            [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+            sage: # checking derivatives
+            sage: s.derivative() == c
+            True
+            sage: s.derivative(times=2) == s
+            True
+            sage: # checking definition by exponetial
+            sage: s == (Exp(x) - Exp(-x))/2
+            True
+            sage: s == (1 - Exp(-2*x))/(2*Exp(-x))
+            True
+            sage: s == (Exp(2*x) - 1)/(2*Exp(x))
+            True
+            sage: # checking relations
+            sage: Sinh(-x) == -Sinh(x)
+            True
+            sage: s + c == Exp(x)
+            True
+            sage: c - s == Exp(-x)
+            True
+            sage: c^2-s^2 == 1
+            True
+            sage: # checking the addition formulas
+            sage: Sinh(2*x) == 2*s*c
+            True
+            sage: Sinh(3*x) == s^3 + 3*s*c^2
+            True
     '''
     if(is_DDFunction(input)):
         return Sinh(x)(input);
@@ -451,19 +501,64 @@ def Sinh(input, ddR = None):
 
 @cached_function    
 def Cosh(input, ddR = None):
-    '''
-        DD-finite implementation of the Hyperbolic Cosine function (cosh(x)).
+    r'''
+        DD-finite implementation of the Hyperbolic Cosine function (`\cosh(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/HyperbolicCosine.html
-    - https://en.wikipedia.org/wiki/Hyperbolic_function
+        Method to crete a DDFunction instance of a hyperbolic cosine-type function. For more
+        information about the tangeng function, consult the following references:
+            * http://mathworld.wolfram.com/HyperbolicCosine.html
+            * https://en.wikipedia.org/wiki/Hyperbolic_function
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp;
+            sage: s = Sinh(x); c = Cosh(x);
+            sage: c[0]
+            -1
+            sage: c[1]
+            0
+            sage: c[2]
+            1
+            sage: c.getInitialValueList(10) # initial values
+            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+            sage: # checking derivatives
+            sage: c.derivative() == s
+            True
+            sage: c.derivative(times=2) == c
+            True
+            sage: # checking definition by exponetial
+            sage: c == (Exp(x) + Exp(-x))/2
+            True
+            sage: c == (1 + Exp(-2*x))/(2*Exp(-x))
+            True
+            sage: c == (Exp(2*x) + 1)/(2*Exp(x))
+            True
+            sage: # checking relations
+            sage: Cosh(-x) == Cosh(x)
+            True
+            sage: s + c == Exp(x)
+            True
+            sage: c - s == Exp(-x)
+            True
+            sage: c^2-s^2 == 1
+            True
+            sage: # checking the addition formulas
+            sage: Cosh(2*x) == s^2 + c^2
+            True
+            sage: Cosh(3*x) == c^3 + 3*c*s^2
+            True
     '''
     if(is_DDFunction(input)):
         return Cosh(x)(input);
@@ -484,19 +579,53 @@ def Cosh(input, ddR = None):
 
 @cached_function
 def Tanh(input, ddR = None):
-    '''
-        DD-finite implementation of the Tangent hyperbolic function (tanh(x)).
+    r'''
+        DD-finite implementation of the Hyperbolic Tangent function (`\tanh(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/HyperbolicTangent.html 
-    - https://en.wikipedia.org/wiki/Hyperbolic_function
+        Method to crete a DDFunction instance of a hyperbolic cosine-type function. For more
+        information about the tangeng function, consult the following references:
+            * http://mathworld.wolfram.com/HyperbolicTangent.html 
+            * https://en.wikipedia.org/wiki/Hyperbolic_function
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Tanh, Exp;
+            sage: s = Sinh(x); c = Cosh(x); t = Tanh(x);
+            sage: t[0]
+            2
+            sage: t[1]
+            0
+            sage: t[2]
+            (cosh(x))^2
+            sage: t.getInitialValueList(10) # initial values
+            [0, 1, 0, -2, 0, 16, 0, -272, 0, 7936]
+            sage: # checking derivatives
+            sage: t.derivative() == 1-t^2
+            True
+            sage: t.derivative() == 1/(c^2)
+            True
+            sage: # checking definition by exponetial
+            sage: t == s/c;
+            True
+            sage: t == (Exp(x) - Exp(-x))/(Exp(x) + Exp(-x))
+            True
+            sage: t == (Exp(2*x)-1)/(Exp(2*x)+1)
+            True
+            sage: # checking relations
+            sage: Tanh(-x) == -Tanh(x)
+            True
     '''
     if(is_DDFunction(input)):
         return Tanh(x)(input);
@@ -1362,6 +1491,26 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)];
+
+@cached_function
+def F00():
+    return GenericHypergeometricFunction((),());
+
+@cached_function
+def F10(a='a'):
+    return GenericHypergeometricFunction((a),());
+
+@cached_function
+def F01(b='b'):
+    return GenericHypergeometricFunction((),(b));
+
+@cached_function
+def F11(a='a',b='b'):
+    return GenericHypergeometricFunction((a),(b));
+
+@cached_function
+def F21(a='a',b='b',c='c'):
+    return HypergeometricFunction(a,b,c);
     
 @cached_function
 def PolylogarithmD(s=1):
@@ -1633,33 +1782,71 @@ def HillD(a='a',q='q',init=()):
 ###### AIRY TYPE FUNCTIONS
 ### Airy's functions
 @cached_function
-def AiryD(init=()):
-    '''
+def AiryD(init=('a','b')):
+    r'''
         D-finite implementation of the Airy's functions (Ai(x), Bi(x)).
         
-        References:
-    - https://dlmf.nist.gov/9.2
-    - https://en.wikipedia.org/wiki/Airy_function
-    - http://mathworld.wolfram.com/AiryFunctions.html
-            
-        The Airy functions are the solutions of the differential equation:
-            f'' - xf = 0
+        The Airy dunctions `Ai(x)` and `Bi(x)` are the two linearly independent
+        solutions to the *Airy* or *Stokes* equation:
         
-        The classical Airy functions, denoted by Ai(x) and Bi(x), form a set of linearly independent
-        solutions to the differential equations. The initial value of the classical Airy functions
-        are
-            Ai(0) = 1/(3^(2/3) * gamma(2/3)); Ai'(0) = -1/(3^(1/3) * gamma(1/3))
-            Bi(0) = 1/(3^(1/6) * gamma(2/3)); Bi'(0) = (3^(1/6))/gamma(1/3)
-            
-        Due to this fact, the classical Airy functions do not have rational initial values. This is why
-        this method can not retrieve te user with the functions Ai(x) or Bi(x). This method returns
-        the solution of the Airy's differential equation with some particular initial value.
+        .. MATH::
+
+            \frac{d^2y}{dx^2} - xy = 0
+
+        It has several applications in physics (for example, it is the solution
+        to Schrodinger's equation for a particle confined within a triangular 
+        potential well and for a particle in a one-dimensional constant force 
+        field).
+
+        The main definition shows that Airy functions are D-finite functions.
+        The classical Airy functions has as initial values:
         
-        The name of the returned function will show the linear combination of the function Ai(x) and Bi(x)
-        using the gamma function and the transcendental value pi.
-        
+        .. MATH::
+
+            \begin{array}{cc}
+                Ai(0) = \frac{1}{3^{2/3} \Gamma(2/3)};& Ai'(0) = \frac{-1}{3^{1/3}\Gamma(1/3)}\\
+                Bi(0) = \frac{1}{3^{1/6} \Gamma(2/3)};& Bi'(0) = \frac{3^{1/6}}{\Gamma(1/3)}
+            \end{array}
+
+        Due to this fact, the classical Airy functions do not have rational 
+        initial values. This is why this method can not retrieve te user with 
+        the functions `Ai(x)` or `Bi(x)`. This method returns the solution of the 
+        Airy's differential equation with some particular initial values.
+
+        For further references, the user can look into the following references:
+            * `DLMF Chapter 9.2 <https://dlmf.nist.gov/9.2>`_
+            * `Wikipedia: Airy functions <https://en.wikipedia.org/wiki/Airy_function>`_
+            * `Mathworld: Airy functions <http://mathworld.wolfram.com/AiryFunctions.html>`_
+                
         INPUT:
-    - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+
+            * ``init``: a **tuple** with the initial values for the function. Each
+              element can be a string to create a variable, any rational number 
+              or any polynomial expression which variables will be considered as
+              parameters (so ``x`` is not allowed).
+
+              By default, two parameters ``a`` and ``b`` are created.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import AiryD, F01;
+            sage: from ajpastor.dd_functions.ddFunction import DFinite;
+            sage: Ai = AiryD(); R = DFinite.base();
+            sage: Ai[0] == R(-x)
+            True
+            sage: Ai[1] == 0
+            True
+            sage: Ai[2] == 1
+            True
+            sage: Ai.getInitialValueList(10)
+            [a, b, 0, a, 2*b, 0, 4*a, 10*b, 0, 28*a]
+            sage: for n in range(3,10):
+            ....:     Ai_n = [Ai.derivative(times=n-i) for i in range(4)]
+            ....:     if(Ai_n[0] != x*Ai_n[2] + (n-2)*Ai_n[3]):
+            ....:         print(n)
+            sage: a = Ai(0); b = Ai.derivative()(0);
+            sage: Ai == a*F01(2/3)(x^3/9) + b*F01(4/3)(x^3/9)*x # hyperg. representation
+            True
     '''
     parent, rinit = __check_list(list(init), [str(el) for el in DFinite.variables()]);
     
@@ -1880,30 +2067,69 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
 ### Fuschian equation
 @cached_function
 def FuschianD(a = (), gamma = (), q = (), init=()):
-    '''
+    r'''
         D-finite implementation of the Fuschian equation
         
         References:
-    - https://dlmf.nist.gov/31.15
+            * https://dlmf.nist.gov/31.14
             
-        The Fuschian differential equation is defined using three list of parameters of the same length
-        a,gamma and q with the following formula:
-            f'' + (sum_j [gamma_j/(x-a_j)])f' + (sum_j [q_j/(x-a_j)])f = 0,
-        where (sum_j [q_j]) == 0.
+        The Fuschian differential equation is defined using three list of parameters 
+        of the same length ``a``, ``gamma`` and ``q`` with the following formula:
+
+        .. MATH::
+
+            w''(x) + \left(\sum_{j=1}^N \frac{\gamma_j}{x-a_j}\right)w'(x) + 
+            \left(\sum_{j=1}^N \frac{q_j}{x-a_j}\right)w(x) = 0,
+
+        where `\sum_{j=1}^N q_j = 0`.
         
-        This differential equation has finite singularities at a_j of exponent {0,1-gamma_j} and at
-        infinity of exponents {alpha, beta} where they are the solutions to
-            alpha+beta+1 = sum_j [gamma_j]
-            alpha*beta = sum_j [a_jq_j]
-            
-        This differential equation is a generalization of the Heun differential equation (see documentation
-        of method HeunD) when len(a) = 3, and the parameters are appropriately addapted.
+        This differential equation has finite singularities at `a_j` of exponent 
+        `\{0,1-\gamma_j\}` and at `\infty` of exponents `\{\alpha, \beta\}` where 
+        they are the solutions to
+
+        .. MATH::
+
+            \left\{\begin{array}{l}
+                \alpha+\beta+1 = \sum_{j=1}^N \gamma_j\\
+                \alpha\beta = \sum_{j=1}^N a_jq_j
+            \end{array}\right.
+
+        This differential equation is a generalization of the Heun differential 
+        equation (see :func:`HeunD`) when ``len(a) == 3``, and the parameters are 
+        appropriately addapted.
         
         INPUT:
-    - a: a TUPLE with the values for the singularity parameter. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-    - gamma: a TUPLE with the exponents values. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-    - q: a TUPLE with the accesory parameters for the equation. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-    - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+            * ``a``: a **tuple** with the values for the singularity parameter. 
+              Each element can be a string to create a variable, any rational 
+              number or any polynomial expression which variables will be 
+              considered as parameters (so ``x`` is not allowed).
+            * ``gamma``: a **tuple** with the exponents values. Each element can 
+              be a string to create a variable, any rational 
+              number or any polynomial expression which variables will be 
+              considered as parameters (so ``x`` is not allowed).
+            * ``q``: a **tuple** with the accesory parameters for the equation. 
+              Each element can be a string to create a variable, any rational 
+              number or any polynomial expression which variables will be 
+              considered as parameters (so ``x`` is not allowed).
+            * ``init``: a **tuple** with the initial values for the function. 
+              Each element can be a string to create a variable, any rational 
+              number or any polynomial expression which variables will be 
+              considered as parameters (so ``x`` is not allowed).
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import FuschianD;
+            sage: try:
+            ....:     FuschianD(1,2,1);
+            ....:     print("Error: something non-zero");
+            ....: except:
+            ....:     pass;
+            sage: FuschianD(1,2,0,(1,1)) == 1/(1-x)
+            True
+            sage: FuschianD(1,2,0,(1,0)) == 1
+            True
+            sage: FuschianD(1,2,0,(0,1)) == x/(1-x)
+            True
     '''
     ## Checking parameters
     if (not (isinstance(a,list) or isinstance(a,set) or isinstance(a,tuple))):
@@ -1922,10 +2148,10 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
     ra = new_all[:N];
     rgamma = new_all[N:2*N];
     rq = new_all[2*N:3*N];
-    rinit = new_all[-len(init):];
+    rinit = new_all[3*N:];
     
-    if(sum(q) != 0):
-        raise ValueError("The q parameters must sum up zero. Got %s" %(sum(q)));
+    if(sum(rq) != 0):
+        raise ValueError("The q parameters must sum up zero. Got %s" %(sum(rq)));
     
     if(parent != QQ):
         destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
@@ -1943,47 +2169,85 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
     return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]));
 
 ### Heun's function
-def HeunD(a='a',b='b',d='d',g='g',e='e',q='q'):
-    '''
+def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
+    r'''
         D-finite implementation of the Heun's functions.
         
         References:
-    - https://dlmf.nist.gov/31.2
-    - https://en.wikipedia.org/wiki/Heun_function
-    - http://mathworld.wolfram.com/HeunsDifferentialEquation.html
+            * https://dlmf.nist.gov/31.2
+            * https://en.wikipedia.org/wiki/Heun_function
+            * http://mathworld.wolfram.com/HeunsDifferentialEquation.html
             
         Heun functions are the solutions of the differential equation
-            f'' + (g/x + d/(x-1) + e/(x-a))f' + (Abx - q)/(x(x-1)(x-a)) f = 0,
-        where A = d+g+e-b-1.
+
+        .. MATH::
+
+            w''(x) + \left(\frac{\gamma}{x} + \frac{\delta}{x-1} + \frac{\epsilon}{x-a}\right)w'(x) + \frac{\alpha\beta x - q}{x(x-1)(x-a)} w(x) = 0,
+
+        where `\alpha = \delta+\gamma+\epsilon-\beta-1`.
         
-        This equation ahs regualr singularities at 0, 1, a and infinity and captures all the possible
-        differential equation of order two with four regular singularities.
+        This equation has regular singularities at `0`, `1`, `a` and `\infty` and
+        captures all the possible differential equation of order two with four 
+        regular singularities.
         
-        The parameter a is called "singularity parameter", A,b,g,d,e are called "exponent parameters" 
-        and q is called the "accesory parameter".
+        The parameter `a` is called *singularity parameter*, `\alpha`, `\beta`,
+        `\gamma`, `\delta`, `\epsilon` are called *exponent parameters* 
+        and `q` is called the *accesory parameter*.
         
         INPUT:
-    - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - d: the parameter 'd' on the differential equation. If not provided, it takes the value 'd' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - g: the parameter 'g' on the differential equation. If not provided, it takes the value 'g' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - e: the parameter 'e' on the differential equation. If not provided, it takes the value 'e' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+            * ``a``: the parameter `a` on the differential equation. If not provided, 
+              it takes the value ``'a'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
+            * ``beta``: the parameter `\beta` on the differential equation. If not provided, 
+              it takes the value ``'b'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
+            * ``delta``: the parameter `\delta` on the differential equation. If not provided, 
+              it takes the value ``'d'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
+            * ``gamma``: the parameter `\gamma` on the differential equation. If not provided, 
+              it takes the value ``'g'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
+            - ``epsilon``: the parameter `\epsilon` on the differential equation. If not provided, 
+              it takes the value ``'e'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
+            - ``q``: the parameter `q` on the differential equation. If not provided, 
+              it takes the value ``'q'`` by default. This argument can be any rational 
+              number or any polynomial expression, which variables will be considered 
+              as parameters (so ``x`` is not allowed).
             
         WARNING:
-    - This method does not compute initial values for the solution of this differential equation as no power series solution is guaranteed due to the singularity at 0.
+            * This method does not compute initial values for the solution of this 
+              differential equation since no power series solution is guaranteed 
+              due to the singularity at 0.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import HeunD;
+            sage: H = HeunD(); H
+            Heun(a,b,d,g,e,q)(x)
+            sage: H.change_init_values([0,0])
+            0
     '''
-    parent, new_all = __check_list([a,b,d,g,e,q], [str(el) for el in DFinite.variables()]);
+    parent, new_all = __check_list([a,beta,delta,gamma,epsilon,q], [str(el) for el in DFinite.variables()]);
     ra,rb,rd,rg,re,rq = new_all;
         
+    if(ra == 0 or ra == 1):
+        raise ValueError(("The singularity parameter is not valid: the extra singularity must be"
+                           "different than 0 or 1"));
+
     al = rg+rd+re-rb-1;
-    f = FuschianD(a=[0,1,ra],gamma=[rd,rg,re],q=[-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))]);
-    f._DDFunction__name = DinamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]);
+    f = FuschianD(a=(0,1,ra),gamma=(rd,rg,re),q=(-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))));
+    f.change_name(DinamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]));
     return f;
 
 ###### COULOMB FUNCTIONS
 def FCoulombD(m='m', l='l'):
-    '''
+    r'''
         D-finite implementation of the regular Coulomb wave function `F_{l,\mu}(x)`.
         
         References:
@@ -1992,32 +2256,35 @@ def FCoulombD(m='m', l='l'):
             * https://en.wikipedia.org/wiki/Coulomb_wave_function
             
         The Coulomb Wave function is the solution to the differential equation
-        MATH::
-            f''(x) + (1-(2m)/x - (l(l+1))/x^2)f(x) = 0
+        
+        .. MATH::
+
+            f''(x) + \left(1-\frac{2m}{x} - \frac{l(l+1)}{x^2}\right)f(x) = 0
             
         If `l` is integer, there is a power serie solution of order `l+1`, and 
         this function return that solution with first sequence element `1`.
         
-        INPUT::
-            * 'm': the parameter 'm' on the differential equation. If not provided, 
-              it takes the value '"m"' by default. This argument can be any 
+        INPUT:
+            * ``m``: the parameter `m` on the differential equation. If not provided, 
+              it takes the value ``'m'`` by default. This argument can be any 
               rational number or any polynomial expression, which variables will 
-              be considered as parameters (so 'x' is not allowed).
-            * 'l': the parameter 'l' on the differential equation. If not provided, 
-              it takes the value 'l' by default. This argument can be any 
+              be considered as parameters (so ``x`` is not allowed).
+            * ``l``: the parameter `l` on the differential equation. If not provided, 
+              it takes the value ``'l'`` by default. This argument can be any 
               rational number or any polynomial expression, which variables will 
-              be considered as parameters (so 'x' is not allowed).
+              be considered as parameters (so ``x`` is not allowed).
               
         EXAMPLE::
+
             sage: from ajpastor.dd_functions.ddExamples import FCoulombD;
             sage: F = FCoulombD(1/2,2); 
             sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
             0
             sage: for l in range(-1,10): # checking with m parameter
-            ....:     F = FCoulomb('m',l);
+            ....:     F = FCoulombD('m',l);
             ....:     m = F.parent().base_field.gens()[0];
             ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
-            ....:         print l;
+            ....:         print(l);
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()]);
     rm, rl = new_all;
@@ -2053,23 +2320,28 @@ def FactorialD():
         `f_{n+1} = (n+1)f_n` with `f_0 =1` and it is commonly represented as 
         `f_n = n!`. As a P-finite recurrence, its generating function
         `Fa(x)` satisfies a linear differential equation: 
-        MATH::
+        
+        .. MATH::
+
             x^2 Fa''(x) + (3x-1)Fa'(x) + Fa(x) = 0.
 
-        This method returns the DDFunction representing this function `Fa(x)`.
+        This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction`
+        representing this function `Fa(x)`.
         
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import FactorialD
-            sage: fa = FactorialD(); fa
+            sage: from ajpastor.dd_functions.ddFunction import DFinite
+            sage: fa = FactorialD(); R = DFinite.base(); fa
             Fa(x)
             sage: fa[0] == 1
             True
-            sage: fa[1] == 3*x-1
+            sage: fa[1] == R(3*x-1)
             True
-            sage: fa[2] == x^2
+            sage: fa[2] == R(x^2)
             True
             sage: fa.getSequenceList(10)
-            [1, 1, 2, 6, 24, 120, 720, 5760, 51840, 518400]
+            [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
             sage: fa.getInitialValueList(10) == [factorial(i)^2 for i in range(10)]
             True
     '''
@@ -2085,32 +2357,40 @@ def CatalanD():
             * https://en.wikipedia.org/wiki/Catalan_number
 
         The Catalan sequence is defined with a closed formula 
-        `c_n = binomial(2n,n)/(n+1)`. It has been widely studied 
+        `c_n = \binom{2n}{n}/(n+1)`. It has been widely studied 
         and it is known that this sequence satisfies a linear recurrence:
-        MATH::
-            c_{n+1+} = \sum_{i=0}^n c_i c_{n-i},
+        
+        .. MATH::
+
+            c_{n+1} = \sum_{i=0}^n c_i c_{n-i},
         
         which leads to the functional equation:
-        MATH::
+        
+        .. MATH::
+
             C(x) = 1+ xC(x)^2,
             
-        where $C(x)$ is the ordinary generating function for the sequence $(c_n)$. 
-        This algebraic equation implies that $C(x)$ is D-finite with 
+        where `C(x)` is the ordinary generating function for the sequence `(c_n)`. 
+        This algebraic equation implies that `C(x)` is D-finite with 
         differential equation:
-        MATH::
+        
+        .. MATH::
             (4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.
             
-        This method returns the DDFunction representing this function `C(x)`.
+        This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction`
+        representing this function `C(x)`.
         
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import CatalanD
-            sage: C = CatalanD(); C
+            sage: from ajpastor.dd_functions.ddFunction import DFinite
+            sage: C = CatalanD(); R = DFinite.base(); C
             C(x)
             sage: C[0] == 2
             True
-            sage: C[1] == 10*x-2
+            sage: C[1] == R(10*x-2)
             True
-            sage: C[2] == 4*x^2-x
+            sage: C[2] == R(4*x^2-x)
             True
             sage: C.getSequenceList(10)
             [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862]
@@ -2128,9 +2408,11 @@ def FibonacciD(init=('a','b')):
             * https://oeis.org/A000045
             * https://en.wikipedia.org/wiki/Fibonacci_number
 
-        The Fibonacci sequence $(f_n)_n$ is defined classically with the linear 
+        The Fibonacci sequence `(f_n)_n` is defined classically with the linear 
         recurrence 
-        MATH::
+
+        .. MATH::
+
             f_{n+2} = f_{n+1} + f_{n},
             
         starting with initial values `f_0 = 0`, `f_1 = 1`. 
@@ -2138,25 +2420,27 @@ def FibonacciD(init=('a','b')):
         This linear recurrence implies that the ordinary generating function for
         the Fibonacci sequence is D-finite independently to initial conditions 
         `f_0`, `f_1`.
-        
         In fact, since the recurrence relation is C-finite (with constant 
         coefficients), the generating function is a rational function:
-        MATH::
-            F(f_0,f_1;x) = frac{f_0 + (f_1-f_0)x}{1-x-x^2}
-
-        This method returns the DDFunction object for the ordinary generating 
-        function for a particular Fibonacci-type sequence provided the initial 
-        conditions `f_0` and `f_1`.
         
-        INPUT::
-            * 'init': a tuple with the intial conditions `f_0` and `f_1`. This
+        .. MATH::
+
+            F(f_0,f_1;x) = \frac{f_0 + (f_1-f_0)x}{1-x-x^2}
+
+        This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction` object 
+        for the ordinary generating function for a particular Fibonacci-type 
+        sequence provided the initial conditions `f_0` and `f_1`.
+        
+        INPUT:
+            * ``init``: a tuple with the intial conditions `f_0` and `f_1`. This
               list can be of any length containing integer, strings or polynomials
               with variables that will be considered as parameters. If not enough 
               elements are provided, more parameters will be added.
               
-              By default, this argument is the tuple ('a','b').
+              By default, this argument is the tuple ``('a','b')``.
               
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import FibonacciD;
             sage: Fp = FibonacciD(); Fp
             F(a,b;x)
@@ -2219,15 +2503,19 @@ def BellD():
         
         However, if we consider its *exponential generating function*, the
         Bell numbers can be represented with
-        MATH::
-            B(x) = \sum_{n \geq 0} B_n \frac{x^n}n! = e^{e^{x}-1}
+
+        .. MATH::
+
+            B(x) = \sum_{n \geq 0} B_n \frac{x^n}{n!} = e^{e^{x}-1}
              
         This formula shows that `B(x)` is DD-finite since it is the composition
         of two exponential functions. 
             
-        This method returns the DDFunction representing this function `B(x)`.
+        This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        representing this function `B(x)`.
         
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import Exp,BellD
             sage: B = BellD(); B
             B(x)
@@ -2256,19 +2544,24 @@ def BernoulliD():
         
         However, if we consider its *exponential generating function*, the
         Bernoulli numbers can be represented with
-        MATH::
-            B(x) = \sum_{n \geq 0} B_n \frac{x^n}n! = frac{x}{e^x-1}
+        
+        .. MATH::
+
+            B(x) = \sum_{n \geq 0} B_n \frac{x^n}{n!} = \frac{x}{e^x-1}
              
         This formula shows that `B(x)` is DD-finite since it is the quotient of
         two D-finite functions.
         
-        This method returns the DDFunction representing this function `B(x)`.
+        This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction`
+        representing this function `B(x)`.
         
         EXAMPLES::
+
             sage: from ajpastor.dd_functions.ddExamples import Exp,BernoulliD
+            sage: from ajpastor.dd_functions.ddFunction import DFinite
             sage: B = BernoulliD(); B
             B(x)
-            sage: B == x/(Exp(x)-1)
+            sage: B == DFinite(x)/(Exp(x)-1)
             True
             sage: B.getInitialValueList(10) == [bernoulli(i) for i in range(10)]
             True

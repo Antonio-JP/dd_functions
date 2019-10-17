@@ -1330,6 +1330,9 @@ def is_DDFunction(func):
     return isinstance(func, DDFunction);
 
 class DDFunction (IntegralDomainElement, SerializableObject):
+    r'''
+        Class for DDFunctions. Element class for DDRing.
+    '''
     #####################################
     ### Init and Interface methods
     #####################################
@@ -2786,6 +2789,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if((type(other) == sage.rings.integer.Integer or type(other) == int) and other == 0 ):
             return self.is_null;
         return self.equals(other);
+
+    def __ne__(self, other):
+        return not self.__eq__(other); 
         
     ### Magic use
     def __call__(self, X=None, **input):
