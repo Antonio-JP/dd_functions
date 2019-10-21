@@ -13,7 +13,7 @@ def readfile(filename):
 # For the tests
 class SageTest(TestCommand):
     def run_tests(self):
-        errno = os.system("sage -t --force-lib sage_sample")
+        errno = os.system("sage -t --force-lib dd_function")
         if errno != 0:
             sys.exit(1)
 

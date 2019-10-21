@@ -333,7 +333,7 @@ def Tan(input, ddR = None):
         DD-finite implementation of the Tangent function (`tan(x)`).
 
         Method to crete a DDFunction instance of a tangent-type function. For more
-        information about the tangeng function, consult the following references::
+        information about the tangent function, consult the following references::
             * http://mathworld.wolfram.com/Tangent.html
             * https://en.wikipedia.org/wiki/Tangent
             
@@ -427,7 +427,7 @@ def Sinh(input, ddR = None):
         DD-finite implementation of the Hyperbolic Sine function (`\sinh(x)`).
         
         Method to crete a DDFunction instance of a hyperbolic sine-type function. For more
-        information about the tangeng function, consult the following references:
+        information about the hyperbolic sine, consult the following references:
             * http://mathworld.wolfram.com/HyperbolicSine.html
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
@@ -505,7 +505,7 @@ def Cosh(input, ddR = None):
         DD-finite implementation of the Hyperbolic Cosine function (`\cosh(x)`).
         
         Method to crete a DDFunction instance of a hyperbolic cosine-type function. For more
-        information about the tangeng function, consult the following references:
+        information about the hyperbolic cosine, consult the following references:
             * http://mathworld.wolfram.com/HyperbolicCosine.html
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
@@ -582,8 +582,8 @@ def Tanh(input, ddR = None):
     r'''
         DD-finite implementation of the Hyperbolic Tangent function (`\tanh(x)`).
         
-        Method to crete a DDFunction instance of a hyperbolic cosine-type function. For more
-        information about the tangeng function, consult the following references:
+        Method to create a DDFunction instance of a hyperbolic tangent-type function. For more
+        information about the hyperbolic tangent, consult the following references:
             * http://mathworld.wolfram.com/HyperbolicTangent.html 
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
@@ -664,19 +664,51 @@ def Tanh(input, ddR = None):
 
 @cached_function
 def Arcsin(input, ddR = None):
-    '''
-        DD-finite implementation of the Arcsine function (arcsin(x)).
+    r'''
+        D-finite implementation of the inverse sine function (`\arcsin(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseSine.html
-    - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+        Method to create a DDFunction instance of a arcsine-type function. For more
+        information about the inverse sine function, consult the following references:
+            * http://mathworld.wolfram.com/InverseSine.html
+            * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import *;
+            sage: arcsin = Arcsin(x); arcsin
+            arcsin(x)
+            sage: arcsin[0]
+            0
+            sage: arcsin[1]
+            -x
+            sage: arcsin[2]
+            -x^2 + 1
+            sage: arcsine.getInitialValueList(10)
+            [0, 1, 0, 1, 0, 9, 0, 225, 0, 11025]
+            sage: # cheking identities with trigonometric functions
+            sage: Sin(arcsine) == x
+            True
+            sage: Cos(arcsine)^2 == 1 - x^2
+            True
+            sage: arcsine == Arctan(DAlgebraic(QQ[x]['y']("y^2*(1-x^2) - x^2", [0,1])
+            True
+            sage: # checking identities with derivatives
+            sage: (1-x^2)*arcsine^2 == 1
+            True
+            sage: Arcsin(-x) == -arcsine
+            True
     '''
     if(is_DDFunction(input)):
         return Arcsin(x)(input);
@@ -714,19 +746,59 @@ def Arcsin(input, ddR = None):
 
 @cached_function
 def Arccos(input, ddR = None):
-    '''
-        DD-finite implementation of the Arccosine function (arccos(x)).
+    r'''
+        D-finite implementation of the inverse cosine function (`\arccos(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseCosine.html
-    - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+        Method to create a DDFunction instance of a arccosine-type function. For more
+        information about the inverse cosine function, consult the following references:
+            * http://mathworld.wolfram.com/InverseCosine.html
+            * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
+
+        Since the default initial conditions for `\arccos(x)` is `\pi/2`, this method
+        extends the DFinite ring with a parameter called ``"pi"``. Since `\pi` is a
+        transcendental number, this implementation works without any issue. However
+        it implies some innecessary performance difficulties when computing with
+        this function, since::
+
+            sage: from ajpastor.dd_functions.ddExamples import *;
+            sage: arccos = Arccos(x); pi = arccos.parent().parameters()[0];
+            sage: arccos - pi/2 == Arcsin(-x)
+            True
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+
+            sage: arccos = Arccos(x); arccos
+            arccos(x)
+            sage: arccos[0]
+            0
+            sage: arccos[1]
+            -x
+            sage: arccos[2]
+            -x^2 + 1
+            sage: arccos.getInitialValueList(10)
+            [1/2*pi, -1, 0, -1, 0, -9, 0, -225, 0, -11025]
+            sage: # cheking identities with trigonometric functions
+            sage: Sin(arccos - pi/2) == -x # cos(arccos(x)) = x
+            True
+            sage: Cos(arccos - pi/2)^2 == 1 - x^2
+            True
+            sage: Arccos(-x) == pi - arccos
+            True
+            sage: # checking identities with derivatives
+            sage: arccos.derivative() == -Arcsin(x).derivative()
+            True
     '''
     if(is_DDFunction(input)):
         return Arccos(x)(input);
@@ -765,19 +837,49 @@ def Arccos(input, ddR = None):
 
 @cached_function
 def Arctan(input, ddR = None):
-    '''
-        DD-finite implementation of the Arctangent function (arctan(x)).
+    r'''
+        D-finite implementation of the inverse tangent function (`\arctan(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseTangent.html
-    - https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
+        Method to create a DDFunction instance of a arctangent-type function. For more
+        information about the inverse tangent function, consult the following references:
+            * http://mathworld.wolfram.com/InverseTangent.html
+            * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
         This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the 
+              main variable.
+            * A DDFunction: the composition will be computed. The DDFunction must 
+              have initial value 0.
             
         This function can be converted into symbolic expressions.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions.ddExamples import *;
+            sage: arctan = Arctan(x); arctan
+            arctan(x)
+            sage: arctan[0]
+            0
+            sage: arctan[1]
+            2*x
+            sage: arctan[2]
+            x^2 + 1
+            sage: arctan.getInitialValueList(10)
+            [0, 1, 0, -2, 0, 24, 0, -720, 0, 40320]
+            sage: Arctan(-x) == -arctan
+            True
+            sage: # cheking identities with trigonometric functions
+            sage: Sin(arctan)^2 == x^2/(1+x^2)
+            True
+            sage: Cos(arctan)^2 == 1/(1 + x^2)
+            True
+            sage: # checking identities with derivatives
+            sage: arctan.derivative() == 1/(1+x^2)
+            True
     '''
     if(is_DDFunction(input)):
         return Arctan(x)(input);
