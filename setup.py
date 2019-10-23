@@ -50,7 +50,7 @@ setup(
         "ajpastor.tests",
         "ajpastor.tests.dd_functions"],
     cmdclass = {'test': SageTest}, # adding a special setup command for tests
-    setup_requires   = ['sage-package'],
-    install_requires = ['sage-package', 'sphinx'],
+    setup_requires   = [],
+    install_requires = ['ore_algebra @ git+https://github.com/mkauers/ore_algebra.git','sphinx'],
 )
     

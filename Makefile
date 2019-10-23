@@ -1,14 +1,14 @@
 SHELL:=/bin/bash
-ZIP=diff_defined_functions# ZIP name
+ZIP=dd_functions# ZIP name
 VERSION=$(shell cat ./VERSION)
 
 # change to your sage command if needed
-SAGE = sage
+SAGE=sage
 
 # Package folder
-PACKAGE = ajpastor
+PACKAGE=ajpastor
 
-all: install test
+all: install doc test
 	
 create:
 	@echo "Creating main directories..."
@@ -19,7 +19,7 @@ create:
 	
 # Installing commands
 install:
-	$(SAGE) -pip install --upgrade --no-index -v .
+	$(SAGE) -pip install --upgrade .
 
 uninstall:
 	$(SAGE) -pip uninstall $(PACKAGE)
@@ -29,7 +29,6 @@ develop:
 
 test: install
 	$(SAGE) -t $(PACKAGE)
-#	$(SAGE) setup.py test
 
 coverage:
 	$(SAGE) -coverage $(PACKAGE)/*
@@ -49,12 +48,6 @@ zip: clean
 	@zip -r ./releases/$(ZIP)__$(VERSION).zip $(PACKAGE) type SPKG.txt setup.py package-version.txt Makefile dependencies
 	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip
 	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/$(ZIP).zip
-	
-git: zip
-	@echo "Pushing changes to public git repository"
-	@git add -A
-	@git commit
-	@git push
 	
 # Cleaning commands
 clean: clean_doc clean_pyc
