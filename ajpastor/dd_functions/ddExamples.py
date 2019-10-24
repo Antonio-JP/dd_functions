@@ -155,16 +155,16 @@ def Sin(input, ddR = None):
             True
             sage: Cos(x)^2 + Sin(x)^2 == 1
             True
-            sage: res = True; # Checking the object with random polynomial coefficients
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: # checking the object with polynomial coefficients
+            sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            sage: for p in polys:
             ....:     l1 = Sin(p).getInitialValueList(10);
             ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: res = True; # Checking the composition with random polynomial coefficients
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: # checking the composition with polynomial coefficients
+            sage: for p in polys:
             ....:     l1 = (Sin(x)(p)).getInitialValueList(10);
             ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
@@ -268,16 +268,16 @@ def Cos(input, ddR = None):
             True
             sage: Sin(x)^2 + Cos(x)^2 == 1
             True
-            sage: res = True; # Checking the method with polynomial input
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            sage: # checking the method with polynomial input
+            sage: for p in polys:
             ....:     l1 = Cos(p).getInitialValueList(10);
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: res = True; # Checking composition with polynomial coefficients
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: # checking composition with polynomial coefficients
+            sage: for p in polys:
             ....:     l1 = (Cos(x)(p)).getInitialValueList(10);
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
@@ -371,16 +371,16 @@ def Tan(input, ddR = None):
             True
             sage: Tan(x).derivative() == 1 + Tan(x)^2 # long time (> 1 min)
             True
-            sage: res = True; # Checking the object with random polynomial coefficients
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            sage: # checking the object with polynomial coefficients
+            sage: for p in polys:
             ....:     l1 = Tan(p).getInitialValueList(10);
             ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
             ....:         print(p)
-            sage: res = True; # Checking the composition with random polynomial coefficients
-            sage: for i in range(5):
-            ....:     p = x*QQ[x].random_element(3);
+            sage: # checking the composition with polynomial coefficients
+            sage: for p in polys:
             ....:     l1 = (Tan(x)(p)).getInitialValueList(10);
             ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
             ....:     if(not l1 == l2):
@@ -695,19 +695,17 @@ def Arcsin(input, ddR = None):
             -x
             sage: arcsin[2]
             -x^2 + 1
-            sage: arcsine.getInitialValueList(10)
+            sage: arcsin.getInitialValueList(10)
             [0, 1, 0, 1, 0, 9, 0, 225, 0, 11025]
             sage: # cheking identities with trigonometric functions
-            sage: Sin(arcsine) == x
+            sage: Sin(arcsin) == x
             True
-            sage: Cos(arcsine)^2 == 1 - x^2
-            True
-            sage: arcsine == Arctan(DAlgebraic(QQ[x]['y']("y^2*(1-x^2) - x^2", [0,1])
+            sage: Cos(arcsin)^2 == 1 - x^2
             True
             sage: # checking identities with derivatives
-            sage: (1-x^2)*arcsine^2 == 1
+            sage: (1-x^2)*arcsin.derivative()^2 == 1
             True
-            sage: Arcsin(-x) == -arcsine
+            sage: Arcsin(-x) == -arcsin
             True
     '''
     if(is_DDFunction(input)):
