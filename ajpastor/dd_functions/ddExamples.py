@@ -78,7 +78,8 @@ EXAMPLES::
     sage: Exp(x).getInitialValueList(10) == [1]*10
     True
 
-TODO:
+.. TODO::
+
     * Improve the Examples section of this doc
     * Improve the documentation of the functions in this package
 
@@ -857,7 +858,7 @@ def Arctan(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import *;
+            sage: from ajpastor.dd_functions.ddExamples import Arctan;
             sage: arctan = Arctan(x); arctan
             arctan(x)
             sage: arctan[0]
@@ -871,9 +872,10 @@ def Arctan(input, ddR = None):
             sage: Arctan(-x) == -arctan
             True
             sage: # cheking identities with trigonometric functions
-            sage: Sin(arctan)^2 == x^2/(1+x^2)
+            sage: from ajpastor.dd_functions.ddExamples import Sin, Cos;
+            sage: Sin(arctan)^2 == x^2/(1+x^2) # long time (> 1 min)
             True
-            sage: Cos(arctan)^2 == 1/(1 + x^2)
+            sage: Cos(arctan)^2 == 1/(1 + x^2) # long time (> 1 min)
             True
             sage: # checking identities with derivatives
             sage: arctan.derivative() == 1/(1+x^2)
