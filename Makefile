@@ -46,7 +46,7 @@ zip: clean
 	@echo "Compressing the project into file" $(ZIP)".zip"...
 	@rm -f ./releases/$(ZIP)__$(VERSION).zip
 	@zip -r ./releases/$(ZIP)__$(VERSION).zip $(PACKAGE) type SPKG.txt setup.py package-version.txt Makefile dependencies
-	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip
+#	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/old/$(ZIP)__$(VERSION)__`date +'%y.%m.%d_%H:%M:%S'`.zip
 	@cp ./releases/$(ZIP)__$(VERSION).zip ./releases/$(ZIP).zip
 	
 # Cleaning commands
