@@ -2730,8 +2730,8 @@ def DAlgebraic(polynomial, init=[], dR=None):
         
         if(is_DDRing(base_ring)):
             F = LazyDDRing(base_ring);
-        elif(not parent.base().is_field()):
-            F = parent.base().fraction_field();
+        elif(not base_ring.is_field()):
+            F = base_ring.fraction_field();
         else:
             F = base_ring;
             
