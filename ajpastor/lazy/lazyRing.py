@@ -7,12 +7,12 @@ This structure also increase the number of variables employed in the polynomial 
 as the suer require to represent more elements of the ring.
         
 EXAMPLES::
-	sage: from ajpastor.lazy.lazyRing
+    sage: from ajpastor.lazy.lazyRing
 
 TODO::
-	* Do the examples section in this documentation
-	* Document all the package
-	* Review the functionality of the package
+    * Do the examples section in this documentation
+    * Document all the package
+    * Review the functionality of the package
 
 AUTHORS:
 
