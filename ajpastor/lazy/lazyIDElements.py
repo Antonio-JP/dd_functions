@@ -447,7 +447,7 @@ class ProductLIDElement(LazyIDElement):
                     new_dic[s_key] = new_dic.get(s_key, _sage_const_0 ) + current_dic[key];
                
             mone = SimpleLIDElement(self.parent(),-self.base().one());
-            if(new_dic.has_key(mone)):     
+            if(mone in new_dic):     
                 new_dic[mone] = new_dic[mone]%_sage_const_2 ;        
             
             self.__factors = new_dic;
@@ -478,7 +478,7 @@ class ProductLIDElement(LazyIDElement):
             
             #Restoring the aux_dic
             aux_dic[key] = current_dic[key];
-            if(current_dic.has_key(der)):
+            if(der in current_dic):
                 aux_dic[der] = aux_dic[der]-_sage_const_1 ;
             else:
                 del aux_dic[der];
@@ -581,7 +581,7 @@ class ProductLIDElement(LazyIDElement):
         
     def __inner_is_zero__(self):
         zero = self.parent().zero();
-        return self.__struct__().has_key(zero);
+        return zero in self.__struct__();
         
     def __inner_is_one__(self):
         self.simplify();
@@ -1103,7 +1103,7 @@ class LIDSimpleMorphism (sage.categories.map.Map):
 __MAP_TO_LAZY_DOMAINS = {};
 def GetLazyDomain(X):
     global  __MAP_TO_LAZY_DOMAINS;
-    if(not __MAP_TO_LAZY_DOMAINS.has_key(X)):
+    if(not X in __MAP_TO_LAZY_DOMAINS):
         __MAP_TO_LAZY_DOMAINS[X] = LazyIntegralDomain(X);
         
     return __MAP_TO_LAZY_DOMAINS[X];
