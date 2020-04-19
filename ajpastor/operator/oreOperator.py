@@ -102,7 +102,7 @@ class w_OreOperator(Operator):
         super(w_OreOperator, self).__init__(base, input, derivate);
         
         ## Computing the Ore_Algebra associated with base
-        if(not w_OreOperator.map_to_algebras.has_key(base)):
+        if(not base in w_OreOperator.map_to_algebras):
             newOreAlgebra = OreAlgebra(base, ('D', lambda p : p, derivate));
             w_OreOperator.map_to_algebras[self.base()] = newOreAlgebra;
             
