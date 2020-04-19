@@ -1305,7 +1305,7 @@ def __first_derivative_associated_legendre(n,m,kind):
 
 @cached_function 
 def LegendreD(nu='n', mu = 0, kind=1):
-    '''
+    r'''
         D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
         
         References:
@@ -1319,9 +1319,16 @@ def LegendreD(nu='n', mu = 0, kind=1):
         This equation has a parameter 'n'. When 'n' takes non-negative integer
         values, it has polynomial solutions, the so called Legendre polynomials (P_n(x)). 
         This family of polynomials is a orthogonal set of polynomials. In particular
+
+        .. MATH:: 
+
             \int_{-1}^{1} P_n(x)P_m(x) = (2/(2n+1))\delta_{m,n}
+
         This set of polynomials (as any orthogonal family of polynomials), also satisfies
         a recursive relation:
+
+        .. MATH::
+
             (n+1)P_{n+1}(x) = (2n+1)xP_n(x) - nP_{n-1}(x)
         
         The other solution are the Legendre functions of second kind (Q_n(x)). They also 
@@ -1329,7 +1336,11 @@ def LegendreD(nu='n', mu = 0, kind=1):
         that converges from x=-1 to x=1.
         
         There is an associated differential equation with an extra parameter:
-            (1-x^2)^2f'' - 2x(1-x^2)f' + (n(n+1)(1-x^2) - m^2)f = 0
+
+        .. MATH::
+
+            (1-x^2)^2f'' - 2x(1-x^2)f' + (n(n+1)(1-x^2) - m^2)f = 0,
+
         that reduces to the original equation when m=0.
         
         This method allows the user to get the D-finite representation of the associated
@@ -1385,7 +1396,7 @@ def LegendreD(nu='n', mu = 0, kind=1):
 ### Chebyshev Polynomials        
 @cached_function    
 def ChebyshevD(input='n', kind = 1, poly=True):
-    '''
+    r'''
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
         References:

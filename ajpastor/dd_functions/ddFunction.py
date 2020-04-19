@@ -1352,9 +1352,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         ## Initializing the serializable structure
         if(isinstance(input, Operator)):
-        	sinput = input.getCoefficients();
+            sinput = input.getCoefficients();
         else:
-        	sinput = input;
+            sinput = input;
         SerializableObject.__init__(self, parent, sinput, init_values=init_values, inhomogeneous=inhomogeneous, name=name);
         
         ## Checking we have some input (if not, we assume the input for zero)
@@ -2460,69 +2460,69 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return float(res),float(abs(to_sum));
         
     def numeric_coefficient_comparison_asymptotics(self, other, max_depth=10000, step=100, verbose=False, comparison="quotient", sequence=False):
-    	r'''
+        r'''
             Method to compare the coefficient sequence of two power sequence. 
 
             This method compares two sequences via division or difference (see optional arguments) and 
             may provide empirical evidence of similarity in asymptotics between the sequences.
 
             INPUT::
-            	- other: the sequnce with ''self'' is compared. If it is not a DDFunction it will be casted to one.
-            	- max_depth: element of the sequence it will be compared. 
-            	- step: step-jump between comparisons. As the sequences are created recursively, this avoids a recursion overflow in Python.
-            	- verbose: if set to True, the method will print the progress of the computation.
-            	- kwds: there are several extra options that can be provided with boolean values:
-            		- comparison: the comparison can be "quotient" (''self.getSequenceElement(n)/other.getSequenceElement(n)'') 
-            		or "difference" (''self.getSequenceElement(n) - other.getSequenceElement(n)'').
-            		- sequence: the answer will be a list of comparisons in all the elements $0 (mod step)$. If not given, the answer will be just the last comparison.
+                - other: the sequnce with ''self'' is compared. If it is not a DDFunction it will be casted to one.
+                - max_depth: element of the sequence it will be compared. 
+                - step: step-jump between comparisons. As the sequences are created recursively, this avoids a recursion overflow in Python.
+                - verbose: if set to True, the method will print the progress of the computation.
+                - kwds: there are several extra options that can be provided with boolean values:
+                    - comparison: the comparison can be "quotient" (''self.getSequenceElement(n)/other.getSequenceElement(n)'') 
+                    or "difference" (''self.getSequenceElement(n) - other.getSequenceElement(n)'').
+                    - sequence: the answer will be a list of comparisons in all the elements $0 (mod step)$. If not given, the answer will be just the last comparison.
 
             OUTPUT::
-            	A value with the appropriate comparison between the ''max_depth'' element of the sequences from ''self'' and ''other''.
+                A value with the appropriate comparison between the ''max_depth'' element of the sequences from ''self'' and ''other''.
 
             WARNING::
-            	This method can be interrupted at any point with Ctr-C and the last reached point will be returned.
-    	'''
-    	## Treating the arguments
-    	if(comparison == "quotient"):
-    		comp = lambda p,q : float(p/q);
-    	elif(comparison == "difference"):
-    		comp = lambda p,q : float(p-q);
-    	else:
-    		raise ValueError("Argument 'comparison' must be either \"quotient\" or \"difference\"");
+                This method can be interrupted at any point with Ctr-C and the last reached point will be returned.
+        '''
+        ## Treating the arguments
+        if(comparison == "quotient"):
+            comp = lambda p,q : float(p/q);
+        elif(comparison == "difference"):
+            comp = lambda p,q : float(p-q);
+        else:
+            raise ValueError("Argument 'comparison' must be either \"quotient\" or \"difference\"");
 
-    	if(not is_DDFunction(other)):
-    		other = self.parent()(other);
+        if(not is_DDFunction(other)):
+            other = self.parent()(other);
 
-    	total = int(max_depth/step) + 1;
-    	iteration = 0;
+        total = int(max_depth/step) + 1;
+        iteration = 0;
 
-    	result = [];
+        result = [];
 
-    	if(verbose): printProgressBar(iteration, total);
-    	while(iteration*step < max_depth):
-    		try:
-    			next = iteration*step;
-    			result += [comp(self.getSequenceElement(next), other.getSequenceElement(next))];
-    		except KeyboardInterrupt:
-    			if(verbose): print("");
-    			break;
-    		iteration+=1;
-    		if(verbose): printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]));
+        if(verbose): printProgressBar(iteration, total);
+        while(iteration*step < max_depth):
+            try:
+                next = iteration*step;
+                result += [comp(self.getSequenceElement(next), other.getSequenceElement(next))];
+            except KeyboardInterrupt:
+                if(verbose): print("");
+                break;
+            iteration+=1;
+            if(verbose): printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]));
 
-    	## Finished loop: returning
-    	# Checking if the last iteration was made
-    	if(iteration*step >= max_depth):
-    		try:
-    			result += [comp(self.getSequenceElement(max_depth), other.getSequenceElement(max_depth))];
-    			if(verbose): printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]));
-    		except KeyboardInterrupt:
-    			if(verbose): print("");
-    			pass;
+        ## Finished loop: returning
+        # Checking if the last iteration was made
+        if(iteration*step >= max_depth):
+            try:
+                result += [comp(self.getSequenceElement(max_depth), other.getSequenceElement(max_depth))];
+                if(verbose): printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]));
+            except KeyboardInterrupt:
+                if(verbose): print("");
+                pass;
 
-    	if(sequence):
-    		return result;
-    	else:
-    		return result[-1];
+        if(sequence):
+            return result;
+        else:
+            return result[-1];
 
 
     #####################################
@@ -3037,18 +3037,18 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
     ## Overriding the serializable method with an exra parameter
     def serialize(self, file, full=False):
-    	## If asked for the full information
-    	if(full):
-    		## We put the current list as argument for the initial conditions
-    		max_index = max(el for el in self.__calculatedSequence);
-    		aux = self.skwds()["init_values"];
-    		self.skwds()["init_values"] = self.getInitialValueList(max_index+1);
+        ## If asked for the full information
+        if(full):
+            ## We put the current list as argument for the initial conditions
+            max_index = max(el for el in self.__calculatedSequence);
+            aux = self.skwds()["init_values"];
+            self.skwds()["init_values"] = self.getInitialValueList(max_index+1);
 
-    	SerializableObject.serialize(self, file);
+        SerializableObject.serialize(self, file);
 
-    	## Putting back the original argument (if needed)
-    	if(full):
-    		self.skwds()["init_values"] = aux;
+        ## Putting back the original argument (if needed)
+        if(full):
+            self.skwds()["init_values"] = aux;
 
     def save_init(self, file, init=True, bin=True, bound=None):
         r'''
@@ -3068,20 +3068,20 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         from pickle import dump as pdump;
         
-    	is_str = isinstance(file,str);
-    	if(is_str and bin): file = open(file, "wb+");
-    	if(is_str and not bin): file = open(file, "w+");
-    	
-    	n = max(self.equation.get_jp_fo(),max(el for el in self.__calculatedSequence));
-    	if((not (bound is None)) and (bound in ZZ) and (bound > 0)):
-    	    n = min(bound, n);
-    	
-    	if(init):
-    	    pdump(self.getInitialValueList(n+1), file);
-    	else:
+        is_str = isinstance(file,str);
+        if(is_str and bin): file = open(file, "wb+");
+        if(is_str and not bin): file = open(file, "w+");
+        
+        n = max(self.equation.get_jp_fo(),max(el for el in self.__calculatedSequence));
+        if((not (bound is None)) and (bound in ZZ) and (bound > 0)):
+            n = min(bound, n);
+        
+        if(init):
+            pdump(self.getInitialValueList(n+1), file);
+        else:
             pdump(self.getSequenceList(n+1), file);
             
-    	if(is_str): file.close();
+        if(is_str): file.close();
 
     def load_init(self, file, init=True, bin=True, check=True,bound=None):
         r'''
@@ -3102,9 +3102,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         from pickle import load as pload;
         
-    	is_str = isinstance(file,str);
-    	if(is_str and bin): file = open(file, "rb+");
-    	if(is_str and not bin): file = open(file, "r+");
+        is_str = isinstance(file,str);
+        if(is_str and bin): file = open(file, "rb+");
+        if(is_str and not bin): file = open(file, "r+");
 
         data = pload(file);
         if(is_str): file.close();

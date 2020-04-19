@@ -9,7 +9,7 @@ In this package the user may find the following subpackages:
 * lazyFracField: conversion system based on a Fraction Field using the basics of lazyToPoly
 
 TODO::
-	* Review the import statements of this package
+    * Review the import statements of this package
 
 AUTHORS:
 
@@ -27,7 +27,7 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from lazyToPoly import LazyToPoly;
+from .lazyToPoly import LazyToPoly;
 
 from pkgutil import extend_path;
 __path__ = extend_path(__path__, __name__);

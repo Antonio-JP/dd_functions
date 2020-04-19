@@ -11,9 +11,9 @@ EXAMPLES::
     DD-Ring over (Univariate Polynomial Ring in x over Rational Field)
 
 TODO::
-	* Make the EXAMPLES section in this documentation
-	* Document the package
-	* Review the package functionality
+    * Make the EXAMPLES section in this documentation
+    * Document the package
+    * Review the package functionality
 
 AUTHORS:
 
