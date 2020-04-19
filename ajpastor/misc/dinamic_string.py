@@ -6,12 +6,12 @@ but can be built using different common pieces so it is possible to perform simu
 substitutions on the string.
 
 EXAMPLES::
-	sage: from ajpastor.misc.dinamic_string import *
+    sage: from ajpastor.misc.dinamic_string import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

@@ -5,12 +5,12 @@ This module offers a verbose system for helping debugging, tracking procceses or
 print. It provides an indentation system, depth of printing and many other utilities.
 
 EXAMPLES::
-	sage: from ajpastor.misc.verbose import *
+    sage: from ajpastor.misc.verbose import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

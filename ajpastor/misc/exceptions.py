@@ -4,12 +4,12 @@ Python file for general exceptions
 This module offers several Exceptions for general purposes.
 
 EXAMPLES::
-	sage: from ajpastor.misc.exceptions import *
+    sage: from ajpastor.misc.exceptions import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

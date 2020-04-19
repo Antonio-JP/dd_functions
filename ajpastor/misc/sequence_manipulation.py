@@ -6,12 +6,12 @@ sequence is given as a function that recieves the index and returns the correspo
 of the sequence.
 
 EXAMPLES::
-	sage: from ajpastor.sequence_manipulation import *
+    sage: from ajpastor.sequence_manipulation import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

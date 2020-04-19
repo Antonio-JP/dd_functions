@@ -4,12 +4,12 @@ Python file for linear restoring the system
 This module provides a bunch of methods to save and restore the state of the Python session.
 
 EXAMPLES::
-	sage: from ajpastor.misc.restore import *
+    sage: from ajpastor.misc.restore import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

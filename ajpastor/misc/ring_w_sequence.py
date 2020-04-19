@@ -5,12 +5,12 @@ This module implements a Ring Parent structure in Sage such that all its element
 implies that the elements of a Ring with Sequence must provide a method (getSequenceElement).
 
 EXAMPLES::
-	sage: from ajpastor.misc.ring_w_sequence import *
+    sage: from ajpastor.misc.ring_w_sequence import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 
