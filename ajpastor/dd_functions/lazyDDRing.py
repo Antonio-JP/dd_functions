@@ -735,7 +735,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             current = f;
             before = self.__used;
             for i in range(order):
-                print "** Adding a new variable (%d)" %self.__used;
+                print("** Adding a new variable (%d)" %self.__used);
                 self.__gens += [self.__gen[self.__used]];
                 self.__map_of_vars[str(self.__gens[-1])] = current;
                 self.__map_to_vars[current] = self.__used;

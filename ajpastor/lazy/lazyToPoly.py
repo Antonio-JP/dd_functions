@@ -222,8 +222,8 @@ class LazyToPoly(ConversionSystem):
                         else:
                             self.__map_v_to_c[self.poly_ring()(var)] = comp;
                 except Exception as e:
-                    print "Exception caught";
-                    print e
+                    print("Exception caught");
+                    print(e);
                     pass;
                 ## We return the compute conversion
                 return c*var + d;

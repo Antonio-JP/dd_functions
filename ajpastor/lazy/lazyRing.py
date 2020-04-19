@@ -510,7 +510,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         
     def _element_constructor_(self, *args, **kwds):
         if(len(args) < 1 ):
-            print args
+            print(str(args));
             raise ValueError("Impossible to build an element without arguments");
         
         i = 0 ;

@@ -993,7 +993,7 @@ class LazyIntegralDomain(UniqueRepresentation, IntegralDomain):
         
     def _element_constructor_(self, *args, **kwds):
         if(len(args) < _sage_const_1 ):
-            print args
+            print(str(args));
             raise ValueError("Impossible to build a lazy element without arguments");
         
         i = _sage_const_0 ;

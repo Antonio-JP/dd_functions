@@ -654,7 +654,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                     try:
                         return self.element([1],[], self.base()(X), name=str(X));
                     except Exception:
-                        print "WHAT??";
+                        print("WHAT??");
                         return self(str(element));
         except TypeError as e:
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e));
@@ -2504,7 +2504,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     			next = iteration*step;
     			result += [comp(self.getSequenceElement(next), other.getSequenceElement(next))];
     		except KeyboardInterrupt:
-    			if(verbose): print "";
+    			if(verbose): print("");
     			break;
     		iteration+=1;
     		if(verbose): printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]));
@@ -2516,7 +2516,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     			result += [comp(self.getSequenceElement(max_depth), other.getSequenceElement(max_depth))];
     			if(verbose): printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]));
     		except KeyboardInterrupt:
-    			if(verbose): print "";
+    			if(verbose): print("");
     			pass;
 
     	if(sequence):
@@ -2630,7 +2630,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
     def __rpow__(self, other):
         try:
-            print "__rpow__ was called";
+            print("__rpow__ was called");
             return self.parent().to_depth(1)(other)**self;
         except:
             return NotImplemented;

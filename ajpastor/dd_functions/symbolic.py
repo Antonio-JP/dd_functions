@@ -101,7 +101,7 @@ def from_symbolic(exp, dR = DFinite):
         elif(name == "mul_vararg"):
             #sverbose("Returning mult");
             for el in operands:
-                print el
+                print(el);
             return prod(operands);
         elif(name == "pow"):
             try:

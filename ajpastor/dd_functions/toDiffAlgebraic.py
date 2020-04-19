@@ -583,10 +583,10 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
             trans += [(0, coeffs[i].equation.companion())];
             
     if(_debug):
-        print "--- Transitions to nodes:";
+        print("--- Transitions to nodes:");
         for i in range(len(trans)):
-            print "+++ %s --> Cosntant: %s; Matrix:\n%s" %(i, trans[i][0], trans[i][1]);
-        print "-------------------------";
+            print("+++ %s --> Cosntant: %s; Matrix:\n%s" %(i, trans[i][0], trans[i][1]));
+        print("-------------------------");
     
     const_val = 0;    
     # Doing a Tree Transversal in POstorder in the graph to pull up the vectors
@@ -709,7 +709,7 @@ def toDifferentiallyAlgebraic_Below(poly, _infinite=False, _debug=False):
     
     ### Now poly is in a InfinitePolynomialRing with one generator "y_*" and some base ring.
     if(not isinstance(parent.base(), DDRing)):
-        print "The base ring is not a DDRing. Returning the original polynomial (reached the bottom)";
+        print("The base ring is not a DDRing. Returning the original polynomial (reached the bottom)");
         return r_method(poly);
     
     up_ddring = parent.base()
@@ -761,7 +761,7 @@ def toDifferentiallyAlgebraic_Below(poly, _infinite=False, _debug=False):
             rows += [row for row in matrix_of_dMovement(C, vector(goal_ring, dict_to_vectors[el]), infinite_derivative, S)];
         
     M = Matrix(rows);
-    if(_debug): print M;
+    if(_debug): print(str(M));
     return r_method(M.determinant().numerator());
 
 def diff_to_diffalg(func, _infinite=False, _debug=False):
@@ -862,7 +862,7 @@ def func_inverse_DA(func, _inifnite=False, _debug=False):
     ## Computations
     equation = fromFinitePolynomial_toInfinitePolynomial(diff_to_diffalg(func, _debug=_debug));
     
-    if(_debug): print equation;
+    if(_debug): print(str(equation));
     
     parent = equation.parent();
     y = parent.gens()[0];
@@ -874,12 +874,12 @@ def func_inverse_DA(func, _inifnite=False, _debug=False):
     monomials = [el(**{str(y[j]) : quot[j] for j in range(n)}) for el in equation.monomials()];
     
     if(_debug):
-        print monomials;
-        print coeffs;
+        print(str(monomials));
+        print(str(coeffs));
     
     sol = sum(monomials[i]*coeffs[i] for i in range(len(monomials)));
     
-    if(_debug): print sol;
+    if(_debug): print(str(sol));
     if(hasattr(sol, "numerator")):
         return parent(sol.numerator());
     return r_method(parent(sol));
@@ -1209,7 +1209,7 @@ def is_Riccati(poly):
     try:
         if(C.derivative(x) != 0):
             new_eq = change_variable(poly, y[0]/C)*C;
-            print "Recursion in Raccati, new equation: %s" %new_eq; 
+            print("Recursion in Raccati, new equation: %s" %new_eq); 
             return is_Riccati(new_eq);
     except:
         # Impossible to compute the derivative -- Assuming zero
@@ -1245,7 +1245,7 @@ def is_Riccati(poly):
 ### Private functions
 ###################################################################################################
 def __dprint(obj, _debug):
-    if(_debug): print obj;
+    if(_debug): print(str(obj));
     
 ####################################################################################################
 #### PACKAGE ENVIRONMENT VARIABLES
