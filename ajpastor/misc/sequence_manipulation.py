@@ -112,7 +112,6 @@ def inv_lagrangian(f):
             result = 0;
             for k in range(1,n):
                 poly = bell_polynomial(n-1,k);
-                #print poly;
                 variables = poly.variables();
                 extra = ((-1)**k)*falling_factorial(n+k-1, k);
                 if(k == n-1):

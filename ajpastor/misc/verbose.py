@@ -72,23 +72,24 @@ class __verbose_session(object):
     ## Basic call method
     def __call__(self,string, end=None):
         if(self.__level+self.__current_depth <= get_verbose()):
+            to_print = "";
             if(self.__time):
                 from datetime import datetime as time;
-                print "|",str(time.now()), "|",
+                to_print += "|"+str(time.now())+"|";
             for i in range(self.__current_depth):
-                print "\t",
+                to_print += "\t";
             if(self.__current_depth > 0 ):
-                print self.__begs[(self.__current_depth-1 )%len(self.__begs)],
+                to_print += str(self.__begs[(self.__current_depth-1 )%len(self.__begs)]);
             else:
-                print self.__default_beg,
+                to_print += str(self.__default_beg);
             
-            print string,
+            to_print += string;
             if(not(end is None)):
-                print end,
+                to_print += end;
             else:
-                print self.__end,
+                to_print += str(self.__end);
                 
-            sys.stdout.flush();
+            print(to_print);
         return;
         
     ## Changing level of verbose for the session
@@ -294,10 +295,10 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print "\r%s |%s| %s%% %s\r" % (prefix, bar, percent, suffix),
+    print("\r%s |%s| %s%% %s\r" % (prefix, bar, percent, suffix));
     # Print New Line on Complete
     if iteration == total: 
-        print "";
+        print("");
     sys.stdout.flush();
 
 __all__ = ["sverbose", "wverbose", "wverbose_w_data", "printProgressBar"];
@@ -311,7 +312,7 @@ except Exception:
         global __VERBOSE_LEVEL;
         __VERBOSE_LEVEL = max(0 , level);
         if(__VERBOSE_LEVEL >= 1 ):
-            print "-- Changed verbose level to %d" %(__VERBOSE_LEVEL);
+            print("-- Changed verbose level to %d" %(__VERBOSE_LEVEL));
     
     def get_verbose():
         global __VERBOSE_LEVEL;
