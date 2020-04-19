@@ -6,12 +6,12 @@ by Manuel Kauers and Marc Mezzaroba. This class is a simply wrapper putting a co
 the other operators provided in ajpastor.operator.
 
 EXAMPLES::
-	sage: from ajpastor.operator.oreOperator import *
+    sage: from ajpastor.operator.oreOperator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

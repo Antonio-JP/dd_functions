@@ -5,12 +5,12 @@ This module offers an abstract class of linear differential operators giving a g
 independently of the implementation.
 
 EXAMPLES::
-	sage: from ajpastor.operator.operator import *
+    sage: from ajpastor.operator.operator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

@@ -8,12 +8,12 @@ with all the operations.
 **This package need a huge review**
 
 EXAMPLES::
-	sage: from ajpastor.operator.lazyStepOperator import *
+    sage: from ajpastor.operator.lazyStepOperator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

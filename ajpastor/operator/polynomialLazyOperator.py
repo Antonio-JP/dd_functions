@@ -6,12 +6,12 @@ This module offers an implementation of a TwoStepsOperator using lazy operations
 **This module requires a huge review**
 
 EXAMPLES::
-	sage: from ajpastor.operator.polynomialLazyOperator import *
+    sage: from ajpastor.operator.polynomialLazyOperator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

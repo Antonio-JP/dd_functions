@@ -4,12 +4,12 @@ Python file for TwoSteps Operators
 This module offers an abstract class of linear differential operators which basic structure is a list of coefficients.
 
 EXAMPLES::
-	sage: from ajpastor.operator.listOperator import *
+    sage: from ajpastor.operator.listOperator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 

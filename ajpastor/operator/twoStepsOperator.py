@@ -7,12 +7,12 @@ are performed in two different steps:
 * Getting an element of its nullspace.
 
 EXAMPLES::
-	sage: from ajpastor.operator.twoStepsOperator import *
+    sage: from ajpastor.operator.twoStepsOperator import *
 
 TODO::
-	* Complete the Examples section of this documentation
-	* Document the package
-	* Review the functionality of the package
+    * Complete the Examples section of this documentation
+    * Document the package
+    * Review the functionality of the package
 
 AUTHORS:
 
