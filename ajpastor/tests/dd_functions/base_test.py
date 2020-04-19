@@ -104,7 +104,7 @@ def run():
     except (Exception, KeyboardInterrupt) as e:
         sverbose.reset_depth();
         sverbose.set_level(__PREV_LEVEL);
-        print "Error found during tests: %s" %(e);
+        print("Error found during tests: %s" %(e));
         raise e;
         
     sverbose.decrease_depth();

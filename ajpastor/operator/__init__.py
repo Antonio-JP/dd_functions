@@ -31,7 +31,7 @@ from .operator import Operator;
 try:
     from .oreOperator import w_OreOperator as OreOperator;
 except ImportError:
-    print "Package ore_algebra not available";
+    print("Package ore_algebra not available");
 from .directStepOperator import DirectStepOperator;
 from .polynomialLazyOperator import PolynomialLazyOperator;
 

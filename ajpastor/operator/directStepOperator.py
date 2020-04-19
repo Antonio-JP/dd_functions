@@ -84,7 +84,7 @@ class DirectStepOperator(TwoStepsOperator):
             
             ker = ba.right_kernel_matrix();
         except Exception as e:
-            print e
+            print(e);
             ker = M.right_kernel_matrix();
         #ker = M.right_kernel_matrix();
         ## If the nullspace has hight dimension, we try to reduce the final vector computing zeros at the end

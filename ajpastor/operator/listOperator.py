@@ -186,7 +186,7 @@ class ListOperator(Operator):
             else:
                 return self.mult(self.__class__(self.base(),other, self.derivate()));
         except Exception as e:
-            print "Got an exception: %s"%(e);
+            print("Got an exception: %s"%(e));
             raise e;
     
     ### Equality

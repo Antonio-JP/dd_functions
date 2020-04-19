@@ -137,7 +137,7 @@ def run():
         sverbose.reset_depth();
         sverbose.set_deep_wrapper(__deep_wrap);
         sverbose.set_level(__PREV_LEVEL);
-        print "\nError found during tests: %s" %(e);
+        print("\nError found during tests: %s" %(e));
         raise e;
         
     sverbose.decrease_depth();
