@@ -1854,14 +1854,16 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return result;
     
     def scalar(self, r):
-        '''
+        r'''
             This method returns the original function multiplied by a constant, i.e. `D(k) = 0`. 
             
             INPUT:
                 - ``k``: scalar from the coefficient ring of `self`. It MUST be a constant.
                 
             OUTPUT:
-                This method will raise TypeError if the value is not a constant. In order to do so, this method will cast the argument into the coefficient ring and try to derivate it. Just if the result is zero, the method will return a new DDFunction representing the function `k\cdot(self)`.
+                This method will raise TypeError if the value is not a constant. In order to do so,
+                this method will cast the argument into the coefficient ring and try to derivate it. 
+                Just if the result is zero, the method will return a new DDFunction representing the function `k\cdot(self)`.
                 
             INFO:
                 - This method must return always true for the following statements:
@@ -2814,7 +2816,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         #return sum([hash(coeff) for coeff in self.getOperator().getCoefficients()]);
 
     def __getitem__(self, key):
-        '''
+        r'''
             GetItem method for DDFunctions. It allows the user do ``self[i]`` for `i \geq -1`.
             
             INPUT:
