@@ -4,15 +4,6 @@ Python file for an implementation of Bareiss' algorithm
 This module offers an implementation of Bareiss algorithm. Such algorithm computes the right nullspace of a matrix where its coefficients
 belong to an Integral Domain. This algorithm is division-free.
 
-EXAMPLES::
-
-    sage: from ajpastor.misc.bareiss import *;
-
-TODO:
-    * Complete the Examples section of this documentation
-    * Document the package
-    * Review the functionality of the package
-
 AUTHORS:
 
     - Antonio Jimenez-Pastor (2016-10-01): initial version
