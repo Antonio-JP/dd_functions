@@ -51,10 +51,10 @@ class BareissAlgorithm(object):
 
         Bareiss' algorithm is a division-free algorithm to compute a basis for a nullspace of a matrix over an integral domain. 
         The main idea from Bareiss algorithm is to perform some type of Gauss-Jordan elimination on the matrix but keeping track
-        of necer divide and ensuring that, in the end, the main diagonal has the extra property that `d_{i+1,i+1} | d_{i,i}`.
+        of necer divide and ensuring that, in the end, the main diagonal has the extra property that `d_{i+1,i+1}\ |\ d_{i,i}`.
 
         This implementation only works with polynomial coefficients, however we allow to provide a method that solves the 
-        membership problem for the ideal `I = \{p(X) \in R[X] | p(X) = 0\}`. If such method is not provided, the algorithm work over
+        membership problem for the ideal `I = \{p(X) \in R[X]\ |\ p(X) = 0\}`. If such method is not provided, the algorithm work over
         the polynomials as no relation between the variables exist.
 
         INPUT:
@@ -394,9 +394,9 @@ class BareissAlgorithm(object):
             .. MATH::
                 
                 \begin{array}{c}
-                    (d_{1,m+1}D_1, d_{2,m+1}D_2, \ldots, d_{m,m+1}D_m, d, 0, \ldots, 0)
-                    (d_{1,m+2}D_1, d_{2,m+2}D_2, \ldots, d_{m,m+2}D_m, 0, d, \ldots, 0)
-                    \vdots
+                    (d_{1,m+1}D_1, d_{2,m+1}D_2, \ldots, d_{m,m+1}D_m, d, 0, \ldots, 0)\\
+                    (d_{1,m+2}D_1, d_{2,m+2}D_2, \ldots, d_{m,m+2}D_m, 0, d, \ldots, 0)\\
+                    \vdots\\
                     (d_{1,n}D_1, d_{2,n}D_2, \ldots, d_{m,n}D_m, 0, 0, \ldots, d)
                 \end{array}
 
@@ -456,7 +456,7 @@ class BareissAlgorithm(object):
                 ch = ch.inverse();
                 rows = [[0  for i in range(M.ncols())] for j in range(len(ker_basis))];
                 for j in range(M.ncols()):
-                    new_col = ch(j+1 )-1 ;
+                    new_col = ch(j+1 )-1;
                     for i in range(len(ker_basis)):
                         rows[i][new_col] = ker_basis[i][j];
                 
@@ -474,8 +474,8 @@ class BareissAlgorithm(object):
         r'''
             Method that defines the ideal over this algorithm is working on.
 
-            This method is a boolean method (returns True or False) in such a way that
-            I = {g in self.parent() : self.is_in_ideal(g) == True} is an ideal
+            This method is a boolean method (returns ``True`` or ``False``) in such a way that
+            ``I = {g in self.parent() : self.is_in_ideal(g) == True}`` is an ideal
             of self.parent().
         '''
         p = self.parent()(p);
@@ -502,11 +502,11 @@ class BareissAlgorithm(object):
                 * The action corresponding to the current step. These are touples containing a name (or type 
                   of operation) and the arguments required for performing such operation. There is a limited 
                   number of posible steps:
-                    * "reduce" or "f_reduce": reduce all entries of the matrix using the found relations.
-                    * "bareiss: perform a Bareiss reduction step on the given index.
-                    * "sw_c" or "sw_r": swap the two given columns (or rows, respectively).
-                    * "gcd_simpl": simplifies the gcd on each row of the matrix.
-                    * "base": the original matrix. This is always the first step. 
+                    * ``reduce`` or ``f_reduce``: reduce all entries of the matrix using the found relations.
+                    * ``bareiss``: perform a Bareiss reduction step on the given index.
+                    * ``sw_c`` or ``sw_r``: swap the two given columns (or rows, respectively).
+                    * ``gcd_simpl``: simplifies the gcd on each row of the matrix.
+                    * ``base``: the original matrix. This is always the first step. 
 
             WARNING:
 
