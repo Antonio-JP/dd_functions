@@ -48,7 +48,7 @@ sys.path.append(os.path.join(SAGE_SRC, "sage_setup", "docbuild", "ext"))
 extensions = [
     #'sphinx.ext.autodoc',
     'sage_autodoc',
-    'sage_package.sphinx',
+    #'sage_package.sphinx',
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
 ]
@@ -304,23 +304,24 @@ if (os.environ.get('SAGE_DOC_MATHJAX', 'no') != 'no'
             and os.environ.get('SAGE_DOC_MATHJAX', 'no') != 'False'):
 
     extensions.append('sphinx.ext.mathjax')
-    mathjax_path = 'MathJax.js?config=TeX-AMS_HTML-full,../mathjax_sage.js'
+    #mathjax_path = 'MathJax.js?config=TeX-AMS-MML_HTMLorMML-full,../MathJax.js'
+    mathjax_path = 'https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'
 
-    from sage.misc.latex_macros import sage_mathjax_macros
+    #from sage.misc.latex_macros import sage_mathjax_macros
     # this is broken for now
     # html_theme_options['mathjax_macros'] = sage_mathjax_macros()
 
-    from pkg_resources import Requirement, working_set
-    sagenb_path = working_set.find(Requirement.parse('sagenb')).location
-    mathjax_relative = os.path.join('sagenb','data','mathjax')
+    #from pkg_resources import Requirement, working_set
+    #sagenb_path = working_set.find(Requirement.parse('notebook')).location
+    #mathjax_relative = os.path.join('notebook','static','components','MathJax')
 
     # It would be really nice if sphinx would copy the entire mathjax directory,
     # (so we could have a _static/mathjax directory), rather than the contents of the directory
 
-    mathjax_static = os.path.join(sagenb_path, mathjax_relative)
-    html_static_path.append(mathjax_static)
-    exclude_patterns=['**/'+os.path.join(mathjax_relative, i) for i in ('docs', 'README*', 'test',
-                                                                        'unpacked', 'LICENSE')]
+    #mathjax_static = os.path.join(sagenb_path, mathjax_relative)
+    #html_static_path.append(mathjax_static)
+    #exclude_patterns=['**/'+os.path.join(mathjax_relative, i) for i in ('docs', 'README*', 'test',
+    #                                                                    'unpacked', 'LICENSE')]
 else:
      extensions.append('sphinx.ext.pngmath')
 
