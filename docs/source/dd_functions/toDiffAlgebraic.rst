@@ -1,7 +1,7 @@
 .. nodoctest
 
-DDFunction to DA
-==============================
+Differentially Agebraic functions as DD-finite elements
+========================================================
 
 .. automodule:: ajpastor.dd_functions.toDiffAlgebraic
    :members:

@@ -2,29 +2,25 @@
 DD-finite functions on Sage
 =============================
 
-This is a sample reference manual for a SageMath package.
+This is the main page for the documentation of the pagkage :module:`dd_functions`.
 
 To use this module, you need to import it:: 
 
-    from sage_sample import *
+    from ajpastor.dd_functions import *;
 
-This reference shows a minimal example of documentation of the
-Sage sample package following SageMath guidelines.
+From this page you have access to all the documentation of the code for this package 
+including some extra files and packages that were coded together with the
+package :module:`dd_functions`.
 
-This work is licensed under a `Creative Commons Attribution-Share Alike
-3.0 License`__.
 
-__ https://creativecommons.org/licenses/by-sa/3.0/
-
-Sage Sample 
-===========
+Tree of packages 
+================
 
 .. toctree::
    :maxdepth: 1
 
-   ddFunction
-   ddExamples
-   toDiffAlgebraic
+   dd_functions
+   misc
 
 
 Indices and Tables
