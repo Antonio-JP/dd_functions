@@ -78,8 +78,7 @@ EXAMPLES::
     sage: Exp(x).getInitialValueList(10) == [1]*10
     True
 
-.. TODO::
-
+TODO:
     * Improve the Examples section of this doc
     * Improve the documentation of the functions in this package
 
@@ -98,7 +97,7 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
+from sage.all_cmdline import *;   # import sage library
 
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
@@ -124,21 +123,31 @@ def Sin(input, ddR = None):
 
         Method to crete a DDFunction instance of a sine-type function. For more
         information about the sine function, consult the following references:
+            
             * http://mathworld.wolfram.com/Sine.html
             * https://en.wikipedia.org/wiki/Sine
-                
-        This function allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the main 
-              variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-                
+
         This function can be converted into symbolic expressions.
-        
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+                
         EXAMPLES::
 
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan;
@@ -200,8 +209,8 @@ def Sin(input, ddR = None):
             sage: Sin(x) == x*F01(3/2)(-x^2/4)
             True
 
-        Due to the nature of this implementation, the case for `x^n` for n > 2 
-        must be treated as functions intead of computing directly the function. 
+        Due to the nature of this implementation, the case for `x^n` for `n > 2` 
+        must be treated as functions instead of computing directly the function. 
         The key here is that for that kind of input, the initial conditions required
         to define ``Sin(x^n)`` are not the first 3 but further::
 
@@ -237,20 +246,30 @@ def Cos(input, ddR = None):
         
         Method to crete a DDFunction instance of a cosine-type function. For more
         information about the cosine function, consult the following references:
+
             * http://mathworld.wolfram.com/Cosine.html
             * https://en.wikipedia.org/wiki/Cosine
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as
-              parameters. Must be a polynomial expression with x as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.                
 
         EXAMPLES::
 
@@ -298,8 +317,8 @@ def Cos(input, ddR = None):
             sage: Cos(x) == Cosh(I*X)
             True
 
-        Due to the nature of this implementation, the case for x^n for n > 2 must 
-        be treated as functions intead of computing directly the function. The 
+        Due to the nature of this implementation, the case for `x^n` for `n > 2` must 
+        be treated as functions instead of computing directly the function. The 
         key here is that for that kind of input, the initial conditions required
         to define ``Cos(x^n)`` are not the first 3 but further::
 
@@ -334,21 +353,31 @@ def Tan(input, ddR = None):
         DD-finite implementation of the Tangent function (`tan(x)`).
 
         Method to crete a DDFunction instance of a tangent-type function. For more
-        information about the tangent function, consult the following references::
+        information about the tangent function, consult the following references:
+
             * http://mathworld.wolfram.com/Tangent.html
             * https://en.wikipedia.org/wiki/Tangent
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will 
-              be considered as parameters. The polynomial must be divisible by 
-              the main variable.
-            * A DDFunction: the composition will be computed. The DDFunction 
-              must have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -429,20 +458,30 @@ def Sinh(input, ddR = None):
         
         Method to crete a DDFunction instance of a hyperbolic sine-type function. For more
         information about the hyperbolic sine, consult the following references:
+
             * http://mathworld.wolfram.com/HyperbolicSine.html
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -507,20 +546,30 @@ def Cosh(input, ddR = None):
         
         Method to crete a DDFunction instance of a hyperbolic cosine-type function. For more
         information about the hyperbolic cosine, consult the following references:
+
             * http://mathworld.wolfram.com/HyperbolicCosine.html
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -585,20 +634,30 @@ def Tanh(input, ddR = None):
         
         Method to create a DDFunction instance of a hyperbolic tangent-type function. For more
         information about the hyperbolic tangent, consult the following references:
+
             * http://mathworld.wolfram.com/HyperbolicTangent.html 
             * https://en.wikipedia.org/wiki/Hyperbolic_function
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -670,20 +729,30 @@ def Arcsin(input, ddR = None):
         
         Method to create a DDFunction instance of a arcsine-type function. For more
         information about the inverse sine function, consult the following references:
+
             * http://mathworld.wolfram.com/InverseSine.html
             * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -750,19 +819,10 @@ def Arccos(input, ddR = None):
         
         Method to create a DDFunction instance of a arccosine-type function. For more
         information about the inverse cosine function, consult the following references:
+
             * http://mathworld.wolfram.com/InverseCosine.html
             * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-
         Since the default initial conditions for `\arccos(x)` is `\pi/2`, this method
         extends the DFinite ring with a parameter called ``"pi"``. Since `\pi` is a
         transcendental number, this implementation works without any issue. However
@@ -775,6 +835,25 @@ def Arccos(input, ddR = None):
             True
             
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -841,20 +920,30 @@ def Arctan(input, ddR = None):
         
         Method to create a DDFunction instance of a arctangent-type function. For more
         information about the inverse tangent function, consult the following references:
+
             * http://mathworld.wolfram.com/InverseTangent.html
             * https://en.wikipedia.org/wiki/Inverse_trigonometric_functions
             
-        This functions allows the user to fix the argument. The argument can be:
-            * A symbolic expression: all variables but ``x`` will be considered as 
-              parameters. Must be a polynomial expression with `x` as a factor.
-            * A polynomial: the first generator of the polynomial ring will be 
-              considered the variable to compute derivatives and the rest will be 
-              considered as parameters. The polynomial must be divisible by the 
-              main variable.
-            * A DDFunction: the composition will be computed. The DDFunction must 
-              have initial value 0.
-            
         This function can be converted into symbolic expressions.
+
+        INPUT:
+            * ``input``: a valid input for the sine function. Namely:
+                * A symbolic expression: all variables but ``x`` will be considered as 
+                  parameters. Must be a polynomial expression with `x` as a factor.
+                * A polynomial: the first generator of the polynomial ring will be 
+                  considered the variable to compute derivatives and the rest will be 
+                  considered as parameters. The polynomial must be divisible by the main 
+                  variable.
+                * A DDFunction: the composition will be computed. The DDFunction must 
+                  have initial value 0.
+            * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+              embed the output. If this is not enough for representing the function, a bigger
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+            A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+            power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
 
         EXAMPLES::
 
@@ -918,6 +1007,7 @@ def Arctan(input, ddR = None):
 @cached_function 
 def Arcsinh(input, ddR = None):
     '''
+        TODO: GO on here
         DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
         
         References:
@@ -1230,9 +1320,9 @@ def StruveD(mu='P',kind=1):
         DD-finite implementation of the Struve functions (J_n(x), Y_n(x)).
         
         References:
-    - https://dlmf.nist.gov/11.2
-    - https://en.wikipedia.org/wiki/Struve_function
-    - http://mathworld.wolfram.com/StruveFunction.html
+            * https://dlmf.nist.gov/11.2
+            * https://en.wikipedia.org/wiki/Struve_function
+            * http://mathworld.wolfram.com/StruveFunction.html
             
         Struve functions are the solutions for the inhomogeneous Bessel differential equation
         and have also a parameter 'P' involved:
