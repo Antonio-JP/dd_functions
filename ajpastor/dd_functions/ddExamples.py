@@ -103,6 +103,7 @@ from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
 
 from ajpastor.dd_functions.ddFunction import *;
+from ajpastor.dd_functions.exceptions import *;
 from ajpastor.dd_functions.lazyDDRing import LazyDDRing;
 
 from ajpastor.misc.dinamic_string import *;
@@ -225,7 +226,7 @@ def Sin(input, ddR = None):
     
     evaluate = lambda p : dR.getSequenceElement(p,0);
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute sin(f) with f(0) != 0");
+        raise ZeroValueRequired("f", "sin(f)");
     
     df = dR.base_derivation(f);
     df2 = dR.base_derivation(df);
