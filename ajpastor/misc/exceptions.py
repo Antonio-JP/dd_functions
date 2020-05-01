@@ -5,11 +5,11 @@ This module offers several Exceptions for general purposes.
 
 EXAMPLES::
     sage: from ajpastor.misc.exceptions import *
-
-TODO::
-    * Complete the Examples section of this documentation
-    * Document the package
-    * Review the functionality of the package
+    sage: raise DebugError("testing error")
+    Traceback (most recent call last):
+    ...
+    DebugError: Debug Error found (testing error): we are working in fixing it. Please be patient.
+    FIXING TIME!
 
 AUTHORS:
 
@@ -28,8 +28,8 @@ AUTHORS:
 # ****************************************************************************
 
 class DebugError(RuntimeError):
-    '''
+    r'''
         Error meaning an unexpected error in the code. Future versions should fix it.
     '''
     def __init__(self, message):
-        RuntimeError.__init__(self, "Debug Error found (%s): we are working in fixing it. Please be patient.\nFIXING TIME!" %message); 
+        super(DebugError, self).__init__("Debug Error found (%s): we are working in fixing it. Please be patient.\nFIXING TIME!" %message)
