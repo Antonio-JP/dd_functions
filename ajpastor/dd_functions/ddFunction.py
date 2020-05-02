@@ -8,7 +8,7 @@ composition, etc.
 
 EXAMPLES::
 
-    sage: from ajpastor.dd_functions import *
+    sage: from ajpastor.dd_functions import DFinite
     sage: DFinite
     DD-Ring over (Univariate Polynomial Ring in x over Rational Field)
     sage: f = DFinite.element([-1,1],[1])
@@ -31,12 +31,13 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-
-from sage.all_cmdline import *   # import sage library
 # Python imports 
 import warnings
 
 #SAGE imports 
+from sage.all_cmdline import (latex, x, var, gcd, log, QQ, ZZ, factorial, falling_factorial, 
+    vector, binomial, bell_polynomial, RealNumber, PolynomialRing, NumberField, Integer, Matrix)
+from sage.misc.cachefunc import cached_method
 from sage.rings.ring import IntegralDomain
 from sage.rings.polynomial.polynomial_element import is_Polynomial
 from sage.rings.polynomial.multi_polynomial import is_MPolynomial
@@ -44,20 +45,20 @@ from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.structure.element import IntegralDomainElement
 from sage.categories.integral_domains import IntegralDomains
 from sage.categories.fields import Fields
-from sage.categories.pushout import pushout
-from sage.categories.pushout import ConstructionFunctor
+from sage.categories.pushout import pushout, ConstructionFunctor
+from sage.categories.map import Map
+from sage.symbolic.expression import Expression
+from sage.symbolic.ring import SymbolicRing
 
 #ajpastor imports
 from ajpastor.operator.operator import Operator
 from ajpastor.operator.directStepOperator import DirectStepOperator
 from ajpastor.operator.fullLazyOperator import FullLazyOperator
 
-from ajpastor.misc.dinamic_string import *
+from ajpastor.misc.dinamic_string import DinamicString, din_m_replace
 from ajpastor.misc.serializable import SerializableObject
 from ajpastor.misc.cached_property import derived_property
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
-from ajpastor.misc.ring_w_sequence import sequence
+from ajpastor.misc.ring_w_sequence import Ring_w_Sequence, Wrap_w_Sequence_Ring, sequence
 from ajpastor.misc.verbose import printProgressBar
 
 #####################################################
@@ -156,7 +157,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             If R or S are not an algebraic extension then the method returns R==S
         '''
         from sage.categories.pushout import AlgebraicExtensionFunctor as algebraic
-        const_S = S.construction(); const_R = R.construction()
+        const_S = S.construction()
+        const_R = R.construction()
         
         ## Checking both elements are constructed as AlgebraicExtension
         if(not(isinstance(const_S[0],algebraic) and isinstance(const_R[0], algebraic))):
@@ -168,9 +170,11 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             return False
         
         # Getting the defining polynomials of the extensions
-        polys_R = const_R[0].polys; polys_S = const_S[0].polys
+        polys_R = const_R[0].polys
+        polys_S = const_S[0].polys
         # Getting the names defining the new variables on the extensions
-        names_R = const_R[0].names; names_S = const_S[0].names
+        names_R = const_R[0].names
+        names_S = const_S[0].names
         
         # We know comapre the four lists. We do not care about the order, so 
         # QQ(i)(sqrt(2)) == QQ(sqrt(2))(i). We check that the corresponding 
@@ -450,7 +454,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             coer = self.base()._coerce_map_from_(S.base())
         elif(S == self.base()):
             coer = True
-        elif(isinstance(S, sage.symbolic.ring.SymbolicRing)):
+        elif(isinstance(S, SymbolicRing)):
             coer = True
         else:
             coer = self.base()._coerce_map_from_(S)
@@ -524,7 +528,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         from sage.categories.integral_domains import IntegralDomains
         
-        if(isinstance(S, sage.symbolic.ring.SymbolicRing)):
+        if(isinstance(S, SymbolicRing)):
             return None
             
         ## We get a list of the generators of self and S with their types
@@ -622,23 +626,28 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             else:
                 try:
                     try:
-                        num = self.base()(X); den = self.base().one()
+                        num = self.base()(X)
+                        den = self.base().one()
                     except TypeError as e:
                         try:
-                            num = self.base()(str(X)); den = self.base().one()
+                            num = self.base()(str(X))
+                            den = self.base().one()
                         except:
                             ## Trying the fraction field
                             try:
                                 X = self.base().fraction_field()(X)
-                                num = self.base()(X.numerator()); den = self.base()(X.denominator())
+                                num = self.base()(X.numerator())
+                                den = self.base()(X.denominator())
                             except:
                                 try:
                                     X = self.base().fraction_field()(str(X))
-                                    num = self.base()(X.numerator()); den = self.base()(X.denominator())
+                                    num = self.base()(X.numerator())
+                                    den = self.base()(X.denominator())
                                 except:
                                     raise e
                                 
-                    dnum = self.base_derivation(num); dden = self.base_derivation(den)
+                    dnum = self.base_derivation(num)
+                    dden = self.base_derivation(den)
                     el = self.element([dden*num - dnum*den, num*den])
                     X = num/den
                     name = str(X)
@@ -670,7 +679,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: DFinite.gens()
                 ()
-                sage: R = ParametrizedDDRing(DFinite, ['a']); R.gens()
+                sage: R = ParametrizedDDRing(DFinite, ['a'])
+                sage: R.gens()
                 (a,)
                 sage: ParametrizedDDRing(R, ['b']).gens()
                 (b, a)
@@ -692,7 +702,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 0
                 sage: DDFinite.ngens()
                 0
-                sage: R = ParametrizedDDRing(DFinite, ['a']); R.ngens()
+                sage: R = ParametrizedDDRing(DFinite, ['a'])
+                sage: R.ngens()
                 1
                 sage: ParametrizedDDRing(R, ['b']).ngens()
                 2
@@ -757,7 +768,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 False
                 sage: Exp(Sin(x)) in DDFinite
                 True
-                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2); 
+                sage: s2 = var('s2')
+                sage: F.<s2> = NumberField(s2^2 - 2)
                 sage: R = DDRing(F[x])
                 sage: Exp(x) in R
                 True
@@ -868,13 +880,14 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         simple = kwds.get("simple", True)
 
         ## Checking the argument values
-        min_order = max(min_order,0); ## Need at least order 1
-        max_order = max(min_order, max_order); ## At least the maximal order must be equal to the minimal
+        min_order = max(min_order,0) ## Need at least order 1
+        max_order = max(min_order, max_order) ## At least the maximal order must be equal to the minimal
         if(simple != True and simple != False):
             simple = False
 
         ## Computing the list of coefficients
-        R = self.base(); S = self.base_field
+        R = self.base()
+        S = self.base_field
         coeffs = [R.random_element() for i in range(randint(min_order,max_order)+1)]
         
         init_values = [0]
@@ -902,23 +915,25 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
             Return the base field for the coefficients of the elements.
 
-            This is a required method for extending rings. In this case, we return the same as ``self.base_field()``.
+            This is a required method for extending rings. In this case, we return the same as ``self.base_field``.
 
             EXAMPLES::
                 sage: from ajpastor.dd_functions import *
-                sage: DFinite.base_ring() is DFinite.base_field()
+                sage: DFinite.base_ring() is DFinite.base_field
                 True
                 sage: DFinite.base_ring() == QQ
                 True
                 sage: DDFinite.base_ring() == QQ
                 True
-                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2)
+                sage: s2 = var('s2')
+                sage: F.<s2> = NumberField(s2^2 - 2)
                 sage: R = DDRing(F[x])
                 sage: R.base_ring() == QQ
                 False
                 sage: R.base_ring() == F
                 True
-                sage: R.base_ring() is R.base_field()
+                sage: R.base_ring() is R.base_field
+                True
 
             In the case of ParametrizedDDRing, the base field contains the parameters::
                 sage: S = ParametrizedDDRing(DFinite, ['a','b'])
@@ -1037,7 +1052,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 True
 
             TESTS::
-                sage: from ajpastor.dd_functions import *
+                sage: from ajpastor.dd_functions import DFinite, DDFinite
                 sage: all(F.is_noetherian() is True for F in [DFinite, DDFinite])
                 True
         '''
@@ -1118,7 +1133,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         
     def get_recurrence(self, *args, **kwds):
         if(self.__get_recurrence is None):
-            raise NotImplementedError("Recurrence method not implemented for %s" %self);        
+            raise NotImplementedError("Recurrence method not implemented for %s" %self) 
         return self.__get_recurrence(*args, **kwds)
     
     def variables(self, as_symbolic=False, fill = True):
@@ -1152,7 +1167,7 @@ class ParametrizedDDRing(DDRing):
     @staticmethod
     def __classcall__(cls, *args, **kwds):
         ## In order to call the __classcall__ of DDRing we treat the arguments received
-        base_ddRing = args[0]; 
+        base_ddRing = args[0]
         if(len(args) > 1 ):
             parameters = args[1]
         else:
@@ -1178,7 +1193,7 @@ class ParametrizedDDRing(DDRing):
         for i in range(len(parameters)):
             if(type(parameters[i]) == str):
                 parameters[i] = var(parameters[i])
-            elif(type(parameters[i]) != sage.symbolic.expression.Expression):
+            elif(type(parameters[i]) != Expression):
                 raise TypeError("All values of the second argument must be strings or SAGE symbolic variables")
         parameters = tuple(set(parameters))
         
@@ -1189,12 +1204,12 @@ class ParametrizedDDRing(DDRing):
             
         ## We rebuild now the base ring for the DDRing operator
         base_field = base_ddRing.base_field
-        constructions = [base_ddRing.construction()]; # Here is the DD-Ring operator
+        constructions = [base_ddRing.construction()] # Here is the DD-Ring operator
             
         while(constructions[-1][1] != base_field):
             constructions += [constructions[-1][1].construction()]
              
-        new_basic_field = PolynomialRing(base_field, parameters).fraction_field();  
+        new_basic_field = PolynomialRing(base_field, parameters).fraction_field()
         current = new_basic_field
         for i in range(1 ,len(constructions)):
             current = constructions[-i][0](current)
@@ -1395,8 +1410,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             inhom = inhomogeneous
         
         ### Cached elements
-        self.__pows = {0 :1 , 1 :self}; # Powers-cache
-        self.__derivative = None; # The derivative of a function
+        self.__pows = {0 :1 , 1 :self} # Powers-cache
+        self.__derivative = None # The derivative of a function
         
         ### Assigning the differential operator
         ### We will save the leading coefficient of the equation (lc) to future uses.
@@ -1439,7 +1454,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             try:
                 to_sum = N * BackslashOperator() * diff
             except Exception:
-                raise ValueError("There is no function satisfying\n(%s)(f) == %s\nwith initial values %s" %(self.equation,inhom,init)); 
+                raise ValueError("There is no function satisfying\n(%s)(f) == %s\nwith initial values %s" %(self.equation,inhom,init))
             
             ## Putting the new values for the equation and initial values
             init = X+sum([to_sum[i]*ker[i] for i in range(len(to_sum))])
@@ -1529,7 +1544,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             while(self.getInitialValue(i) == 0 ):
                 i += 1 
             
-            return i;    
+            return i
         
     def getSequenceElement(self, n):
         try:
@@ -1545,10 +1560,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             else:
                 ## Otherwise, we try to get as usual the value
                 d = self.getOrder()
-                i = max(n-d,0 );                      
+                i = max(n-d,0 )
                 rec = self.equation.get_recursion_row(i)
                 while(rec[n] == 0  and i <= self.equation.jp_value):                   
-                    i += 1 ;                           
+                    i += 1 
                     rec = self.equation.get_recursion_row(i)
                 if(rec[n] == 0 ):
                     raise TypeError("Impossible to compute recursively the required value")
@@ -1620,7 +1635,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     if(coeff != 0 ):
                         to_sum += [coeff.degree()]
                 except Exception:
-                    pass;           
+                    pass
         return sum(to_sum)
         
     def built(self):
@@ -1709,9 +1724,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         newName = None
         if(not(self.__name is None) and (not(other.__name is None))):
             if(other.__name[0] == '-'):
-                newName = DinamicString("_1_2", [self.__name, other.__name]); 
+                newName = DinamicString("_1_2", [self.__name, other.__name])
             else:
-                newName = DinamicString("_1+_2", [self.__name, other.__name]); 
+                newName = DinamicString("_1+_2", [self.__name, other.__name])
                 
         
         ## We check other simplifications: if the elements are constants
@@ -1773,7 +1788,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ### Computing the new name
         newName = None
         if(not(self.__name is None) and (not(other.__name is None))):
-            newName = DinamicString("_1-_2", [self.__name, other.__name]); 
+            newName = DinamicString("_1-_2", [self.__name, other.__name])
         
         ## We check other simplifications: if the elements are constants
         if(self.is_constant or other.is_constant):
@@ -1854,7 +1869,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ### Computing the new name
         newName = None
         if(not(self.__name is None) and (not(other.__name is None))):
-            newName = DinamicString("(_1)*(_2)", [self.__name, other.__name]); 
+            newName = DinamicString("(_1)*(_2)", [self.__name, other.__name])
             
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
         result.change_built("polynomial", (PolynomialRing(self.parent().base_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
@@ -1903,7 +1918,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                    
             result = self.parent().element(self.equation, [r*el for el in init], check_init=False, name=newName)
             result.change_built("polynomial", (PolynomialRing(self.parent().base_field,['x1'])('(%s)*x1' %repr(r)), {'x1':self}))
-            return result;       
+            return result
         else:
             return self.mult(self.parent()(r))
     
@@ -1928,7 +1943,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ### Computing the new name
             newName = None
             if(not(self.__name is None)):
-                newName = DinamicString("(_1)/(_2^%d)" %n, [self.__name, repr(X)]); 
+                newName = DinamicString("(_1)/(_2^%d)" %n, [self.__name, repr(X)])
                
             result = self.parent().element(newEquation, newInit, check_init=False, name=newName)
             result.change_built("polynomial", (PolynomialRing(self.parent().base_field,[repr(X),'x1']).fraction_field()('x1/(%s^%d)' %(repr(X),n)), {repr(X):self.parent()(X),'x1':self}))
@@ -2031,7 +2046,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         else:
             raise NotImplementedError("Method 'split_sequence' not implemented for 3 or more parts")
             
-        R = PolynomialRing(QQ[x], 'y'); y = R.gens()[0]
+        R = PolynomialRing(QQ[x], 'y')
+        y = R.gens()[0]
         p = y^parts - x
             
         return [el.compose_algebraic(p, lambda n : el.getSequenceElement(parts*n)*factorial(n)) for el in f]
@@ -2121,7 +2137,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         newName = None
         if(not(self.__name is None)):
             if(constant == 0 ):
-                newName = DinamicString("int(_1)", self.__name); 
+                newName = DinamicString("int(_1)", self.__name)
             else:
                 newName = DinamicString("int(_1) + _2", [self.__name, repr(constant)])
         
@@ -2157,7 +2173,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Initial checking and considerations
         ######################################
         ## Checking that the 'other' element is NOT in the Symbolic Ring
-        if(isinstance(other.parent(), sage.symbolic.ring.SymbolicRing)):
+        if(isinstance(other.parent(), SymbolicRing)):
             try:
                 other = self.parent().original_ring()(str(other))
             except Exception as e:
@@ -2184,7 +2200,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ######################################
         destiny_ring = None
         ## First, compute the pushout fo the parents
-        sp = self.parent(); op = other.parent()
+        sp = self.parent()
+        op = other.parent()
         push = pushout(sp, op)
         
         ## Second, compute the final depth of the DDRing
@@ -2202,8 +2219,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Computing the new operator
         ######################################
         ## HERE IS THE MAIN RECURSION STEP
-        equation = destiny_ring.element([coeff(**{str(self_var) : other}) for coeff in self.equation.getCoefficients()]).equation; ## Equation with coefficients composed with 'other'
-        g = destiny_ring.base()(other); ## Casting the element 'other' to the base ring
+        equation = destiny_ring.element([coeff(**{str(self_var) : other}) for coeff in self.equation.getCoefficients()]).equation ## Equation with coefficients composed with 'other'
+        g = destiny_ring.base()(other) ## Casting the element 'other' to the base ring
         
         new_equation = equation.compose_solution(g)
         
@@ -2219,7 +2236,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         except AttributeError:
             init_g = [0] + [factorial(n)*new_equation.base().sequence(g,n) for n in range(1 ,required)]
         ## Computing the new initial values
-        new_init = [init_f[0]]+[sum([init_f[j]*bell_polynomial(i,j)(*init_g[1 :i-j+2]) for j in range(1 ,i+1 )]) for i in range(1 ,min(len(init_f), len(init_g), required))]; ## See Faa di Bruno's formula
+        new_init = [init_f[0]]+[sum([init_f[j]*bell_polynomial(i,j)(*init_g[1 :i-j+2]) for j in range(1 ,i+1 )]) for i in range(1 ,min(len(init_f), len(init_g), required))] ## See Faa di Bruno's formula
         
         
         ######################################
@@ -2448,7 +2465,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         except AttributeError:
             ## The operator has no numerical solution method (i.e. it is not an OreOperator
             ## We compute the basic numerical approximation
-            return self.__basic_numerical_solution(value, delta, max_depth);            
+            return self.__basic_numerical_solution(value, delta, max_depth)          
             
     def __basic_numerical_solution(self, value, delta,max_depth):
         res = 0 
@@ -2540,7 +2557,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     @cached_method
     def to_symbolic(self):
         evaluation = sage_eval(str(self.__name).replace("'", ".derivative()").replace("^", "**"), locals=globals())
-        if(isinstance(evaluation, sage.symbolic.expression.Expression)):
+        if(isinstance(evaluation, Expression)):
             evaluation = evaluation.simplify_full()
             
         return evaluation
@@ -2708,7 +2725,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             The only case that is not included is when self(0) = 0 or self**other(0) is not implemented.
         '''
         if(other not in self.__pows):
-            f = self; g = other; f0 = f(x=0)
+            f = self
+            g = other
+            f0 = f(x=0)
             if(f.is_null or other == 0):
                 raise ValueError("Value 0**0 not well defined")
             if(f.is_null): # Trivial case when f == 0, then f**g = 0.
@@ -2761,7 +2780,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     lf = Log(self)
                     
                     R = pushout(other.parent(), lf.parent())
-                    g = R(other); lf = R(lf)
+                    g = R(other)
+                    lf = R(lf)
                     R = R.to_depth(R.depth()+1)
                     
                     g0 = g(x=0)
@@ -2795,12 +2815,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def __eq__(self,other):
         if (other is self):
             return True
-        if((type(other) == sage.rings.integer.Integer or type(other) == int) and other == 0 ):
+        if((type(other) == Integer or type(other) == int) and other == 0 ):
             return self.is_null
         return self.equals(other)
 
     def __ne__(self, other):
-        return not self.__eq__(other); 
+        return not self.__eq__(other)
         
     ### Magic use
     def __call__(self, X=None, **input):
@@ -2926,7 +2946,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(string[par] != '('):
             return len(string)
         
-        n = 1; i = par+1
+        n = 1
+        i = par+1
         while(i < len(string) and n > 0):
             if(string[i] == '('):
                 n += 1
@@ -2944,7 +2965,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(self.is_constant):
             return str(self.getInitialValue(0 ))
         if(self.__name is None):
-            return "(%s:%s:%s)DD-Function in (%s)" %(self.getOrder(),self.equation.get_jp_fo(),self.size(),self.parent());   
+            return "(%s:%s:%s)DD-Function in (%s)" %(self.getOrder(),self.equation.get_jp_fo(),self.size(),self.parent()) 
         else:
             return str(self.__name)
             
@@ -2988,7 +3009,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             current = coeffs[i]
             
             if(not simpl[i] and current.is_constant): # Recursive and constant case
-                current = current.getInitialValue(0); # Reduced to constant case
+                current = current.getInitialValue(0) # Reduced to constant case
                 simpl[i] = True
             
             ## Constant cases
@@ -3017,7 +3038,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 coeffs[i] += "%s^{(%d)}(x)" %(c_name, i)
                 
         ## Building the final line from the highest order to the minimal
-        coeffs.reverse(); sgn.reverse()
+        coeffs.reverse()
+        sgn.reverse()
         
         final = ""
         for i in range(len(coeffs)):
@@ -3042,7 +3064,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 res += ["%s''(0) = %s" %(name, latex(self.getInitialValue(i)))]
             else:
                 res += ["%s^{(%d)}(0) = %s" %(name, i,latex(self.getInitialValue(i)))]
-        return ", ".join(res);     
+        return ", ".join(res)
 
     ## Overriding the serializable method with an exra parameter
     def serialize(self, file, full=False):
@@ -3131,7 +3153,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(check):
             try:
                 aux = self.change_init_values(init_data[:n])
-                self.__calculatedSequence = aux.__calculatedSequence;  
+                self.__calculatedSequence = aux.__calculatedSequence
             except ValueError:
                 raise ValueError("Bad error conditions in %s for equation %s" %(file.name,self.equation))
         else:
@@ -3240,7 +3262,7 @@ class ParametrizedDDRingFunctor (DDRingFunctor):
 #####################################################
 ### General Morphism for return to basic rings
 #####################################################
-class DDSimpleMorphism (sage.categories.map.Map):
+class DDSimpleMorphism (Map):
     def __init__(self, domain, codomain):
         super(DDSimpleMorphism, self).__init__(domain, codomain)
         
@@ -3300,7 +3322,8 @@ def polynomial_computation(poly, functions):
     ### Checking the argument 'poly'
     if(not (is_Polynomial(poly) or is_MPolynomial(poly))):
         raise TypeError("First argument require to be a polynomial.\n\t- Got: %s (%s)" %(poly, type(poly)))
-    parent_poly = poly.parent(); gens = parent_poly.gens()
+    parent_poly = poly.parent()
+    gens = parent_poly.gens()
         
     ### Checking the argument 'functions'
     tfunc= type(functions)
@@ -3340,7 +3363,7 @@ def polynomial_computation(poly, functions):
                 break
         if(not inPlace):
             chains += [[f]]
-    dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains};    
+    dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains}
             
     ## We build the new operator
     newOperator = None
@@ -3408,7 +3431,8 @@ def _m_replace(string, to_replace, escape=("(",")")):
     
     ## No escape characters: doing normal computation
     all_index = _m_indices(string, *to_replace.keys())
-    res = ""; current_index = 0 
+    res = ""
+    current_index = 0 
     for el in all_index:
         res += string[current_index:el[0]] + to_replace[el[1]]
         current_index = el[0]+len(el[1])
@@ -3447,7 +3471,7 @@ def _command_list(elements):
 # Some global pre-defined DD-Rings
 DFinite = None
 try:
-    from ore_algebra import *
+    import ore_algebra
     from ajpastor.operator.oreOperator import w_OreOperator
     DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
 except ImportError:
