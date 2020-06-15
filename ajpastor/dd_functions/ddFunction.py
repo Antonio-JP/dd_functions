@@ -36,18 +36,15 @@ import warnings
 
 #SAGE imports 
 from sage.all_cmdline import (latex, x, var, gcd, log, QQ, ZZ, factorial, falling_factorial, 
-    vector, binomial, bell_polynomial, RealNumber, PolynomialRing, NumberField, Integer, Matrix)
-from sage.misc.cachefunc import cached_method
-from sage.rings.ring import IntegralDomain
+    vector, binomial, bell_polynomial, RealNumber, PolynomialRing, NumberField, Integer, Matrix,
+    IntegralDomain, IntegralDomainElement, Expression, cached_method, derivative, randint)
 from sage.rings.polynomial.polynomial_element import is_Polynomial
 from sage.rings.polynomial.multi_polynomial import is_MPolynomial
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
-from sage.structure.element import IntegralDomainElement
 from sage.categories.integral_domains import IntegralDomains
 from sage.categories.fields import Fields
 from sage.categories.pushout import pushout, ConstructionFunctor
 from sage.categories.map import Map
-from sage.symbolic.expression import Expression
 from sage.symbolic.ring import SymbolicRing
 
 #ajpastor imports
@@ -463,9 +460,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             return True
         #return None
         ## If not coercion is found, we check deeper using generators
-        gens_self, p_self = DDRing.__get_gens__(self)
+        gens_self = DDRing.__get_gens__(self)[0]
         try:
-            gens_S, pS = DDRing.__get_gens__(S)
+            gens_S = DDRing.__get_gens__(S)[0]
         except RuntimeError:
             return None
         
@@ -608,7 +605,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
             This method describes how to interpret the arguments that a DDRing can received to cast one element to a DDFunction in ``self``.
         '''
-        el_class = self.element_class
         if(len(args) < 1 ):
             raise ValueError("Impossible to build a lazy element without arguments")
         
@@ -661,7 +657,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                         return self.element([1],[], self.base()(X), name=str(X))
                     except Exception:
                         print("WHAT??")
-                        return self(str(element))
+                        return self(str(self.element))
         except TypeError as e:
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e))
             
@@ -900,7 +896,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             init_values += [S.random_element() for i in range(len(coeffs)-2)]
             return self.element(coeffs,init_values)
         ## Otherwise, we need to know the initial value condition
-        equation = self.element(coeffs).equation
         warnings.warn("Not-simple random element not implemented. Returning zero", DDFunctionWarning, stacklevel=2)
 
         return self.zero()
@@ -1419,8 +1414,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         try:
             self.equation = self.__buildOperator(equation)
         except Exception as e:
-            #print("here -- %s" %e)
-            raise TypeError("The input for this operator is not valid")
+            raise TypeError("The input for this operator is not valid", e)
             
         ### Managing the inhomogeneous term
         # We cast the inhomogeneous term to an element of self.parent()
@@ -1902,7 +1896,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(r == 1 ):
                 return self
             n = self.equation.get_jp_fo()+1 
-            coeffs = self.getOperator().getCoefficients()
             init = self.getInitialValueList(n)
             
             if(isinstance(r, DDFunction)):
@@ -2293,7 +2286,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 F = DFinite.base().fraction_field()
                 Q = PolynomialRing(F, 'y')
                 poly = Q(poly)
-                destiny_ring = self.parent()
         elif(len(gens) > 1):
             # If multivariate, we only accept 2 variables
             if(len(gens) > 2):
@@ -2610,7 +2602,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 if(pol == self):
                     return pol
                 raise ValueError("3:Function %s is not a polynomial" %repr(self))
-        except Exception as e:
+        except Exception:
             pass
         return self
         
@@ -2626,7 +2618,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     return self.parent()(other)
                 except:
                     return ParametrizedDDRing(self.parent(),other.variables())(other)
-        except Exception as e:
+        except Exception:
             pass
         return other
     
@@ -2790,7 +2782,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     else:
                         name = None
                         if(g.has_name() and f.has_name()):
-                            nname = DinamicString("(_1)^(_2)", [f.__name, g.__name])
+                            name = DinamicString("(_1)^(_2)", [f.__name, g.__name])
                         
                         self.__pows[other] = R.element([-((lf + lf0)*g).derivative(),1],[1],name=name)
                 else:
@@ -3301,101 +3293,101 @@ def zero_extraction(el):
                 val = el(**{'x':0 })
                 
             return (n, el)
-    except AttributeError as e:
+    except AttributeError:
         return (0 ,el)
         
-def polynomial_computation(poly, functions):
-    '''
-        Method that compute a polynomial operation over a set of DDFunctions.
+# def polynomial_computation(poly, functions):
+#     '''
+#         Method that compute a polynomial operation over a set of DDFunctions.
         
-        INPUT:
-            - poly: a multivariate polynomial representing the operation we want to perform.
-            - functions: the set of functions related with the polynomial. 
-        OUTPUT:
-            A DDFunction in the corresponding DDRing.
+#         INPUT:
+#             - poly: a multivariate polynomial representing the operation we want to perform.
+#             - functions: the set of functions related with the polynomial. 
+#         OUTPUT:
+#             A DDFunction in the corresponding DDRing.
             
-        WARNING:
-            We assume that for any pair of functions f,g in functions, there are not
-            constants c,d such that f = cg+d. Otherwise the result will still
-            be correct, but will be computed slower.
-    '''
-    ### Checking the argument 'poly'
-    if(not (is_Polynomial(poly) or is_MPolynomial(poly))):
-        raise TypeError("First argument require to be a polynomial.\n\t- Got: %s (%s)" %(poly, type(poly)))
-    parent_poly = poly.parent()
-    gens = parent_poly.gens()
+#         WARNING:
+#             We assume that for any pair of functions f,g in functions, there are not
+#             constants c,d such that f = cg+d. Otherwise the result will still
+#             be correct, but will be computed slower.
+#     '''
+#     ### Checking the argument 'poly'
+#     if(not (is_Polynomial(poly) or is_MPolynomial(poly))):
+#         raise TypeError("First argument require to be a polynomial.\n\t- Got: %s (%s)" %(poly, type(poly)))
+#     parent_poly = poly.parent()
+#     gens = parent_poly.gens()
         
-    ### Checking the argument 'functions'
-    tfunc= type(functions)
-    if(not ((tfunc is list) or (tfunc is set) or (tfunc is tuple))):
-        functions = [functions]
+#     ### Checking the argument 'functions'
+#     tfunc= type(functions)
+#     if(not ((tfunc is list) or (tfunc is set) or (tfunc is tuple))):
+#         functions = [functions]
         
-    if(len(functions) < parent_poly.ngens()):
-        raise TypeError("Not enough functions given for the polynomial ring of the polynomial.")
+#     if(len(functions) < parent_poly.ngens()):
+#         raise TypeError("Not enough functions given for the polynomial ring of the polynomial.")
     
-    ### Coarcing all the functions to a common parent
-    parent = functions[0].parent()
-    for i in range(1,len(functions)):
-        parent = pushout(parent, functions[i].parent())
+#     ### Coarcing all the functions to a common parent
+#     parent = functions[0].parent()
+#     for i in range(1,len(functions)):
+#         parent = pushout(parent, functions[i].parent())
         
-    ### Base case: non-DDRing
-    if(not isinstance(parent, DDRing)):
-        return poly(**{str(gens[i]) : functions[i] for i in range(len(gens))})
+#     ### Base case: non-DDRing
+#     if(not isinstance(parent, DDRing)):
+#         return poly(**{str(gens[i]) : functions[i] for i in range(len(gens))})
         
-    functions = [parent(f) for f in functions]
+#     functions = [parent(f) for f in functions]
         
-    ### Grouping the elements that are derivatives of each other
-    ### Using the assumption on the input functions, we have that for each
-    ###    chain of derivatives, we only need to check if the function is
-    ###    the derivative of the last or if the first element is the derivative
-    ###    of the function.
-    chains = []
-    for f in functions:
-        inPlace = False
-        for i in range(len(chains)):
-            if(f.derivative() == chains[i][0]):
-                chains[i] = [f] + chains[i]
-                inPlace = True
-                break
-            elif(chains[i][-1].derivative() == f):
-                chains[i] = chains[i] + [f]
-                inPlace = True
-                break
-        if(not inPlace):
-            chains += [[f]]
-    dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains}
+#     ### Grouping the elements that are derivatives of each other
+#     ### Using the assumption on the input functions, we have that for each
+#     ###    chain of derivatives, we only need to check if the function is
+#     ###    the derivative of the last or if the first element is the derivative
+#     ###    of the function.
+#     chains = []
+#     for f in functions:
+#         inPlace = False
+#         for i in range(len(chains)):
+#             if(f.derivative() == chains[i][0]):
+#                 chains[i] = [f] + chains[i]
+#                 inPlace = True
+#                 break
+#             elif(chains[i][-1].derivative() == f):
+#                 chains[i] = chains[i] + [f]
+#                 inPlace = True
+#                 break
+#         if(not inPlace):
+#             chains += [[f]]
+#     dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains}
             
-    ## We build the new operator
-    newOperator = None
-    if(len(dics) == 1):
-        if(hasattr(f.equation, "annihilator_of_polynomial")):
-            ## Reordering the variables
-            parent_poly2 = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]])
-            poly2 = parent_poly2(poly)
-            newOperator = f.equation.annihilator_of_polynomial(poly2)
-    if(newOperator is None):
-        newOperator = _get_equation_poly(poly, dics)
+#     ## We build the new operator
+#     newOperator = None
+#     if(len(dics) == 1):
+#         if(hasattr(f.equation, "annihilator_of_polynomial")):
+#             ## Reordering the variables
+#             parent_poly2 = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]])
+#             poly2 = parent_poly2(poly)
+#             newOperator = f.equation.annihilator_of_polynomial(poly2)
+#     if(newOperator is None):
+#         newOperator = _get_equation_poly(poly, dics)
             
-    ### Getting the needed initial values for the solution
-    needed_initial = newOperator.get_jp_fo()+1 
+#     ### Getting the needed initial values for the solution
+#     needed_initial = newOperator.get_jp_fo()+1 
         
-    ### Getting as many initial values as posible until the new order
+#     ### Getting as many initial values as posible until the new order
     
-    newInit = [_get_initial_poly(poly, dics, i) for i in range(needed_initial)]
-    ## If some error happens, we delete all results after it
-    if(None in newInit):
-        newInit = newInit[:newInit.index(None)]
+#     newInit = [_get_initial_poly(poly, dics, i) for i in range(needed_initial)]
+#     ## If some error happens, we delete all results after it
+#     if(None in newInit):
+#         newInit = newInit[:newInit.index(None)]
         
-    ## Computing the new name
-    newName = None
-    if(all(f.has_name() for f in functions)):
-        newName = DinamicString(_m_replace(str(poly), {str(gens[i]) : "_%d" %(i+1) for i in range(len(gens))}), [f._DDFunction__name for f in functions])
+#     ## Computing the new name
+#     newName = None
+#     if(all(f.has_name() for f in functions)):
+#         newName = DinamicString(_m_replace(str(poly), {str(gens[i]) : "_%d" %(i+1) for i in range(len(gens))}), [f._DDFunction__name for f in functions])
         
-    ## Building the element
-    result = parent.element(newOperator, newInit, check_init=False, name=newName)
-    result.change_built("polynomial", (poly, {str(gens[i]) : functions[i] for i in range(len(gens))}))
+#     ## Building the element
+#     result = parent.element(newOperator, newInit, check_init=False, name=newName)
+#     result.change_built("polynomial", (poly, {str(gens[i]) : functions[i] for i in range(len(gens))}))
 
-    return result
+#     return result
 
 ###################################################################################################
 ### PRIVAME MODULE METHODS
@@ -3526,7 +3518,7 @@ __all__ = [
     "DDFinite", 
     "command", 
     "zero_extraction", 
-    "polynomial_computation", 
+    #"polynomial_computation", 
     "ParametrizedDDRing", 
     "DFiniteP", 
     "DFiniteI"]
