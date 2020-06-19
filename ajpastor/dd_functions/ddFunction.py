@@ -101,17 +101,18 @@ def _aux_derivation(p):
 ### Class for DD-Rings
 #####################################################
 def is_DDRing(ring):
-    '''
+    r'''
         Method that checks if an object is a DDRing. 
 
         This method provides a general function to check the class of an object without knowing 
         exactly the name of the basic class of the module. This is basically an alias for the command 
-        ``isinstance(ring, DDRing)``.
+        ''sinstance(ring, DDRing)''.
 
         INPUT:
-            - ``ring`` -- object to be checked.
+            * ''ring'' -- object to be checked.
 
-        OUTPUT: True or False depending if ``ring`` is a DDRing or not.
+        OUTPUT: 
+            * ''True'' or ''False'' depending if ''ring'' is a ''DDRing'' or not.
 
         EXAMPLES::
 
@@ -123,13 +124,13 @@ def is_DDRing(ring):
             sage: is_DDRing(QQ)
             False
 
-        Also ``ParametrizedDDRing`` return True with this method::
+        Also ''ParametrizedDDRing'' return ''True'' with this method::
 
             sage: is_DDRing(ParametrizedDDRing(DFinite, ['a']))
             True
 
         SEE ALSO:
-            * "DDRing"
+            * :class:'DDRing'
     '''
     return isinstance(ring, DDRing)
 
@@ -758,7 +759,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 False
                 sage: Exp(Sin(x)) in DDFinite
                 True
-                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2);
+                sage: var('s2')
+                s2
+                sage: F.<s2> = NumberField(s2^2 - 2);
                 sage: R = DDRing(F[x])
                 sage: Exp(x) in R
                 True
@@ -786,6 +789,14 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     #################################################
     ### Magic python methods
     #################################################
+    def __hash__(self):
+        r'''
+            Hash method for DDRings.
+
+            The hash is a shifted by the depth of the hash for the original ring of coefficients.
+        '''
+        return hash(self.original_ring())+self.depth()
+
     def __eq__(self, other):
         '''
             Method to check equality of this Parent structure
@@ -908,19 +919,22 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
             EXAMPLES::
                 sage: from ajpastor.dd_functions import *
-                sage: DFinite.base_ring() is DFinite.base_field()
+                sage: DFinite.base_ring() is DFinite.base_field
                 True
                 sage: DFinite.base_ring() == QQ
                 True
                 sage: DDFinite.base_ring() == QQ
                 True
-                sage: var('s2'); F.<s2> = NumberField(s2^2 - 2);
+                sage: var('s2')
+                s2
+                sage: F.<s2> = NumberField(s2^2 - 2);
                 sage: R = DDRing(F[x])
                 sage: R.base_ring() == QQ
                 False
                 sage: R.base_ring() == F
                 True
-                sage: R.base_ring() is R.base_field()
+                sage: R.base_ring() is R.base_field
+                True
 
             In the case of ParametrizedDDRing, the base field contains the parameters::
                 sage: S = ParametrizedDDRing(DFinite, ['a','b'])
@@ -2818,10 +2832,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def __hash__(self):
         '''
             Hash method for DDFunctions.
+
+            Since several representations may be equal, we use the initial conditions as a mark for the hash.
         '''
         return sum(hash(el) for el in self.getInitialValueList(20))
-        #return int("%d%d%d" %(self.getOrder(),self.equation.get_jp_fo(),self.size()))
-        #return sum([hash(coeff) for coeff in self.getOperator().getCoefficients()])
 
     def __getitem__(self, key):
         r'''
