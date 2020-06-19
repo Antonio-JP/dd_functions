@@ -47,4 +47,4 @@ If you did not want to install the package (or simply, you do not have Sage) do 
 https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
 
 ## **3. Extra requirements**
-It is **hightly recommended** (but not *required*) to have previously installed the *ore_algebra* package from M. Kauers and M. Mezzarobba (see thei *git* repository [here](https://github.com/mkauers/ore_algebra)).
+It is **hightly recommended** (but not *required*) to have previously installed the *ore_algebra* package from M. Kauers and M. Mezzarobba (see their *git* repository [here](https://github.com/mkauers/ore_algebra)).
