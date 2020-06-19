@@ -97,17 +97,18 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *;   # import sage library
+from sage.all_cmdline import *   # import sage library
 
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 
-from ajpastor.dd_functions.ddFunction import *;
-from ajpastor.dd_functions.lazyDDRing import LazyDDRing;
+from ajpastor.dd_functions.ddFunction import *
+from ajpastor.dd_functions.exceptions import *
+from ajpastor.dd_functions.lazyDDRing import LazyDDRing
 
-from ajpastor.misc.dinamic_string import *;
+from ajpastor.misc.dinamic_string import *
 
-from ajpastor.misc.exceptions import *;
+from ajpastor.misc.exceptions import *
 
 ##################################################################################
 ##################################################################################
@@ -218,6 +219,17 @@ def Sin(input, ddR = None):
             True
             sage: Sin(x^4).getInitialValueList(20) == [sin(x^4).derivative(i)(x=0) for i in range(20)]
             True
+
+        This method can throw some error when the input evaluates to something different than zero::
+
+            sage: Sin(x+1)
+            Traceback (most recent call last):
+            ...
+            ZeroValueRequired: required a zero value for x+1 in sin(x+1)
+            sage: Sin(Exp(x))
+            Traceback (most recent call last):
+            ...
+            ZeroValueRequired: required a zero value for Exp(x) in sin(Exp(x))
     '''
     if(is_DDFunction(input)):
         return Sin(x)(input);
@@ -225,7 +237,7 @@ def Sin(input, ddR = None):
     
     evaluate = lambda p : dR.getSequenceElement(p,0);
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute sin(f) with f(0) != 0");
+        raise ZeroValueRequired(input, "Sin(%s)" %input);
     
     df = dR.base_derivation(f);
     df2 = dR.base_derivation(df);
@@ -326,6 +338,17 @@ def Cos(input, ddR = None):
             True
             sage: Cos(x^4).getInitialValueList(20) == [cos(x^4).derivative(i)(x=0) for i in range(20)]
             True
+
+        This method can throw some error when the input evaluates to something different than zero::
+
+            sage: Cos(x+1)
+            Traceback (most recent call last):
+            ...
+            ZeroValueRequired: required a zero value for x + 1 in Cos(x + 1)
+            sage: Cos(Exp(x))
+            Traceback (most recent call last):
+            ...
+            ZeroValueRequired: required a zero value for Exp(x) in Cos(Exp(x))
     '''
     if(is_DDFunction(input)):
         return Cos(x)(input);
@@ -333,7 +356,7 @@ def Cos(input, ddR = None):
     
     evaluate = lambda p : dR.getSequenceElement(p,0);
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute cos(f) with f(0) != 0");
+        raise ZeroValueRequired(input, "Cos(%s)" %input);
     
     df = dR.base_derivation(f);
     df2 = dR.base_derivation(df);

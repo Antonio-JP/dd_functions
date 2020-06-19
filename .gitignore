@@ -1,5 +1,6 @@
 # Directory configuration files
 .directory
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
