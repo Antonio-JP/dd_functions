@@ -20,18 +20,20 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all import *   # import sage library
+# Sage imports
+from sage.all import (Matrix, Permutations, ideal, gcd, cached_method, vector, lcm, prod)
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 
-from ajpastor.misc.matrix import swap_rows;
-from ajpastor.misc.matrix import swap_cols;
+# ajpastor imports
+from ajpastor.misc.matrix import swap_rows
+from ajpastor.misc.matrix import swap_cols
+from ajpastor.misc.cached_property import derived_property
 
-from ajpastor.misc.cached_property import derived_property;
+# Private variables for this module
+_Permutations = Permutations()
 
-from ajpastor.misc.verbose import *;
-
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial;
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
-
+# Main class of the file
 class BareissAlgorithm(object):
     r'''
         This class represents the application of the Bareiss Algorithm over a matrix with polynomial coefficients.
@@ -60,24 +62,24 @@ class BareissAlgorithm(object):
     def __init__(self, parent, M, method=None, relations = []):
         ## Checking the parent parameter
         if(parent.is_field()):
-            parent = parent.base();
+            parent = parent.base()
         if(not (isUniPolynomial(parent) or isMPolynomial(parent))):
-            raise TypeError("The parent for this algorithm must be a polynomial ring.\n\t Got: %s" %parent);
-        self.__parent = parent;
+            raise TypeError("The parent for this algorithm must be a polynomial ring.\n\t Got: %s" %parent)
+        self.__parent = parent
             
         ## Checking the matrix input
-        self.base_matrix = Matrix(self.parent(), M);
+        self.base_matrix = Matrix(self.parent(), M)
         
-        self.change_of_columns = Permutation(range(1 ,self.base_matrix.ncols()));
+        self.change_of_columns = _Permutations(range(1 ,self.base_matrix.ncols()))
         
         ## Storing the checking method
-        self.__in_ideal = method;
+        self.__in_ideal = method
         
         ## Cached elements
-        self.__steps = None;
-        self.__actions = None;
-        self.__gb = ideal(self.parent(), relations).groebner_basis();
-        self.__echelon = None;
+        self.__steps = None
+        self.__actions = None
+        self.__gb = ideal(self.parent(), relations).groebner_basis()
+        self.__echelon = None
         
         
     ### Getter methods
@@ -91,17 +93,17 @@ class BareissAlgorithm(object):
 
             EXAMPLES::
 
-                sage: from ajpastor.misc.bareiss import *;
-                sage: R.<a,b> = PolynomialRing(QQ);
-                sage: M = Matrix([[a^2, b], [-b, 1]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: from ajpastor.misc.bareiss import *
+                sage: R.<a,b> = PolynomialRing(QQ)
+                sage: M = Matrix([[a^2, b], [-b, 1]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.parent()
                 Multivariate Polynomial Ring in a, b over Rational Field
-                sage: BA = BareissAlgorithm(FractionField(R), M);
+                sage: BA = BareissAlgorithm(FractionField(R), M)
                 sage: BA.parent()
                 Multivariate Polynomial Ring in a, b over Rational Field
         '''
-        return self.__parent;
+        return self.__parent
         
     #################################################
     ### Linear algebra methods
@@ -120,40 +122,40 @@ class BareissAlgorithm(object):
 
             EXAMPLE::
 
-                sage: from ajpastor.misc.bareiss import *;
-                sage: R.<a,b> = PolynomialRing(QQ);
-                sage: M = Matrix([[a^2, b], [-b, 1]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: from ajpastor.misc.bareiss import *
+                sage: R.<a,b> = PolynomialRing(QQ)
+                sage: M = Matrix([[a^2, b], [-b, 1]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.echelon_form()
                 [1 0]
                 [0 1]
                 sage: # Example where the matrix M is not invertible
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.echelon_form()
                 [-b 1]
                 [ 0 0]
                 sage: # Example where the matrix M is not square
-                sage: M = Matrix([[a, b, a],[-b,a,-b]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: M = Matrix([[a, b, a],[-b,a,-b]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.echelon_form()
                 [1 0 1]
                 [0 1 0]
                 sage: # Example where M is not square and we have relations
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.echelon_form()
                 [a b a]
                 [0 0 0]
                 sage: # Another example with M not square
                 sage: M = Matrix([[a,b],[-b,a],[a^3 - 3*b^4, 1+b^5]])
-                sage: BA = BareissAlgorithm(R, M);
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.echelon_form()
                 [1 0]
                 [0 1]
                 [0 0]
         '''
         if(self.__echelon is None):
-            self.__compute_echelon();
-        return self.__echelon;
+            self.__compute_echelon()
+        return self.__echelon
         
     #@wverbose
     def __compute_echelon(self):
@@ -175,70 +177,73 @@ class BareissAlgorithm(object):
             we compute the gcd of each row and divide such row by it. With these, we end up with a simpler echelon
             form but the assumption on the main diagonal is no longer valid.
         '''
-        self.__actions = [("base")];
-        self.__steps = [self.base_matrix];
+        self.__actions = [("base")]
+        self.__steps = [self.base_matrix]
         
         ## If we have initial relations, we perform the first reduction
         if(self.__have_ideal()):
             #Initial reduction of the matrix
-            self.__steps += [self.__simplify_matrix(self.__steps[-1])];
-            self.__actions += [("f_reduce", self.__gb)];
+            self.__steps += [self.__simplify_matrix(self.__steps[-1])]
+            self.__actions += [("f_reduce", self.__gb)]
         
-        tr = self.__steps[-1 ].nrows(); tc = self.__steps[-1].ncols();
-        cr = 0 ; cc = 0 ; i = -1 ;
+        tr = self.__steps[-1 ].nrows()
+        tc = self.__steps[-1].ncols()
+        cr = 0
+        cc = 0
+        i = -1 
         
         # Starting the iterations
         while(i < min(tr,tc)):
-            i = i + 1 ;
+            i = i + 1 
             
-            pivot = self.__choose_pivot(self.__steps[-1], i,i);
+            pivot = self.__choose_pivot(self.__steps[-1], i,i)
             
-            cr,cc = pivot[0];
-            new_rels = pivot[2];
+            cr,cc = pivot[0]
+            new_rels = pivot[2]
             
             ## If there are new relations, we simplify the matrix
             if(len(new_rels) > 0):
                 # New relations found looking for a pivot
-                self.__gb = ideal(self.parent(), tuple(new_rels) + tuple(self.__gb)).groebner_basis();
-                self.__steps += [self.__simplify_matrix(self.__steps[-1])];
-                self.__actions += [("reduce", new_rels)];
+                self.__gb = ideal(self.parent(), tuple(new_rels) + tuple(self.__gb)).groebner_basis()
+                self.__steps += [self.__simplify_matrix(self.__steps[-1])]
+                self.__actions += [("reduce", new_rels)]
                     
             ## If no pivot was found, we finish
             if(cr == -1 or cc == -1):
                 # No pivot found. Finishing the iterations
-                break;
+                break
                     
             ## If we have a new pivot, we moved everythin so it is in the proper position
-            swap_actions = pivot[1];
+            swap_actions = pivot[1]
             for action in swap_actions:
                 if(action[0] == "sw_r"):
-                    self.__steps += [swap_rows(self.__steps[-1], action[1],action[2])];
+                    self.__steps += [swap_rows(self.__steps[-1], action[1],action[2])]
                 elif(action[0] == "sw_c"):
-                    self.__steps += [swap_cols(self.__steps[-1], action[1], action[2])];
-                    self.change_of_columns = Permutation((action[1]+1, action[2]+1))*self.change_of_columns;
+                    self.__steps += [swap_cols(self.__steps[-1], action[1], action[2])]
+                    self.change_of_columns = _Permutations((action[1]+1, action[2]+1))*self.change_of_columns
                     
-                self.__actions += [action];
+                self.__actions += [action]
                 
             ## One the pivot is in position, we proceed with the Bareiss elimination
-            M = self.__steps[-1];
+            # M = self.__steps[-1]
             
                 
             ## We save the new matrix and go on
-            self.__steps += [self.__bareiss(self.__steps[-1], i)];
-            self.__actions += [("bareiss", i)];
+            self.__steps += [self.__bareiss(self.__steps[-1], i)]
+            self.__actions += [("bareiss", i)]
             
         # Simplifying each row with its GCD.
-        gcds = [gcd(row) for row in self.__steps[-1]];
+        gcds = [gcd(row) for row in self.__steps[-1]]
         for i in range(len(gcds)):
             if(gcds[i] == 0 ):
-                gcds[i] = 1;
-        self.__steps += [Matrix(self.parent(), [[el/gcds[i] for el in self.__steps[-1][i]] for i in range(self.__steps[-1].nrows())])];
-        self.__actions += [("gcd_simpl")];
+                gcds[i] = 1
+        self.__steps += [Matrix(self.parent(), [[el/gcds[i] for el in self.__steps[-1][i]] for i in range(self.__steps[-1].nrows())])]
+        self.__actions += [("gcd_simpl")]
             
         # Saving the final echelon form
-        self.__echelon = self.__steps[-1];
+        self.__echelon = self.__steps[-1]
                                 
-        return;
+        return
         
     @cached_method
     def rank(self):
@@ -254,34 +259,34 @@ class BareissAlgorithm(object):
 
             EXAMPLE::
 
-                sage: from ajpastor.misc.bareiss import *;
-                sage: R.<a,b> = PolynomialRing(QQ);
-                sage: M = Matrix([[a^2, b], [-b, 1]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: from ajpastor.misc.bareiss import *
+                sage: R.<a,b> = PolynomialRing(QQ)
+                sage: M = Matrix([[a^2, b], [-b, 1]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.rank()
                 2
                 sage: # Example where the matrix M is not invertible
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.rank()
                 1
                 sage: # Example where the matrix M is not square
-                sage: M = Matrix([[a, b, a],[-b,a,-b]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: M = Matrix([[a, b, a],[-b,a,-b]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.rank()
                 2
                 sage: # Example where M is not square and we have relations
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.rank()
                 1
                 sage: # Another example with M not square
                 sage: M = Matrix([[a,b],[-b,a],[a^3 - 3*b^4, 1+b^5]])
-                sage: BA = BareissAlgorithm(R, M);
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.rank()
                 2
         '''
         for i in range(self.base_matrix.nrows()):
             if(any((el != 0 ) for el in self.echelon_form()[-(i+1 )])):
-                return self.base_matrix.nrows()-i;
+                return self.base_matrix.nrows()-i
 
 
     def relations(self):
@@ -301,42 +306,42 @@ class BareissAlgorithm(object):
 
             EXAMPLE::
 
-                sage: from ajpastor.misc.bareiss import *;
-                sage: R.<a,b> = PolynomialRing(QQ);
-                sage: M = Matrix([[a^2, b], [-b, 1]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: from ajpastor.misc.bareiss import *
+                sage: R.<a,b> = PolynomialRing(QQ)
+                sage: M = Matrix([[a^2, b], [-b, 1]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.relations()
                 [0]
                 sage: # Example where the matrix M is not invertible
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.relations()
                 [a^2 + b^2]
                 sage: # Example where the matrix M is not square
-                sage: M = Matrix([[a, b, a],[-b,a,-b]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: M = Matrix([[a, b, a],[-b,a,-b]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.relations()
                 [0]
                 sage: # Example where M is not square and we have relations
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.relations()
                 [a^2 + b^2]
                 sage: # Another example with M not square
                 sage: M = Matrix([[a,b],[-b,a],[a^3 - 3*b^4, 1+b^5]])
-                sage: BA = BareissAlgorithm(R, M);
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.relations()
                 [0]
 
             This method also can improve the relations given at inizialization::
 
                 sage: M = Matrix([[a^2, b^2+2*a^2,b],[-b^2, a^2, 3],[1, 1, 1]])
-                sage: BA = BareissAlgorithm(R, M, relations=[a^4 + 2*a^2*b^2 + b^4]);
+                sage: BA = BareissAlgorithm(R, M, relations=[a^4 + 2*a^2*b^2 + b^4])
                 sage: BA.echelon_form()
                 [1 0 0]
                 [0 1 0]
                 [0 0 1]
                 sage: BA.relations()
                 [a^4 + 2*a^2*b^2 + b^4]
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0, [a^4 + 2*a^2*b^2 + b^4]);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0, [a^4 + 2*a^2*b^2 + b^4])
                 sage: BA.echelon_form()
                 [-1 0 -1]
                 [ 0 1  0]
@@ -345,9 +350,9 @@ class BareissAlgorithm(object):
                 [a^2 + b^2]
         '''
         # Compute the echelon form and the relations with it
-        self.echelon_form();
+        self.echelon_form()
         # Returning the relations
-        return self.__gb;
+        return self.__gb
                 
     @cached_method
     def right_kernel_matrix(self):
@@ -398,64 +403,64 @@ class BareissAlgorithm(object):
 
             EXAMPLE::
 
-                sage: from ajpastor.misc.bareiss import *;
-                sage: R.<a,b> = PolynomialRing(QQ);
-                sage: M = Matrix([[a^2, b], [-b, 1]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: from ajpastor.misc.bareiss import *
+                sage: R.<a,b> = PolynomialRing(QQ)
+                sage: M = Matrix([[a^2, b], [-b, 1]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.right_kernel_matrix()
                 [(0, 0)]
                 sage: # Example where the matrix M is not invertible
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.right_kernel_matrix()
                 [(-1, -b)]
                 sage: # Example where the matrix M is not square
-                sage: M = Matrix([[a, b, a],[-b,a,-b]]);
-                sage: BA = BareissAlgorithm(R, M);
+                sage: M = Matrix([[a, b, a],[-b,a,-b]])
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.right_kernel_matrix()
                 [(-1, 0, 1)]
                 sage: # Example where M is not square and we have relations
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
                 sage: BA.right_kernel_matrix()
                 [(-b, a, 0), (-a, 0, a)]
                 sage: # Another example with M not square
                 sage: M = Matrix([[a,b],[-b,a],[a^3 - 3*b^4, 1+b^5]])
-                sage: BA = BareissAlgorithm(R, M);
+                sage: BA = BareissAlgorithm(R, M)
                 sage: BA.right_kernel_matrix()
                 [(0, 0)]
                 sage: M = Matrix([[a^2, b^2+2*a^2,b],[-b^2, a^2, 3],[1, 1, 1]])
-                sage: BA = BareissAlgorithm(R, M, relations=[a^4 + 2*a^2*b^2 + b^4]);
+                sage: BA = BareissAlgorithm(R, M, relations=[a^4 + 2*a^2*b^2 + b^4])
                 sage: BA.right_kernel_matrix()
                 [(0, 0, 0)]
-                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0, [a^4 + 2*a^2*b^2 + b^4]);
+                sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0, [a^4 + 2*a^2*b^2 + b^4])
                 sage: BA.right_kernel_matrix()
                 [(1, -1, 0)]
         '''
-        sol_dimension = self.base_matrix.ncols()-self.rank();        
-        M = self.echelon_form();
+        sol_dimension = self.base_matrix.ncols()-self.rank()        
+        M = self.echelon_form()
         
         if(sol_dimension > 0 ):
             ## Compute the product of the nice diagonal
-            A = self.__get_lcm([M[i][i] for i in range(self.rank())]);
-            to_mult = [-A/M[i][i] for i in range(self.rank())];
+            A = self.__get_lcm([M[i][i] for i in range(self.rank())])
+            to_mult = [-A/M[i][i] for i in range(self.rank())]
         
-            ker_basis = [vector(self.parent(), [to_mult[j]*M[j][i+self.rank()] for j in range(self.rank())] + [0  for j in range(i)] + [A] + [0  for j in range(i+1 , sol_dimension)]) for i in range(sol_dimension)];
+            ker_basis = [vector(self.parent(), [to_mult[j]*M[j][i+self.rank()] for j in range(self.rank())] + [0  for j in range(i)] + [A] + [0  for j in range(i+1 , sol_dimension)]) for i in range(sol_dimension)]
             
-            ch = self.change_of_columns;
+            ch = self.change_of_columns
             ## If there were a change of columns (i.e. ch is not the trivial permutation) 
             ## we swap the result
-            if(Permutation(range(1 ,self.base_matrix.ncols())) != ch):
-                ch = ch.inverse();
-                rows = [[0  for i in range(M.ncols())] for j in range(len(ker_basis))];
+            if(_Permutations(range(1 ,self.base_matrix.ncols())) != ch):
+                ch = ch.inverse()
+                rows = [[0  for i in range(M.ncols())] for j in range(len(ker_basis))]
                 for j in range(M.ncols()):
-                    new_col = ch(j+1 )-1;
+                    new_col = ch(j+1 )-1
                     for i in range(len(ker_basis)):
-                        rows[i][new_col] = ker_basis[i][j];
+                        rows[i][new_col] = ker_basis[i][j]
                 
-                ker_basis = [vector(self.parent(), row) for row in rows];            
+                ker_basis = [vector(self.parent(), row) for row in rows]           
             
-            return ker_basis;
+            return ker_basis
         else:
-            return [vector(self.parent(), [0  for i in range(M.ncols())])];
+            return [vector(self.parent(), [0  for i in range(M.ncols())])]
         
     #################################################
     ### Other cached methods
@@ -469,12 +474,12 @@ class BareissAlgorithm(object):
             ``I = {g in self.parent() : self.is_in_ideal(g) == True}`` is an ideal
             of self.parent().
         '''
-        p = self.parent()(p);
+        p = self.parent()(p)
         
         try:
-            return self.__in_ideal(p) is True;
+            return self.__in_ideal(p) is True
         except Exception:
-            return False;
+            return False
           
     @cached_method
     def steps(self):
@@ -503,9 +508,9 @@ class BareissAlgorithm(object):
 
             Due to long and unstructured outputs for this method, no tests are provided for it.
         '''
-        self.echelon_form();
+        self.echelon_form()
         
-        return [(self.__steps[i],self.__actions[i]) for i in range(len(self.__steps))];
+        return [(self.__steps[i],self.__actions[i]) for i in range(len(self.__steps))]
         
     #################################################
     ### Private methods for Bareiss Algorithm 
@@ -535,43 +540,43 @@ class BareissAlgorithm(object):
                   position.
                 * A set of new relations found during this pivot chosing.
         '''
-        relations = set();
-        actions = [];
-        end = False;
-        fc = -1 ; fr = -1 ;
+        relations = set()
+        actions = []
+        end = False
+        fc = -1 ; fr = -1 
         ## Checking rows
         for cc in range(ic, M.ncols()):
             ## Checking columns
             for cr in range(ir, M.nrows()):
                 # Checking if position (cr,cc) is in the ideal
-                to_check = M[cr][cc];
+                to_check = M[cr][cc]
                 if(len(relations) > 0 ):
                     # Reducing the selected element with the found relations
-                    to_check = M[cr][cc].reduce(relations);
+                    to_check = M[cr][cc].reduce(relations)
                     
                 if(not to_check == self.parent().zero()):
                     if(not self.is_in_ideal(to_check)):
                         # Non-zero element found --> Valid pivot
-                        end = True;
-                        fr = cr;
-                        break;
+                        end = True
+                        fr = cr
+                        break
                     else:
                         # Non trivial zero found --> New relation
-                        relations.add(to_check);
+                        relations.add(to_check)
             
             if(end):
-                fc = cc;
-                break;
+                fc = cc
+                break
         
         if(fc != -1  and fc != ic):
-            actions += [("sw_c", ic, cc)];
+            actions += [("sw_c", ic, cc)]
             for i in range(1 ,(min(cc-ic, M.ncols()-cc))):
-                actions += [("sw_c", ic+i, M.ncols()-i)];
+                actions += [("sw_c", ic+i, M.ncols()-i)]
         
         if(fr != -1  and fr != ir):
-            actions += [("sw_r", ir, cr)];
+            actions += [("sw_r", ir, cr)]
                 
-        return ((fr,fc), tuple(actions), relations);
+        return ((fr,fc), tuple(actions), relations)
         
     def __bareiss(self, M, i):
         r'''
@@ -592,32 +597,32 @@ class BareissAlgorithm(object):
                 - ``M``: matrix where we want perform the Bareiss reduction.
                 - ``i``: position where we have a pivot.
         '''
-        rows = [];
+        rows = []
         ## Reduction of the rows before i
         for j in range(i):
             if(M[j][i] != 0 ):
-                rows += [[M[j][k]*M[i][i]-M[j][i]*M[i][k] for k in range(M.ncols())]];
+                rows += [[M[j][k]*M[i][i]-M[j][i]*M[i][k] for k in range(M.ncols())]]
             else:
-                rows += [[M[j][k] for k in range(M.ncols())]];
+                rows += [[M[j][k] for k in range(M.ncols())]]
 
         ## The i-th row remains the same as before
-        rows += [[M[i][k] for k in range(M.ncols())]];
+        rows += [[M[i][k] for k in range(M.ncols())]]
 
         ## Reduction of the rows after i
         for j in range(i+1 , M.nrows()):
             if(M[j][i] != 0 ):
-                rows += [[M[j][k]*M[i][i]-M[j][i]*M[i][k] for k in range(M.ncols())]];
+                rows += [[M[j][k]*M[i][i]-M[j][i]*M[i][k] for k in range(M.ncols())]]
             else:
-                rows += [[M[j][k] for k in range(M.ncols())]];
+                rows += [[M[j][k] for k in range(M.ncols())]]
         
         ## GCD simplification of the rows
         try:
-            gcds = [gcd(row) for row in rows];
-            rows = [[el/gcd[i] for el in rows[i]] for i in range(len(rows))];
+            gcds = [gcd(row) for row in rows]
+            rows = [[el/gcds[i] for el in rows[i]] for i in range(len(rows))]
         except Exception:
-            pass;
+            pass
             
-        return Matrix(self.parent(), rows);
+        return Matrix(self.parent(), rows)
         
     def __have_ideal(self):
         r'''
@@ -627,8 +632,8 @@ class BareissAlgorithm(object):
             gives some non-trivial ideal.
         '''
         if(len(self.__gb) == 1):
-            return self.__gb[0] != 0;
-        return len(self.__gb) > 0;
+            return self.__gb[0] != 0
+        return len(self.__gb) > 0
         
     def __simplify_matrix(self, M):
         r'''
@@ -641,11 +646,11 @@ class BareissAlgorithm(object):
             This method unifies the way to perform such reduction taking care of iterate through 
             the elements of `M` and to check that there are relations to use.
         '''
-        rows = [[el for el in row] for row in M];
+        rows = [[el for el in row] for row in M]
         if(self.__have_ideal()):
-            rows = [[el.reduce(self.__gb) for el in row] for row in rows];
+            rows = [[el.reduce(self.__gb) for el in row] for row in rows]
         
-        return Matrix(self.parent(), rows);
+        return Matrix(self.parent(), rows)
         
     def __get_lcm(self, input):
         r'''
@@ -663,19 +668,19 @@ class BareissAlgorithm(object):
             the elements of the input.
         '''
         try:
-            return lcm(input);
+            return lcm(input)
         except AttributeError:
             ## No lcm for this class, implementing a general lcm
             try:
                 ## Relying on gcd
-                p = self.__parent;
-                res = p(1 );
+                p = self.__parent
+                res = p(1 )
                 for el in input:
-                    res = p((res*el)/gcd(res,el));
-                return res;
+                    res = p((res*el)/gcd(res,el))
+                return res
             except AttributeError:
                 ## Returning the product of everything
-                return prod(input);
+                return prod(input)
         
         
 

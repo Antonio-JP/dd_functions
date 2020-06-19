@@ -33,10 +33,10 @@ class derived_property(cached_property):
         Author: Antonio Jimenez
     """ #noqa
     def __init__(self, func):
-        super(derived_property, self).__init__(func);
+        super(derived_property, self).__init__(func)
         
     def __set__(self, obj, cls):
-        raise AttributeError("This attribute can not be setted");  
+        raise AttributeError("This attribute can not be setted")
 
 class threaded_cached_property(object):
     """

@@ -29,44 +29,42 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.functions.other import factorial;
-from sage.combinat.combinat import bell_polynomial;
-from sage.arith.misc import falling_factorial;
-from sage.misc.cachefunc import cached_function
+#Sage imports
+from sage.all import (factorial, bell_polynomial, falling_factorial, cached_function)
 
 ################################################################################
 ################################################################################
 ################################################################################
 ## Sequence operations
 def addition(f,g):
-    return lambda n : f(n)+g(n);
+    return lambda n : f(n)+g(n)
 
 def hadamard_product(f,g):
-    return lambda n : f(n)*g(n);
+    return lambda n : f(n)*g(n)
 
 def cauchy_product(f,g):
-    return lambda n : sum(f(m)*g(n-m) for m in range(n+1));
+    return lambda n : sum(f(m)*g(n-m) for m in range(n+1))
 
 def standard_derivation(f):
-    return lambda n : (n+1)*f(n+1);
+    return lambda n : (n+1)*f(n+1)
 
 def shift(f):
-    return lambda n : f(n+1);
+    return lambda n : f(n+1)
         
 def composition(f,g):   
     if(g(0) != 0):                     
-        raise ValueError("Impossible compose with g(0) != 0");
+        raise ValueError("Impossible compose with g(0) != 0")
     @cached_function
     def _composition(n):                                     
         if(n == 0):                                                                
-            return f(0);
-        result = 0; 
-        current = g; 
+            return f(0)
+        result = 0
+        current = g
         for k in range(1,n+1):
-            result += f(k)*current(n);
+            result += f(k)*current(n)
             current = cauchy_product(current, g)
-        return result; 
-    return _composition;
+        return result
+    return _composition
 
 def egf_ogf(f):       
     '''
@@ -75,7 +73,7 @@ def egf_ogf(f):
         
         Then h(n) = f(n)/factorial(n)
     '''
-    return lambda n: f(n)/factorial(n);
+    return lambda n: f(n)/factorial(n)
 
 def ogf_egf(f):       
     '''
@@ -84,7 +82,7 @@ def ogf_egf(f):
         
         Then h(n) = f(n)*factorial(n)
     '''
-    return lambda n: f(n)*factorial(n);
+    return lambda n: f(n)*factorial(n)
 
 def inv_lagrangian(f):
     '''
@@ -98,31 +96,30 @@ def inv_lagrangian(f):
         Then composition(f, inv_lagrangian(f))(n) = delta(1,n).
     '''
     if(f(0) != 0):
-        raise ValueError("Power serie not invertible");
+        raise ValueError("Power serie not invertible")
     if(f(1) == 0):
-        raise NotImplementedError("Case with order higher than 1 not implemented");
-    f = ogf_egf(f);
+        raise NotImplementedError("Case with order higher than 1 not implemented")
+    f = ogf_egf(f)
     @cached_function
     def _inverse_egf(n):
         if(n == 0):
-            return 0;
+            return 0
         elif(n == 1):
-            return 1/f(1);
+            return 1/f(1)
         else:
-            result = 0;
+            result = 0
             for k in range(1,n):
-                poly = bell_polynomial(n-1,k);
-                variables = poly.variables();
-                extra = ((-1)**k)*falling_factorial(n+k-1, k);
+                poly = bell_polynomial(n-1,k)
+                extra = ((-1)**k)*falling_factorial(n+k-1, k)
                 if(k == n-1):
-                    evaluation = poly(x=f(2)/2/f(1));
+                    evaluation = poly(x=f(2)/2/f(1))
                 else:
-                    evaluation = poly(**{"x%d" %(i) : f(i+2)/(i+2)/f(1) for i in range(n-k)});
+                    evaluation = poly(**{"x%d" %(i) : f(i+2)/(i+2)/f(1) for i in range(n-k)})
                 
-                result += extra*evaluation;
+                result += extra*evaluation
                 
-            return (1/(f(1)**n)) * result;
-    return egf_ogf(_inverse_egf);
+            return (1/(f(1)**n)) * result
+    return egf_ogf(_inverse_egf)
 
 def Richardson(f,order):
     '''
@@ -138,7 +135,7 @@ def Richardson(f,order):
             * https://www3.risc.jku.at/publications/download/risc_4324/techrep.pdf
         
     '''
-    return lambda n : (2**order*f(2*n)-f(n))/(2**order-1);
+    return lambda n : (2**order*f(2*n)-f(n))/(2**order-1)
 
 ################################################################################
 ################################################################################
@@ -152,7 +149,7 @@ def list_to_seq(input):
         a method that receives a index as input and returns the corresponding element 
         of the sequence.
     '''
-    return lambda n : input[n];
+    return lambda n : input[n]
     
 def seq_to_list(f, bound=None):
     '''
@@ -163,13 +160,13 @@ def seq_to_list(f, bound=None):
         
         WARNING:: if bound is None, the method may not finish. 
     '''
-    result = []; i = 0;
+    result = []; i = 0
     while(((bound is None) or (i < bound))):
         try:
-            result += [f(i)];
-            i += 1;
+            result += [f(i)]
+            i += 1
         except Exception:
-            break;
-    return result;
+            break
+    return result
     
     

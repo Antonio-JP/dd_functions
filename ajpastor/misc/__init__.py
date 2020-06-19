@@ -7,7 +7,6 @@ In this package the user may find the following subpackages:
 * dinamic_string: implementation of an enhanced string where it can be built from different pieces
 * exceptions: basic Exceptions for general use
 * matrix: basic operations and utilities with matrices and linear algebra
-* restore: implementation of a restore system
 * ring_w_sequence: implementation of a Ring class where their elements define a sequence
 * sequence_manipulation: module with method to manipulate sequences in black-box format
 * verbose: an implementation of a verbose system for debugging or control
@@ -27,6 +26,6 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from pkgutil import extend_path;
-__path__ = extend_path(__path__, __name__);
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
 

@@ -29,13 +29,13 @@ class InitSequenceSerializable:
     r'''
         Auxiliary class to detect the beginning of a sequence in a serializable argument.
     '''
-    pass;
+    pass
 
 class FinishSequenceSerializable:
     r'''
         Auxiliary class to detect the ending of a sequence in a serializable argument.
     '''
-    pass;
+    pass
 
 class SerializableObject:
     r'''
@@ -54,104 +54,104 @@ class SerializableObject:
             This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
             use a recursive serialization procedure to get the final object.
         '''
-        from pickle import load as pload;
+        from pickle import load as pload
 
         ## Auxiliar method for the recursive loading procedure
         def rec_load(ctype, file):
             if(issubclass(ctype, SerializableObject)):
-                return ctype.unserialize(file);
+                return ctype.unserialize(file)
             elif(issubclass(ctype, list) or issubclass(ctype, tuple)):
                 # Reading the starting mark
-                pload(file);
+                pload(file)
 
                 # Starting the empty collection
-                res = [];
+                res = []
 
                 # Reading each element
-                current = pload(file);
+                current = pload(file)
                 while(current != FinishSequenceSerializable):
                     # If it is not over, current is the type for the next element
-                    res += [rec_load(get_class(current), file)];
-                    current = pload(file);
+                    res += [rec_load(get_class(current), file)]
+                    current = pload(file)
 
                 # Return the appropriate type of collection
-                return ctype(res);
+                return ctype(res)
             elif(issubclass(ctype, dict)):
                 # Reading the starting mark
-                pload(file);
+                pload(file)
 
                 # Starting the empty collection
-                res = {};
+                res = {}
 
                 # Reading each element
-                current = pload(file);
+                current = pload(file)
                 while(current != FinishSequenceSerializable):
                     # If it is not over, current is the type for the next key
-                    key = rec_load(get_class(current), file);
-                    v_type = pload(file);
-                    value = rec_load(get_class(v_type), file);
-                    res[key] = value;
+                    key = rec_load(get_class(current), file)
+                    v_type = pload(file)
+                    value = rec_load(get_class(v_type), file)
+                    res[key] = value
 
-                    current = pload(file);
+                    current = pload(file)
 
-                return res;
+                return res
             else:
-                return pload(file);
+                return pload(file)
 
         def get_class(ctype):
             if(ctype is None):
-                return type(ctype);
-            return ctype;
+                return type(ctype)
+            return ctype
 
-        is_str = (type(file) == str);
-        if(is_str): file = open(file, "rb");
+        is_str = (type(file) == str)
+        if(is_str): file = open(file, "rb")
 
         ## Reading the first object: a list of classes
-        args_types = pload(file);
+        args_types = pload(file)
         ## Reading for each element in args the 
-        args = [rec_load(get_class(ctype), file) for ctype in args_types];
+        args = [rec_load(get_class(ctype), file) for ctype in args_types]
 
         ## Reading the dictionary of names and types
-        kwds_types = pload(file);
+        kwds_types = pload(file)
         ## Building the actual dictionary of keywords
-        kwds = {ctype[0]: rec_load(get_class(ctype[1]), file) for ctype in kwds_types};
+        kwds = {ctype[0]: rec_load(get_class(ctype[1]), file) for ctype in kwds_types}
 
-        if(is_str): file.close();
+        if(is_str): file.close()
 
         ## Returning the final object
-        return cls(*args, **kwds);
+        return cls(*args, **kwds)
 
     ## Builder method to initialize variables
     def __init__(self, *args, **kwds):
         # Initializing the two 
         if(len(args) > 0):
-            self.__args = args;
+            self.__args = args
         else:
-            self.__args = [];
+            self.__args = []
         if(len(kwds) > 0):
-            self.__kwds = kwds;
+            self.__kwds = kwds
         else:
-            self.__kwds = {};
+            self.__kwds = {}
 
     ## Setter and getter for the arguments of the builder
     def set_sargs(self, *args, **kwds):
         r'''
             Setter for the arguments of the serializable object
         '''
-        self.__args = args;
-        self.__kwds = kwds;
+        self.__args = args
+        self.__kwds = kwds
 
     def sargs(self):
         r'''
             Setter for the first arguments of the serializable object
         '''
-        return self.__args;
+        return self.__args
 
     def skwds(self):
         r'''
             Setter for the named arguments of the serializable object
         '''
-        return self.__kwds;
+        return self.__kwds
 
     ## Serializable method
     def serialize(self, file):
@@ -163,54 +163,54 @@ class SerializableObject:
             This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
             use a recursive serialization procedure to write the whole object.
         '''
-        from pickle import dump as pdump;
-        from sage.symbolic.expression import Expression;
+        from pickle import dump as pdump
+        from sage.all import Expression
 
         ## Auxiliar method for the recursive loading procedure
         def rec_dump(obj, file):
             if(isinstance(obj, SerializableObject)):
-                obj.serialize(file);
+                obj.serialize(file)
             elif(isinstance(obj, Expression)):
-                pdump(str(obj), file);
+                pdump(str(obj), file)
             elif(isinstance(obj, list) or isinstance(obj, tuple)):
-                pdump(InitSequenceSerializable, file);
+                pdump(InitSequenceSerializable, file)
                 for el in obj:
-                    pdump(get_class(el), file);
-                    rec_dump(el, file);
-                pdump(FinishSequenceSerializable,file);
+                    pdump(get_class(el), file)
+                    rec_dump(el, file)
+                pdump(FinishSequenceSerializable,file)
             elif(isinstance(obj, dict)):
-                pdump(InitSequenceSerializable, file);
+                pdump(InitSequenceSerializable, file)
                 for key in obj:
-                    pdump(get_class(key), file);
-                    rec_dump(key, file);
-                    pdump(get_class(obj[key]), file);
-                    rec_dump(obj[key], file);
-                pdump(FinishSequenceSerializable,file);
+                    pdump(get_class(key), file)
+                    rec_dump(key, file)
+                    pdump(get_class(obj[key]), file)
+                    rec_dump(obj[key], file)
+                pdump(FinishSequenceSerializable,file)
             else:
-                pdump(obj,file);
+                pdump(obj,file)
 
         def get_class(obj):
             if(obj is None):
-                return None;
-            return obj.__class__;
+                return None
+            return obj.__class__
 
         # Checking the file is opened
-        is_str = (type(file) == str);
-        if(is_str): file = open(file, "wb+");
+        is_str = (type(file) == str)
+        if(is_str): file = open(file, "wb+")
 
         # Serializing the list of types for args
-        pdump([get_class(obj) for obj in self.sargs()], file);
+        pdump([get_class(obj) for obj in self.sargs()], file)
 
         # Serializing the arguments
         for obj in self.sargs():
-            rec_dump(obj, file);
+            rec_dump(obj, file)
 
         # Serializing the list of named arguments
-        pdump([(key, get_class(self.skwds()[key])) for key in self.skwds()], file);
+        pdump([(key, get_class(self.skwds()[key])) for key in self.skwds()], file)
 
         # Serializing the arguments
         for key in self.skwds():
-            rec_dump(self.skwds()[key],file);
+            rec_dump(self.skwds()[key],file)
 
         # Closing the file if we opened it
-        if(is_str): file.close();
+        if(is_str): file.close()

@@ -37,12 +37,12 @@ class DinamicString(object):
     @staticmethod
     def is_string(obj):
         '''Method that check if `obj` is str or DinamicString'''
-        return type(obj) == str or isinstance(obj, DinamicString);
+        return type(obj) == str or isinstance(obj, DinamicString)
         
     @staticmethod
     def is_list(obj):
         '''Method that check if `obj` is list, set or tuple'''
-        return type(obj) == list or type(obj) == tuple or type(obj) == set;
+        return type(obj) == list or type(obj) == tuple or type(obj) == set
 
     ### Initialization methods
     def __init__(self, template, arguments, escape="_"):
@@ -62,24 +62,24 @@ class DinamicString(object):
         '''
         ## Assign template and escape
         if(not (type(template) == str)):
-            raise TypeError("The template argument must be of type 'str'. Received: %s" %(type(tempalte)));
-        self.__template = template;
+            raise TypeError("The template argument must be of type 'str'. Received: %s" %(type(template)))
+        self.__template = template
         if(not (type(escape) == str or type(escape) == chr)):
-            raise TypeError("The escape character must be of type 'str' or 'chr'. Received %s" %(type(escape)));
-        self.__escape = escape;
+            raise TypeError("The escape character must be of type 'str' or 'chr'. Received %s" %(type(escape)))
+        self.__escape = escape
         
         ## Checking the arguments for the string
-        self.__arguments = None;
+        self.__arguments = None
         if(DinamicString.is_string(arguments)):
-            self.__arguments = [arguments];
+            self.__arguments = [arguments]
         elif(DinamicString.is_list(arguments)):
-            self.__arguments = list(arguments);
+            self.__arguments = list(arguments)
         if(any(not DinamicString.is_string(el) for el in self.__arguments)):
-            raise TypeError("No valid arguments for a DinamicString: only strings and DinamicStrings are valid.");
+            raise TypeError("No valid arguments for a DinamicString: only strings and DinamicStrings are valid.")
         
         ## Computing the first representation of the DinamicString
-        self.__real = None;
-        self.real();
+        self.__real = None
+        self.real()
         
     ### Getters and setters
     def real(self):
@@ -89,9 +89,9 @@ class DinamicString(object):
             This is a cached method: calling it several times in row returns the same string directly. To reset the string, call the method 'change_argument'.
         '''
         if(self.__real is None):
-            self.__real = din_m_replace(self.__template, {"%s%d" %(self.__escape, i+1) : str(self.__arguments[i]) for i in range(len(self.__arguments))});
+            self.__real = din_m_replace(self.__template, {"%s%d" %(self.__escape, i+1) : str(self.__arguments[i]) for i in range(len(self.__arguments))})
         
-        return self.__real;
+        return self.__real
         
     def change_argument(self, new_argument, index=0):
         '''
@@ -110,13 +110,13 @@ class DinamicString(object):
                 - Can raise a IndexError exception if 'index' is not valid for 'self.__arguments'.
         '''
         if(DinamicString.is_list(new_argument)):
-            self.__arguments = list(new_argument);
+            self.__arguments = list(new_argument)
         elif(DinamicString.is_string(new_argument)):
-            self.__arguments[index] = new_argument;
+            self.__arguments[index] = new_argument
         else:
-            raise TypeError("The argument 'new_argument' must be a list or a 'str' o a DinamicString");
+            raise TypeError("The argument 'new_argument' must be a list or a 'str' o a DinamicString")
             
-        self.__real = None;
+        self.__real = None
         
     ### Implementation of 'str' methods
     def replace(self, pattern, out, deep=False):
@@ -134,12 +134,12 @@ class DinamicString(object):
             OUTPUT:
                 - A new DinamicString such that 'result.real() == self.real().replace(pattern, str(out))'.
         '''
-        new_arguments = [din_replace(el, pattern,out, deep) for el in self.__arguments];
-        new_template = self.__template;
+        new_arguments = [din_replace(el, pattern,out, deep) for el in self.__arguments]
+        new_template = self.__template
         if(not deep):
-            new_template = new_template.replace(pattern, out);
+            new_template = new_template.replace(pattern, out)
             
-        return DinamicString(new_template, new_arguments, self.__escape);
+        return DinamicString(new_template, new_arguments, self.__escape)
     
     ### Extra methods
     def m_replace(self, to_replace, deep=False):
@@ -153,47 +153,47 @@ class DinamicString(object):
             OUTPUT:
                 - A new DinamicString where all the appearances of the keys of 'to_replace' have been changed to their values.
         '''
-        new_arguments = [din_m_replace(el, to_replace, deep) for el in self.__arguments];
-        new_template = self.__template;
+        new_arguments = [din_m_replace(el, to_replace, deep) for el in self.__arguments]
+        new_template = self.__template
         if(not deep):
-            new_template = din_m_replace(new_template, to_replace, False);
+            new_template = din_m_replace(new_template, to_replace, False)
             
-        return DinamicString(new_template, new_arguments, self.__escape);
+        return DinamicString(new_template, new_arguments, self.__escape)
         
     ### Magic Python methods
     def __repr__(self):
         '''Magic Python 'repr' implementation'''
-        return self.real();
+        return self.real()
         
     def __str__(self):
         '''Magic Python 'str' implementation'''
-        return self.real();
+        return self.real()
         
     def __getitem__(self, key):
         '''Magic Python implementation for 'self[key]' ''' 
-        return self.real()[key];
+        return self.real()[key]
         
     ## Implementing concatenation
     def __add__(self, other):
         '''Magic Python implementation for '+' (i.e. concatenation)'''
         if(type(other) == str):
-            return str(self) + other;
+            return str(self) + other
         elif(isinstance(other, DinamicString)):
             ## Changing arguments of other
-            other_template = din_m_replace(other.__template, {"%s%d" %(other.__escape, i) : "_%d" %(self.__escape, i+len(self.__arguments)) for i in range(len(other.__arguments))});
+            other_template = din_m_replace(other.__template, {"%s%d" %(other.__escape, i) : "%s%d" %(self.__escape, i+len(self.__arguments)) for i in range(len(other.__arguments))})
             
-            return DinamicString(self.__template + other_template, self.__arguments + other.__arguments);
+            return DinamicString(self.__template + other_template, self.__arguments + other.__arguments)
             
-        return NotImplemented;
+        return NotImplemented
     
     def __radd__(self, other):
         '''Magic Python implementation for '+' (i.e. concatenation)'''
         if(type(other) == str):
-            return other + str(self);
+            return other + str(self)
         elif(isinstance(other, DinamicString)):
-            return other.__add__(self);
+            return other.__add__(self)
             
-        return NotImplemented;
+        return NotImplemented
 
 ################################################################################
 ################################################################################
@@ -223,13 +223,13 @@ def din_replace(element, pattern, out, deep=False):
             - Can raise an error if 'element' is not a 'str' neither a DinamicString.
     '''
     if(isinstance(element, DinamicString)):
-        return element.replace(pattern, out, deep);
+        return element.replace(pattern, out, deep)
     elif(type(element) == str):
-        if(isinsance(out, DinamicString)):
-            return DinamicString(element.replace(pattern, "_1"), out);
-        return element.replace(pattern, out);
+        if(isinstance(out, DinamicString)):
+            return DinamicString(element.replace(pattern, "_1"), out)
+        return element.replace(pattern, out)
     
-    raise TypeError("No string given. Impossible to replace string");
+    raise TypeError("No string given. Impossible to replace string")
 
 def din_m_replace(element, to_replace, deep=False):
     '''
@@ -253,29 +253,29 @@ def din_m_replace(element, to_replace, deep=False):
             - Can raise an error if 'element' is not a 'str' neither a DinamicString.
     '''
     if(isinstance(element, DinamicString)):
-        return element.m_replace(to_replace, deep);
+        return element.m_replace(to_replace, deep)
     elif(type(element) == str):
-        real_replace = {};
-        to_dinam = [];
+        real_replace = {}
+        to_dinam = []
         for k,v in to_replace.items():
             if(isinstance(v, DinamicString)):
-                to_dinam += [v];
-                real_replace[k] = "_%d" %(len(to_dinam));
+                to_dinam += [v]
+                real_replace[k] = "_%d" %(len(to_dinam))
             else:
-                real_replace[k] = v;
-        all_index = _din_m_indices(element, *real_replace.keys());
-        res = ""; current_index = 0;
+                real_replace[k] = v
+        all_index = _din_m_indices(element, *real_replace.keys())
+        res = ""; current_index = 0
         for el in all_index:
-            res += element[current_index:el[0]] + real_replace[el[1]];
-            current_index = el[0]+len(el[1]);
-        res += element[current_index:];
+            res += element[current_index:el[0]] + real_replace[el[1]]
+            current_index = el[0]+len(el[1])
+        res += element[current_index:]
         
         if(len(to_dinam) > 0):
-            return DinamicString(res, to_dinam);
+            return DinamicString(res, to_dinam)
         else:
-            return res;
+            return res
     
-    raise TypeError("No string given. Impossible to replace multiple strings");
+    raise TypeError("No string given. Impossible to replace multiple strings")
 
 def _din_indices(string, sep):
     '''
@@ -284,10 +284,10 @@ def _din_indices(string, sep):
         This method relies in the fact that both 'string' and 'sep' are of type 'str'.
     '''
     try:
-        index = string.index(sep);
-        return [index] + [el+index+len(sep) for el in _din_indices(string[index+len(sep):],sep)];
+        index = string.index(sep)
+        return [index] + [el+index+len(sep) for el in _din_indices(string[index+len(sep):],sep)]
     except ValueError:
-        return [];
+        return []
 
 def _din_m_indices(string, *seps):
     '''
@@ -299,16 +299,16 @@ def _din_m_indices(string, *seps):
         This method relies in the fact that both 'string' and the elements of 'seps' are of type 'str'.
     '''
     ## We assume no possible overlapping can occur between elements in seps
-    all_index = [];
+    all_index = []
     for sep in seps:
-        all_index += [(el,sep) for el in _din_indices(string,sep)];
-    all_index.sort();
+        all_index += [(el,sep) for el in _din_indices(string,sep)]
+    all_index.sort()
     
-    return all_index;    
+    return all_index
     
 ################################################################################
 ################################################################################
 ################################################################################
 ### Module variables
     
-__all__ = ["DinamicString", "din_replace", "din_m_replace"];
+__all__ = ["DinamicString", "din_replace", "din_m_replace"]
