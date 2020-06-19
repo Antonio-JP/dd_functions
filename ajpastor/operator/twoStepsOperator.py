@@ -30,9 +30,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
+# Sage imports
+from sage.all import (Matrix, vector)
 
 ####################################################################################################
 ####################################################################################################
@@ -59,8 +58,8 @@ _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 ####################################################################################################
 
 # Local imports
-from .listOperator import ListOperator;
-from .operator import foo_derivative;
+from .listOperator import ListOperator
+from .operator import foo_derivative
 
 class TwoStepsOperator(ListOperator):
 
@@ -68,7 +67,7 @@ class TwoStepsOperator(ListOperator):
     ### INIT METHOD AND GETTERS
     #######################################################
     def __init__(self, base, input, derivate = foo_derivative):
-        super(TwoStepsOperator, self).__init__(base, input, derivate);
+        super(TwoStepsOperator, self).__init__(base, input, derivate)
             
     ####################################################### 
     
@@ -76,22 +75,22 @@ class TwoStepsOperator(ListOperator):
     ### SOLUTION ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
     def _compute_add_solution(self, other):
-        M = self._get_matrix_add(other);
-        v = self._get_element_nullspace(M);
+        M = self._get_matrix_add(other)
+        v = self._get_element_nullspace(M)
         
-        return self.__class__(self.base(), [el for el in v], self.derivate());
+        return self.__class__(self.base(), [el for el in v], self.derivate())
         
     def _compute_mult_solution(self, other):
-        M = self._get_matrix_mult(other);
-        v = self._get_element_nullspace(M);
+        M = self._get_matrix_mult(other)
+        v = self._get_element_nullspace(M)
         
-        return self.__class__(self.base(), [el for el in v], self.derivate());
+        return self.__class__(self.base(), [el for el in v], self.derivate())
         
     def _compute_compose_solution(self, other):
-        M = self._get_matrix_composition(other);
-        v = self._get_element_nullspace(M);
+        M = self._get_matrix_composition(other)
+        v = self._get_element_nullspace(M)
         
-        return self.__class__(self.base(), [el for el in v], self.derivate());
+        return self.__class__(self.base(), [el for el in v], self.derivate())
     ####################################################### 
     
     ####################################################### 
@@ -101,66 +100,66 @@ class TwoStepsOperator(ListOperator):
         '''
             Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the sum (f+g) where f is solution to 'self=0' and g is solution to 'other=0'
         '''        
-        from ajpastor.misc.matrix import diagonal_matrix as diagonal;
-        from ajpastor.misc.matrix import matrix_of_dMovement as move;
+        from ajpastor.misc.matrix import diagonal_matrix as diagonal
+        from ajpastor.misc.matrix import matrix_of_dMovement as move
         
-        Mf = self.companion();
-        Mg = other.companion();
+        Mf = self.companion()
+        Mg = other.companion()
         
-        Mf, Mg, parent = self._mix_matrices(other, Mf, Mg);
+        Mf, Mg, parent = self._mix_matrices(other, Mf, Mg)
         
-        full_companion = diagonal(parent, [Mf,Mg]);
-        init_vector = vector(parent,([_sage_const_1 ] + [_sage_const_0  for i in range(self.getOrder()-_sage_const_1 )])+([_sage_const_1 ] + [_sage_const_0  for i in range(other.getOrder()-_sage_const_1 )]));
+        full_companion = diagonal(parent, [Mf,Mg])
+        init_vector = vector(parent,([1] + [0 for i in range(self.getOrder()-1)])+([1] + [0 for i in range(other.getOrder()-1)]))
         
-        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+_sage_const_1 ));
+        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+1))
         
     def _get_matrix_mult(self, other):
         '''
             Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the product (fg) where f is solution to 'self=0' and g is solution to 'other=0'
         '''        
-        from ajpastor.misc.matrix import block_matrix as block;
-        from ajpastor.misc.matrix import diagonal_matrix as diagonal;
-        from ajpastor.misc.matrix import matrix_of_dMovement as move;
+        from ajpastor.misc.matrix import block_matrix as block
+        from ajpastor.misc.matrix import diagonal_matrix as diagonal
+        from ajpastor.misc.matrix import matrix_of_dMovement as move
         
-        f = self;
-        g = other;
+        f = self
+        g = other
         
-        Mf = f.companion();
-        Mg = g.companion();
+        Mf = f.companion()
+        Mg = g.companion()
         
-        Mf, Mg, parent = self._mix_matrices(other, Mf, Mg);
+        Mf, Mg, parent = self._mix_matrices(other, Mf, Mg)
         
         ## Using tensor product
-        full_companion = Mf.tensor_product(Matrix.identity(parent.base(), Mg.nrows())) + Matrix.identity(parent.base(), Mf.nrows()).tensor_product(Mg);
+        full_companion = Mf.tensor_product(Matrix.identity(parent.base(), Mg.nrows())) + Matrix.identity(parent.base(), Mf.nrows()).tensor_product(Mg)
         
-        init_vector = vector(parent,([_sage_const_1 ] + [_sage_const_0  for i in range(f.getOrder()*g.getOrder()-_sage_const_1 )]));
+        init_vector = vector(parent,([1] + [0 for i in range(f.getOrder()*g.getOrder()-1)]))
                 
-        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+_sage_const_1 ));
+        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+1))
         
     def _get_matrix_composition(self, other):
-        from ajpastor.misc.matrix import matrix_of_dMovement as move;
+        from ajpastor.misc.matrix import matrix_of_dMovement as move
     
-        g = other;
+        g = other
         
-        Mf = self.companion();
+        Mf = self.companion()
         
-        full_companion, parent = self._compose_companion(Mf,g);
-        init_vector = vector(parent, [_sage_const_1 ] + [_sage_const_0  for i in range(_sage_const_1 ,self.getOrder())]);
+        full_companion, parent = self._compose_companion(Mf,g)
+        init_vector = vector(parent, [1] + [0 for i in range(1,self.getOrder())])
         
-        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+_sage_const_1 ));
+        return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+1))
         
     def _mix_matrices(self, other, Mf, Mg):
-        return Mf, Mg, Mf.parent().base();
+        return Mf, Mg, Mf.parent().base()
         
     def _compose_companion(self,Mf,g):
-        dg = Mf.parent().base()(self.derivate()(self.base()(g)));
-        return dg*Mf, Mf.parent().base();
+        dg = Mf.parent().base()(self.derivate()(self.base()(g)))
+        return dg*Mf, Mf.parent().base()
         
     def _pre_proc(self, M):
-        return M;
+        return M
         
     def _post_proc(self, M):
-        return M;
+        return M
     ####################################################### 
     
     ####################################################### 
@@ -170,7 +169,7 @@ class TwoStepsOperator(ListOperator):
         '''
             Method that computes an element in the nullspace of M.
         '''        
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 
     
 

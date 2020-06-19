@@ -26,9 +26,6 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_3 = Integer(3); _sage_const_2 = Integer(2); _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 
 ####################################################################################################
 ####################################################################################################
@@ -64,15 +61,15 @@ _sage_const_3 = Integer(3); _sage_const_2 = Integer(2); _sage_const_1 = Integer(
 ####################################################################################################
 
 # Local imports
-from .operator import Operator;
-from .operator import foo_derivative;
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring;
+from .operator import Operator
+from .operator import foo_derivative
+from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
 
 class ListOperator(Operator):
     ### Static parameters
-    _op_preference = _sage_const_2 ;
+    _op_preference = 2
 
     #######################################################
     ### INIT METHOD AND GETTERS
@@ -88,56 +85,56 @@ class ListOperator(Operator):
             - input: the input data for the operator. The format must be checked in each class.
         '''
         ## Initializing the minimal structure
-        super(ListOperator, self).__init__(base, input, derivate);
+        super(ListOperator, self).__init__(base, input, derivate)
                 
         if (isinstance(input, list)):
-            if(len(input) == _sage_const_0 ):
-                self.__coefficients = [_sage_const_1 ];
+            if(len(input) == 0):
+                self.__coefficients = [1]
             else:
                 # Getting the las non-zero position
-                i = len(input);
-                while(input[i-_sage_const_1 ] == _sage_const_0  and i > _sage_const_0 ):
-                    i -= _sage_const_1 ; 
+                i = len(input)
+                while(input[i-1] == 0 and i > 0):
+                    i -= 1
                 try:
-                    if(i == _sage_const_0 ):
-                        self.__coefficients = [self.base().one()];
+                    if(i == 0):
+                        self.__coefficients = [self.base().one()]
                     else:
-                        self.__coefficients = [self.base()(input[j]) for j in range(i)];
-                except Exception as e:
-                    raise TypeError('The input (%s) is not valid for a ListOperator with coefficients in (%s)' %(input,format(base)));
+                        self.__coefficients = [self.base()(input[j]) for j in range(i)]
+                except Exception:
+                    raise TypeError('The input (%s) is not valid for a ListOperator with coefficients in (%s)' %(input,format(base)))
         elif(isinstance(input, Operator)):
-            self.__coefficients = [self.base()(coeff) for coeff in input.getCoefficients()];
+            self.__coefficients = [self.base()(coeff) for coeff in input.getCoefficients()]
         else:
             try:
-                self.__coefficients = [self.base()(input)];
+                self.__coefficients = [self.base()(input)]
             except Exception:
-                raise TypeError('The input is not valid for an operator with coefficients in (%s)' %(format(base)));
-        #coeff_gcd = gcd(self.__coefficients);
+                raise TypeError('The input is not valid for an operator with coefficients in (%s)' %(format(base)))
+        #coeff_gcd = gcd(self.__coefficients)
         #if(coeff_gcd != 0):
-        #    self.__coefficients = [self.base()(el/coeff_gcd) for el in self.__coefficients];
+        #    self.__coefficients = [self.base()(el/coeff_gcd) for el in self.__coefficients]
         #if(isinstance(self.base(), Wrap_w_Sequence_Ring) and isPolynomial(self.base().base())):
         #    l = []
         #    for el in self.__coefficients:
-        #        l += el.coefficients(x);
+        #        l += el.coefficients(x)
         #    
-        #    coeff_gcd = gcd(l);
+        #    coeff_gcd = gcd(l)
         #    if(coeff_gcd != 0):
-        #        self.__coefficients = [el/coeff_gcd for el in self.__coefficients];
+        #        self.__coefficients = [el/coeff_gcd for el in self.__coefficients]
             
     ### Getter methods
     def getOrder(self):
-        return len(self.__coefficients)-_sage_const_1 ;
+        return len(self.__coefficients)-1
         
     def getCoefficients(self):
-        return self.__coefficients;
+        return self.__coefficients
     
     def getCoefficient(self, i):
-        if (i < _sage_const_0 ):
-            raise IndexError('The argument must be a number greater or equal to zero');
+        if (i < 0):
+            raise IndexError('The argument must be a number greater or equal to zero')
         elif (i < len(self.__coefficients)):
-            return self.__coefficients[i];
+            return self.__coefficients[i]
         
-        return _sage_const_0 ;
+        return 0
     #######################################################
         
     #######################################################
@@ -147,114 +144,110 @@ class ListOperator(Operator):
     def add(self, other):
         if(isinstance(other, ListOperator)):
             if(self.is_zero()):
-                return other;
+                return other
             if(other.is_zero()):
-                return self;
+                return self
             return self.__class__(self.base(), 
-                [self.getCoefficient(i)+self.base()(other.getCoefficient(i)) for i in range(max(self.getOrder(), other.getOrder())+_sage_const_1 )], 
-                self.derivate());
+                [self.getCoefficient(i)+self.base()(other.getCoefficient(i)) for i in range(max(self.getOrder(), other.getOrder())+1)], 
+                self.derivate())
         elif(isinstance(other, Operator)):
-            return other.__radd__(self);
+            return other.__radd__(self)
         else:
-            return self.add(self.__class__(self.base(),other, self.derivate()));
+            return self.add(self.__class__(self.base(),other, self.derivate()))
         
     def scalar(self, other):
         try:
-            r = self.base()(other);
-            if(r == _sage_const_0 ):
-                return self.__class__(self.base(), _sage_const_0 , self.derivate());
-            return self.__class__(self.base(), [r*coeff for coeff in self.getCoefficients()], self.derivate());
+            r = self.base()(other)
+            if(r == 0):
+                return self.__class__(self.base(), 0, self.derivate())
+            return self.__class__(self.base(), [r*coeff for coeff in self.getCoefficients()], self.derivate())
         except TypeError:
-            raise TypeError("The argument for this method must be an element of the current domain");
+            raise TypeError("The argument for this method must be an element of the current domain")
         
     def mult(self, other):
         try:
             if(isinstance(other, ListOperator)):
                 if(self.is_zero() or other.is_zero()):
-                    self.__class__(self.base(), _sage_const_0 , self.derivate()); 
-                res = self.__class__(self.base(), _sage_const_0 , self.derivate());
-                aux = None;
+                    self.__class__(self.base(), 0, self.derivate())
+                res = self.__class__(self.base(), 0, self.derivate())
+                aux = None
                 for coeff in self.getCoefficients():
                     if(aux is None):
-                        aux = other;
+                        aux = other
                     else:
-                        aux = aux.derivative();
-                    res = res.add(aux.scalar(coeff));
-                return res;
+                        aux = aux.derivative()
+                    res = res.add(aux.scalar(coeff))
+                return res
             elif(isinstance(other, Operator)):
-                return other.__rmul__(self);
+                return other.__rmul__(self)
             else:
-                return self.mult(self.__class__(self.base(),other, self.derivate()));
+                return self.mult(self.__class__(self.base(),other, self.derivate()))
         except Exception as e:
-            print("Got an exception: %s"%(e));
-            raise e;
+            print("Got an exception: %s"%(e))
+            raise e
     
     ### Equality
     def is_zero(self):
         for coeff in self.getCoefficients():
-            if not (coeff == _sage_const_0 ):
-                return False;
-        return True;
+            if not (coeff == 0):
+                return False
+        return True
         
     def __eq__(self, other):
         if(isinstance(other, ListOperator)):
-            selfCoeffs = self.getCoefficients();
-            otherCoeffs = other.getCoefficients();
+            selfCoeffs = self.getCoefficients()
+            otherCoeffs = other.getCoefficients()
             
             if(len(selfCoeffs) == len(otherCoeffs)):
                 for i in range(len(selfCoeffs)):
                     if(not (selfCoeffs[i] == otherCoeffs[i])):
-                        return False;
-                return True;
-        return False;
+                        return False
+                return True
+        return False
         
     ### Differential
     def derivative(self):
-        newCoeffs = [self.derivate()(self.getCoefficient(_sage_const_0 ))];
-        for j in range(_sage_const_1 ,self.getOrder()+_sage_const_1 ):
-            newCoeffs += [self.derivate()(self.getCoefficient(j)) + self.getCoefficient(j-_sage_const_1 )];
-        newCoeffs += [self.getCoefficient(self.getOrder())];
+        newCoeffs = [self.derivate()(self.getCoefficient(0))]
+        for j in range(1,self.getOrder()+1):
+            newCoeffs += [self.derivate()(self.getCoefficient(j)) + self.getCoefficient(j-1)]
+        newCoeffs += [self.getCoefficient(self.getOrder())]
         
-        return self.__class__(self.base(), newCoeffs, self.derivate());
+        return self.__class__(self.base(), newCoeffs, self.derivate())
     ####################################################### 
     
     ####################################################### 
     ### SOLUTION ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
     def _compute_derivative_solution(self):
-        r = self.getCoefficients();
+        r = self.getCoefficients()
         ### The operation depends on the first coefficient of the equation
-        if(r[_sage_const_0 ] == _sage_const_0 ):
+        if(r[0] == 0):
             ### If is zero, then the next derivative has the same coefficients shifted 1 position to the left.
-            newCoeffs = [r[i] for i in range(_sage_const_1 ,len(r))];
+            newCoeffs = [r[i] for i in range(1,len(r))]
         else:
             ### Otherwise, we compute another operator
-            der0 = self.derivate()(r[_sage_const_0 ]);
-            newCoeffs = [r[i]*r[_sage_const_0 ] + self.derivate()(r[i+_sage_const_1 ])*r[_sage_const_0 ]-der0*r[i+_sage_const_1 ] for i in range(self.getOrder())];
-            newCoeffs += [r[_sage_const_0 ]*r[-_sage_const_1 ]];
+            der0 = self.derivate()(r[0])
+            newCoeffs = [r[i]*r[0] + self.derivate()(r[i+1])*r[0]-der0*r[i+1] for i in range(self.getOrder())]
+            newCoeffs += [r[0]*r[-1]]
             
-        return self.__class__(self.base(), newCoeffs, self.derivate());
+        return self.__class__(self.base(), newCoeffs, self.derivate())
             
     def _compute_integral_solution(self):
-        return self.__class__(self.base(), [_sage_const_0 ] + self.getCoefficients(), self.derivate());
+        return self.__class__(self.base(), [0] + self.getCoefficients(), self.derivate())
     ####################################################### 
     
     ####################################################### 
     ### MAGIC PYTHON METHODS
     ####################################################### 
     def __call__(self, obj):
-        try:
-            obj = self.base()(obj);
-        except Exception:
-            verbose("The object %s can not be casted into an element of the coefficient ring" %(obj), level=_sage_const_3 );
-        res = _sage_const_0 ;
+        res = 0
         for coeff in self.getCoefficients():
-            res += coeff*obj;
-            obj = self.derivate()(obj);
-        return res;
+            res += coeff*obj
+            obj = self.derivate()(obj)
+        return res
         
     def __repr__(self):
-        return ("%s(%s)"%(self.__class__.__name__,self.__coefficients.__repr__()));
+        return ("%s(%s)"%(self.__class__.__name__,self.__coefficients.__repr__()))
         
     #######################################################         
     

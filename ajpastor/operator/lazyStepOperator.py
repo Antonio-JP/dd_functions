@@ -31,9 +31,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_3 = Integer(3); _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
+# Sage imports
+from sage.all import (cached_method, kronecker_delta, Matrix) 
 
 ####################################################################################################
 ####################################################################################################
@@ -59,47 +58,47 @@ _sage_const_3 = Integer(3); _sage_const_1 = Integer(1); _sage_const_0 = Integer(
 ####################################################################################################
 
 # Imports
-from .twoStepsOperator import TwoStepsOperator;
-from .operator import foo_derivative;
+from .twoStepsOperator import TwoStepsOperator
+from .operator import foo_derivative
 
-from ajpastor.lazy.lazyIDElements import *;
+from ajpastor.lazy.lazyIDElements import LazyIntegralDomain
 
 class LazyStepOperator(TwoStepsOperator):
     ### Static parameters
-    _op_preference = _sage_const_3 ;
+    _op_preference = 3
 
     #######################################################
     ### INIT METHOD AND GETTERS
     #######################################################
     def __init__(self, base, input, derivate = foo_derivative):
-        super(LazyStepOperator, self).__init__(base, input, derivate);
+        super(LazyStepOperator, self).__init__(base, input, derivate)
             
     ####################################################### 
         
     @cached_method
     def companion(self):
-        field = LazyIntegralDomain(self._original_base).fraction_field();
+        field = LazyIntegralDomain(self._original_base).fraction_field()
         
-        coefficients = [field(el) for el in self.getCoefficients()];
+        coefficients = [field(el) for el in self.getCoefficients()]
             
         ## We divide by the leading coefficient
-        coefficients = [-(coefficients[i]/coefficients[-_sage_const_1 ]) for i in range(len(coefficients)-_sage_const_1 )];
+        coefficients = [-(coefficients[i]/coefficients[-1]) for i in range(len(coefficients)-1)]
         ## Trying to reduce the elements
         try:
             for i in range(len(coefficients)):
-                coefficients[i].reduce();
+                coefficients[i].reduce()
         except AttributeError:
-            pass;
+            pass
         except ArithmeticError:
-            pass;
-        d = len(coefficients);
+            pass
+        d = len(coefficients)
         
         ## Building the rows of our matrix
-        rows = [[_sage_const_0  for i in range(d-_sage_const_1 )] + [coefficients[_sage_const_0 ]]];
-        for i in range(d-_sage_const_1 ):
-            rows += [[kronecker_delta(i,j) for j in range(d-_sage_const_1 )] + [coefficients[i+_sage_const_1 ]]];
+        rows = [[0 for i in range(d-1)] + [coefficients[0]]]
+        for i in range(d-1):
+            rows += [[kronecker_delta(i,j) for j in range(d-1)] + [coefficients[i+1]]]
             
         ## Returning the matrix
-        return Matrix(field, rows);
+        return Matrix(field, rows)
     
 

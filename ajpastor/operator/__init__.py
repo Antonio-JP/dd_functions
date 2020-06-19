@@ -27,13 +27,13 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from .operator import Operator;
+from .operator import Operator
 try:
-    from .oreOperator import w_OreOperator as OreOperator;
+    from .oreOperator import w_OreOperator as OreOperator
 except ImportError:
-    print("Package ore_algebra not available");
-from .directStepOperator import DirectStepOperator;
-from .polynomialLazyOperator import PolynomialLazyOperator;
+    print("Package ore_algebra not available")
+from .directStepOperator import DirectStepOperator
+from .polynomialLazyOperator import PolynomialLazyOperator
 
-from pkgutil import extend_path;
-__path__ = extend_path(__path__, __name__);
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)

@@ -29,9 +29,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
+# Sage imports 
+from sage.all_cmdline import x
 
 ####################################################################################################
 ####################################################################################################
@@ -71,18 +70,18 @@ _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 ####################################################################################################
 
 # General imports
-from ore_algebra import OreAlgebra;
-from ore_algebra.ore_operator import OreOperator;
+from ore_algebra import OreAlgebra
+from ore_algebra.ore_operator import OreOperator
 
 # Local imports
-from .operator import Operator;
-from .directStepOperator import DirectStepOperator;
-from .operator import foo_derivative;
+from .operator import Operator
+from .directStepOperator import DirectStepOperator
+from .operator import foo_derivative
 
 class w_OreOperator(Operator):
     ### Static parameters
-    map_to_algebras = {};
-    _op_preference = _sage_const_1 ;
+    map_to_algebras = {}
+    _op_preference = 1
 
     #######################################################
     ### INIT METHOD AND GETTERS
@@ -99,54 +98,54 @@ class w_OreOperator(Operator):
             OreAlgebra for `base` or a list of elements of `base`
         '''
         ## Initializing the minimal structure
-        super(w_OreOperator, self).__init__(base, input, derivate);
+        super(w_OreOperator, self).__init__(base, input, derivate)
         
         ## Computing the Ore_Algebra associated with base
         if(not base in w_OreOperator.map_to_algebras):
-            newOreAlgebra = OreAlgebra(base, ('D', lambda p : p, derivate));
-            w_OreOperator.map_to_algebras[self.base()] = newOreAlgebra;
+            newOreAlgebra = OreAlgebra(base, ('D', lambda p : p, derivate))
+            w_OreOperator.map_to_algebras[self.base()] = newOreAlgebra
             
-        self.__oa = w_OreOperator.map_to_algebras[self.base()];
-        d = self.__oa.gen();
+        self.__oa = w_OreOperator.map_to_algebras[self.base()]
+        d = self.__oa.gen()
         
         ## Computing the operator
         try:
             if isinstance(input, w_OreOperator):
-                self.operator = input.operator;
+                self.operator = input.operator
             else:
                 if isinstance(input, Operator):
-                    input = input.getCoefficients();
+                    input = input.getCoefficients()
                 if isinstance(input, list):
-                    res = self.__oa(_sage_const_0 );
+                    res = self.__oa(0)
                     for i in range(len(input)):
-                        res += self.base()(input[i])*d**i;
-                    self.operator = res;
+                        res += self.base()(input[i])*d**i
+                    self.operator = res
                 else:
-                    self.operator = self.__oa(input);
+                    self.operator = self.__oa(input)
                     
-            if(self.operator == _sage_const_0 ):
-                self.operator = d;
+            if(self.operator == 0):
+                self.operator = d
                 
         except TypeError as e:
-            raise e;
+            raise e
         except Exception as e:
-            raise TypeError('The input (%s) is not valid for an oreOperator with coefficients in (%s)\nCaused by: %s - %s' %(input,format(base),type(e),e));
+            raise TypeError('The input (%s) is not valid for an oreOperator with coefficients in (%s)\nCaused by: %s - %s' %(input,format(base),type(e),e))
             
             
     ### Getter methods
     def getOrder(self):
-        return self.operator.order();
+        return self.operator.order()
         
     def getCoefficients(self):
-        return self.operator.coefficients(sparse=False);
+        return self.operator.coefficients(sparse=False)
     
     def getCoefficient(self, i):
-        if (i < _sage_const_0 ):
-            raise IndexError('The argument must be a number greater or equal to zero');
-        elif (i < self.getOrder()+_sage_const_1 ):
-            return self.getCoefficients()[i];
+        if (i < 0):
+            raise IndexError('The argument must be a number greater or equal to zero')
+        elif (i < self.getOrder()+1):
+            return self.getCoefficients()[i]
         
-        return _sage_const_0 ;
+        return 0
     #######################################################
         
     #######################################################
@@ -155,43 +154,43 @@ class w_OreOperator(Operator):
     ### Arithmetic
     def add(self, other):
         if(isinstance(other, w_OreOperator)):
-            return w_OreOperator(self.base(), self.operator+self.__oa(other.operator));
+            return w_OreOperator(self.base(), self.operator+self.__oa(other.operator))
         elif(isinstance(other, Operator)):
-            return self+w_OreOperator(self.base(),other.getCoefficients());
+            return self+w_OreOperator(self.base(),other.getCoefficients())
         else:
-            return w_OreOperator(self.base(), self.operator+self.__oa(other));
+            return w_OreOperator(self.base(), self.operator+self.__oa(other))
         
     def scalar(self, other):
-        return w_OreOperator(self.base(), self.__oa(other)*self.operator);
+        return w_OreOperator(self.base(), self.__oa(other)*self.operator)
         
     def mult(self, other):
         if(isinstance(other, w_OreOperator)):
-            return w_OreOperator(self.base(), self.operator*self.__oa(other.operator));
+            return w_OreOperator(self.base(), self.operator*self.__oa(other.operator))
         elif(isinstance(other, Operator)):
             try:
-                return self*w_OreOperator(self.base(),other.getCoefficients());
+                return self*w_OreOperator(self.base(),other.getCoefficients())
             except Exception:
-                return other.__class__(self.base(),self).mult(other);
+                return other.__class__(self.base(),self).mult(other)
         else:
-            return w_OreOperator(self.base(), self.operator*self.__oa(other));
+            return w_OreOperator(self.base(), self.operator*self.__oa(other))
         
     ### Equality
     def is_zero(self):
-        return self.operator == _sage_const_0 ;
+        return self.operator == 0
         
     def __eq__(self, other):
         try:
             if(not isinstance(other, OreOperator)):
-                other = self.__oa(other);
-            return self.operator == other.operator;
+                other = self.__oa(other)
+            return self.operator == other.operator
         except Exception:
-            pass;
-        return False;
+            pass
+        return False
         
     ### Differential
     def derivative(self):
-        d = self.__oa.gen();
-        return w_OreOperator(self.base(), d*self.operator);
+        d = self.__oa.gen()
+        return w_OreOperator(self.base(), d*self.operator)
     ####################################################### 
         
     ####################################################### 
@@ -199,34 +198,34 @@ class w_OreOperator(Operator):
     ####################################################### 
     def _compute_add_solution(self, other):
         try:
-            return w_OreOperator(self.base(),self.operator.lclm(other.operator, algorithm="linalg"));
+            return w_OreOperator(self.base(),self.operator.lclm(other.operator, algorithm="linalg"))
         except TypeError:
-            return w_OreOperator(self.base(),self.operator.lclm(other.operator, algorithm="euclid"));
+            return w_OreOperator(self.base(),self.operator.lclm(other.operator, algorithm="euclid"))
         
     def _compute_mult_solution(self, other):
-        return w_OreOperator(self.base(),self.operator.symmetric_product(other.operator));
+        return w_OreOperator(self.base(),self.operator.symmetric_product(other.operator))
         
     def _compute_derivative_solution(self):
-        d = self.__oa.gen();
-        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(d));
+        d = self.__oa.gen()
+        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(d))
         
     def _compute_integral_solution(self):
-        return w_OreOperator(self.base(),self.operator.annihilator_of_integral());
+        return w_OreOperator(self.base(),self.operator.annihilator_of_integral())
         
     def _compute_compose_solution(self, other):
-        op1 = DirectStepOperator(self.base(), self, self.derivate());
+        op1 = DirectStepOperator(self.base(), self, self.derivate())
         
-        return w_OreOperator(self.base(), op1._compute_compose_solution(other), self.derivate());
+        return w_OreOperator(self.base(), op1._compute_compose_solution(other), self.derivate())
     ####################################################### 
     
     ####################################################### 
     ### MAGIC PYTHON METHODS
     ####################################################### 
     def __call__(self, obj):
-        return self.operator(obj, action=lambda p : p.derivative(x));
+        return self.operator(obj, action=lambda p : p.derivative(x))
         
     def __repr__(self):
-        return ("Wrapped_OreOperator(%s)"%(self.operator.__repr__()));
+        return ("Wrapped_OreOperator(%s)"%(self.operator.__repr__()))
         
     ####################################################### 
     
@@ -234,9 +233,9 @@ class w_OreOperator(Operator):
     ### OTHER WRAPPED METHODS
     #######################################################
     def annihilator_of_associate(self, M):
-        M = w_OreOperator(self.base(), M).operator;
-        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(M));
+        M = w_OreOperator(self.base(), M).operator
+        return w_OreOperator(self.base(), self.operator.annihilator_of_associate(M))
         
     def annihilator_of_polynomial(self, poly):
-        return w_OreOperator(self.base(), self.operator.annihilator_of_polynomial(poly));
+        return w_OreOperator(self.base(), self.operator.annihilator_of_polynomial(poly))
 

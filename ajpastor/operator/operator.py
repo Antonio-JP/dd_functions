@@ -342,7 +342,7 @@ class Operator(object):
         jp_pol = self.get_recursion_polynomial(self.forward_order)
         return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol))
        
-    @cached_method 
+    @cached_method
     def jp_matrix(self):
         return self.get_recursion_matrix(self.jp_value())
         

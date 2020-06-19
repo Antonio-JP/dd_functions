@@ -27,9 +27,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
+#Sage imports
+from sage.all import (lcm, Matrix, gcd, prod, vector)
 
 ####################################################################################################
 ####################################################################################################
@@ -55,8 +54,8 @@ _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 ####################################################################################################
 
 # Local imports
-from .twoStepsOperator import TwoStepsOperator;
-from .operator import foo_derivative;
+from .twoStepsOperator import TwoStepsOperator
+from .operator import foo_derivative
 
 class DirectStepOperator(TwoStepsOperator):
 
@@ -64,7 +63,7 @@ class DirectStepOperator(TwoStepsOperator):
     ### INIT METHOD AND GETTERS
     #######################################################
     def __init__(self, base, input, derivate = foo_derivative):
-        super(DirectStepOperator, self).__init__(base, input, derivate);
+        super(DirectStepOperator, self).__init__(base, input, derivate)
             
     ####################################################### 
         
@@ -72,46 +71,46 @@ class DirectStepOperator(TwoStepsOperator):
     ### SOLVING MATRICES METHOD
     ####################################################### 
     def _get_element_nullspace(self, M):
-        from ajpastor.misc.bareiss import BareissAlgorithm;
+        from ajpastor.misc.bareiss import BareissAlgorithm
         ## We take the domain where our elements will lie
-        parent = M.parent().base().base();
+        parent = M.parent().base().base()
         
         ## Computing the kernell of the matrix
         try:
-            lcms = [lcm([el.denominator() for el in row]) for row in M];
-            N = Matrix(parent, [[el*lcms[i] for el in M[i]] for i in range(M.nrows())]);
-            ba = BareissAlgorithm(parent, N, lambda p : False);
+            lcms = [lcm([el.denominator() for el in row]) for row in M]
+            N = Matrix(parent, [[el*lcms[i] for el in M[i]] for i in range(M.nrows())])
+            ba = BareissAlgorithm(parent, N, lambda p : False)
             
-            ker = ba.right_kernel_matrix();
+            ker = ba.right_kernel_matrix()
         except Exception as e:
-            print(e);
-            ker = M.right_kernel_matrix();
-        #ker = M.right_kernel_matrix();
+            print(e)
+            ker = M.right_kernel_matrix()
+        #ker = M.right_kernel_matrix()
         ## If the nullspace has hight dimension, we try to reduce the final vector computing zeros at the end
-        aux = [row for row in ker];
-        i = _sage_const_1 ;
+        aux = [row for row in ker]
+        i = 1
         
-        while(len(aux) > _sage_const_1 ):
-            new = [];
-            current = None;
+        while(len(aux) > 1):
+            new = []
+            current = None
             for j in range(len(aux)):
-                if(aux[j][-(i)] == _sage_const_0 ):
-                    new += [aux[j]];
+                if(aux[j][-(i)] == 0):
+                    new += [aux[j]]
                 elif(current is None):
-                    current = j;
+                    current = j
                 else:
-                    new += [aux[current]*aux[j][-(i)] - aux[j]*aux[current][-(i)]];
-                    current = j;
-            aux = [el/gcd(el) for el in new];
-            i = i+_sage_const_1 ;
+                    new += [aux[current]*aux[j][-(i)] - aux[j]*aux[current][-(i)]]
+                    current = j
+            aux = [el/gcd(el) for el in new]
+            i = i+1
 
             
         ## When exiting the loop, aux has just one vector
-        sol = aux[_sage_const_0 ];
+        sol = aux[0]
         
         ## Our solution has denominators. We clean them all
-        p = prod([el.denominator() for el in sol]);
-        return vector(parent, [el*p for el in sol]);
+        p = prod([el.denominator() for el in sol])
+        return vector(parent, [el*p for el in sol])
     ####################################################### 
     
 
