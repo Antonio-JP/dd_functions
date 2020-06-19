@@ -31,20 +31,19 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-
-from sage.all_cmdline import *   # import sage library
-
 # Python imports
 import warnings
+from functools import reduce
 
 #SAGE imports 
-from sage.rings.ring import IntegralDomain
-from sage.rings.polynomial.polynomial_element import is_Polynomial
-from sage.rings.polynomial.multi_polynomial import is_MPolynomial
+from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
+                        QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
+                        cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
+                        sage_eval, log, BackslashOperator)
+from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
-from sage.structure.element import IntegralDomainElement
-from sage.categories.integral_domains import IntegralDomains
-from sage.categories.fields import Fields
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
+from sage.categories.all import Morphism
 from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
@@ -53,13 +52,17 @@ from ajpastor.operator.operator import Operator
 from ajpastor.operator.directStepOperator import DirectStepOperator
 from ajpastor.operator.fullLazyOperator import FullLazyOperator
 
-from ajpastor.misc.dinamic_string import *
+from ajpastor.misc.dinamic_string import DinamicString, din_m_replace
 from ajpastor.misc.serializable import SerializableObject
 from ajpastor.misc.cached_property import derived_property
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 from ajpastor.misc.ring_w_sequence import sequence
 from ajpastor.misc.verbose import printProgressBar
+
+# Private variables for module
+_IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
+_Fields = Fields.__classcall__(Fields)
 
 #####################################################
 ### Definition of some exceptions
@@ -364,7 +367,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         else:
             ### We call the builders of the superclasses
             Ring_w_Sequence.__init__(self, base, method = lambda p,n : self(p).getSequenceElement(n))
-            IntegralDomain.__init__(self, base, category=IntegralDomains())
+            IntegralDomain.__init__(self, base, category=_IntegralDomains)
             
             ### We assign the operator class
             if(default_operator is None):
@@ -426,7 +429,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 self.base_derivation = derivation
             
             ### Setting the default "get_recurence" method
-            self.__get_recurrence = None
+            # self.__get_recurrence = None
             
             
             ### Setting new conversions
@@ -453,7 +456,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             coer = self.base()._coerce_map_from_(S.base())
         elif(S == self.base()):
             coer = True
-        elif(isinstance(S, sage.symbolic.ring.SymbolicRing)):
+        elif(S is SR):
             coer = True
         else:
             coer = self.base()._coerce_map_from_(S)
@@ -462,9 +465,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             return True
         #return None
         ## If not coercion is found, we check deeper using generators
-        gens_self, p_self = DDRing.__get_gens__(self)
+        gens_self, _ = DDRing.__get_gens__(self)
         try:
-            gens_S, pS = DDRing.__get_gens__(S)
+            gens_S, _ = DDRing.__get_gens__(S)
         except RuntimeError:
             return None
         
@@ -491,17 +494,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         if(isinstance(S, DDRing)):
             return S.depth() <= self.depth()
         
-    def __is_polynomial(self, S):
-        '''
-            Method that checks if an object is a polynomial ring. 
-
-            This method checks if any object is either a Univariate Polynomial ring or a Multivariate Polynomial ring
-        '''
-        from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
-        from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
-        
-        return isUniPolynomial(S) or isMPolynomial(S)
-        
     def _pushout_(self, S):
         '''
             This method compute the pushout of 'self' with the parent class 'S'. This method returns None if it is not possible to get the pushout or a DDRing with all the properties required to include 'self' and 'S'.
@@ -524,10 +516,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             ERRORS:
                 - TypeError will be raised if a problem with the algebraic extension is found.
                 - 
-        '''
-        from sage.categories.integral_domains import IntegralDomains
-        
-        if(isinstance(S, sage.symbolic.ring.SymbolicRing)):
+        '''        
+        if(S is SR):
             return None
             
         ## We get a list of the generators of self and S with their types
@@ -553,7 +543,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             return None
             #raise TypeError("Incompatible original structures:\n\t- %s\n\t- %s" %(pself, pS))
         
-        if(not F in IntegralDomains()):
+        if(not F in _IntegralDomains):
             return None
             #raise TypeError("Pushout of the original structures is not an integral domain:\n\t- %s" %F)
         if(not F.is_field()):
@@ -610,7 +600,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
             This method describes how to interpret the arguments that a DDRing can received to cast one element to a DDFunction in ``self``.
         '''
-        el_class = self.element_class
         if(len(args) < 1 ):
             raise ValueError("Impossible to build a lazy element without arguments")
         
@@ -664,7 +653,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                         return self.element([1],[], self.base()(X), name=str(X))
                     except Exception:
                         print("WHAT??")
-                        return self(str(element))
+                        return self(str(X))
         except TypeError as e:
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e))
             
@@ -901,7 +890,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             init_values += [S.random_element() for i in range(len(coeffs)-2)]
             return self.element(coeffs,init_values)
         ## Otherwise, we need to know the initial value condition
-        equation = self.element(coeffs).equation
         warnings.warn("Not-simple random element not implemented. Returning zero", DDFunctionWarning, stacklevel=2)
 
         return self.zero()
@@ -1120,10 +1108,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         ## Returning the resulting function
         return sum(x**i*functions[i] for i in range(n))
         
-    def get_recurrence(self, *args, **kwds):
-        if(self.__get_recurrence is None):
-            raise NotImplementedError("Recurrence method not implemented for %s" %self)  
-        return self.__get_recurrence(*args, **kwds)
+    #def get_recurrence(self, *args, **kwds):
+    #    if(self.__get_recurrence is None):
+    #        raise NotImplementedError("Recurrence method not implemented for %s" %self)  
+    #    return self.__get_recurrence(*args, **kwds)
     
     def variables(self, as_symbolic=False, fill = True):
         if(self.__variables is None):
@@ -1182,7 +1170,7 @@ class ParametrizedDDRing(DDRing):
         for i in range(len(parameters)):
             if(type(parameters[i]) == str):
                 parameters[i] = var(parameters[i])
-            elif(type(parameters[i]) != sage.symbolic.expression.Expression):
+            elif(type(parameters[i]) != Expression):
                 raise TypeError("All values of the second argument must be strings or SAGE symbolic variables")
         parameters = tuple(set(parameters))
         
@@ -1207,7 +1195,7 @@ class ParametrizedDDRing(DDRing):
             base_ring = ParametrizedDDRing(DDRing(base_ddRing.original_ring(),depth=constructions[0][0].depth()-1 ), parameters)
             ring = DDRing.__classcall__(cls, base_ring, 1 , base_field = new_basic_field, default_operator = base_ddRing.default_operator)
             Ring_w_Sequence.__init__(ring, base_ring, method = lambda p,n : ring(p).getSequenceElement(n))
-            IntegralDomain.__init__(ring, base_ring, category=IntegralDomains())
+            IntegralDomain.__init__(ring, base_ring, category=_IntegralDomains)
         else:
             ring = DDRing.__classcall__(cls, current, depth = constructions[0][0].depth(), base_field = new_basic_field, default_operator = base_ddRing.default_operator)
             
@@ -1407,7 +1395,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         # We create the operator using the structure given by our DDRing
         try:
             self.equation = self.__buildOperator(equation)
-        except Exception as e:
+        except Exception:
             #print "here -- ", e
             raise TypeError("The input for this operator is not valid")
             
@@ -1891,7 +1879,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(r == 1 ):
                 return self
             n = self.equation.get_jp_fo()+1 
-            coeffs = self.getOperator().getCoefficients()
             init = self.getInitialValueList(n)
             
             if(isinstance(r, DDFunction)):
@@ -2163,7 +2150,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Initial checking and considerations
         ######################################
         ## Checking that the 'other' element is NOT in the Symbolic Ring
-        if(isinstance(other.parent(), sage.symbolic.ring.SymbolicRing)):
+        if(other.parent() is SR):
             try:
                 other = self.parent().original_ring()(str(other))
             except Exception as e:
@@ -2267,12 +2254,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         ### Checking the input
         ## Checking 'poly' is a polynomial
-        if(not(is_Polynomial(poly) or is_MPolynomial(poly))):
+        if(not _is_polynomial(poly)):
             raise TypeError("'compose_algebraic': the input 'poly' is not a polynomial")
         
         ## Checkig that 'y' is a variable
         gens = [v for v in poly.parent().gens()]
-        if(all(str(v) != 'y')):
+        if(all(str(v) != 'y' for v in gens)):
             raise TypeError("'compose_algebraic': the input poly has no variable 'y'")
         
         if(len(gens) == 1):
@@ -2306,7 +2293,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         # poly in Q
         # destiny_ring: final DDRing where the result will belong
         
-        raise NotImplementedError("Method 'compose_algebraic' is not yet implemented")
+        raise NotImplementedError("\n\t- ".join(["Method 'compose_algebraic' is not yet implemented. Current variables", 
+                                                "coefficients: %s" %F, 
+                                                "minimal polynomial: %s" %poly, 
+                                                "final ring: %s" %destiny_ring]))
             
     #####################################
     ### Equality methods
@@ -2444,7 +2434,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     #####################################
     ### Numerical methods
     #####################################   
-    def numerical_solution(self, value, delta=RealNumber('1e-10'), max_depth=100 ):
+    def numerical_solution(self, value, delta=1e-10, max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
             if(self.equation.getCoefficients()[-1](0 ) != 0 ):
@@ -2547,7 +2537,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     @cached_method
     def to_symbolic(self):
         evaluation = sage_eval(str(self.__name).replace("'", ".derivative()").replace("^", "**"), locals=globals())
-        if(isinstance(evaluation, sage.symbolic.expression.Expression)):
+        if(isinstance(evaluation, Expression)):
             evaluation = evaluation.simplify_full()
             
         return evaluation
@@ -2600,7 +2590,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 if(pol == self):
                     return pol
                 raise ValueError("3:Function %s is not a polynomial" %repr(self))
-        except Exception as e:
+        except Exception:
             pass
         return self
         
@@ -2616,7 +2606,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     return self.parent()(other)
                 except:
                     return ParametrizedDDRing(self.parent(),other.variables())(other)
-        except Exception as e:
+        except Exception:
             pass
         return other
     
@@ -2741,7 +2731,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                         inverse = self.inverse
                     except Exception:
                         raise ZeroDivisionError("Impossible to compute the inverse")
-                    return inverse.__pow__(-other)
+                    return inverse**(-other)
             elif(g in f.parent().base_field): # Constant case: need extra condition (f(0) != 0 and f(0)**g is a valid element
                 g = f.parent().base_field(g)
                 if(f0 == 0):
@@ -2781,7 +2771,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     else:
                         name = None
                         if(g.has_name() and f.has_name()):
-                            nname = DinamicString("(_1)^(_2)", [f.__name, g.__name])
+                            name = DinamicString("(_1)^(_2)", [f.__name, g.__name])
                         
                         self.__pows[other] = R.element([-((lf + lf0)*g).derivative(),1],[1],name=name)
                 else:
@@ -2806,7 +2796,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def __eq__(self,other):
         if (other is self):
             return True
-        if((type(other) == sage.rings.integer.Integer or type(other) == int) and other == 0 ):
+        if((other in ZZ) and other == 0):
             return self.is_null
         return self.equals(other)
 
@@ -3035,7 +3025,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         final = ""
         for i in range(len(coeffs)):
             ## If it is a non-zero coefficient
-            if(not self[len(coeffs)-i-1] == Integer(0)):
+            if(not self[len(coeffs)-i-1] == ZZ(0)):
                 ## Adding the sign
                 if(i > 0 or sgn[i] == '-'):
                     final += "%s " %sgn[i]
@@ -3169,13 +3159,13 @@ class DDRingFunctor (ConstructionFunctor):
     def __init__(self, depth, base_field):
         if(depth <= 0):
             raise ValueError("Depth can not be lower than 1 (DDRingFunctor)")
-        if(not (base_field in Fields())):
+        if(not (base_field in _Fields)):
             raise TypeError("The base field must be a field (DDRingFunctor")
 
         self.rank = 11 
         self.__depth = depth
         self.__base_field = base_field
-        super(DDRingFunctor, self).__init__(IntegralDomains(),IntegralDomains())
+        super(DDRingFunctor, self).__init__(_IntegralDomains,_IntegralDomains)
         
     ### Methods to implement
     def _coerce_into_domain(self, x):
@@ -3253,7 +3243,7 @@ class ParametrizedDDRingFunctor (DDRingFunctor):
 #####################################################
 ### General Morphism for return to basic rings
 #####################################################
-class DDSimpleMorphism (sage.categories.map.Map):
+class DDSimpleMorphism (Morphism):
     def __init__(self, domain, codomain):
         super(DDSimpleMorphism, self).__init__(domain, codomain)
         
@@ -3292,105 +3282,134 @@ def zero_extraction(el):
                 val = el(**{'x':0 })
                 
             return (n, el)
-    except AttributeError as e:
-        return (0 ,el)
+    except AttributeError:
+        return (0,el)
         
-def polynomial_computation(poly, functions):
-    '''
-        Method that compute a polynomial operation over a set of DDFunctions.
+# def polynomial_computation(poly, functions):
+#     '''
+#         Method that compute a polynomial operation over a set of DDFunctions.
         
-        INPUT:
-            - poly: a multivariate polynomial representing the operation we want to perform.
-            - functions: the set of functions related with the polynomial. 
-        OUTPUT:
-            A DDFunction in the corresponding DDRing.
+#         INPUT:
+#             - poly: a multivariate polynomial representing the operation we want to perform.
+#             - functions: the set of functions related with the polynomial. 
+#         OUTPUT:
+#             A DDFunction in the corresponding DDRing.
             
-        WARNING:
-            We assume that for any pair of functions f,g in functions, there are not
-            constants c,d such that f = cg+d. Otherwise the result will still
-            be correct, but will be computed slower.
-    '''
-    ### Checking the argument 'poly'
-    if(not (is_Polynomial(poly) or is_MPolynomial(poly))):
-        raise TypeError("First argument require to be a polynomial.\n\t- Got: %s (%s)" %(poly, type(poly)))
-    parent_poly = poly.parent()
-    gens = parent_poly.gens()
+#         WARNING:
+#             We assume that for any pair of functions f,g in functions, there are not
+#             constants c,d such that f = cg+d. Otherwise the result will still
+#             be correct, but will be computed slower.
+#     '''
+#     ### Checking the argument 'poly'
+#     if(not _is_polynomial(poly)):
+#         raise TypeError("First argument require to be a polynomial.\n\t- Got: %s (%s)" %(poly, type(poly)))
+#     parent_poly = poly.parent()
+#     gens = parent_poly.gens()
         
-    ### Checking the argument 'functions'
-    tfunc= type(functions)
-    if(not ((tfunc is list) or (tfunc is set) or (tfunc is tuple))):
-        functions = [functions]
+#     ### Checking the argument 'functions'
+#     tfunc= type(functions)
+#     if(not ((tfunc is list) or (tfunc is set) or (tfunc is tuple))):
+#         functions = [functions]
         
-    if(len(functions) < parent_poly.ngens()):
-        raise TypeError("Not enough functions given for the polynomial ring of the polynomial.")
+#     if(len(functions) < parent_poly.ngens()):
+#         raise TypeError("Not enough functions given for the polynomial ring of the polynomial.")
     
-    ### Coarcing all the functions to a common parent
-    parent = functions[0].parent()
-    for i in range(1,len(functions)):
-        parent = pushout(parent, functions[i].parent())
+#     ### Coarcing all the functions to a common parent
+#     parent = functions[0].parent()
+#     for i in range(1,len(functions)):
+#         parent = pushout(parent, functions[i].parent())
         
-    ### Base case: non-DDRing
-    if(not isinstance(parent, DDRing)):
-        return poly(**{str(gens[i]) : functions[i] for i in range(len(gens))})
+#     ### Base case: non-DDRing
+#     if(not isinstance(parent, DDRing)):
+#         return poly(**{str(gens[i]) : functions[i] for i in range(len(gens))})
         
-    functions = [parent(f) for f in functions]
+#     functions = [parent(f) for f in functions]
         
-    ### Grouping the elements that are derivatives of each other
-    ### Using the assumption on the input functions, we have that for each
-    ###    chain of derivatives, we only need to check if the function is
-    ###    the derivative of the last or if the first element is the derivative
-    ###    of the function.
-    chains = []
-    for f in functions:
-        inPlace = False
-        for i in range(len(chains)):
-            if(f.derivative() == chains[i][0]):
-                chains[i] = [f] + chains[i]
-                inPlace = True
-                break
-            elif(chains[i][-1].derivative() == f):
-                chains[i] = chains[i] + [f]
-                inPlace = True
-                break
-        if(not inPlace):
-            chains += [[f]]
-    dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains}    
+#     ### Grouping the elements that are derivatives of each other
+#     ### Using the assumption on the input functions, we have that for each
+#     ###    chain of derivatives, we only need to check if the function is
+#     ###    the derivative of the last or if the first element is the derivative
+#     ###    of the function.
+#     chains = []
+#     for f in functions:
+#         inPlace = False
+#         for i in range(len(chains)):
+#             if(f.derivative() == chains[i][0]):
+#                 chains[i] = [f] + chains[i]
+#                 inPlace = True
+#                 break
+#             elif(chains[i][-1].derivative() == f):
+#                 chains[i] = chains[i] + [f]
+#                 inPlace = True
+#                 break
+#         if(not inPlace):
+#             chains += [[f]]
+#     dics = {c[0] : [gens[functions.index(f)] for f in c] for c in chains}    
             
-    ## We build the new operator
-    newOperator = None
-    if(len(dics) == 1):
-        if(hasattr(f.equation, "annihilator_of_polynomial")):
-            ## Reordering the variables
-            parent_poly2 = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]])
-            poly2 = parent_poly2(poly)
-            newOperator = f.equation.annihilator_of_polynomial(poly2)
-    if(newOperator is None):
-        newOperator = _get_equation_poly(poly, dics)
+#     ## We build the new operator
+#     newOperator = None
+#     if(len(dics) == 1):
+#         if(hasattr(f.equation, "annihilator_of_polynomial")):
+#             ## Reordering the variables
+#             parent_poly2 = PolynomialRing(chains[0][0].parent().original_ring(), dics[chains[0][0]])
+#             poly2 = parent_poly2(poly)
+#             newOperator = f.equation.annihilator_of_polynomial(poly2)
+#     if(newOperator is None):
+#         newOperator = _get_equation_poly(poly, dics)
             
-    ### Getting the needed initial values for the solution
-    needed_initial = newOperator.get_jp_fo()+1 
+#     ### Getting the needed initial values for the solution
+#     needed_initial = newOperator.get_jp_fo()+1 
         
-    ### Getting as many initial values as posible until the new order
+#     ### Getting as many initial values as posible until the new order
     
-    newInit = [_get_initial_poly(poly, dics, i) for i in range(needed_initial)]
-    ## If some error happens, we delete all results after it
-    if(None in newInit):
-        newInit = newInit[:newInit.index(None)]
+#     newInit = [_get_initial_poly(poly, dics, i) for i in range(needed_initial)]
+#     ## If some error happens, we delete all results after it
+#     if(None in newInit):
+#         newInit = newInit[:newInit.index(None)]
         
-    ## Computing the new name
-    newName = None
-    if(all(f.has_name() for f in functions)):
-        newName = DinamicString(_m_replace(str(poly), {str(gens[i]) : "_%d" %(i+1) for i in range(len(gens))}), [f._DDFunction__name for f in functions])
+#     ## Computing the new name
+#     newName = None
+#     if(all(f.has_name() for f in functions)):
+#         newName = DinamicString(_m_replace(str(poly), {str(gens[i]) : "_%d" %(i+1) for i in range(len(gens))}), [f._DDFunction__name for f in functions])
         
-    ## Building the element
-    result = parent.element(newOperator, newInit, check_init=False, name=newName)
-    result.change_built("polynomial", (poly, {str(gens[i]) : functions[i] for i in range(len(gens))}))
+#     ## Building the element
+#     result = parent.element(newOperator, newInit, check_init=False, name=newName)
+#     result.change_built("polynomial", (poly, {str(gens[i]) : functions[i] for i in range(len(gens))}))
 
-    return result
+#     return result
 
 ###################################################################################################
 ### PRIVAME MODULE METHODS
 ###################################################################################################
+def _is_polynomial_ring(ring, univariate=True, multivariate=True):
+    '''
+        Method that checks whether an object is a polynomial ring or not.
+
+        This method checks if an object is a polynomial ring.
+
+        The method allows the user also to check if the object is univariate, multivariate or both
+        with the optional arguments ''univariate'' and ''multivariate''. By default, the method
+        checks for both types together.
+    '''
+    return (univariate and is_PolynomialRing(ring)) or (multivariate and is_MPolynomialRing(ring))
+
+def _is_polynomial(element, univariate=True, multivariate=True):
+    r'''
+        Method that checks whether an object is a polynomial or not disregarding exceptions.
+
+        This method checks if the parent of the element is a polynomial ring. If the object has
+        no parent (i.e., a Python object), then the method returns ''False''.
+
+        The method allows the user also to check if the object is univariate, multivariate or both
+        with the optional arguments ''univariate'' and ''multivariate''. By default, the method
+        checks for both types together.
+    '''
+    try:
+        return _is_polynomial_ring(element.parent(), univariate, multivariate)
+    except AttributeError:
+        return False
+
+
 def _indices(string, sep):
     try:
         index = string.index(sep)
@@ -3438,7 +3457,7 @@ def command(e):
         return e._to_command_()
     except AttributeError:
         from sage.rings.polynomial import polynomial_ring as Uni_Polynomial
-        if(e in IntegralDomains()):
+        if(e in _IntegralDomains):
             if(e is QQ):
                 return "QQ"
             if(Uni_Polynomial.is_PolynomialRing(e)):
@@ -3462,7 +3481,6 @@ def _command_list(elements):
 # Some global pre-defined DD-Rings
 DFinite = None
 try:
-    from ore_algebra import *
     from ajpastor.operator.oreOperator import w_OreOperator
     DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
 except ImportError:
@@ -3508,6 +3526,6 @@ DFinite._DDRing__get_recurrence = __get_recurrence
 ###################################################################################################
 ### PACKAGE ENVIRONMENT VARIABLES
 ###################################################################################################
-__all__ = ["is_DDRing", "is_ParametrizedDDRing", "is_DDFunction", "DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "polynomial_computation", "ParametrizedDDRing", "DFiniteP", "DFiniteI"]
+__all__ = ["is_DDRing", "is_ParametrizedDDRing", "is_DDFunction", "DDRing", "DFinite", "DDFinite", "command", "zero_extraction", "ParametrizedDDRing", "DFiniteP", "DFiniteI"]
   
 
