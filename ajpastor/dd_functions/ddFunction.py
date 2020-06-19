@@ -1553,7 +1553,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 d = self.getOrder()
                 i = max(n-d,0 )                      
                 rec = self.equation.get_recursion_row(i)
-                while(rec[n] == 0  and i <= self.equation.jp_value):                   
+                while(rec[n] == 0  and i <= self.equation.jp_value()):                   
                     i += 1                            
                     rec = self.equation.get_recursion_row(i)
                 if(rec[n] == 0 ):
@@ -2585,7 +2585,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 else:
                     raise TypeError("1:No optimization found in the simplifacion")
                 
-                return dR.element([dR.base()(el) for el in coeffs], self.getInitialValueList(self.equation.jp_value+1), name=self.__name).to_simpler()
+                return dR.element([dR.base()(el) for el in coeffs], self.getInitialValueList(self.equation.jp_value()+1), name=self.__name).to_simpler()
                         
             elif(is_PolynomialRing(R)):
                 degs = [self[i].degree() - i for i in range(self.getOrder()+1)]

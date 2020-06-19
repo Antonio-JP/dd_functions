@@ -27,9 +27,12 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all_cmdline import *   # import sage library
 
-_sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
+#Sage imports
+from sage.all import (cached_function, ZZ, PolynomialRing, cached_method, kronecker_delta, 
+                        Matrix, falling_factorial)
+
+from sage.all_cmdline import x
 
 ####################################################################################################
 ####################################################################################################
@@ -68,53 +71,53 @@ _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 ####################################################################################################
 ####################################################################################################
 
-from ajpastor.misc.cached_property import derived_property;
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence;
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring;
+from ajpastor.misc.cached_property import derived_property
+from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
+from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing;
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing;
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 
 
 ## GENERIC UTILITIES METHODS
 def foo_derivative(p):
     try:
-        return p.derivative(x);
+        return p.derivative(x)
     except AttributeError:
-        return _sage_const_0 ;
+        return 0
     
 @cached_function
 def get_integer_roots(element):
     if(not is_PolynomialRing(element.parent())):
-        raise TypeError("Incompatible element to compute integer roots");
-    base,deep_vars, n_vars = _tower_variables(element.parent().base());
-    gen = str(element.parent().gens()[0]);
+        raise TypeError("Incompatible element to compute integer roots")
+    base,deep_vars,_ = _tower_variables(element.parent().base())
+    gen = str(element.parent().gens()[0])
     
-    ring = element.parent().change_ring(base);
-    deg = element.degree();
-    p = ring.one();
+    ring = element.parent().change_ring(base)
+    deg = element.degree()
+    p = ring.one()
     while(p.degree() < deg):
-        new_ev = {var : base.random_element() for var in deep_vars};
-        p = ring(element(**new_ev));
+        new_ev = {var : base.random_element() for var in deep_vars}
+        p = ring(element(**new_ev))
     
-    pos_roots = [ZZ(root) for root in p.roots(multiplicities=False) if (root in ZZ)];
-    return [rt for rt in pos_roots if element(**{gen : rt}) == 0];
+    pos_roots = [ZZ(root) for root in p.roots(multiplicities=False) if (root in ZZ)]
+    return [rt for rt in pos_roots if element(**{gen : rt}) == 0]
     
 @cached_function
 def _tower_variables(parent):
-    result = [];
-    n_vars = _sage_const_0;
+    result = []
+    n_vars = 0
     while(is_PolynomialRing(parent) or is_MPolynomialRing(parent)):
-        result += [str(gen) for gen in parent.gens()];
-        n_vars += parent.ngens();
-        parent = parent.base();
+        result += [str(gen) for gen in parent.gens()]
+        n_vars += parent.ngens()
+        parent = parent.base()
 
-    return (parent,result, n_vars);
+    return (parent,result, n_vars)
 
 ## Operator class
 class Operator(object):
     ### Static parameters
-    _op_preference = _sage_const_0 ;
+    _op_preference = 0
 
     #######################################################
     ### INIT METHOD AND GETTERS
@@ -132,36 +135,36 @@ class Operator(object):
         
         ## Computing the polynomial associated ring
         try:
-            self.__pol_var = 'n';
-            i = -_sage_const_1 ;
-            names = [str(gen) for gen in base.base_ring().gens()];
+            self.__pol_var = 'n'
+            i = -1
+            names = [str(gen) for gen in base.base_ring().gens()]
             while(self.__pol_var in names):
-                i += _sage_const_1 ;
-                self.__pol_var = 'n' + str(i);
+                i += 1
+                self.__pol_var = 'n' + str(i)
             
-            self.__polynomialRing = PolynomialRing(base.base_ring(), self.__pol_var);
+            self.__polynomialRing = PolynomialRing(base.base_ring(), self.__pol_var)
         except RuntimeError:
-            self.__pol_var = 'n';
-            self.__polynomialRing = PolynomialRing(base.base_ring(),self.__pol_var);
+            self.__pol_var = 'n'
+            self.__polynomialRing = PolynomialRing(base.base_ring(),self.__pol_var)
             
         ## Computing the Ring_w_Sequence associated to base
         if(isinstance(base, Ring_w_Sequence)):
-            self.__base = base;
+            self.__base = base
         else:
-            self.__base = Wrap_w_Sequence_Ring(base);
-        self._original_base = base;    
+            self.__base = Wrap_w_Sequence_Ring(base)
+        self._original_base = base
                 
         ## Declaring private fields
-        self.__derivate = derivate;
+        self.__derivate = derivate
         
     def base(self):
-        return self.__base;
+        return self.__base
         
     def derivate(self):
-        return self.__derivate;
+        return self.__derivate
         
     def _get_preference(self):
-        return self._op_preference;
+        return self._op_preference
     
     ### Getter methods
     def getOrder(self):
@@ -170,10 +173,10 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def order(self):
-        return self.getOrder();
+        return self.getOrder()
         
     def getCoefficients(self):
         '''
@@ -181,10 +184,10 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
     
     def coefficients(self):
-        return self.getCoefficients();
+        return self.getCoefficients()
     
     def getCoefficient(self, i):
         '''
@@ -192,34 +195,34 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def coefficient(self, i):
-        return self.getCoefficient(i);
+        return self.getCoefficient(i)
         
     @cached_method
     def companion(self):
-        field = self.base().fraction_field();
+        field = self.base().fraction_field()
         
-        coefficients = [field(el) for el in self.getCoefficients()];    
+        coefficients = [field(el) for el in self.getCoefficients()]
         
         ## We divide by the leading coefficient
-        coefficients = [-(coefficients[i]/coefficients[-_sage_const_1 ]) for i in range(len(coefficients)-_sage_const_1 )];
+        coefficients = [-(coefficients[i]/coefficients[-1]) for i in range(len(coefficients)-1)]
         ## Trying to reduce the elements
         try:
             for i in range(len(coefficients)):
-                coefficients[i].reduce();
+                coefficients[i].reduce()
         except (AttributeError, ArithmeticError):
-            pass;
-        d = len(coefficients);
+            pass
+        d = len(coefficients)
         
         ## Building the rows of our matrix
-        rows = [[_sage_const_0  for i in range(d-_sage_const_1 )] + [coefficients[_sage_const_0 ]]];
-        for i in range(d-_sage_const_1 ):
-            rows += [[kronecker_delta(i,j) for j in range(d-_sage_const_1 )] + [coefficients[i+_sage_const_1 ]]];
+        rows = [[0 for i in range(d-1)] + [coefficients[0]]]
+        for i in range(d-1):
+            rows += [[kronecker_delta(i,j) for j in range(d-1)] + [coefficients[i+1]]]
             
         ## Returning the matrix
-        return Matrix(field, rows);
+        return Matrix(field, rows)
     #######################################################
     
     #######################################################
@@ -237,82 +240,82 @@ class Operator(object):
             OUTPUT:
                 A polynomial on self.base()[nx] where x will be an integer such the variable nx is not in self.base().gens()
         '''
-        if(n >= _sage_const_0 ):
+        if(n >= 0):
             try:
-                return self.forward(n);
+                return self.forward(n)
             except IndexError:
-                return _sage_const_0 ;
+                return 0
         else:
-            return self.backward(-n);
+            return self.backward(-n)
             
     @cached_method
     def forward(self, n):
-        if(n < _sage_const_0 ):
-            raise IndexError("Forward polynomials have only positive index");
+        if(n < 0):
+            raise IndexError("Forward polynomials have only positive index")
         elif(n > self.getOrder()):
-            return _sage_const_0 ;
+            return 0
         elif(self.is_zero()):
-            return _sage_const_0 ;
+            return 0
         else: 
-            var = self.__polynomialRing.gens()[-_sage_const_1 ];
+            var = self.__polynomialRing.gens()[-1]
             
-            return sum([self.base().sequence(self.getCoefficient(l),l-n)*falling_factorial(var+n,l) for l in range(n, self.getOrder()+_sage_const_1 )]);
+            return sum([self.base().sequence(self.getCoefficient(l),l-n)*falling_factorial(var+n,l) for l in range(n, self.getOrder()+1)])
           
     @cached_method  
     def backward(self, n):
-        if(n < _sage_const_0 ):
-            raise IndexError("Backward polynomials have only positive index");
+        if(n < 0):
+            raise IndexError("Backward polynomials have only positive index")
         elif(self.is_zero()):
-            return _sage_const_0 ;
+            return 0
         
-        var = self.__polynomialRing.gens()[-_sage_const_1 ];
-        return sum([self.base().sequence(self.getCoefficient(l), l+n)*falling_factorial(var-n, l) for l in range(_sage_const_0 ,self.getOrder()+_sage_const_1 )]);
+        var = self.__polynomialRing.gens()[-1]
+        return sum([self.base().sequence(self.getCoefficient(l), l+n)*falling_factorial(var-n, l) for l in range(0,self.getOrder()+1)])
         
     def get_recursion_row(self,i):
-        r = self.getCoefficients();
-        d = self.getOrder();
-        row = [];
+        r = self.getCoefficients()
+        d = self.getOrder()
+        row = []
         
-        #var = self.__polynomialRing.gens()[-1];
+        #var = self.__polynomialRing.gens()[-1]
         ### First summation part
-        #row += [sum([falling_factorial(k,l)*self.base().sequence(r[l],i-k+l) for l in range(0,k+1)]) for k in range(0,min(i,d))];
+        #row += [sum([falling_factorial(k,l)*self.base().sequence(r[l],i-k+l) for l in range(0,k+1)]) for k in range(0,min(i,d))]
         #if(i<d):
         #    ## Second summation part
-        #    row += [sum([falling_factorial(k+i,l)*self.base().sequence(r[l], l-k) for l in range(k,i+k+1)]) for k in range(d-i)];
+        #    row += [sum([falling_factorial(k+i,l)*self.base().sequence(r[l], l-k) for l in range(k,i+k+1)]) for k in range(d-i)]
         #    ## Third summation part
-        #    row += [self.forward(k)(**{str(var):i}) for k in range(d-i,d+1)];
+        #    row += [self.forward(k)(**{str(var):i}) for k in range(d-i,d+1)]
         #else:
         #    ## Second summation part
-        #    row += [self.backward(i-d-k)(**{str(var):i}) for k in range(i-d)];
+        #    row += [self.backward(i-d-k)(**{str(var):i}) for k in range(i-d)]
         #    ## Third summation part
-        #    row += [self.forward(k)(**{str(var):i}) for k in range(0,d+1)];
+        #    row += [self.forward(k)(**{str(var):i}) for k in range(0,d+1)]
         
         ## First summation part
-        row += [sum([falling_factorial(k,l)*self.base().sequence(r[l],i-k+l) for l in range(_sage_const_0 ,k+_sage_const_1 )]) for k in range(_sage_const_0 ,min(i,d))];
+        row += [sum([falling_factorial(k,l)*self.base().sequence(r[l],i-k+l) for l in range(0,k+1)]) for k in range(0,min(i,d))]
         if(i<d):
             ## Second summation part
-            row += [sum([falling_factorial(k+i,l)*self.base().sequence(r[l], l-k) for l in range(k,i+k+_sage_const_1 )]) for k in range(d-i)];
+            row += [sum([falling_factorial(k+i,l)*self.base().sequence(r[l], l-k) for l in range(k,i+k+1)]) for k in range(d-i)]
             ## Third summation part
-            row += [self.__eval_pol(self.forward(k),i) for k in range(d-i,d+_sage_const_1 )];
+            row += [self.__eval_pol(self.forward(k),i) for k in range(d-i,d+1)]
         else:
             ## Second summation part
-            row += [self.__eval_pol(self.backward(i-d-k),i) for k in range(i-d)];
+            row += [self.__eval_pol(self.backward(i-d-k),i) for k in range(i-d)]
             ## Third summation part
-            row += [self.__eval_pol(self.forward(k),i) for k in range(_sage_const_0 ,d+_sage_const_1 )];
+            row += [self.__eval_pol(self.forward(k),i) for k in range(0,d+1)]
             
-        return row;
+        return row
         
     def get_recursion_matrix(self, n):
-        nrows = n+_sage_const_1 ;
-        ncols = n+self.forward_order+_sage_const_1 ;
-        rows = [];
+        nrows = n+1
+        ncols = n+self.forward_order+1
+        rows = []
         
         for i in range(nrows):
-            row = self.get_recursion_row(i);
+            row = self.get_recursion_row(i)
             
-            rows += [[row[i] for i in range(min(len(row),ncols))] + [_sage_const_0  for i in range(ncols-len(row))]];
+            rows += [[row[i] for i in range(min(len(row),ncols))] + [0 for i in range(ncols-len(row))]]
             
-        return Matrix(self.__polynomialRing.base(), rows); 
+        return Matrix(self.__polynomialRing.base(), rows)
     #######################################################
         
     #######################################################
@@ -320,31 +323,31 @@ class Operator(object):
     #######################################################
     @derived_property
     def dimension(self):
-        return self.jp_matrix.right_kernel_matrix().nrows();
+        return self.jp_matrix().right_kernel_matrix().nrows()
     
     @derived_property
     def forward_order(self):
         if(self.is_zero()):
-            raise ValueError("The zero operator has not forward order");
+            raise ValueError("The zero operator has not forward order")
         
-        n = self.getOrder();
-        while(self.get_recursion_polynomial(n) == _sage_const_0 ):
-            n -= _sage_const_1 ;
+        n = self.getOrder()
+        while(self.get_recursion_polynomial(n) == 0):
+            n -= 1
         
-        return n;
+        return n
     
-    @derived_property
+    @cached_method
     def jp_value(self):
         ## TODO Be careful with this computation:oinly valid is the base field are the rational
-        jp_pol = self.get_recursion_polynomial(self.forward_order);
-        return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol));
+        jp_pol = self.get_recursion_polynomial(self.forward_order)
+        return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol))
        
-    @derived_property 
+    @cached_method 
     def jp_matrix(self):
-        return self.get_recursion_matrix(self.jp_value);
+        return self.get_recursion_matrix(self.jp_value())
         
     def get_jp_fo(self):
-        return self.jp_value+self.forward_order;      
+        return self.jp_value()+self.forward_order
     #######################################################
     
     #######################################################
@@ -356,7 +359,7 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def scalar(self, other):
         '''
@@ -364,7 +367,7 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def mult(self, other):
         '''
@@ -372,7 +375,7 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def is_zero(self):
         '''
@@ -380,7 +383,7 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked');
+        raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def derivative(self):
         '''
@@ -389,7 +392,7 @@ class Operator(object):
         
         This method must be extended in each child-class of Operator.
         '''
-        raise NotImplementedError('This operator can not be derivated');
+        raise NotImplementedError('This operator can not be derivated')
     ####################################################### 
     
     ####################################################### 
@@ -401,15 +404,15 @@ class Operator(object):
         '''
         ## If the input is not an operator, trying the casting
         if(not isinstance(other, Operator)):
-            other = self.__class__(self.base(), other, self.derivate());
+            other = self.__class__(self.base(), other, self.derivate())
             
         ## If the input is an Operator we guess the hightest preference type
         if(not isinstance(other, self.__class__)):
             if(other._get_preference() > self._get_preference()):
-                return other.add_solution(self);
-            other = self.__class__(self.base(), other, self.derivate());
+                return other.add_solution(self)
+            other = self.__class__(self.base(), other, self.derivate())
             
-        return self._compute_add_solution(other);
+        return self._compute_add_solution(other)
                 
     def mult_solution(self, other):
         '''
@@ -417,27 +420,27 @@ class Operator(object):
         '''
         ## If the input is not an operator, trying the casting
         if(not isinstance(other, Operator)):
-            other = self.__class__(self.base(), other, self.derivate());
+            other = self.__class__(self.base(), other, self.derivate())
             
         ## If the input is an Operator we guess the hightest preference type
         if(not isinstance(other, self.__class__)):
             if(other._get_preference() > self._get_preference()):
-                return other.mult_solution(self);
-            other = self.__class__(self.base(), other, self.derivate());
+                return other.mult_solution(self)
+            other = self.__class__(self.base(), other, self.derivate())
             
-        return self._compute_mult_solution(other);
+        return self._compute_mult_solution(other)
         
     def derivative_solution(self):
         '''
         This method computes a new operator such the derivative of any solution of 'self == 0' must satisfy.
         '''
-        return self._compute_derivative_solution();
+        return self._compute_derivative_solution()
         
     def integral_solution(self):
         '''
         This method computes a new operator such any anti-derivative of any solution of 'self == 0' must satisfy.
         '''
-        return self._compute_integral_solution();
+        return self._compute_integral_solution()
         
     def compose_solution(self, other):
         '''
@@ -456,46 +459,46 @@ class Operator(object):
         '''
         ## If the input is not an operator, trying the casting
         if(not other in self.base()):
-            raise TypeError("Element (%s) is not valid for compose with a solution of %s" %(other, str(self)));
+            raise TypeError("Element (%s) is not valid for compose with a solution of %s" %(other, str(self)))
         
-        return self._compute_compose_solution(other);
+        return self._compute_compose_solution(other)
     
     def _compute_add_solution(self, other):
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_mult_solution(self, other):
         '''
         This method computes a new operator such any solution of 'self == 0' multiplied by any solution of 'other == 0' must satisfy.
         It assumes that other and self are exactly the same type.
         '''
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_derivative_solution(self):
         '''
         This method computes a new operator such the derivative of any solution of 'self == 0' must satisfy.
         '''
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_integral_solution(self):
         '''
         This method computes a new operator such any anti-derivative of any solution of 'self == 0' must satisfy.
         '''
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_compose_solution(self, other):
         '''
         This method computes a new operator that annihilates any solution of 'self' compose with any solution of 'other'.
         '''
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__);
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 
     
     ####################################################### 
     ### MAGIC PYTHON METHODS
     ####################################################### 
     def __getitem__(self, key):
-        if(key > self.getOrder() or key < _sage_const_0 ):
-            raise IndexError("No coefficient can be get bigger than the order or with negative index");
-        return self.getCoefficient(key);
+        if(key > self.getOrder() or key < 0):
+            raise IndexError("No coefficient can be get bigger than the order or with negative index")
+        return self.getCoefficient(key)
     
     def __call__(self, obj):
         '''
@@ -504,76 +507,76 @@ class Operator(object):
         This method must be extended in each child-class of Operator.
         '''
         try:
-            res = obj.parent().zero();
-            to_mult = obj;
-            for i in range(self.getOrder()+_sage_const_1 ):
-                res += self.getCoefficient(i)*to_mult;
-                to_mult = to_mult.derivative();
-            return res;
+            res = obj.parent().zero()
+            to_mult = obj
+            for i in range(self.getOrder()+1):
+                res += self.getCoefficient(i)*to_mult
+                to_mult = to_mult.derivative()
+            return res
         except Exception:
-            raise NotImplementedError('Method not implemented -- Abstract class asked');
+            raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     ### Addition
     def __add__(self, other):
         try:
-            return self.add(other);
+            return self.add(other)
         except Exception:
-            return NotImplemented;
+            return NotImplemented
             
     ### Substraction
     def __sub__(self, other):
         try:
-            #return self.add(other.scalar(-1));
-            return self.scalar(-_sage_const_1 ).add(other).scalar(-_sage_const_1 );
+            #return self.add(other.scalar(-1))
+            return self.scalar(-1).add(other).scalar(-1)
         except Exception:
-            return NotImplemented;
+            return NotImplemented
             
     ### Multiplication
     def __mul__(self, other):
         try:                
-            return self.mult(other);
+            return self.mult(other)
         except Exception:
-            return NotImplemented;
+            return NotImplemented
   
     ### Reverse addition
     def __radd__(self, other):
-        return self.__add__(other);
+        return self.__add__(other)
             
     ### Reverse substraction
     def __rsub__(self, other):
-        return self.scalar(-_sage_const_1 ).__add__(other);
+        return self.scalar(-1).__add__(other)
             
     ### Reverse multiplication
     def __rmul__(self, other):
         try:
             if(not isinstance(other, Operator)):
-                return self.scalar(other);
+                return self.scalar(other)
                 
-            return other.mult(self);
+            return other.mult(self)
         except Exception:
-            return NotImplemented;
+            return NotImplemented
         
     ### Implicit addition
     def __iadd__(self, other):
-        return self.__add__(other);
+        return self.__add__(other)
             
     ### Implicit substraction
     def __isub__(self, other):
-        return self.__sub__(other);
+        return self.__sub__(other)
             
     ### Implicit multiplication
     def __imul__(self, other):
-        return self.__mul__(other);
+        return self.__mul__(other)
             
     ### Unary '-'
     def __neg__(self):
-        return self.scalar(-_sage_const_1 );
+        return self.scalar(-1)
     ####################################################### 
     
     def __eval_pol(self,pol, val):
         try:
-            return pol(**{self.__pol_var:val});
+            return pol(**{self.__pol_var:val})
         except RuntimeError:
-            coeffs = pol.coefficients(False);
-            return sum(coeffs[i]*val**i for i in range(len(coeffs)));
+            coeffs = pol.coefficients(False)
+            return sum(coeffs[i]*val**i for i in range(len(coeffs)))
 

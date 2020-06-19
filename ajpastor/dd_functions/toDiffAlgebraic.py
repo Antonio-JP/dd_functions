@@ -941,7 +941,7 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
         f = R2.element(e);
         if(len(init) > 0):
             try:
-                f = f.change_init_values([init[i] for i in range(min(len(init), f.equation.jp_value+1))]);
+                f = f.change_init_values([init[i] for i in range(min(len(init), f.equation.jp_value()+1))]);
             except ValueError:
                 continue;
         
@@ -972,7 +972,7 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
         
         ##################################################
         ### Comparing the initial values
-        for i in range(min(len(init), f.equation.jp_value+1),len(init)):
+        for i in range(min(len(init), f.equation.jp_value()+1),len(init)):
             try:
                 eqs += [f.getInitialValue(i) - init[i]];
             except TypeError:
