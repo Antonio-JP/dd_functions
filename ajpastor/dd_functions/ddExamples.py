@@ -3048,7 +3048,7 @@ def __decide_parent(input, parent = None, depth = 1):
         R = input.parent()
         if(input in QQ):
             dR = DFinite.to_depth(depth)
-        elif(isinstance(R, SR)):
+        elif(R is SR):
             parameters = set([str(el) for el in input.variables()])-set(['x'])
             if(len(parameters) > 0 ):
                 dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters)
