@@ -1562,7 +1562,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 d = self.getOrder()
                 i = max(n-d,0 )
                 rec = self.equation.get_recursion_row(i)
-                while(rec[n] == 0  and i <= self.equation.jp_value):                   
+                while(rec[n] == 0  and i <= self.equation.jp_value()):                   
                     i += 1 
                     rec = self.equation.get_recursion_row(i)
                 if(rec[n] == 0 ):
