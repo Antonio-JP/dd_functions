@@ -25,26 +25,26 @@ AUTHORS:
 # ****************************************************************************
 
 try:
-    from .ddFunction import *;
+    from .ddFunction import *
 except Exception:
-    print("Error loading module dd_functions.ddFunction");
+    print("Error loading module dd_functions.ddFunction")
 try:
-    from .ddExamples import *;
+    from .ddExamples import *
 except Exception:
-    print("Error loading module dd_functions.ddExamples");
+    print("Error loading module dd_functions.ddExamples")
 try:
-    from .symbolic import *;
+    from .symbolic import *
 except Exception:
-    print("Error loading module dd_functions.symbolic");
+    print("Error loading module dd_functions.symbolic")
 try:
-    from .toDiffAlgebraic import *;
+    from .toDiffAlgebraic import *
 except Exception:
-    print("Error loading module dd_functions.toDiffAlgebraic");
+    print("Error loading module dd_functions.toDiffAlgebraic")
 try:
-    from .lazyDDRing import *;
+    from .lazyDDRing import *
 except Exception:
-    print("Error loading module dd_functions.lazyDDRing");
+    print("Error loading module dd_functions.lazyDDRing")
 
-from pkgutil import extend_path;
-__path__ = extend_path(__path__, __name__);
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
 
