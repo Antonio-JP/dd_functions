@@ -97,18 +97,28 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
+#from sage.all_cmdline import *   # import sage library
+
+# Sage imports
+from sage.all import (cached_function, factorial, bell_polynomial, NumberField, QQ, ZZ, pi,
+                        sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR)
+from sage.all_cmdline import x
 
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 
-from ajpastor.dd_functions.ddFunction import *
-from ajpastor.dd_functions.exceptions import *
+
+# ajpastor imports
+from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DDFinite)
+from ajpastor.dd_functions.exceptions import (ZeroValueRequired, )
 from ajpastor.dd_functions.lazyDDRing import LazyDDRing
+from ajpastor.misc.dinamic_string import DinamicString
+#from ajpastor.dd_functions.ddFunction import *
+#from ajpastor.dd_functions.exceptions import *
 
-from ajpastor.misc.dinamic_string import *
+#from ajpastor.misc.dinamic_string import *
 
-from ajpastor.misc.exceptions import *
+#from ajpastor.misc.exceptions import *
 
 ##################################################################################
 ##################################################################################
@@ -151,7 +161,7 @@ def Sin(input, ddR = None):
                 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan;
+            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan
             sage: Sin(x).getInitialValueList(10)
             [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
             sage: Sin(x)[0]
@@ -168,16 +178,16 @@ def Sin(input, ddR = None):
             True
             sage: # checking the object with polynomial coefficients
             sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
-            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: for p in polys:
-            ....:     l1 = Sin(p).getInitialValueList(10);
-            ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = Sin(p).getInitialValueList(10)
+            ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking the composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Sin(x)(p)).getInitialValueList(10);
-            ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = (Sin(x)(p)).getInitialValueList(10)
+            ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: Sin(2*x) == 2*Sin(x)*Cos(x)
@@ -193,8 +203,8 @@ def Sin(input, ddR = None):
 
         We can also check identities with complex exponential::
 
-            sage: from ajpastor.dd_functions.ddExamples import Exp, Sinh;
-            sage: from ajpastor.dd_functions.ddFunction import DFiniteI;
+            sage: from ajpastor.dd_functions.ddExamples import Exp, Sinh
+            sage: from ajpastor.dd_functions.ddFunction import DFiniteI
             sage: I = DFiniteI.base_ring().gens()[0]; I
             I
             sage: X = DFiniteI.variables()[0]; X
@@ -206,7 +216,7 @@ def Sin(input, ddR = None):
 
         And also the relation with the hypergeometric functions::
 
-            sage: from ajpastor.dd_functions.ddExamples import F01;
+            sage: from ajpastor.dd_functions.ddExamples import F01
             sage: Sin(x) == x*F01(3/2)(-x^2/4)
             True
 
@@ -232,24 +242,24 @@ def Sin(input, ddR = None):
             ZeroValueRequired: required a zero value for Exp(x) in sin(Exp(x))
     '''
     if(is_DDFunction(input)):
-        return Sin(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Sin(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ZeroValueRequired(input, "Sin(%s)" %input);
+        raise ZeroValueRequired(input, "Sin(%s)" %input)
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    sol = dR.element([df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sin(_1)", newName)); 
+    sol = dR.element([df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sin(_1)", newName))
     if(not sol.is_fully_defined):
-        return Sin(x)(input);
-    return sol;
+        return Sin(x)(input)
+    return sol
 
 @cached_function    
 def Cos(input, ddR = None):
@@ -285,7 +295,7 @@ def Cos(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos;
+            sage: from ajpastor.dd_functions.ddExamples import Sin,Cos
             sage: Cos(x).getInitialValueList(10)
             [1, 0, -1, 0, 1, 0, -1, 0, 1, 0]
             sage: Cos(x)[0]
@@ -301,17 +311,17 @@ def Cos(input, ddR = None):
             sage: Sin(x)^2 + Cos(x)^2 == 1
             True
             sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
-            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: # checking the method with polynomial input
             sage: for p in polys:
-            ....:     l1 = Cos(p).getInitialValueList(10);
-            ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = Cos(p).getInitialValueList(10)
+            ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Cos(x)(p)).getInitialValueList(10);
-            ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = (Cos(x)(p)).getInitialValueList(10)
+            ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: Cos(2*x) == Cos(x)^2 - Sin(x)^2
@@ -321,9 +331,9 @@ def Cos(input, ddR = None):
 
         We can also check identities with complex exponential::
 
-            sage: from ajpastor.dd_functions.ddExamples import Exp, Cosh;
-            sage: from ajpastor.dd_functions.ddFunction import DFiniteI;
-            sage: I = DFiniteI.base_ring().gens()[0]; X = DFiniteI.variables()[0];
+            sage: from ajpastor.dd_functions.ddExamples import Exp, Cosh
+            sage: from ajpastor.dd_functions.ddFunction import DFiniteI
+            sage: I = DFiniteI.base_ring().gens()[0]; X = DFiniteI.variables()[0]
             sage: Exp(I*X) + Exp(-I*X) == 2*Cos(x)
             True
             sage: Cos(x) == Cosh(I*X)
@@ -351,24 +361,24 @@ def Cos(input, ddR = None):
             ZeroValueRequired: required a zero value for Exp(x) in Cos(Exp(x))
     '''
     if(is_DDFunction(input)):
-        return Cos(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Cos(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ZeroValueRequired(input, "Cos(%s)" %input);
+        raise ZeroValueRequired(input, "Cos(%s)" %input)
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    sol = dR.element([df**3 ,-df2,df], [1,0,-evaluate(df)**2 ], name=DinamicString("cos(_1)",newName));
+    sol = dR.element([df**3 ,-df2,df], [1,0,-evaluate(df)**2 ], name=DinamicString("cos(_1)",newName))
     if(not sol.is_fully_defined):
-        return Cos(x)(input);
-    return sol;
+        return Cos(x)(input)
+    return sol
     
 @cached_function
 def Tan(input, ddR = None):
@@ -425,54 +435,54 @@ def Tan(input, ddR = None):
             sage: Tan(x).derivative() == 1 + Tan(x)^2 # long time (> 1 min)
             True
             sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
-            ....: QQ[x](x*(x-1)^2*(x+3)^2)];
+            ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: # checking the object with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = Tan(p).getInitialValueList(10);
-            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = Tan(p).getInitialValueList(10)
+            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking the composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Tan(x)(p)).getInitialValueList(10);
-            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)];
+            ....:     l1 = (Tan(x)(p)).getInitialValueList(10)
+            ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
     '''
     if(is_DDFunction(input)):
-        return Tan(x)(input);
-    g, dR = __decide_parent(input, ddR,2 );
+        return Tan(x)(input)
+    g, dR = __decide_parent(input, ddR,2 )
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute tan(f) with f(0) != 0");
+        raise ValueError("Impossible to compute tan(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = Cos(input)**2 ; b = dR.base().zero(); c = dR.base()(-2 );
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg)
+    a = Cos(input)**2 ; b = dR.base().zero(); c = dR.base()(-2 )
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([dg**3 *c,dg**2 *b-ddg*a,dg*a]).equation;
+    newOperator = dR.element([dg**3 *c,dg**2 *b-ddg*a,dg*a]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_tan = Tan(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_tan = Tan(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_tan[0]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_tan[0]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
+    result = dR.element(newOperator,newInit)
     
-    newName = repr(input);
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("tan(_1)",newName);
-    return result;
+    result._DDFunction__name = DinamicString("tan(_1)",newName)
+    return result
 
 @cached_function    
 def Sinh(input, ddR = None):
@@ -508,8 +518,8 @@ def Sinh(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp;
-            sage: s = Sinh(x); c = Cosh(x);
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp
+            sage: s = Sinh(x); c = Cosh(x)
             sage: s[0]
             -1
             sage: s[1]
@@ -546,21 +556,21 @@ def Sinh(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Sinh(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Sinh(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute sin(f) with f(0) != 0");
+        raise ValueError("Impossible to compute sin(f) with f(0) != 0")
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    return dR.element([-df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sinh(_1)",newName)); 
+    return dR.element([-df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sinh(_1)",newName))
 
 @cached_function    
 def Cosh(input, ddR = None):
@@ -596,8 +606,8 @@ def Cosh(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp;
-            sage: s = Sinh(x); c = Cosh(x);
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Exp
+            sage: s = Sinh(x); c = Cosh(x)
             sage: c[0]
             -1
             sage: c[1]
@@ -634,21 +644,21 @@ def Cosh(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Cosh(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Cosh(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute cos(f) with f(0) != 0");
+        raise ValueError("Impossible to compute cos(f) with f(0) != 0")
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    return dR.element([-df**3 ,-df2,df],[1,0,evaluate(df)**2 ], name=DinamicString("cosh(_1)", newName)); 
+    return dR.element([-df**3 ,-df2,df],[1,0,evaluate(df)**2 ], name=DinamicString("cosh(_1)", newName))
 
 @cached_function
 def Tanh(input, ddR = None):
@@ -684,8 +694,8 @@ def Tanh(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Tanh, Exp;
-            sage: s = Sinh(x); c = Cosh(x); t = Tanh(x);
+            sage: from ajpastor.dd_functions.ddExamples import Sinh, Cosh, Tanh, Exp
+            sage: s = Sinh(x); c = Cosh(x); t = Tanh(x)
             sage: t[0]
             2
             sage: t[1]
@@ -700,7 +710,7 @@ def Tanh(input, ddR = None):
             sage: t.derivative() == 1/(c^2)
             True
             sage: # checking definition by exponetial
-            sage: t == s/c;
+            sage: t == s/c
             True
             sage: t == (Exp(x) - Exp(-x))/(Exp(x) + Exp(-x))
             True
@@ -711,39 +721,39 @@ def Tanh(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Tanh(x)(input);
-    g, dR = __decide_parent(input, ddR,2 );
+        return Tanh(x)(input)
+    g, dR = __decide_parent(input, ddR,2 )
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute tan(f) with f(0) != 0");
+        raise ValueError("Impossible to compute tan(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = Cosh(input)**2 ; 
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg)
+    a = Cosh(input)**2
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([2*dg**3, -ddg*a, dg*a]).equation;
+    newOperator = dR.element([2*dg**3, -ddg*a, dg*a]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_tanh = Tanh(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_tanh = Tanh(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_tanh[0]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_tanh[0]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
+    result = dR.element(newOperator,newInit)
     
-    newName = repr(input);
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("tanh(_1)",newName);
-    return result;
+    result._DDFunction__name = DinamicString("tanh(_1)",newName)
+    return result
 
 @cached_function
 def Arcsin(input, ddR = None):
@@ -779,7 +789,7 @@ def Arcsin(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import *;
+            sage: from ajpastor.dd_functions.ddExamples import *
             sage: arcsin = Arcsin(x); arcsin
             arcsin(x)
             sage: arcsin[0]
@@ -802,38 +812,38 @@ def Arcsin(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Arcsin(x)(input);
-    g, dR = __decide_parent(input, ddR);
+        return Arcsin(x)(input)
+    g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arcsin(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arcsin(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg;
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg)
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([a,b,c]).equation;
+    newOperator = dR.element([a,b,c]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arcsin = Arcsin(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arcsin = Arcsin(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arcsin[0]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arcsin[0]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
-    newName = repr(input);
+    result = dR.element(newOperator,newInit)
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arcsin(_1)",newName);
+    result._DDFunction__name = DinamicString("arcsin(_1)",newName)
     
-    return result;
+    return result
 
 @cached_function
 def Arccos(input, ddR = None):
@@ -852,8 +862,8 @@ def Arccos(input, ddR = None):
         it implies some innecessary performance difficulties when computing with
         this function, since::
 
-            sage: from ajpastor.dd_functions.ddExamples import *;
-            sage: arccos = Arccos(x); pi = arccos.parent().parameters()[0];
+            sage: from ajpastor.dd_functions.ddExamples import *
+            sage: arccos = Arccos(x); pi = arccos.parent().parameters()[0]
             sage: arccos - pi/2 == Arcsin(-x)
             True
             
@@ -902,39 +912,39 @@ def Arccos(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Arccos(x)(input);
-    g, dR = __decide_parent(input, ddR);
-    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
+        return Arccos(x)(input)
+    g, dR = __decide_parent(input, ddR)
+    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arccos(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arccos(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg;
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg)
+    a = dR.base().zero(); b = -(ddg*(1-g**2) + g*dg**2); c = (1-g**2)*dg
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([a,b,c]).equation;
+    newOperator = dR.element([a,b,c]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [pi/Integer(2),-1];
+        newInit = [pi/ZZ(2),-1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arccos = Arccos(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arccos = Arccos(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arccos[0]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arccos[0]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
-    newName = repr(input);
+    result = dR.element(newOperator,newInit)
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arccos(_1)",newName);
+    result._DDFunction__name = DinamicString("arccos(_1)",newName)
     
-    return result;
+    return result
 
 @cached_function
 def Arctan(input, ddR = None):
@@ -970,7 +980,7 @@ def Arctan(input, ddR = None):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import Arctan;
+            sage: from ajpastor.dd_functions.ddExamples import Arctan
             sage: arctan = Arctan(x); arctan
             arctan(x)
             sage: arctan[0]
@@ -984,7 +994,7 @@ def Arctan(input, ddR = None):
             sage: Arctan(-x) == -arctan
             True
             sage: # cheking identities with trigonometric functions
-            sage: from ajpastor.dd_functions.ddExamples import Sin, Cos;
+            sage: from ajpastor.dd_functions.ddExamples import Sin, Cos
             sage: Sin(arctan)^2 == x^2/(1+x^2) # long time (> 1 min)
             True
             sage: Cos(arctan)^2 == 1/(1 + x^2) # long time (> 1 min)
@@ -994,38 +1004,38 @@ def Arctan(input, ddR = None):
             True
     '''
     if(is_DDFunction(input)):
-        return Arctan(x)(input);
-    g, dR = __decide_parent(input, ddR);
+        return Arctan(x)(input)
+    g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arctan(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arctan(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg);
-    a = dR.base().zero(); b = (2*g*dg**2 - (1+g**2)*ddg); c = (1+g**2)*dg;
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg)
+    a = dR.base().zero(); b = (2*g*dg**2 - (1+g**2)*ddg); c = (1+g**2)*dg
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([a,b,c]).equation;
+    newOperator = dR.element([a,b,c]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arctan = Arctan(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arctan = Arctan(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arctan[0]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arctan[0]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
+    result = dR.element(newOperator,newInit)
     
-    newName = repr(input);
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arctan(_1)",newName);
-    return result;
+    result._DDFunction__name = DinamicString("arctan(_1)",newName)
+    return result
 
 @cached_function 
 def Arcsinh(input, ddR = None):
@@ -1045,37 +1055,37 @@ def Arcsinh(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Arcsinh(x)(input);
-    g, dR = __decide_parent(input, ddR);
+        return Arcsinh(x)(input)
+    g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arcsinh(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arcsinh(f) with f(0) != 0")
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2+1
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation;
+    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arcsinh = Arcsinh(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arcsinh = Arcsinh(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arcsinh[0]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arcsinh[0]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
-    newName = repr(input);
+    result = dR.element(newOperator,newInit)
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arcsinh(_1)",newName);
+    result._DDFunction__name = DinamicString("arcsinh(_1)",newName)
     
-    return result;
+    return result
 
 @cached_function
 def Arccosh(input, ddR = None):
@@ -1094,39 +1104,39 @@ def Arccosh(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Arccosh(x)(input);
-    g, dR = __decide_parent(input, ddR);
-    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.base_field.gens()[0];
-    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi');
+        return Arccosh(x)(input)
+    g, dR = __decide_parent(input, ddR)
+    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.base_field.gens()[0]
+    dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arccosh(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arccosh(f) with f(0) != 0")
     
     dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = g**2-1
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation;
+    newOperator = dR.element([dR.base().zero(),(g*dg**2 - ddg*a),dg*a]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [I*pi/2,-I];
+        newInit = [I*pi/2,-I]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arccosh = Arccosh(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arccosh = Arccosh(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arccosh[0]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arccosh[0]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
-    newName = repr(input);
+    result = dR.element(newOperator,newInit)
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arccosh(_1)",newName);
+    result._DDFunction__name = DinamicString("arccosh(_1)",newName)
     
-    return result;
+    return result
 
 @cached_function 
 def Arctanh(input, ddR = None):
@@ -1145,37 +1155,37 @@ def Arctanh(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Arctanh(x)(input);
-    g, dR = __decide_parent(input, ddR);
+        return Arctanh(x)(input)
+    g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(g) != 0):
-        raise ValueError("Impossible to compute arctanh(f) with f(0) != 0");
+        raise ValueError("Impossible to compute arctanh(f) with f(0) != 0")
     
-    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = 1-g**2;
+    dg = dR.base_derivation(g); ddg = dR.base_derivation(dg); a = 1-g**2
     
     ### First we compute the new linear differential operator
-    newOperator = dR.element([dR.base().zero(), -(ddg*a + g*dg**2*2), dg*a]).equation;
+    newOperator = dR.element([dR.base().zero(), -(ddg*a + g*dg**2*2), dg*a]).equation
         
     ### Now, we compute the initial values required
     if(input == x):
-        newInit = [0,1];
+        newInit = [0,1]
     else:
-        required = newOperator.get_jp_fo()+1;
+        required = newOperator.get_jp_fo()+1
             
-        init_arctanh = Arctanh(x).getInitialValueList(required);
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)];
+        init_arctanh = Arctanh(x).getInitialValueList(required)
+        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
             
-        newInit = [init_arctanh[0]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)]; ## See Faa di Bruno's formula
+        newInit = [init_arctanh[0]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
-    result = dR.element(newOperator,newInit);
+    result = dR.element(newOperator,newInit)
     
-    newName = repr(input);
+    newName = repr(input)
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
-        newName = input._DDFunction__name;
+        newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arctanh(_1)",newName);
-    return result;
+    result._DDFunction__name = DinamicString("arctanh(_1)",newName)
+    return result
 
 ##################################################################################
 ##################################################################################
@@ -1201,21 +1211,21 @@ def Log(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Log(x+1)(input-1);
-    f,dR = __decide_parent(input, ddR);
+        return Log(x+1)(input-1)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 1):
-        raise ValueError("Impossible to compute ln(f) with f(0) != 1");
+        raise ValueError("Impossible to compute ln(f) with f(0) != 1")
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    return dR.element([0,df**2 -df2*f,df*f],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1)",newName));
+    return dR.element([0,df**2 -df2*f,df*f],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1)",newName))
     
 @cached_function 
 def Log1(input, ddR = None):
@@ -1234,23 +1244,23 @@ def Log1(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Log1(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Log1(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute cos(f) with f(0) != 0");
+        raise ValueError("Impossible to compute cos(f) with f(0) != 0")
     
-    df = dR.base_derivation(f);
-    df2 = dR.base_derivation(df);
+    df = dR.base_derivation(f)
+    df2 = dR.base_derivation(df)
     
-    f1 = f+1;
+    f1 = f+1
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
     
-    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1+1)", newName)); 
+    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1+1)", newName))
     
 @cached_function 
 def Exp(input, ddR = None):
@@ -1269,18 +1279,18 @@ def Exp(input, ddR = None):
         This function can be converted into symbolic expressions.
     '''
     if(is_DDFunction(input)):
-        return Exp(x)(input);
-    f,dR = __decide_parent(input, ddR);
+        return Exp(x)(input)
+    f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0);
+    evaluate = lambda p : dR.getSequenceElement(p,0)
     if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute exp(f) with f(0) != 0");
+        raise ValueError("Impossible to compute exp(f) with f(0) != 0")
     
-    newName = repr(f);
+    newName = repr(f)
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name;
+        newName = f._DDFunction__name
         
-    return dR.element([-dR.base_derivation(f),1],[1], name=DinamicString("exp(_1)", newName));
+    return dR.element([-dR.base_derivation(f),1],[1], name=DinamicString("exp(_1)", newName))
 
 ##################################################################################
 ##################################################################################
@@ -1314,27 +1324,27 @@ def BesselD(input = 'P', kind = 1):
     - The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
     - When evaluating parameters, the initial values will not update and must be set by hand.
     '''
-    parent, par = __check_list([input], DFinite.variables());
-    par = par[0];
+    parent, par = __check_list([input], DFinite.variables())
+    par = par[0]
         
     if(parent is QQ):
-        parent = DFinite;
+        parent = DFinite
     else:
-        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
-        par = parent.base()(par);
-    x = parent.variables()[0];
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+        par = parent.base()(par)
+    x = parent.variables()[0]
         
     if(kind == 1):
-        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_J(_1,_2)", [repr(par),"x"]));
+        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_J(_1,_2)", [repr(par),"x"]))
         if(par in ZZ):
-            alpha = ZZ(par);
-            func = func.change_init_values([0 for i in range(alpha)] + [Integer(1)/Integer(2) **alpha, 0, -((alpha+Integer(2))/(Integer(2) **(alpha+2 )))], name = func._DDFunction__name);
+            alpha = ZZ(par)
+            func = func.change_init_values([0 for i in range(alpha)] + [ZZ(1)/ZZ(2) **alpha, 0, -((alpha+ZZ(2))/(ZZ(2) **(alpha+2)))], name = func._DDFunction__name)
     elif(kind == 2 ):
-        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_Y(_1,_2)", [repr(par),"x"]));
+        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_Y(_1,_2)", [repr(par),"x"]))
     else:
-        raise ValueError("Impossible to manage Bessel functions of %sth kind" %(kind));
+        raise ValueError("Impossible to manage Bessel functions of %sth kind" %(kind))
     
-    return func;
+    return func
     
 ### Struve's functions
 @cached_function
@@ -1370,51 +1380,51 @@ def StruveD(mu='P',kind=1):
     - When evaluating parameters, the initial values will not update and must be set by hand.
         
     '''
-    parent, par = __check_list([mu], DFinite.variables());
-    par = par[0];
+    parent, par = __check_list([mu], DFinite.variables())
+    par = par[0]
     
     if(kind != 1):
-        raise TypeError("Only struve_H functions are implemented");
+        raise TypeError("Only struve_H functions are implemented")
         
     if(parent is QQ):
-        parent = DFinite;
+        parent = DFinite
     else:
-        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
-    f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", [repr(par),"x"]));
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+    f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", [repr(par),"x"]))
     if(par in ZZ and par >= 0):
-        num = factorial(par+1)*pi*(Integer(1)/Integer(2))**(par+1);
-        den = gamma(Integer(3)/Integer(2))*gamma(par+Integer(3)/Integer(2));
-        val = QQ(num/den);
-        f = f.change_init_values([0 for i in range(par+1)] + [val], name=f._DDFunction__name);
+        num = factorial(par+1)*pi*(ZZ(1)/ZZ(2))**(par+1)
+        den = gamma(ZZ(3)/ZZ(2))*gamma(par+ZZ(3)/ZZ(2))
+        val = QQ(num/den)
+        f = f.change_init_values([0 for i in range(par+1)] + [val], name=f._DDFunction__name)
     
-    return f;
+    return f
 
 
 ###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials 
 def __init_value_associated_legendre(n,m,kind):
-    S1_2 = Integer(1)/Integer(2);
-    S2 = Integer(2);
-    S1 = Integer(1);
+    S1_2 = ZZ(1)/ZZ(2)
+    S2 = ZZ(2)
+    S1 = ZZ(1)
     
     if(kind == 1):
-        res = (2**m*sqrt(pi))/gamma((n-m)/S2 + S1)/gamma(S1_2-(n+m)/S2);
+        res = (2**m*sqrt(pi))/gamma((n-m)/S2 + S1)/gamma(S1_2-(n+m)/S2)
     else:
-        res = -(S2**(m-S1)*sqrt(pi)*sin((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1_2)/gamma((n-m)/S2 + S1);
+        res = -(S2**(m-S1)*sqrt(pi)*sin((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1_2)/gamma((n-m)/S2 + S1)
 
-    return res;
+    return res
 
 def __first_derivative_associated_legendre(n,m,kind):
-    S1_2 = Integer(1)/Integer(2);
-    S2 = Integer(2);
-    S1 = Integer(1);
+    S1_2 = ZZ(1)/ZZ(2)
+    S2 = ZZ(2)
+    S1 = ZZ(1)
     
     if(kind == 1):
-        res = -(S2**(m+S1)*sqrt(pi))/gamma((n-m)/S2 + S1_2)/gamma(-(n+m)/S2);
+        res = -(S2**(m+S1)*sqrt(pi))/gamma((n-m)/S2 + S1_2)/gamma(-(n+m)/S2)
     else:
-        res = (S2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1)/gamma((n-m)/S2 + S1_2);
+        res = (S2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1)/gamma((n-m)/S2 + S1_2)
 
-    return res;
+    return res
 
 @cached_function 
 def LegendreD(nu='n', mu = 0, kind=1):
@@ -1468,43 +1478,43 @@ def LegendreD(nu='n', mu = 0, kind=1):
     - Initial values will also be computed for the parameter values that have power series solutions. The second kind may have non-rational initial values and those will not be computed.
     - When evaluating parameters, the initial values will not update and must be set by hand.
     '''
-    parent, par = __check_list([nu,mu], DFinite.variables());
-    n = par[0]; m = par[1];
+    parent, par = __check_list([nu,mu], DFinite.variables())
+    n = par[0]; m = par[1]
     
     ## Building the final parent
     if(parent is QQ):
-        parent = DFinite;
+        parent = DFinite
     else:
-        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     
     ## Building the final name
-    x = parent.variables()[0];
+    x = parent.variables()[0]
     if(m != 0):
-        name = DinamicString("Legendre(_1,_2;_3)" [repr(n), repr(m), repr(x)]);
+        name = DinamicString("Legendre(_1,_2;_3)", [repr(n), repr(m), repr(x)])
     elif(kind == 1):
-        name = DinamicString("legendre_P(_1,_2)", [repr(n),repr(x)]);
+        name = DinamicString("legendre_P(_1,_2)", [repr(n),repr(x)])
     elif(kind == 2):
-        name = DinamicString("legendre_Q(_1,_2)", [repr(n),repr(x)]);
+        name = DinamicString("legendre_Q(_1,_2)", [repr(n),repr(x)])
     else:
-        raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind);
+        raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind)
     
     ## Building the initial values
-    init = [];
+    init = []
     if((m == 0) and (n in ZZ) and (n >= 0)):
         try:
-            init = [__init_value_associated_legendre(n,m,kind), __first_derivative_associated_legendre(n,m,kind)];
+            init = [__init_value_associated_legendre(n,m,kind), __first_derivative_associated_legendre(n,m,kind)]
             if(any(el not in parent.base_field for el in init)):
-                init = [];
+                init = []
         except:
-            pass;
+            pass
     ## Building the coefficients of the equation
     if(m == 0):
-        coeffs = [(n*(n+1)),-2*x,1-x**2];
+        coeffs = [(n*(n+1)),-2*x,1-x**2]
     else:
-        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)**2];
+        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)**2]
      
     ## Returning the final element
-    return parent.element(coeffs, init, name=name);        
+    return parent.element(coeffs, init, name=name)
    
 ### Chebyshev Polynomials        
 @cached_function    
@@ -1551,60 +1561,60 @@ def ChebyshevD(input='n', kind = 1, poly=True):
     - Initial values will also be computed for the integer parameter values.
     - When evaluating parameters, the initial values will not update and must be set by hand.
     '''
-    parent, par = __check_list([input], DFinite.variables());
-    n = par[0];
+    parent, par = __check_list([input], DFinite.variables())
+    n = par[0]
     
     ## Building the final parent
     if(parent is QQ):
-        parent = DFinite;
+        parent = DFinite
     else:
-        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     
     ## Building the final name and the equation
-    x = parent.variables()[0];
-    name = "chebyshev";
+    x = parent.variables()[0]
+    name = "chebyshev"
     if(not poly):
-        name = "P_" + name;
+        name = "P_" + name
         
     if(kind == 1):
-        coeffs = [n**2, -x, 1-x**2];
-        name = DinamicString("%s_T(_1;_2)" %name, [repr(n), repr(x)]);
+        coeffs = [n**2, -x, 1-x**2]
+        name = DinamicString("%s_T(_1;_2)" %name, [repr(n), repr(x)])
     elif(kind == 2):
-        coeffs = [n*(n+2), -3*x, 1-x**2];
-        name = DinamicString("%s_U(_1;_2)" %name, [repr(n),repr(x)]);
+        coeffs = [n*(n+2), -3*x, 1-x**2]
+        name = DinamicString("%s_U(_1;_2)" %name, [repr(n),repr(x)])
     elif(kind == 3):
-        coeffs = [n*(n+1), 1-2*x, 1-x**2];
-        name = DinamicString("%s_V(_1;_2)" %name, [repr(n),repr(x)]);
+        coeffs = [n*(n+1), 1-2*x, 1-x**2]
+        name = DinamicString("%s_V(_1;_2)" %name, [repr(n),repr(x)])
     elif(kind == 4):
-        coeffs = [n*(n+1), -1-2*x, 1-x**2];
-        name = DinamicString("%s_W(_1;_2)" %name, [repr(n),repr(x)]);
+        coeffs = [n*(n+1), -1-2*x, 1-x**2]
+        name = DinamicString("%s_W(_1;_2)" %name, [repr(n),repr(x)])
     else:
-        raise ValueError("Only Chebyshev polynomials of first, second, third and fourth kind are implemented. Got %s" %kind);
+        raise ValueError("Only Chebyshev polynomials of first, second, third and fourth kind are implemented. Got %s" %kind)
     
     ## Building the initial values
-    init = [];
+    init = []
     if(n in ZZ):
         if(n%2 == 0):
-            n = n/2;
+            n = n/2
             if(poly):
-                init = [(-1)**(n),0];
+                init = [(-1)**(n),0]
             else:
-                init = [0, (-1)**(n)];
+                init = [0, (-1)**(n)]
         else:
-            n = (n-1)/2;
+            n = (n-1)/2
             if(kind == 1):
-                init = [0, ((-1)**n)*(2*n+1)];
+                init = [0, ((-1)**n)*(2*n+1)]
             else:
-                init = [0, ((-1)**n)*(2*n+2)];   
+                init = [0, ((-1)**n)*(2*n+2)]
             if(not poly):
-                init = [-1/init[1], 0];
+                init = [-1/init[1], 0]
      
     ## Returning the final element
-    return parent.element(coeffs, init, name=name);        
+    return parent.element(coeffs, init, name=name)
 
 ###### HYPERGEOMETRIC FUNCTIONS
 ### Hypergeometric Functions
-__CACHED_HYPERGEOMETRIC = {};
+__CACHED_HYPERGEOMETRIC = {}
 @cached_function
 def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     '''
@@ -1633,7 +1643,7 @@ def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    return GenericHypergeometricFunction([a,b],[c],init);
+    return GenericHypergeometricFunction([a,b],[c],init)
 
 def GenericHypergeometricFunction(num=[],den=[],init=1):
     '''
@@ -1660,83 +1670,81 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     '''
     ## Checking arguments: num
     if (not (isinstance(num,list) or isinstance(num,set) or isinstance(num,tuple))):
-        num = [num];
+        num = [num]
     else:
-        num = list(num);
+        num = list(num)
     if (not (isinstance(den,list) or isinstance(den,set) or isinstance(den,tuple))):
-        den = [den];
+        den = [den]
     else:
-        den = list(den);
+        den = list(den)
         
-    parent, new_all = __check_list(num+den+[init], [str(el) for el in DFinite.variables()]);
-    numerator = new_all[:len(num)];
-    denominator = new_all[len(num):-1];
-    initial = new_all[-1];
+    parent, new_all = __check_list(num+den+[init], [str(el) for el in DFinite.variables()])
+    numerator = new_all[:len(num)]
+    denominator = new_all[len(num):-1]
+    initial = new_all[-1]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
+        destiny_ring = DFinite
         
     ## Cleaning repeated values 
-    i = 0;
+    i = 0
     while(i < len(numerator) and len(denominator) > 0):
         if(numerator[i] in denominator):
-            denominator.remove(numerator[i]);
-            numerator.remove(numerator[i]);
+            denominator.remove(numerator[i])
+            numerator.remove(numerator[i])
         else:
-            i += 1;
+            i += 1
     
     ## Sort list for cannonical input
-    numerator.sort(); denominator.sort();
+    numerator.sort(); denominator.sort()
     
     ## Casting to tuples to have hash  
-    numerator = tuple(numerator); denominator = tuple(denominator);
+    numerator = tuple(numerator); denominator = tuple(denominator)
     
     ## Checking the function is cached
-    global __CACHED_HYPERGEOMETRIC;
+    global __CACHED_HYPERGEOMETRIC
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
         # Lambda method to get the operator in the appropriate operator ring
-        get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation); 
+        get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation)
         
         ## Getting the operator for the numerator and for the denominator
-        op_num = prod((get_op([el,x]) for el in numerator),x);
-        op_den = prod((get_op([el-1,x]) for el in denominator), get_op([0,x]));
+        op_num = prod((get_op([el,x]) for el in numerator),x)
+        op_den = prod((get_op([el-1,x]) for el in denominator), get_op([0,x]))
         
-        op = op_num - op_den;
+        op = op_num - op_den
         
-        f = destiny_ring.element(op);
-        
-        initVals = [initial];
+        f = destiny_ring.element(op)
         
         if(initial == 1):
-            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([1],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]));
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([1],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]))
         else:
-            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DinamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]));
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DinamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]))
         
     ## Return the cached element
-    return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)];
+    return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)]
 
 @cached_function
 def F00():
-    return GenericHypergeometricFunction((),());
+    return GenericHypergeometricFunction((),())
 
 @cached_function
 def F10(a='a'):
-    return GenericHypergeometricFunction((a),());
+    return GenericHypergeometricFunction((a),())
 
 @cached_function
 def F01(b='b'):
-    return GenericHypergeometricFunction((),(b));
+    return GenericHypergeometricFunction((),(b))
 
 @cached_function
 def F11(a='a',b='b'):
-    return GenericHypergeometricFunction((a),(b));
+    return GenericHypergeometricFunction((a),(b))
 
 @cached_function
 def F21(a='a',b='b',c='c'):
-    return HypergeometricFunction(a,b,c);
+    return HypergeometricFunction(a,b,c)
     
 @cached_function
 def PolylogarithmD(s=1):
@@ -1755,19 +1763,19 @@ def PolylogarithmD(s=1):
     - s: Integer and positive value. All other possible powers are not accepted so far.
     '''
     if((not (s in ZZ)) or s < 1):
-        raise ValueError("The parameter 's' must be a positive integer. Got %d" %s);
+        raise ValueError("The parameter 's' must be a positive integer. Got %d" %s)
     
-    destiny_ring = DFinite;
+    destiny_ring = DFinite
     
-    get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation); 
-    pos_part = prod((get_op([1,x]) for i in range(1,s+2)), get_op([1]));
-    neg_part = prod((get_op([1,x]) for i in range(1,s+1)), get_op([1])).derivative();
+    get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation)
+    pos_part = prod((get_op([1,x]) for i in range(1,s+2)), get_op([1]))
+    neg_part = prod((get_op([1,x]) for i in range(1,s+1)), get_op([1])).derivative()
     
-    final_eq = pos_part-neg_part;
-    Li_x = DFinite.element(final_eq, [Integer(1)/(n**s) *factorial(n-1) for n in range(1,s+1)]);
-    result = Li_x*x;
-    result._DDFunction__name = DinamicString("Li(_1;_2)", [str(s), "x"]);
-    return result;
+    final_eq = pos_part-neg_part
+    Li_x = DFinite.element(final_eq, [ZZ(1)/(n**s) *factorial(n-1) for n in range(1,s+1)])
+    result = Li_x*x
+    result._DDFunction__name = DinamicString("Li(_1;_2)", [str(s), "x"])
+    return result
     
 ###### RICCATI DIFFERENTIAL EQUATION
 ### Basic Riccati differential equation
@@ -1799,33 +1807,33 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     - name: name the system will give to the function w. By default this is "w"
     '''
     ## Considering the three parameters
-    from sage.categories.pushout import pushout;
+    from sage.categories.pushout import pushout
     
     if(is_DDFunction(a)):
-        da, dRa = (a.parent().depth(), a.parent());
+        da, dRa = (a.parent().depth(), a.parent())
     else:
-        a, dRa = __decide_parent(a, ddR); da = dRa.depth()-1;
+        a, dRa = __decide_parent(a, ddR); da = dRa.depth()-1
     if(is_DDFunction(b)):
-        db, dRb = (b.parent().depth(), b.parent());
+        db, dRb = (b.parent().depth(), b.parent())
     else:
-        b, dRb = __decide_parent(b, ddR); db = dRb.depth()-1;
+        b, dRb = __decide_parent(b, ddR); db = dRb.depth()-1
     if(is_DDFunction(c)):
-        dc, dRc = (c.parent().depth(), c.parent());
+        dc, dRc = (c.parent().depth(), c.parent())
     else:
-        c, dRc = __decide_parent(c, ddR); dc = dRc.depth()-1;
+        c, dRc = __decide_parent(c, ddR); dc = dRc.depth()-1
         
-    R = pushout(dRa, pushout(dRb, dRc));
-    R = R.to_depth(max(da+1, db+1, dc+2));
+    R = pushout(dRa, pushout(dRb, dRc))
+    R = R.to_depth(max(da+1, db+1, dc+2))
     
-    x = R.variables()[0];
+    x = R.variables()[0]
     
-    w = R.base().element([a*c, -b + c.derivative()/c,1], [1, -c(0)*init],name=DinamicString("_1(_2)", [name,repr(x)]));
-    solution = -w.derivative()*(c*w).inverse;
-    solution._DDFunction__name = DinamicString("Riccati(_1,_2,_3;_4)(_5)", [repr(a),repr(b),repr(c),str(init),repr(x)]);
+    w = R.base().element([a*c, -b + c.derivative()/c,1], [1, -c(0)*init],name=DinamicString("_1(_2)", [name,repr(x)]))
+    solution = -w.derivative()*(c*w).inverse
+    solution._DDFunction__name = DinamicString("Riccati(_1,_2,_3;_4)(_5)", [repr(a),repr(b),repr(c),str(init),repr(x)])
     
     if(full):
-        return solution,w;
-    return solution;
+        return solution,w
+    return solution
     
     
     
@@ -1852,16 +1860,16 @@ def MathieuD(a='a',q='q',init=()):
     - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
-    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
+    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()])
+    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DDFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DDFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DDFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DDFinite
+    x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([ra-2 *rq*Cos(2 *x), 0, 1], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]));
+    return destiny_ring.element([ra-2 *rq*Cos(2 *x), 0, 1], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
 
 @cached_function
 def MathieuSin(a='a',q='q'):
@@ -1876,7 +1884,7 @@ def MathieuSin(a='a',q='q'):
         This is the sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuD(a,q,(0,1)).
     '''
-    return MathieuD(a,q,(0,1));
+    return MathieuD(a,q,(0,1))
     
 @cached_function
 def MathieuCos(a='a',q='q'):
@@ -1891,7 +1899,7 @@ def MathieuCos(a='a',q='q'):
         This is the cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuD(a,q,(1,0)).
     '''
-    return MathieuD(a,q,(1,0));
+    return MathieuD(a,q,(1,0))
 
 ### Modified Mathieu's Functions
 @cached_function
@@ -1914,16 +1922,16 @@ def MathieuH(a='a',q='q',init=()):
     - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()]);
-    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:];
+    parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()])
+    ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DDFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DDFinite
+    x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]));
+    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
 
 @cached_function
 def MathieuSinh(a='a',q='q'):
@@ -1937,7 +1945,7 @@ def MathieuSinh(a='a',q='q'):
         This is the hyperbolic sine function with the Mathieu equation (i.e., with initial values
         0 an 1). It is equivalent to MathieuH(a,q,(0,1)).
     '''
-    return MathieuH(a,q,(0,1));
+    return MathieuH(a,q,(0,1))
     
 @cached_function
 def MathieuCosh(a='a',q='q'):
@@ -1951,7 +1959,7 @@ def MathieuCosh(a='a',q='q'):
         This is the hyperbolic cosine function with the Mathieu equation (i.e., with initial values
         1 an 0). It is equivalent to MathieuH(a,q,(1,0)).
     '''
-    return MathieuH(a,q,(1,0));
+    return MathieuH(a,q,(1,0))
 
 ### Hill's equation
 @cached_function
@@ -1980,30 +1988,30 @@ def HillD(a='a',q='q',init=()):
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(is_DDFunction(q)):
-        destiny_ring = q.parent().to_depth(q.parent().depth());
-        parent, new_all = __check_list([a] + list(init), [str(el) for el in DFinite.variables()]);
+        destiny_ring = q.parent().to_depth(q.parent().depth())
+        parent, new_all = __check_list([a] + list(init), [str(el) for el in DFinite.variables()])
         
         if(not (parent is QQ)):
-            destiny_ring = ParametrizedDDRing(base, [str(v) for v in parent.gens()]);
-        ra = new_all[0]; rq = destiny_ring.base()(q); rinit = new_all[-len(init):];
+            destiny_ring = ParametrizedDDRing(QQ, [str(v) for v in parent.gens()])
+        ra = new_all[0]; rq = destiny_ring.base()(q); rinit = new_all[-len(init):]
     else:
-        parent, new_all = __check_list([a,q] + list(init), []);
-        ra = new_all[0]; rq = new_all[1]; rinit = new_all[-len(init):];
+        parent, new_all = __check_list([a,q] + list(init), [])
+        ra = new_all[0]; rq = new_all[1]; rinit = new_all[-len(init):]
         
         if(parent is QQ):
-            destiny_ring = DFinite;
+            destiny_ring = DFinite
         else:
-            new_vars = [str(v) for v in parent.gens()];
+            new_vars = [str(v) for v in parent.gens()]
             
             if('x' in new_vars):
-                x = parent.gens()[new_vars.index('x')];
+                x = parent.gens()[new_vars.index('x')]
                 if(x in ra.variables() or any(x in el.variables() for el in rinit)):
-                    raise ValueError("The variable 'x' can not appear in the parameter 'a' or in the initial values.\n\t- a: %s\n\t- init: %s" %(ra,rinit));
-                new_vars.remove('x');
+                    raise ValueError("The variable 'x' can not appear in the parameter 'a' or in the initial values.\n\t- a: %s\n\t- init: %s" %(ra,rinit))
+                new_vars.remove('x')
             
-            destiny_ring = ParametrizedDDRing(DFinite, new_vars);
+            destiny_ring = ParametrizedDDRing(DFinite, new_vars)
             
-    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:2 ])),"x"]));
+    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:2 ])),"x"]))
 
 ###### AIRY TYPE FUNCTIONS
 ### Airy's functions
@@ -2055,9 +2063,9 @@ def AiryD(init=('a','b')):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import AiryD, F01;
-            sage: from ajpastor.dd_functions.ddFunction import DFinite;
-            sage: Ai = AiryD(); R = DFinite.base();
+            sage: from ajpastor.dd_functions.ddExamples import AiryD, F01
+            sage: from ajpastor.dd_functions.ddFunction import DFinite
+            sage: Ai = AiryD(); R = DFinite.base()
             sage: Ai[0] == R(-x)
             True
             sage: Ai[1] == 0
@@ -2070,43 +2078,43 @@ def AiryD(init=('a','b')):
             ....:     Ai_n = [Ai.derivative(times=n-i) for i in range(4)]
             ....:     if(Ai_n[0] != x*Ai_n[2] + (n-2)*Ai_n[3]):
             ....:         print(n)
-            sage: a = Ai(0); b = Ai.derivative()(0);
+            sage: a = Ai(0); b = Ai.derivative()(0)
             sage: Ai == a*F01(2/3)(x^3/9) + b*F01(4/3)(x^3/9)*x # hyperg. representation
             True
     '''
-    parent, rinit = __check_list(list(init), [str(el) for el in DFinite.variables()]);
+    parent, rinit = __check_list(list(init), [str(el) for el in DFinite.variables()])
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DFinite
+    x = destiny_ring.variables()[0]
     
-    name = None;
+    name = None
     if(len(rinit) >= 2): ## Complete Airy function, we can build the name
         ## Rejecting the zero case
         if(rinit[0] == rinit[1] and rinit[0] == 0):
-            return DFinite.zero();
+            return DFinite.zero()
         
         ## Simplifying the name if there is zero coefficients
         if(rinit[0] != 0):
-            name_a1 = DinamicString("(3**(2/3)*gamma(2/3))*_1", [repr(rinit[0])]);
-            name_b1 = DinamicString("(3**(1/3)*gamma(2/3))*_1", [repr(rinit[0])]);
+            name_a1 = DinamicString("(3**(2/3)*gamma(2/3))*_1", [repr(rinit[0])])
+            name_b1 = DinamicString("(3**(1/3)*gamma(2/3))*_1", [repr(rinit[0])])
         else:
-            name_a1 = DinamicString("", []);
-            name_b1 = DinamicString("", []);
+            name_a1 = DinamicString("", [])
+            name_b1 = DinamicString("", [])
         if(rinit[1] != 0):
-            name_a2 = DinamicString("-(3**(1/3)*gamma(1/3))*_1", [repr(rinit[1])]);
-            name_b2 = DinamicString("+(gamma(1/3))*_1", [repr(rinit[1])]);
+            name_a2 = DinamicString("-(3**(1/3)*gamma(1/3))*_1", [repr(rinit[1])])
+            name_b2 = DinamicString("+(gamma(1/3))*_1", [repr(rinit[1])])
         else:
-            name_a2 = DinamicString("", []);
-            name_b2 = DinamicString("", []);
+            name_a2 = DinamicString("", [])
+            name_b2 = DinamicString("", [])
             
         ## Building the final name
-        name = DinamicString("((_1_2)/2)*airy_ai(_5) + ((_3_4)/(2*3**(1/6)))*airy_bi(_5)", [name_a1, name_a2, name_b1, name_b2,repr(x)]);
+        name = DinamicString("((_1_2)/2)*airy_ai(_5) + ((_3_4)/(2*3**(1/6)))*airy_bi(_5)", [name_a1, name_a2, name_b1, name_b2,repr(x)])
     else:
-        name = DinamicString("airy(_1; _2)", [repr(x), repr(rinit)]);
-    return destiny_ring.element([-x,0,1], rinit, name=name);
+        name = DinamicString("airy(_1; _2)", [repr(x), repr(rinit)])
+    return destiny_ring.element([-x,0,1], rinit, name=name)
 
 
 ###### PARABOLIC-CYLINDER TYPE FUNCTIONS
@@ -2130,16 +2138,16 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
     - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
-    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
+    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()])
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DFinite
+    x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], rinit, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4;_5)", [repr(ra), repr(rb), repr(rc), repr(rinit), repr(x)]));
+    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], rinit, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4;_5)", [repr(ra), repr(rb), repr(rc), repr(rinit), repr(x)]))
     
 ###### ELLIPTIC INTEGRALS
 ## Legendre elliptic integrals
@@ -2175,34 +2183,34 @@ def EllipticLegendreD(kind,var='phi'):
     - var: the variable to consider. If str(var) is 'k', then the compelte Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
     '''
     if(kind not in [1,2,3]):
-        raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2");
+        raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2")
     if(str(var) not in ['m','phi']):
-        raise ValueError("The variable for taking the equation must be 'm' or 'phi'");
+        raise ValueError("The variable for taking the equation must be 'm' or 'phi'")
         
-    var = str(var);
+    var = str(var)
     if(var == 'm'):
         if(kind == 1):
-            name = DinamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"]);
-            return DFinite.element([-x,(1-3*x**2), x*(1-x**2)],[1], name=name);
+            name = DinamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"])
+            return DFinite.element([-x,(1-3*x**2), x*(1-x**2)],[1], name=name)
         elif(kind == 2):
-            name = DinamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"]);
-            return DFinite.element([x,(1-x**2), x*(1-x**2)],[1], name=name);
+            name = DinamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"])
+            return DFinite.element([x,(1-x**2), x*(1-x**2)],[1], name=name)
         else:
-            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2;
+            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2
             
     if(var == 'phi'):
-        DDFiniteK = ParametrizedDDRing(DDFinite, 'k');
-        P = DDFiniteK.parameters()[0];
-        s = DDFiniteK.to_depth(1)(Sin(x));
-        c = DDFiniteK.to_depth(1)(Cos(x));
+        DDFiniteK = ParametrizedDDRing(DDFinite, 'k')
+        P = DDFiniteK.parameters()[0]
+        s = DDFiniteK.to_depth(1)(Sin(x))
+        c = DDFiniteK.to_depth(1)(Cos(x))
         if(kind == 1):
-            name = DinamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"]);
-            return DDFiniteP.element([0,-P**2*s*c,1-P**2*s**2], [0,1], name=name);
+            name = DinamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"])
+            return DDFiniteK.element([0,-P**2*s*c,1-P**2*s**2], [0,1], name=name)
         elif(kind == 2):
-            name = DinamicString("(2/pi)*elliptic_e(_2,_1)", [repr(P),"x"]);
-            return DDFiniteP.element([0,P**2*s*c,1-P**2*s**2], [0,1], name=name);
+            name = DinamicString("(2/pi)*elliptic_e(_2,_1)", [repr(P),"x"])
+            return DDFiniteK.element([0,P**2*s*c,1-P**2*s**2], [0,1], name=name)
         else:
-            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/P**2;
+            return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/P**2
         
 ###### SPHEROIDAL WAVE FUNCTIONS
 ## Generalized (or Coulomb) Spheroidal Differential Equation
@@ -2234,23 +2242,23 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
     if(kind not in [1,2]):
-        raise TypeValue("Generalized Spheroidal functions only allowed in two different generalizations (1 or 2). Got %s" %kind);
-    parent, new_all = __check_list([a,b,c,d]+list(init), [str(el) for el in DFinite.variables()]);
-    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rd = new_all[3]; rinit = new_all[-len(init):];
+        raise ValueError("Generalized Spheroidal functions only allowed in two different generalizations (1 or 2). Got %s" %kind)
+    parent, new_all = __check_list([a,b,c,d]+list(init), [str(el) for el in DFinite.variables()])
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rd = new_all[3] # rinit = new_all[-len(init):]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DFinite
+    x = destiny_ring.variables()[0]
     
-    coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2];
+    coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2]
     if(kind == 1):
-        coeffs[0] += rd*x*(1-x**2);
+        coeffs[0] += rd*x*(1-x**2)
     else:
-        coeffs = [el*x**2 for el in coeffs];
-        coeffs[0] -= rd*(rd+1)*(1-x**2);
-    return destiny_ring.element(coeffs, init, name=DinamicString("CoulombSpheroidal(_1,_2,_3,_4;%d;%s)(_5)" %(kind,init), [repr(ra), repr(rb), repr(rc), repr(rd), "x"]));
+        coeffs = [el*x**2 for el in coeffs]
+        coeffs[0] -= rd*(rd+1)*(1-x**2)
+    return destiny_ring.element(coeffs, init, name=DinamicString("CoulombSpheroidal(_1,_2,_3,_4;%d;%s)(_5)" %(kind,init), [repr(ra), repr(rb), repr(rc), repr(rd), "x"]))
 
 @cached_function
 def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
@@ -2276,18 +2284,18 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
     '''
-    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()]);
-    ra = new_all[0]; rb = new_all[1]; rc = new_all[2]; rinit = new_all[-len(init):];
+    parent, new_all = __check_list([a,b,c]+list(init), [str(el) for el in DFinite.variables()])
+    ra = new_all[0]; rb = new_all[1]; rc = new_all[2] # rinit = new_all[-len(init):]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
-    x = destiny_ring.variables()[0];
+        destiny_ring = DFinite
+    x = destiny_ring.variables()[0]
     
-    coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2];
+    coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2]
     
-    return destiny_ring.element(coeffs, init, name=DinamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]));
+    return destiny_ring.element(coeffs, init, name=DinamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]))
 
 ###### HEUN FUNCTIONS
 ### Fuschian equation
@@ -2344,12 +2352,12 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import FuschianD;
+            sage: from ajpastor.dd_functions.ddExamples import FuschianD
             sage: try:
-            ....:     FuschianD(1,2,1);
-            ....:     print("Error: something non-zero");
+            ....:     FuschianD(1,2,1)
+            ....:     print("Error: something non-zero")
             ....: except:
-            ....:     pass;
+            ....:     pass
             sage: FuschianD(1,2,0,(1,1)) == 1/(1-x)
             True
             sage: FuschianD(1,2,0,(1,0)) == 1
@@ -2359,40 +2367,40 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
     '''
     ## Checking parameters
     if (not (isinstance(a,list) or isinstance(a,set) or isinstance(a,tuple))):
-        a = [a];
+        a = [a]
     if (not (isinstance(gamma,list) or isinstance(gamma,set) or isinstance(gamma,tuple))):
-        gamma = [gamma];
+        gamma = [gamma]
     if (not (isinstance(q,list) or isinstance(q,set) or isinstance(q,tuple))):
-        q = [q];
+        q = [q]
     if(len(a) == 0 or len(a) != len(gamma) or len(a) != len(q)):
-        raise ValueError("The three arguments a, gamma and q must be non-empty lists of the same length");
-    N = len(a);
+        raise ValueError("The three arguments a, gamma and q must be non-empty lists of the same length")
+    N = len(a)
     
     ## Getting the parameters
-    parent, new_all = __check_list(list(a)+list(gamma)+list(q)+list(init), [str(el) for el in DFinite.variables()]);
+    parent, new_all = __check_list(list(a)+list(gamma)+list(q)+list(init), [str(el) for el in DFinite.variables()])
     
-    ra = new_all[:N];
-    rgamma = new_all[N:2*N];
-    rq = new_all[2*N:3*N];
-    rinit = new_all[3*N:];
+    ra = new_all[:N]
+    rgamma = new_all[N:2*N]
+    rq = new_all[2*N:3*N]
+    rinit = new_all[3*N:]
     
     if(sum(rq) != 0):
-        raise ValueError("The q parameters must sum up zero. Got %s" %(sum(rq)));
+        raise ValueError("The q parameters must sum up zero. Got %s" %(sum(rq)))
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
+        destiny_ring = DFinite
         
-    x = destiny_ring.variables()[0];
+    x = destiny_ring.variables()[0]
     ## Computing the differential equation
-    P = prod([x-ra[i] for i in range(N)]); R = P.parent();
-    Q = [R(P/(x-ra[i])) for i in range(N)];
+    P = prod([x-ra[i] for i in range(N)]); R = P.parent()
+    Q = [R(P/(x-ra[i])) for i in range(N)]
     
-    coeffs = [sum(rq[i]*Q[i] for i in range(N)), sum(rgamma[i]*Q[i] for i in range(N)), P];
+    coeffs = [sum(rq[i]*Q[i] for i in range(N)), sum(rgamma[i]*Q[i] for i in range(N)), P]
     
     ## Returning the solution
-    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]));
+    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]))
 
 ### Heun's function
 def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
@@ -2453,23 +2461,23 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import HeunD;
+            sage: from ajpastor.dd_functions.ddExamples import HeunD
             sage: H = HeunD(); H
             Heun(a,b,d,g,e,q)(x)
             sage: H.change_init_values([0,0])
             0
     '''
-    parent, new_all = __check_list([a,beta,delta,gamma,epsilon,q], [str(el) for el in DFinite.variables()]);
-    ra,rb,rd,rg,re,rq = new_all;
+    _, new_all = __check_list([a,beta,delta,gamma,epsilon,q], [str(el) for el in DFinite.variables()])
+    ra,rb,rd,rg,re,rq = new_all
         
     if(ra == 0 or ra == 1):
         raise ValueError(("The singularity parameter is not valid: the extra singularity must be"
-                           "different than 0 or 1"));
+                           "different than 0 or 1"))
 
-    al = rg+rd+re-rb-1;
-    f = FuschianD(a=(0,1,ra),gamma=(rd,rg,re),q=(-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))));
-    f.change_name(DinamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]));
-    return f;
+    al = rg+rd+re-rb-1
+    f = FuschianD(a=(0,1,ra),gamma=(rd,rg,re),q=(-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))))
+    f.change_name(DinamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]))
+    return f
 
 ###### COULOMB FUNCTIONS
 def FCoulombD(m='m', l='l'):
@@ -2502,33 +2510,33 @@ def FCoulombD(m='m', l='l'):
               
         EXAMPLE::
 
-            sage: from ajpastor.dd_functions.ddExamples import FCoulombD;
+            sage: from ajpastor.dd_functions.ddExamples import FCoulombD
             sage: F = FCoulombD(1/2,2); 
             sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
             0
             sage: for l in range(-1,10): # checking with m parameter
-            ....:     F = FCoulombD('m',l);
-            ....:     m = F.parent().base_field.gens()[0];
+            ....:     F = FCoulombD('m',l)
+            ....:     m = F.parent().base_field.gens()[0]
             ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
-            ....:         print(l);
+            ....:         print(l)
     '''
-    parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()]);
-    rm, rl = new_all;
+    parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()])
+    rm, rl = new_all
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()]);
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
-        destiny_ring = DFinite;
-    x = destiny_ring.variables()[0];
-    init = [];
+        destiny_ring = DFinite
+    x = destiny_ring.variables()[0]
+    init = []
     
     if(rl in ZZ): ## Power series solution
         if(rl in [-1,0]): ## Special cases
-            init = [0,1];
+            init = [0,1]
         elif(rl > 0):
-            init = [0 for i in range(rl+1)] + [1];
+            init = [0 for i in range(rl+1)] + [1]
             
-    return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DinamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]));
+    return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DinamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]))
 
 ##################################################################################
 ##################################################################################
@@ -2571,7 +2579,7 @@ def FactorialD():
             sage: fa.getInitialValueList(10) == [factorial(i)^2 for i in range(10)]
             True
     '''
-    return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1)", ["x"]));
+    return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1)", ["x"]))
 
 @cached_function
 def CatalanD():
@@ -2623,7 +2631,7 @@ def CatalanD():
             sage: x*C^2 + 1 == C # algebraic relation
             True
     '''
-    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1], name=DinamicString("C(_1)", ["x"]));
+    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1], name=DinamicString("C(_1)", ["x"]))
 
 @cached_function
 def FibonacciD(init=('a','b')):
@@ -2667,7 +2675,7 @@ def FibonacciD(init=('a','b')):
               
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import FibonacciD;
+            sage: from ajpastor.dd_functions.ddExamples import FibonacciD
             sage: Fp = FibonacciD(); Fp
             F(a,b;x)
             sage: Fp.getSequenceList(5)
@@ -2677,8 +2685,8 @@ def FibonacciD(init=('a','b')):
             True
             sage: F == x/(1-x-x^2)
             True
-            sage: a = Fp.getSequenceElement(0); b = Fp.getSequenceElement(1);
-            sage: x = Fp.parent().variables()[0];
+            sage: a = Fp.getSequenceElement(0); b = Fp.getSequenceElement(1)
+            sage: x = Fp.parent().variables()[0]
             sage: Fp == (a + (b-a)*x)/(1-x-x^2)
             True
             sage: FibonacciD(tuple([2*a-3*b])) # just one element tuple
@@ -2688,29 +2696,29 @@ def FibonacciD(init=('a','b')):
             sage: FibonacciD(('f',a*2+1,0,0,0)) # with long tuple
             F(f,2*a + 1;x)
     '''
-    parent, rinit = __check_list([el for el in init], [str(el) for el in DFinite.variables()]);
-    params = [str(v) for v in parent.gens()];
-    pos = ord('a');
+    parent, rinit = __check_list([el for el in init], [str(el) for el in DFinite.variables()])
+    params = [str(v) for v in parent.gens()]
+    pos = ord('a')
     if(len(init) < 2):
         if(len(init) < 1):
             while(chr(pos) in params):
-                pos += 1;
-            rinit = [chr(pos)];
+                pos += 1
+            rinit = [chr(pos)]
         if(len(init) == 1):
             while(chr(pos) in params):
-                pos += 1;
-            rinit += [chr(pos)];
-        return FibonacciD(tuple(rinit));
+                pos += 1
+            rinit += [chr(pos)]
+        return FibonacciD(tuple(rinit))
     
     if(parent is QQ):
-        destiny_ring = DFinite;
+        destiny_ring = DFinite
     else:
-        destiny_ring = ParametrizedDDRing(DFinite, params);
+        destiny_ring = ParametrizedDDRing(DFinite, params)
     
-    x = destiny_ring.variables()[0];
-    f = destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2));
-    f.change_name(DinamicString("F(_1,_2;_3)", [str(rinit[0]),str(rinit[1]),"x"]));
-    return f;
+    x = destiny_ring.variables()[0]
+    f = destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2))
+    f.change_name(DinamicString("F(_1,_2;_3)", [str(rinit[0]),str(rinit[1]),"x"]))
+    return f
     
 @cached_function
 def BellD():
@@ -2750,7 +2758,7 @@ def BellD():
             sage: B.getInitialValueList(10) == [bell_number(i) for i in range(10)]
             True
     '''
-    return DDFinite.element([-Exp(x),1], [1], name=DinamicString("B(_1)", ["x"]));
+    return DDFinite.element([-Exp(x),1], [1], name=DinamicString("B(_1)", ["x"]))
     
 @cached_function
 def BernoulliD():
@@ -2792,7 +2800,7 @@ def BernoulliD():
             sage: B.getInitialValueList(10) == [bernoulli(i) for i in range(10)]
             True
     '''
-    return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DinamicString("B(_1)", ["x"]));
+    return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DinamicString("B(_1)", ["x"]))
             
 ##################################################################################
 ##################################################################################
@@ -2825,75 +2833,75 @@ def DAlgebraic(polynomial, init=[], dR=None):
     - If any error happens with the initial values, a ValueError will be raised
     '''
     ## Local imports
-    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
-    from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial;
-    from sage.categories.pushout import FractionField;
-    from ajpastor.misc.matrix import matrix_of_dMovement as move;
+    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
+    from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
+    from sage.categories.pushout import FractionField
+    from ajpastor.misc.matrix import matrix_of_dMovement as move
     
     ###############################################
     ## Dealing with the polynomial input
     ###############################################
-    parent = polynomial.parent();
+    parent = polynomial.parent()
     if(not (isPolynomial(parent) or isMPolynomial(parent))):
-        raise TypeError("DAlgebraic: the input polynomial is NOT a polynomial");
+        raise TypeError("DAlgebraic: the input polynomial is NOT a polynomial")
     
-    base_ring = None;  
-    F = None;  
-    poly_ring = parent;
+    base_ring = None
+    F = None
+    poly_ring = parent
     if(isMPolynomial(parent)):
         ## Only valid for 2 variables
         if(parent.ngens() > 2):
-            raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables");
-        base_ring = PolynomialRing(parent.base(),parent.gens()[0]);
-        F = base_ring.fraction_field();  
+            raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables")
+        base_ring = PolynomialRing(parent.base(),parent.gens()[0])
+        F = base_ring.fraction_field()
     else:
         if(isinstance(parent.base().construction()[0], FractionField)):
-            base_ring = parent.base().base();
+            base_ring = parent.base().base()
         else:
-            base_ring = parent.base();
+            base_ring = parent.base()
         
         if(is_DDRing(base_ring)):
-            F = LazyDDRing(base_ring);
+            F = LazyDDRing(base_ring)
         elif(not base_ring.is_field()):
-            F = base_ring.fraction_field();
+            F = base_ring.fraction_field()
         else:
-            F = base_ring;
+            F = base_ring
             
-    poly_ring = PolynomialRing(F, parent.gens()[-1]);
-    y = poly_ring.gens()[-1];
+    poly_ring = PolynomialRing(F, parent.gens()[-1])
+    y = poly_ring.gens()[-1]
     
     ## At this point we have the following
     ##   - F is a field
     ##   - y is a variable
     ##   - poly_ring == F[y]
-    polynomial = poly_ring(polynomial); ## Now the structure is univariate
+    polynomial = poly_ring(polynomial) ## Now the structure is univariate
     if(polynomial.degree() == 1):
-        return -polynomial[0]/polynomial[1];
+        return -polynomial[0]/polynomial[1]
     elif(polynomial.degree() <= 0):
-        raise TypeError("DAlgebraic: constant polynomial given for algebraic function: IMPOSSIBLE!!");
+        raise TypeError("DAlgebraic: constant polynomial given for algebraic function: IMPOSSIBLE!!")
         
     #################################################
     ## Building and checking the destiny ring
     #################################################
-    destiny_ring = None;
+    destiny_ring = None
     if(dR is None):
-        destiny_ring = DDRing(base_ring);
+        destiny_ring = DDRing(base_ring)
     else:
-        destiny_ring = dR;
-        coercion = destiny_ring.base()._coerce_map_from_(base_ring);
+        destiny_ring = dR
+        coercion = destiny_ring.base()._coerce_map_from_(base_ring)
         if((coercion is None) or (coercion is False)):
-            raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring));
+            raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring))
             
-    dest_var = repr(destiny_ring.variables()[0]);
+    dest_var = repr(destiny_ring.variables()[0])
     
     ##################################################
     ## Computing the differential equation
     ##################################################
     ## Computing the derivative
-    dy = polynomial.derivative(y);
+    dy = polynomial.derivative(y)
         
     ## Computing the coefficient-wise derivation of polynomial
-    ky = sum(polynomial[i].derivative()*y**i for i in range(polynomial.degree()+1));
+    ky = sum(polynomial[i].derivative()*y**i for i in range(polynomial.degree()+1))
     
     ### WARNING From this point until said otherwise, in the case base_ring is DDRing
     ### we change the poylnomials to a finite setting because when this was code, 
@@ -2905,74 +2913,74 @@ def DAlgebraic(polynomial, init=[], dR=None):
         # Changing to a finite setting
         def get_sub_vars(*polys):
             if(len(polys) > 1):
-                return get_sub_vars(polys);
-            return list(set(sum([sum([list(el[i].variables()) for i in range(el.degree()+1)],[]) for el in polys[0]],[])));
+                return get_sub_vars(polys)
+            return list(set(sum([sum([list(el[i].variables()) for i in range(el.degree()+1)],[]) for el in polys[0]],[])))
         
-        sub_vars = get_sub_vars([polynomial, dy, ky]);
-        poly_ring_fin = PolynomialRing(PolynomialRing(base_ring.base_ring(), sub_vars).fraction_field(), poly_ring.gens_dict().items()[0][0]);
+        sub_vars = get_sub_vars([polynomial, dy, ky])
+        poly_ring_fin = PolynomialRing(PolynomialRing(base_ring.base_ring(), sub_vars).fraction_field(), poly_ring.gens_dict().items()[0][0])
         polynomial = poly_ring_fin(str(polynomial))
-        dy = poly_ring_fin(str(dy));
-        ky = poly_ring_fin(str(ky));
-        y = poly_ring_fin.gens()[0];
+        dy = poly_ring_fin(str(dy))
+        ky = poly_ring_fin(str(ky))
+        y = poly_ring_fin.gens()[0]
                             
     ## Getting its gcd with the polynomial
-    g,r,s = polynomial.xgcd(dy);
+    g,_,s = polynomial.xgcd(dy)
     if((g != 1) and (g.degree() != 0)):
-        raise ValueError("DAlgebraic: no irreducible polynomial (%s) given" %polynomial);
+        raise ValueError("DAlgebraic: no irreducible polynomial (%s) given" %polynomial)
     
     ## Getting the polynomial expression of y'
-    yp = (-ky*s)%polynomial;
+    yp = (-ky*s)%polynomial
     
     ## Building the derivation matrix of <1,y,y^2,...>
-    rows = [[0]*polynomial.degree()];
+    rows = [[0]*polynomial.degree()]
     for i in range(1,polynomial.degree()):
         # (y^i)' = i*y^(i-1)*y'
-        current = ((i*yp*y**(i-1))%polynomial).coefficients(False);
-        current += [0 for i in range(len(current),polynomial.degree())];
-        rows += [current];
+        current = ((i*yp*y**(i-1))%polynomial).coefficients(False)
+        current += [0 for i in range(len(current),polynomial.degree())]
+        rows += [current]
     
-    M = Matrix(F, rows).transpose();
+    M = Matrix(F, rows).transpose()
     ## Creating the vector representing y
-    y_vector = vector(F, [0,1] + [0]*(polynomial.degree()-2 ));
+    y_vector = vector(F, [0,1] + [0]*(polynomial.degree()-2 ))
     
-    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop")
     
     ## Building and solving the system
-    to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+1);
+    to_solve = move(M, y_vector, lambda p : p.derivative(), M.ncols()+1)
     
-    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop")
     
-    v = to_solve.right_kernel_matrix()[0];
+    v = to_solve.right_kernel_matrix()[0]
     
-    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop");
+    if(is_DDRing(base_ring)): raise RuntimeError("DEBUG Stop")
     
     ## Cleaning denominators
-    cleaning = lcm(el.denominator() for el in v);
+    cleaning = lcm(el.denominator() for el in v)
     
-    equation = destiny_ring.element([F.base()(el*cleaning) for el in v]).equation;
+    equation = destiny_ring.element([F.base()(el*cleaning) for el in v]).equation
     
     ##################################################
     ## Getting the initial values
     ##################################################
     if(not (type(init) is list)):
         ## We try to compute the new initial values
-        init = [init];
-        go_on = True;
+        init = [init]
+        go_on = True
         for i in range(1,min(equation.get_jp_fo()+2 , to_solve.ncols())):
             try:
-                init += [sum(to_solve[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree()))];
+                init += [sum(to_solve[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree()))]
             except ZeroDivisionError:
-                go_on = False;
-                break;
+                go_on = False
+                break
         
-        if(go_on and (equation.get_jp_fo()+2  > to_solve.ncols())):
-            extra = move(M, vector(F,[el[0] for el in to_solve[:,-1]]), equation.get_jp_fo()+2 -to_solve.ncols());
-            init += [sum(extra[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree())) for i in range(extra.ncols())];
+        if(go_on and (equation.get_jp_fo()+2 > to_solve.ncols())):
+            extra = move(M, vector(F,[el[0] for el in to_solve[:,-1]]),lambda p: p.derivative(), equation.get_jp_fo()+2 -to_solve.ncols())
+            init += [sum(extra[j,i](**{dest_var:0})*init[0]**j for j in range(polynomial.degree())) for i in range(extra.ncols())]
     
     ##################################################
     ## Returning the DDFunction
     ##################################################
-    return destiny_ring.element(equation, init);
+    return destiny_ring.element(equation, init)
     
 def polynomial_inverse(polynomial):
     '''
@@ -2982,31 +2990,31 @@ def polynomial_inverse(polynomial):
         The polynomial provided must be univariate.
     '''
     ## Local imports
-    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial;
-    from ajpastor.misc.sequence_manipulation import inv_lagrangian;
+    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
+    from ajpastor.misc.sequence_manipulation import inv_lagrangian
     
     ###############################################
     ## Dealing with the polynomial input
     ###############################################
-    parent = polynomial.parent();
-    if(not (isPolynomial(parent) or isMPolynomial(parent))):
-        raise TypeError("The minimal polynomial is NOT a polynomial");
+    parent = polynomial.parent()
+    if(not isPolynomial(parent)):
+        raise TypeError("The minimal polynomial is NOT a polynomial")
         
     if(polynomial.constant_coefficient() != 0):
-        raise ValueError("Non-invertible polynomial given: %s" %polynomial);
+        raise ValueError("Non-invertible polynomial given: %s" %polynomial)
     
     ## Building the extra variable needed for algebraicity    
-    x = parent.gens()[0];   
-    y = str(x)+"_y";
-    R = PolynomialRing(parent.fraction_field(), [y]);
-    y = R.gens()[0];
+    x = parent.gens()[0]
+    y = str(x)+"_y"
+    R = PolynomialRing(parent.fraction_field(), [y])
+    y = R.gens()[0]
     
     ## Building the initial conditions
-    coeffs = polynomial.coefficients(False);
-    inv = inv_lagrangian(lambda n : factorial(n)*coeffs[n]);
-    init = [inv(i) for i in range(len(coeffs))];
+    coeffs = polynomial.coefficients(False)
+    inv = inv_lagrangian(lambda n : factorial(n)*coeffs[n])
+    init = [inv(i) for i in range(len(coeffs))]
     
-    return DAlgebraic(polynomial(**{str(x):y})-x, init);
+    return DAlgebraic(polynomial(**{str(x):y})-x, init)
   
 ##################################################################################
 ##################################################################################
@@ -3035,30 +3043,30 @@ def __decide_parent(input, parent = None, depth = 1):
     - Otherwise, we create the DDRing of the parent of 'input' of the given depth 
             and try to work with that ring.
     '''
-    dR = parent;
+    dR = parent
     if(dR is None):
-        R = input.parent();
+        R = input.parent()
         if(input in QQ):
-            dR = DFinite.to_depth(depth);
-        elif(isinstance(R, sage.symbolic.ring.SymbolicRing)):
-            parameters = set([str(el) for el in input.variables()])-set(['x']);
+            dR = DFinite.to_depth(depth)
+        elif(isinstance(R, SR)):
+            parameters = set([str(el) for el in input.variables()])-set(['x'])
             if(len(parameters) > 0 ):
-                dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters);
+                dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters)
             else:
-                dR = DDRing(PolynomialRing(QQ,x), depth=depth);
+                dR = DDRing(PolynomialRing(QQ,x), depth=depth)
         elif(is_MPolynomialRing(R) or is_PolynomialRing(R)):
-            parameters = [str(gen) for gen in R.gens()[1:]];
+            parameters = [str(gen) for gen in R.gens()[1:]]
             if(len(parameters) > 0):
-                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base(),R.gens()[0]), depth=depth), parameters);
+                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base(),R.gens()[0]), depth=depth), parameters)
             else:
-                dR = DDRing(PolynomialRing(R.base(),R.gens()[0]), depth = depth);
+                dR = DDRing(PolynomialRing(R.base(),R.gens()[0]), depth = depth)
         else:
             try:
-                dR = DDRing(R, depth = depth);
-            except Exception:
-                raise TypeError("The object provided is not in a valid Parent", e);
+                dR = DDRing(R, depth = depth)
+            except Exception as e:
+                raise TypeError("The object provided is not in a valid Parent", e)
     
-    return dR.base()(input), dR;
+    return dR.base()(input), dR
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
@@ -3076,31 +3084,31 @@ def __check_list(list_of_elements, invalid_vars=[]):
         with the original list, now with all elements casted to this field.
         
     '''
-    invalid_vars = [str(el) for el in invalid_vars];
-    all_vars = [];
-    parent = QQ;
+    invalid_vars = [str(el) for el in invalid_vars]
+    all_vars = []
+    parent = QQ
     for i in range(len(list_of_elements)):
-        el = list_of_elements[i];
+        el = list_of_elements[i]
         if(el in QQ):
-            pass;
+            pass
         elif(isinstance(el, str)):
-            all_vars += [el];
+            all_vars += [el]
         else:
-            from sage.rings.fraction_field import is_FractionField;
+            from sage.rings.fraction_field import is_FractionField
             if(is_FractionField(el.parent())):
-                all_vars += [str(v) for v in el.numerator().variables()];
-                all_vars += [str(v) for v in el.denominator().variables()];
+                all_vars += [str(v) for v in el.numerator().variables()]
+                all_vars += [str(v) for v in el.denominator().variables()]
             else:
-                all_vars += [str(v) for v in el.variables()];
-            list_of_elements[i] = str(el);
+                all_vars += [str(v) for v in el.variables()]
+            list_of_elements[i] = str(el)
     
     if(any(el in all_vars for el in invalid_vars)):
-        raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars));
+        raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars))
     
-    parent = QQ;
+    parent = QQ
     if(len(all_vars) > 0):
-        all_vars = list(set(all_vars));
-        parent = PolynomialRing(QQ, all_vars).fraction_field();
-        list_of_elements = [parent(el) for el in list_of_elements];
+        all_vars = list(set(all_vars))
+        parent = PolynomialRing(QQ, all_vars).fraction_field()
+        list_of_elements = [parent(el) for el in list_of_elements]
     
-    return (parent, list_of_elements);
+    return (parent, list_of_elements)
