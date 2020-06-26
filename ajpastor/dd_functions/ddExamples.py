@@ -112,13 +112,7 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DDFinite)
 from ajpastor.dd_functions.exceptions import (ZeroValueRequired, )
 from ajpastor.dd_functions.lazyDDRing import LazyDDRing
-from ajpastor.misc.dinamic_string import DinamicString
-#from ajpastor.dd_functions.ddFunction import *
-#from ajpastor.dd_functions.exceptions import *
-
-#from ajpastor.misc.dinamic_string import *
-
-#from ajpastor.misc.exceptions import *
+from ajpastor.misc.dynamic_string import DynamicString
 
 ##################################################################################
 ##################################################################################
@@ -256,7 +250,7 @@ def Sin(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    sol = dR.element([df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sin(_1)", newName))
+    sol = dR.element([df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DynamicString("sin(_1)", newName))
     if(not sol.is_fully_defined):
         return Sin(x)(input)
     return sol
@@ -375,7 +369,7 @@ def Cos(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    sol = dR.element([df**3 ,-df2,df], [1,0,-evaluate(df)**2 ], name=DinamicString("cos(_1)",newName))
+    sol = dR.element([df**3 ,-df2,df], [1,0,-evaluate(df)**2 ], name=DynamicString("cos(_1)",newName))
     if(not sol.is_fully_defined):
         return Cos(x)(input)
     return sol
@@ -481,7 +475,7 @@ def Tan(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("tan(_1)",newName)
+    result._DDFunction__name = DynamicString("tan(_1)",newName)
     return result
 
 @cached_function    
@@ -570,7 +564,7 @@ def Sinh(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    return dR.element([-df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DinamicString("sinh(_1)",newName))
+    return dR.element([-df**3 ,-df2,df],[0,evaluate(df),evaluate(df2)], name=DynamicString("sinh(_1)",newName))
 
 @cached_function    
 def Cosh(input, ddR = None):
@@ -658,7 +652,7 @@ def Cosh(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    return dR.element([-df**3 ,-df2,df],[1,0,evaluate(df)**2 ], name=DinamicString("cosh(_1)", newName))
+    return dR.element([-df**3 ,-df2,df],[1,0,evaluate(df)**2 ], name=DynamicString("cosh(_1)", newName))
 
 @cached_function
 def Tanh(input, ddR = None):
@@ -752,7 +746,7 @@ def Tanh(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("tanh(_1)",newName)
+    result._DDFunction__name = DynamicString("tanh(_1)",newName)
     return result
 
 @cached_function
@@ -841,7 +835,7 @@ def Arcsin(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arcsin(_1)",newName)
+    result._DDFunction__name = DynamicString("arcsin(_1)",newName)
     
     return result
 
@@ -942,7 +936,7 @@ def Arccos(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arccos(_1)",newName)
+    result._DDFunction__name = DynamicString("arccos(_1)",newName)
     
     return result
 
@@ -1034,7 +1028,7 @@ def Arctan(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arctan(_1)",newName)
+    result._DDFunction__name = DynamicString("arctan(_1)",newName)
     return result
 
 @cached_function 
@@ -1083,7 +1077,7 @@ def Arcsinh(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arcsinh(_1)",newName)
+    result._DDFunction__name = DynamicString("arcsinh(_1)",newName)
     
     return result
 
@@ -1134,7 +1128,7 @@ def Arccosh(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arccosh(_1)",newName)
+    result._DDFunction__name = DynamicString("arccosh(_1)",newName)
     
     return result
 
@@ -1184,7 +1178,7 @@ def Arctanh(input, ddR = None):
     if(hasattr(input, "_DDFunction__name") and (not(input._DDFunction__name is None))):
         newName = input._DDFunction__name
     
-    result._DDFunction__name = DinamicString("arctanh(_1)",newName)
+    result._DDFunction__name = DynamicString("arctanh(_1)",newName)
     return result
 
 ##################################################################################
@@ -1225,7 +1219,7 @@ def Log(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    return dR.element([0,df**2 -df2*f,df*f],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1)",newName))
+    return dR.element([0,df**2 -df2*f,df*f],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DynamicString("log(_1)",newName))
     
 @cached_function 
 def Log1(input, ddR = None):
@@ -1260,7 +1254,7 @@ def Log1(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
     
-    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DinamicString("log(_1+1)", newName))
+    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DynamicString("log(_1+1)", newName))
     
 @cached_function 
 def Exp(input, ddR = None):
@@ -1290,7 +1284,7 @@ def Exp(input, ddR = None):
     if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
         newName = f._DDFunction__name
         
-    return dR.element([-dR.base_derivation(f),1],[1], name=DinamicString("exp(_1)", newName))
+    return dR.element([-dR.base_derivation(f),1],[1], name=DynamicString("exp(_1)", newName))
 
 ##################################################################################
 ##################################################################################
@@ -1335,12 +1329,12 @@ def BesselD(input = 'P', kind = 1):
     x = parent.variables()[0]
         
     if(kind == 1):
-        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_J(_1,_2)", [repr(par),"x"]))
+        func = parent.element([x**2-par**2, x, x**2], name=DynamicString("bessel_J(_1,_2)", [repr(par),"x"]))
         if(par in ZZ):
             alpha = ZZ(par)
             func = func.change_init_values([0 for i in range(alpha)] + [ZZ(1)/ZZ(2) **alpha, 0, -((alpha+ZZ(2))/(ZZ(2) **(alpha+2)))], name = func._DDFunction__name)
     elif(kind == 2 ):
-        func = parent.element([x**2-par**2, x, x**2], name=DinamicString("bessel_Y(_1,_2)", [repr(par),"x"]))
+        func = parent.element([x**2-par**2, x, x**2], name=DynamicString("bessel_Y(_1,_2)", [repr(par),"x"]))
     else:
         raise ValueError("Impossible to manage Bessel functions of %sth kind" %(kind))
     
@@ -1390,7 +1384,7 @@ def StruveD(mu='P',kind=1):
         parent = DFinite
     else:
         parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
-    f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DinamicString("pi*struve_H(_1,_2)", [repr(par),"x"]))
+    f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DynamicString("pi*struve_H(_1,_2)", [repr(par),"x"]))
     if(par in ZZ and par >= 0):
         num = factorial(par+1)*pi*(ZZ(1)/ZZ(2))**(par+1)
         den = gamma(ZZ(3)/ZZ(2))*gamma(par+ZZ(3)/ZZ(2))
@@ -1490,11 +1484,11 @@ def LegendreD(nu='n', mu = 0, kind=1):
     ## Building the final name
     x = parent.variables()[0]
     if(m != 0):
-        name = DinamicString("Legendre(_1,_2;_3)", [repr(n), repr(m), repr(x)])
+        name = DynamicString("Legendre(_1,_2;_3)", [repr(n), repr(m), repr(x)])
     elif(kind == 1):
-        name = DinamicString("legendre_P(_1,_2)", [repr(n),repr(x)])
+        name = DynamicString("legendre_P(_1,_2)", [repr(n),repr(x)])
     elif(kind == 2):
-        name = DinamicString("legendre_Q(_1,_2)", [repr(n),repr(x)])
+        name = DynamicString("legendre_Q(_1,_2)", [repr(n),repr(x)])
     else:
         raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind)
     
@@ -1578,16 +1572,16 @@ def ChebyshevD(input='n', kind = 1, poly=True):
         
     if(kind == 1):
         coeffs = [n**2, -x, 1-x**2]
-        name = DinamicString("%s_T(_1;_2)" %name, [repr(n), repr(x)])
+        name = DynamicString("%s_T(_1;_2)" %name, [repr(n), repr(x)])
     elif(kind == 2):
         coeffs = [n*(n+2), -3*x, 1-x**2]
-        name = DinamicString("%s_U(_1;_2)" %name, [repr(n),repr(x)])
+        name = DynamicString("%s_U(_1;_2)" %name, [repr(n),repr(x)])
     elif(kind == 3):
         coeffs = [n*(n+1), 1-2*x, 1-x**2]
-        name = DinamicString("%s_V(_1;_2)" %name, [repr(n),repr(x)])
+        name = DynamicString("%s_V(_1;_2)" %name, [repr(n),repr(x)])
     elif(kind == 4):
         coeffs = [n*(n+1), -1-2*x, 1-x**2]
-        name = DinamicString("%s_W(_1;_2)" %name, [repr(n),repr(x)])
+        name = DynamicString("%s_W(_1;_2)" %name, [repr(n),repr(x)])
     else:
         raise ValueError("Only Chebyshev polynomials of first, second, third and fourth kind are implemented. Got %s" %kind)
     
@@ -1719,9 +1713,9 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         f = destiny_ring.element(op)
         
         if(initial == 1):
-            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([1],name=DinamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]))
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([1],name=DynamicString("hypergeometric(_1,_2,_3)", [str(numerator),str(denominator),"x"]))
         else:
-            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DinamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]))
+            __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)] = f.change_init_values([initial],name=DynamicString("(_1)*(hypergeometric(_2,_3,_4))", [str(initial),str(numerator),str(denominator),"x"]))
         
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)]
@@ -1774,7 +1768,7 @@ def PolylogarithmD(s=1):
     final_eq = pos_part-neg_part
     Li_x = DFinite.element(final_eq, [ZZ(1)/(n**s) *factorial(n-1) for n in range(1,s+1)])
     result = Li_x*x
-    result._DDFunction__name = DinamicString("Li(_1;_2)", [str(s), "x"])
+    result._DDFunction__name = DynamicString("Li(_1;_2)", [str(s), "x"])
     return result
     
 ###### RICCATI DIFFERENTIAL EQUATION
@@ -1827,9 +1821,9 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     
     x = R.variables()[0]
     
-    w = R.base().element([a*c, -b + c.derivative()/c,1], [1, -c(0)*init],name=DinamicString("_1(_2)", [name,repr(x)]))
+    w = R.base().element([a*c, -b + c.derivative()/c,1], [1, -c(0)*init],name=DynamicString("_1(_2)", [name,repr(x)]))
     solution = -w.derivative()*(c*w).inverse
-    solution._DDFunction__name = DinamicString("Riccati(_1,_2,_3;_4)(_5)", [repr(a),repr(b),repr(c),str(init),repr(x)])
+    solution._DDFunction__name = DynamicString("Riccati(_1,_2,_3;_4)(_5)", [repr(a),repr(b),repr(c),str(init),repr(x)])
     
     if(full):
         return solution,w
@@ -1869,7 +1863,7 @@ def MathieuD(a='a',q='q',init=()):
         destiny_ring = DDFinite
     x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([ra-2 *rq*Cos(2 *x), 0, 1], rinit, name=DinamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
+    return destiny_ring.element([ra-2 *rq*Cos(2 *x), 0, 1], rinit, name=DynamicString("Mathieu(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
 
 @cached_function
 def MathieuSin(a='a',q='q'):
@@ -1931,7 +1925,7 @@ def MathieuH(a='a',q='q',init=()):
         destiny_ring = DDFinite
     x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DinamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
+    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DynamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
 
 @cached_function
 def MathieuSinh(a='a',q='q'):
@@ -2011,7 +2005,7 @@ def HillD(a='a',q='q',init=()):
             
             destiny_ring = ParametrizedDDRing(DFinite, new_vars)
             
-    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DinamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:2 ])),"x"]))
+    return destiny_ring.element([ra+rq, 0, 1], rinit, name=DynamicString("HillEq(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(list(init[:2 ])),"x"]))
 
 ###### AIRY TYPE FUNCTIONS
 ### Airy's functions
@@ -2098,22 +2092,22 @@ def AiryD(init=('a','b')):
         
         ## Simplifying the name if there is zero coefficients
         if(rinit[0] != 0):
-            name_a1 = DinamicString("(3**(2/3)*gamma(2/3))*_1", [repr(rinit[0])])
-            name_b1 = DinamicString("(3**(1/3)*gamma(2/3))*_1", [repr(rinit[0])])
+            name_a1 = DynamicString("(3**(2/3)*gamma(2/3))*_1", [repr(rinit[0])])
+            name_b1 = DynamicString("(3**(1/3)*gamma(2/3))*_1", [repr(rinit[0])])
         else:
-            name_a1 = DinamicString("", [])
-            name_b1 = DinamicString("", [])
+            name_a1 = DynamicString("", [])
+            name_b1 = DynamicString("", [])
         if(rinit[1] != 0):
-            name_a2 = DinamicString("-(3**(1/3)*gamma(1/3))*_1", [repr(rinit[1])])
-            name_b2 = DinamicString("+(gamma(1/3))*_1", [repr(rinit[1])])
+            name_a2 = DynamicString("-(3**(1/3)*gamma(1/3))*_1", [repr(rinit[1])])
+            name_b2 = DynamicString("+(gamma(1/3))*_1", [repr(rinit[1])])
         else:
-            name_a2 = DinamicString("", [])
-            name_b2 = DinamicString("", [])
+            name_a2 = DynamicString("", [])
+            name_b2 = DynamicString("", [])
             
         ## Building the final name
-        name = DinamicString("((_1_2)/2)*airy_ai(_5) + ((_3_4)/(2*3**(1/6)))*airy_bi(_5)", [name_a1, name_a2, name_b1, name_b2,repr(x)])
+        name = DynamicString("((_1_2)/2)*airy_ai(_5) + ((_3_4)/(2*3**(1/6)))*airy_bi(_5)", [name_a1, name_a2, name_b1, name_b2,repr(x)])
     else:
-        name = DinamicString("airy(_1; _2)", [repr(x), repr(rinit)])
+        name = DynamicString("airy(_1; _2)", [repr(x), repr(rinit)])
     return destiny_ring.element([-x,0,1], rinit, name=name)
 
 
@@ -2147,7 +2141,7 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
         destiny_ring = DFinite
     x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], rinit, name=DinamicString("ParabolicCylinder(_1,_2,_3;_4;_5)", [repr(ra), repr(rb), repr(rc), repr(rinit), repr(x)]))
+    return destiny_ring.element([(rc+rb*x+ra*x**2),0,1], rinit, name=DynamicString("ParabolicCylinder(_1,_2,_3;_4;_5)", [repr(ra), repr(rb), repr(rc), repr(rinit), repr(x)]))
     
 ###### ELLIPTIC INTEGRALS
 ## Legendre elliptic integrals
@@ -2190,10 +2184,10 @@ def EllipticLegendreD(kind,var='phi'):
     var = str(var)
     if(var == 'm'):
         if(kind == 1):
-            name = DinamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"])
+            name = DynamicString("(2/pi)*elliptic_f(pi/2,_1)", ["x"])
             return DFinite.element([-x,(1-3*x**2), x*(1-x**2)],[1], name=name)
         elif(kind == 2):
-            name = DinamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"])
+            name = DynamicString("(2/pi)*elliptic_e(pi/2,_1)", ["x"])
             return DFinite.element([x,(1-x**2), x*(1-x**2)],[1], name=name)
         else:
             return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/x**2
@@ -2204,10 +2198,10 @@ def EllipticLegendreD(kind,var='phi'):
         s = DDFiniteK.to_depth(1)(Sin(x))
         c = DDFiniteK.to_depth(1)(Cos(x))
         if(kind == 1):
-            name = DinamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"])
+            name = DynamicString("(2/pi)*elliptic_f(_2,_1)", [repr(P),"x"])
             return DDFiniteK.element([0,-P**2*s*c,1-P**2*s**2], [0,1], name=name)
         elif(kind == 2):
-            name = DinamicString("(2/pi)*elliptic_e(_2,_1)", [repr(P),"x"])
+            name = DynamicString("(2/pi)*elliptic_e(_2,_1)", [repr(P),"x"])
             return DDFiniteK.element([0,P**2*s*c,1-P**2*s**2], [0,1], name=name)
         else:
             return (EllipticLegendreD(1,var)-EllipticLegendreD(2,var))/P**2
@@ -2258,7 +2252,7 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     else:
         coeffs = [el*x**2 for el in coeffs]
         coeffs[0] -= rd*(rd+1)*(1-x**2)
-    return destiny_ring.element(coeffs, init, name=DinamicString("CoulombSpheroidal(_1,_2,_3,_4;%d;%s)(_5)" %(kind,init), [repr(ra), repr(rb), repr(rc), repr(rd), "x"]))
+    return destiny_ring.element(coeffs, init, name=DynamicString("CoulombSpheroidal(_1,_2,_3,_4;%d;%s)(_5)" %(kind,init), [repr(ra), repr(rb), repr(rc), repr(rd), "x"]))
 
 @cached_function
 def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
@@ -2295,7 +2289,7 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     
     coeffs = [ra*(1-x**2)**2-(rb*(1-x**2))**2-rc**2, -2*x*(1-x**2), (1-x**2)**2]
     
-    return destiny_ring.element(coeffs, init, name=DinamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]))
+    return destiny_ring.element(coeffs, init, name=DynamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]))
 
 ###### HEUN FUNCTIONS
 ### Fuschian equation
@@ -2400,7 +2394,7 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
     coeffs = [sum(rq[i]*Q[i] for i in range(N)), sum(rgamma[i]*Q[i] for i in range(N)), P]
     
     ## Returning the solution
-    return destiny_ring.element(coeffs, rinit, name=DinamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]))
+    return destiny_ring.element(coeffs, rinit, name=DynamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]))
 
 ### Heun's function
 def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
@@ -2476,7 +2470,7 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
 
     al = rg+rd+re-rb-1
     f = FuschianD(a=(0,1,ra),gamma=(rd,rg,re),q=(-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))))
-    f.change_name(DinamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]))
+    f.change_name(DynamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"]))
     return f
 
 ###### COULOMB FUNCTIONS
@@ -2536,7 +2530,7 @@ def FCoulombD(m='m', l='l'):
         elif(rl > 0):
             init = [0 for i in range(rl+1)] + [1]
             
-    return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DinamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]))
+    return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DynamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]))
 
 ##################################################################################
 ##################################################################################
@@ -2579,7 +2573,7 @@ def FactorialD():
             sage: fa.getInitialValueList(10) == [factorial(i)^2 for i in range(10)]
             True
     '''
-    return DFinite.element([1,3*x-1,x**2],[1], name=DinamicString("Fa(_1)", ["x"]))
+    return DFinite.element([1,3*x-1,x**2],[1], name=DynamicString("Fa(_1)", ["x"]))
 
 @cached_function
 def CatalanD():
@@ -2631,7 +2625,7 @@ def CatalanD():
             sage: x*C^2 + 1 == C # algebraic relation
             True
     '''
-    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1], name=DinamicString("C(_1)", ["x"]))
+    return DFinite.element([2, 10*x-2, 4*x**2-x], [1,1], name=DynamicString("C(_1)", ["x"]))
 
 @cached_function
 def FibonacciD(init=('a','b')):
@@ -2717,7 +2711,7 @@ def FibonacciD(init=('a','b')):
     
     x = destiny_ring.variables()[0]
     f = destiny_ring(((rinit[1]-rinit[0])*x + rinit[0])/(1-x-x**2))
-    f.change_name(DinamicString("F(_1,_2;_3)", [str(rinit[0]),str(rinit[1]),"x"]))
+    f.change_name(DynamicString("F(_1,_2;_3)", [str(rinit[0]),str(rinit[1]),"x"]))
     return f
     
 @cached_function
@@ -2758,7 +2752,7 @@ def BellD():
             sage: B.getInitialValueList(10) == [bell_number(i) for i in range(10)]
             True
     '''
-    return DDFinite.element([-Exp(x),1], [1], name=DinamicString("B(_1)", ["x"]))
+    return DDFinite.element([-Exp(x),1], [1], name=DynamicString("B(_1)", ["x"]))
     
 @cached_function
 def BernoulliD():
@@ -2800,7 +2794,7 @@ def BernoulliD():
             sage: B.getInitialValueList(10) == [bernoulli(i) for i in range(10)]
             True
     '''
-    return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DinamicString("B(_1)", ["x"]))
+    return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DynamicString("B(_1)", ["x"]))
             
 ##################################################################################
 ##################################################################################
@@ -2929,7 +2923,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
         raise ValueError("DAlgebraic: no irreducible polynomial (%s) given" %polynomial)
     
     ## Getting the polynomial expression of y'
-    yp = (-ky*s)%polynomial
+    yp = (-(ky*s))%polynomial
     
     ## Building the derivation matrix of <1,y,y^2,...>
     rows = [[0]*polynomial.degree()]

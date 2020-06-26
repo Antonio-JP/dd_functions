@@ -4,7 +4,7 @@ Package ''misc''
 In this package the user may find the following subpackages:
 * ''bareiss'': an implementation of the Bareiss algorithm for getting nullspaces of matrices over Integral Domains
 * ''cached_property'': implementation of a decorator to declared derived attributes of objects
-* ''dinamic_string'': implementation of an enhanced string where it can be built from different pieces
+* ''dynamic_string'': implementation of an enhanced string where it can be built from different pieces
 * ''exceptions'': basic Exceptions for general use
 * ''matrix'': basic operations and utilities with matrices and linear algebra
 * ''ring_w_sequence'': implementation of a Ring class where their elements define a sequence
