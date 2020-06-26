@@ -28,7 +28,6 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as is
 # ajpastor imports
 from ajpastor.misc.matrix import swap_rows
 from ajpastor.misc.matrix import swap_cols
-from ajpastor.misc.cached_property import derived_property
 
 # Private variables for this module
 _Permutations = Permutations()
@@ -157,7 +156,6 @@ class BareissAlgorithm(object):
             self.__compute_echelon()
         return self.__echelon
         
-    #@wverbose
     def __compute_echelon(self):
         r'''
             Private method that performs operations for the echelon form.
