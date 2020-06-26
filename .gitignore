@@ -99,3 +99,15 @@ ENV/
 /.travis_ci_gh_pages_deploy_key.pub
 /gh-pages
 /log
+
+# Ignored files for gh-pages
+docs/_sources
+docs/source
+docs/Makefile
+*.py
+releases
+Dockerfile
+dependencies
+*.ipynb
+Makefile
+VERSION
