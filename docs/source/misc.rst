@@ -2,7 +2,7 @@
 Miscellaneous package (misc)
 =============================
 
-Package "misc" for Sage which provide several useful packages and utilities for
+Package ``misc`` for Sage which provide several useful packages and utilities for
 the main package :mod:`ajpastor.dd_functions`.
 
 Files in the package 
@@ -12,6 +12,7 @@ Files in the package
    :maxdepth: 1
 
    misc/bareiss
+   misc/dynamic_string
 
 Indices and Tables
 ==================

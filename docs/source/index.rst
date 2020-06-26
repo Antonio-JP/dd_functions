@@ -2,7 +2,7 @@
 DD-finite functions on Sage
 =============================
 
-This is the main page for the documentation of the pagkage :module:`dd_functions`.
+This is the main page for the documentation of the pagkage :mod:`dd_functions`.
 
 To use this module, you need to import it:: 
 
@@ -10,7 +10,7 @@ To use this module, you need to import it::
 
 From this page you have access to all the documentation of the code for this package 
 including some extra files and packages that were coded together with the
-package :module:`dd_functions`.
+package :mod:`dd_functions`.
 
 
 Tree of packages 

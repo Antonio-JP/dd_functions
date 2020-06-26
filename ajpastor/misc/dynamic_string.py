@@ -1,11 +1,12 @@
 r"""
 Python file for a dynamic string
 
-This module offers an implementation of a class (DynamicString) that behaves like a string 
+This module offers an implementation of a class (``DynamicString``) that behaves like a string 
 but can be built using different common pieces so it is possible to perform simultaneos
 substitutions on the string.
 
 EXAMPLES::
+
     sage: from ajpastor.misc.dynamic_string import *
 
 TODO:
@@ -131,7 +132,7 @@ class DynamicString(object):
             ...
             TypeError: The escape character must be of type 'str' with length 1 or 'chr'. Received <class 'sage.rings.integer.Integer'>: 1
 
-        Although numbers can be used as escape characterers if set as strings:
+        Although numbers can be used as escape characterers if set as strings::
 
             sage: DynamicString("11 + 12", ['a','b'], escape='1')
             a + b
@@ -231,6 +232,12 @@ class DynamicString(object):
         
         return self.__real
         
+    def clean(self):
+        r'''
+            Method for manually cleaning the cache for :func:`real`.
+        '''
+        self.__real = None
+
     def change_argument(self, new_argument, index=1):
         r'''
             Method to change the arguments of a :class:`DynamicString`.
@@ -318,7 +325,7 @@ class DynamicString(object):
                 raise ValueError("Invalid index: the index has to be between 1 and %d. Got: %d" %(self.nargs(), index))
             self.__arguments[index-1] = new_argument
         
-        self.__real = None
+        self.clean()
         
     ### Implementation of 'str' methods
     def replace(self, pattern, out, deep=False):
