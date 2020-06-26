@@ -1,0 +1,516 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Differentially Agebraic functions as DD-finite elements &#8212; DD-finite functions in Sage 0.8 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exceptions for DDFunctions and DDRings" href="exceptions.html" />
+    <link rel="prev" title="DDExamples: built-in functions" href="ddExamples.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions for DDFunctions and DDRings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">DD-finite functions in Sage 0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Main package (dd_functions)</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.dd_functions.toDiffAlgebraic">
+<span id="differentially-agebraic-functions-as-dd-finite-elements"></span><h1>Differentially Agebraic functions as DD-finite elements<a class="headerlink" href="#module-ajpastor.dd_functions.toDiffAlgebraic" title="Permalink to this headline">¶</a></h1>
+<p>Python file for DDFunctions as DA-Functions</p>
+<p>This package provides functions to work with DDFunctions as differentially algebraic functions.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>TODO::</dt>
+<dd><ul class="first last simple">
+<li>Do the examples section of this documentation</li>
+<li>Document this package</li>
+<li>Review the functionality of this package</li>
+</ul>
+</dd>
+</dl>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Antonio Jimenez-Pastor (2016-10-01): initial version</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.is_InfinitePolynomialRing">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">is_InfinitePolynomialRing</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.is_InfinitePolynomialRing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.get_InfinitePolynomialRingGen">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">get_InfinitePolynomialRingGen</code><span class="sig-paren">(</span><em>parent</em>, <em>var</em>, <em>with_number=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.get_InfinitePolynomialRingGen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.infinite_derivative">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">infinite_derivative</code><span class="sig-paren">(</span><em>element</em>, <em>times=1</em>, <em>var=x</em>, <em>_infinite=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.infinite_derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that takes an element and compute its times-th derivative
+with respect to the variable given by var.</p>
+<p>If the element is not in a InfinitePolynomialRing then the method
+‘derivative’ of the object will be called. Otherwise this method
+returns the derivative following the rules:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The coefficients of the polynomial ring are differentiated using</li>
+</ul>
+<p>a recursive call to this method (usually this leads to a call of the
+method ‘.derivative’ of that coefficient).
+- Any variable “#_n” appearing in the InfinitePolynomialRing has
+as derivative the variable “#_{n+1}”, i.e., the same name but with
+one higher index.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.diffalg_reduction">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">diffalg_reduction</code><span class="sig-paren">(</span><em>poly</em>, <em>_infinite=False</em>, <em>_debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.diffalg_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that recieves a polynomial ‘poly’ with variables y_0,…,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
+‘result’ with coefficients in R where, for any function f(x) such that poly(f) == 0, result(f) == 0.</p>
+<dl class="docutils">
+<dt>The algorithm works as follows:</dt>
+<dd>1 - Collect all the coefficients and their derivatives
+2 - Perform the simplification to each pair of coefficients
+3 - Perform the simplification for the last derivatives of the remaining coefficients –&gt; gens
+4 - Build the final derivation matrix for ‘gens’
+5 - Create a vector v for represent ‘poly’ w.r.t. ‘gens’
+6 - Build a square matrix –&gt; M = (v | v’ | … | v^(n))
+7 - Return det(M)</dd>
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>poly: a polynomial with variables y_0,…,y_m. Also an infinite polynomial with variable y_* is valid.</li>
+<li>_infinite: if True the result polynomial will be an infinite polynomial. Otherwise, a finite variable polynomial will be returned.</li>
+<li>_debug: if True, the steps of the algorithm will be printed.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.toDifferentiallyAlgebraic_Below">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">toDifferentiallyAlgebraic_Below</code><span class="sig-paren">(</span><em>poly</em>, <em>_infinite=False</em>, <em>_debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.toDifferentiallyAlgebraic_Below" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that receives a polynomial with variables y_0,…,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
+with coefficients in R.</p>
+<p>The optional input ‘_debug’ allow the user to print extra information as the matrix that the determinant is computed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.diff_to_diffalg">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">diff_to_diffalg</code><span class="sig-paren">(</span><em>func</em>, <em>_infinite=False</em>, <em>_debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.diff_to_diffalg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that compute an differentially algebraic equation for the obect func.
+This objet may be any element in QQ(x) or an element in some DDRing. In the first case
+the equation returned is the simple “y_0 - func”. In the latter, we compute the differential
+equation using the linear differential representation of the obect.</p>
+<p>The result is always a polynomial with variables “y_*” where the number in the index
+represent the derivative.</p>
+<p>The optional argument _debug allows the user to see during execution more data of the computation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.inverse_DA">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">inverse_DA</code><span class="sig-paren">(</span><em>poly</em>, <em>vars=None</em>, <em>_infinite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.inverse_DA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that computes the DA equation for the multiplicative inverse 
+of the solutions of a DA equation.</p>
+<p>We assume that the variables given by vars are the variables representing
+the solution, namely vars[i+1] = vars[i].derivative().
+If vars is not provided, we take all the variables from the polynomial
+that is given.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.func_inverse_DA">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">func_inverse_DA</code><span class="sig-paren">(</span><em>func</em>, <em>_inifnite=False</em>, <em>_debug=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.func_inverse_DA" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: Add documentation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.guess_DA_DDfinite">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">guess_DA_DDfinite</code><span class="sig-paren">(</span><em>poly</em>, <em>init=[]</em>, <em>bS=None</em>, <em>bd=None</em>, <em>all=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.guess_DA_DDfinite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that tries to compute a DD-finite differential equation
+for a DA-function with constant coefficients.</p>
+<p>It just tries all the possibilities. It uses the Composition class
+to get the possibilities of the orders for the coefficients.</p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>poly: polynomial with the differential equation we want to mimic with DD-finite elements</li>
+<li>init: initial values of the solution of poly</li>
+<li>bS: bound to the sum of orders in the DD-finite equation</li>
+<li>db: bound to the order of the DD-finite equation</li>
+<li>all: compute all the posibles equations</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.guess_homogeneous_DNfinite">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">guess_homogeneous_DNfinite</code><span class="sig-paren">(</span><em>poly</em>, <em>init</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.guess_homogeneous_DNfinite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that tries to compute a Dn-finite differential equation
+for a DA-function defined from an homogeneous equation.</p>
+<p>This method simplifies the equation supposing that the solution
+is of the form y(x) = exp(int(u(x))), getting a differential equation
+for u(x) of less order.</p>
+<p>If we end up with a linear equation, then we can return a Dn-finite function
+where n depends on how many iterations we needed.</p>
+<p>If the final algebraic equation is not linear, then we return this
+last equation together with the number of iterations done.</p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>poly: polynomial with the differential equation we want to mimic with DD-finite elements</li>
+<li>init: initial values of the solution of poly (must be enough).</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.FaaDiBruno_polynomials">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">FaaDiBruno_polynomials</code><span class="sig-paren">(</span><em>n</em>, <em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.FaaDiBruno_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cached version of a function, which only recomputes
+values it hasn’t already computed. A custom name can be
+provided by an optional argument “name”.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a function, do either <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">CachedFunction(f)</span></code>
+to make a cached version of <code class="docutils literal notranslate"><span class="pre">f</span></code>, or put <code class="docutils literal notranslate"><span class="pre">&#64;CachedFunction</span></code>
+right before the definition of <code class="docutils literal notranslate"><span class="pre">f</span></code> (i.e., use Python decorators):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@CachedFunction</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">....</span>
+</pre></div>
+</div>
+<p>The inputs to the function must be hashable or they must define
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">sage.structure.sage_object.SageObject._cache_key()</span></code>.</p>
+<p>TESTS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">g</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">number_of_partitions</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="s1">&#39;number_of_partitions&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="s1">&#39;partitions&#39;</span> <span class="ow">in</span> <span class="n">sage</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">sageinspect</span><span class="o">.</span><span class="n">sage_getdoc</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="mi">7</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">cache</span>
+<span class="p">{((</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">),</span> <span class="p">()):</span> <span class="mi">7</span><span class="p">}</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">w</span> <span class="o">=</span> <span class="n">walltime</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span><span class="p">();</span> <span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">h</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">walltime</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>By default, the contents of the cache are not pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="kn">import</span> <span class="nn">__main__</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">do_pickle</span></code> is set, then the cache is pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span><span class="p">(</span><span class="n">do_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.Exponential_polynomials">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">Exponential_polynomials</code><span class="sig-paren">(</span><em>n</em>, <em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.Exponential_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cached version of a function, which only recomputes
+values it hasn’t already computed. A custom name can be
+provided by an optional argument “name”.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a function, do either <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">CachedFunction(f)</span></code>
+to make a cached version of <code class="docutils literal notranslate"><span class="pre">f</span></code>, or put <code class="docutils literal notranslate"><span class="pre">&#64;CachedFunction</span></code>
+right before the definition of <code class="docutils literal notranslate"><span class="pre">f</span></code> (i.e., use Python decorators):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@CachedFunction</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">....</span>
+</pre></div>
+</div>
+<p>The inputs to the function must be hashable or they must define
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">sage.structure.sage_object.SageObject._cache_key()</span></code>.</p>
+<p>TESTS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">g</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">number_of_partitions</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="s1">&#39;number_of_partitions&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="s1">&#39;partitions&#39;</span> <span class="ow">in</span> <span class="n">sage</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">sageinspect</span><span class="o">.</span><span class="n">sage_getdoc</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="mi">7</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">cache</span>
+<span class="p">{((</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">),</span> <span class="p">()):</span> <span class="mi">7</span><span class="p">}</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">w</span> <span class="o">=</span> <span class="n">walltime</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span><span class="p">();</span> <span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">h</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">walltime</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>By default, the contents of the cache are not pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="kn">import</span> <span class="nn">__main__</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">do_pickle</span></code> is set, then the cache is pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span><span class="p">(</span><span class="n">do_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.Logarithmic_polynomials">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">Logarithmic_polynomials</code><span class="sig-paren">(</span><em>n</em>, <em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.Logarithmic_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a cached version of a function, which only recomputes
+values it hasn’t already computed. A custom name can be
+provided by an optional argument “name”.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a function, do either <code class="docutils literal notranslate"><span class="pre">g</span> <span class="pre">=</span> <span class="pre">CachedFunction(f)</span></code>
+to make a cached version of <code class="docutils literal notranslate"><span class="pre">f</span></code>, or put <code class="docutils literal notranslate"><span class="pre">&#64;CachedFunction</span></code>
+right before the definition of <code class="docutils literal notranslate"><span class="pre">f</span></code> (i.e., use Python decorators):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@CachedFunction</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="o">...</span><span class="p">):</span>
+    <span class="o">....</span>
+</pre></div>
+</div>
+<p>The inputs to the function must be hashable or they must define
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">sage.structure.sage_object.SageObject._cache_key()</span></code>.</p>
+<p>TESTS:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">g</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">number_of_partitions</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="s1">&#39;number_of_partitions&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="s1">&#39;partitions&#39;</span> <span class="ow">in</span> <span class="n">sage</span><span class="o">.</span><span class="n">misc</span><span class="o">.</span><span class="n">sageinspect</span><span class="o">.</span><span class="n">sage_getdoc</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="mi">7</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">cache</span>
+<span class="p">{((</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">),</span> <span class="p">()):</span> <span class="mi">7</span><span class="p">}</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span> <span class="o">=</span> <span class="n">CachedFunction</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">w</span> <span class="o">=</span> <span class="n">walltime</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">h</span><span class="p">();</span> <span class="n">h</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span> <span class="n">h</span><span class="p">(</span><span class="n">t</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">walltime</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>By default, the contents of the cache are not pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="kn">import</span> <span class="nn">__main__</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">do_pickle</span></code> is set, then the cache is pickled:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nd">@cached_function</span><span class="p">(</span><span class="n">do_pickle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">....</span><span class="p">:</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">n</span><span class="p">):</span> <span class="k">return</span> <span class="kc">None</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">__main__</span><span class="o">.</span><span class="n">f</span> <span class="o">=</span> <span class="n">f</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span> <span class="n">f</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span><span class="p">)</span>
+<span class="mi">100</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.is_Riccati">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">is_Riccati</code><span class="sig-paren">(</span><em>poly</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.is_Riccati" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that checks if a non-linear differential equation is of Riccatti type 
+and returns the change of coordinates and the linear differential equation in case
+we can.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.change_variable">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">change_variable</code><span class="sig-paren">(</span><em>poly</em>, <em>new_var</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.change_variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.simplify_coefficients">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">simplify_coefficients</code><span class="sig-paren">(</span><em>base</em>, <em>coeffs</em>, <em>derivatives</em>, <em>_debug=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.simplify_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.simplify_derivatives">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">simplify_derivatives</code><span class="sig-paren">(</span><em>derivatives</em>, <em>_debug=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.simplify_derivatives" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.find_relation">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">find_relation</code><span class="sig-paren">(</span><em>g</em>, <em>df</em>, <em>_debug=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.find_relation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.find_linear_relation">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">find_linear_relation</code><span class="sig-paren">(</span><em>f</em>, <em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.find_linear_relation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.build_derivation_matrix">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">build_derivation_matrix</code><span class="sig-paren">(</span><em>gens</em>, <em>coeffs</em>, <em>drelations</em>, <em>_debug=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.build_derivation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.build_vector">
+<code class="descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="descname">build_vector</code><span class="sig-paren">(</span><em>coeffs</em>, <em>monomials</em>, <em>graph</em>, <em>drelations</em>, <em>cR</em>, <em>_debug=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.build_vector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ddExamples.html"
+                        title="previous chapter">DDExamples: built-in functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="exceptions.html"
+                        title="next chapter">Exceptions for DDFunctions and DDRings</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dd_functions/toDiffAlgebraic.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions for DDFunctions and DDRings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">DD-finite functions in Sage 0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Main package (dd_functions)</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

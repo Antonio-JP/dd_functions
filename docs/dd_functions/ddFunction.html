@@ -1,0 +1,645 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DDFunctions and DDRings &#8212; DD-finite functions in Sage 0.8 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DDExamples: built-in functions" href="ddExamples.html" />
+    <link rel="prev" title="Main package (dd_functions)" href="../dd_functions.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../dd_functions.html" title="Main package (dd_functions)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">DD-finite functions in Sage 0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Main package (dd_functions)</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.dd_functions.ddFunction">
+<span id="ddfunctions-and-ddrings"></span><h1>DDFunctions and DDRings<a class="headerlink" href="#module-ajpastor.dd_functions.ddFunction" title="Permalink to this headline">¶</a></h1>
+<p>Python file for DD-functions and DD-rings</p>
+<p>This packages provides all the functionality for computing with Differentially Definable Functions (DD-functions) and 
+the rings they form (DD-rings). It allows to create further DD-rings, compare them and add constant parameters to the
+computations. The user can also compute several closure properties on te DD-functions such as addition, product, division
+composition, etc.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="n">DFinite</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span> <span class="o">=</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">getInitialValueList</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">10</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Antonio Jimenez-Pastor (2016-10-01): initial version</li>
+</ul>
+</div></blockquote>
+<dl class="function">
+<dt id="ajpastor.dd_functions.ddFunction.is_DDRing">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">is_DDRing</code><span class="sig-paren">(</span><em>ring</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.is_DDRing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that checks if an object is a DDRing.</p>
+<p>This method provides a general function to check the class of an object without knowing 
+exactly the name of the basic class of the module. This is basically an alias for the command 
+‘’sinstance(ring, DDRing)’‘.</p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>‘’ring’’ – object to be checked.</li>
+</ul>
+</dd>
+<dt>OUTPUT: </dt>
+<dd><ul class="first last simple">
+<li>‘’True’’ or ‘’False’’ depending if ‘’ring’’ is a ‘’DDRing’’ or not.</li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_DDRing</span><span class="p">(</span><span class="n">DFinite</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_DDRing</span><span class="p">(</span><span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">))</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span>
+<span class="kc">False</span>
+</pre></div>
+</div>
+<p>Also ‘’ParametrizedDDRing’’ return ‘’True’’ with this method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">is_DDRing</span><span class="p">(</span><span class="n">ParametrizedDDRing</span><span class="p">(</span><span class="n">DFinite</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>SEE ALSO:</dt>
+<dd><ul class="first last simple">
+<li>:class:’DDRing’</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.ddFunction.is_ParametrizedDDRing">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">is_ParametrizedDDRing</code><span class="sig-paren">(</span><em>ring</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.is_ParametrizedDDRing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.ddFunction.is_DDFunction">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">is_DDFunction</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.is_DDFunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing">
+<em class="property">class </em><code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">DDRing</code><span class="sig-paren">(</span><em>base</em>, <em>depth=1</em>, <em>base_field=None</em>, <em>invertibility=None</em>, <em>derivation=None</em>, <em>default_operator=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.misc.ring_w_sequence.Ring_w_Sequence</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sage.rings.ring.IntegralDomain</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.misc.serializable.SerializableObject</span></code></p>
+<p>Class for Differentially Definable Rings (or DDRing).</p>
+<p>This class represents the Ring of Differentially Definable Functions with coefficients over a base ring. This rings contains all the functions
+(formal power series) that satisfy a linear differential equation with coefficients in a base ring.</p>
+<dl class="docutils">
+<dt>INPUT::</dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">base</span></code> – an integral domain. Will provide the coefficients for the differential equations.</li>
+<li><code class="docutils literal notranslate"><span class="pre">depth</span></code> – positive integer. Points how many iterations of this construction we want.</li>
+<li><code class="docutils literal notranslate"><span class="pre">base_field</span></code> – a field. The elements of <code class="docutils literal notranslate"><span class="pre">self</span></code> will be formal power series over this field.</li>
+<li><code class="docutils literal notranslate"><span class="pre">invertibility</span></code> – method. This method checks if an element of <code class="docutils literal notranslate"><span class="pre">base</span></code> is invertible or not.</li>
+<li><code class="docutils literal notranslate"><span class="pre">derivation</span></code> – method. This method computes the derivative of elements in <code class="docutils literal notranslate"><span class="pre">base</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">default_operator</span></code> – class. Class inheriting from <code class="docutils literal notranslate"><span class="pre">ajpastor.operator.Operator</span></code> for the differential equations.</li>
+</ul>
+</dd>
+</dl>
+<p>More formally, <code class="docutils literal notranslate"><span class="pre">(base,derivation)</span></code> is a Differential Integral Domain and <code class="docutils literal notranslate"><span class="pre">(self,</span> <span class="pre">self.derivative)</span></code> a Differential Extension.</p>
+<p>Note that this objects are unique, so calling the constructor with the same arguments retrieve the same object.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Rational</span> <span class="n">Field</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>We can iterate the process using an iterative call of the constructor or the <code class="docutils literal notranslate"><span class="pre">depth</span></code> argument:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Rational</span> <span class="n">Field</span><span class="p">))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="ow">is</span> <span class="n">DDRing</span><span class="p">(</span><span class="n">DDRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<dl class="attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.Element">
+<code class="descname">Element</code><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.base_ring">
+<code class="descname">base_ring</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.base_ring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the base field for the coefficients of the elements.</p>
+<p>This is a required method for extending rings. In this case, we return the same as <code class="docutils literal notranslate"><span class="pre">self.base_field</span></code>.</p>
+<dl class="docutils">
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: DFinite.base_ring() is DFinite.base_field
+True
+sage: DFinite.base_ring() == QQ
+True
+sage: DDFinite.base_ring() == QQ
+True
+sage: s2 = var(‘s2’)
+sage: F.&lt;s2&gt; = NumberField(s2^2 - 2)
+sage: R = DDRing(F[x])
+sage: R.base_ring() == QQ
+False
+sage: R.base_ring() == F
+True
+sage: R.base_ring() is R.base_field
+True</dd>
+<dt>In the case of ParametrizedDDRing, the base field contains the parameters::</dt>
+<dd>sage: S = ParametrizedDDRing(DFinite, [‘a’,’b’])
+sage: pars = S.parameters()
+sage: S.base_ring() == FractionField(PolynomialRing(QQ, pars))
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.characteristic">
+<code class="descname">characteristic</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.characteristic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method inherited from the Ring SAGE class. It returns the characteristic of the coefficient ring.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.construction">
+<code class="descname">construction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.construction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a functor that built the DDRing.</p>
+<p>Method that returns a functor <span class="math notranslate nohighlight">\(F\)</span> and an Integral Domain <span class="math notranslate nohighlight">\(R\)</span> such that <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">==</span> <span class="pre">F(R)</span></code>. This method allows the 
+coerce system in Sage to handle <code class="docutils literal notranslate"><span class="pre">DDFunctions</span></code> and <code class="docutils literal notranslate"><span class="pre">DDRings</span></code> appropriately.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd><ul class="first last simple">
+<li>A DDRingFunctor <span class="math notranslate nohighlight">\(F\)</span></li>
+<li>An Integral Domain <span class="math notranslate nohighlight">\(R\)</span></li>
+</ul>
+</dd>
+</dl>
+<p>Such that <code class="docutils literal notranslate"><span class="pre">F(R)</span> <span class="pre">==</span> <span class="pre">self</span></code>. Moreover, <code class="docutils literal notranslate"><span class="pre">R</span> <span class="pre">in</span> <span class="pre">IntegralDomains()</span></code> and <code class="docutils literal notranslate"><span class="pre">isintance(DDRingFunctor,</span> <span class="pre">F)</span></code> are both True.</p>
+<dl class="docutils">
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: from ajpastor.dd_functions.ddFunction import DDRingFunctor
+sage: from ajpastor.dd_functions.ddFunction import ParametrizedDDRingFunctor
+sage: F,R = DFinite.construction()
+sage: F == DDRingFunctor(1,QQ)
+True
+sage: R == QQ[x]
+True
+sage: F,R = DDFinite.construction()
+sage: F == DDRingFunctor(2,QQ)
+True
+sage: R == QQ[x]
+True</dd>
+<dt>The functor for Paramterized DDRings works a bit differently: it adds the parameters to the appropriate DDRing</dt>
+<dd>sage: S = ParametrizedDDRing(DDFinite, [‘a’,’b’])
+sage: F, R = S.construction()
+sage: F == ParametrizedDDRingFunctor(2, QQ, set([var(‘a’), var(‘b’)]))
+True
+sage: R == QQ[x]
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.depth">
+<code class="descname">depth</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.depth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the depth on iteration of the construction of <code class="docutils literal notranslate"><span class="pre">self</span></code> as a Differentially Definable Ring.</p>
+<p>The method returns the depth of <code class="docutils literal notranslate"><span class="pre">self</span></code> as a DDRing. This is measure on how many times we iterate the
+process of building a differentially definable ring from <code class="docutils literal notranslate"><span class="pre">self.original_field()</span></code>. See
+<code class="docutils literal notranslate"><span class="pre">self.original_ring?</span></code> for further information.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>A (strictly) positive integer <span class="math notranslate nohighlight">\(n\)</span> such that <code class="docutils literal notranslate"><span class="pre">DDRing(self.original_ring(),</span> <span class="pre">n)</span></code> is <code class="docutils literal notranslate"><span class="pre">self</span></code>.</dd>
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: DFinite.depth()
+1
+sage: DDFinite.depth()
+2</dd>
+<dt>The ParametrizedDDRing will share the depth of the rings from where they are built::</dt>
+<dd>sage: ParametrizedDDRing(DDFinite, [‘a’,’b’]).depth()
+2
+sage: ParametrizedDDRing(DDRing(QQ[x], depth=10), [‘a’,’b’]).depth()
+10</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.element">
+<code class="descname">element</code><span class="sig-paren">(</span><em>coefficients=[]</em>, <em>init=[]</em>, <em>inhomogeneous=0</em>, <em>check_init=True</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to create a DDFunction contained in self with some coefficients, inhomogeneous term and initial values. This method just call the builder of DDFunction just puting the base argument as self.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.eval">
+<code class="descname">eval</code><span class="sig-paren">(</span><em>element</em>, <em>X=None</em>, <em>**input</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.extend_base_field">
+<code class="descname">extend_base_field</code><span class="sig-paren">(</span><em>new_field</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.extend_base_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.gens">
+<code class="descname">gens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.gens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the method <code class="docutils literal notranslate"><span class="pre">gens</span></code>.</p>
+<p>This method returns a list with all the generators of the <code class="docutils literal notranslate"><span class="pre">DDRing</span></code>. This usually means nothing, although some <code class="docutils literal notranslate"><span class="pre">DDRing</span></code> can 
+retrieve some special variables or its parameter as genertors.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>List of generators provided by this <code class="docutils literal notranslate"><span class="pre">DDRing</span></code>.</dd>
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: DFinite.gens()
+()
+sage: R = ParametrizedDDRing(DFinite, [‘a’])
+sage: R.gens()
+(a,)
+sage: ParametrizedDDRing(R, [‘b’]).gens()
+(b, a)</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.interlace_sequence">
+<code class="descname">interlace_sequence</code><span class="sig-paren">(</span><em>*functions</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.interlace_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that computes a function in ‘self’ which sequence is the interlacing of the sequences 
+given as input in ‘functions’. These functions must be contained in ‘self’ or an error will be
+raised.</p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>functions: list of function in ‘self’ which we want to interlace</li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt>
+<dd><ul class="first last simple">
+<li><dl class="first docutils">
+<dt>DDFunction ‘f’ in ‘self’ such that for all n</dt>
+<dd>f.getSequenceElement(n) == functions[n%len(functions)].getSequenceElement(n//len(functions))</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>ERRORS:</dt>
+<dd><ul class="first last simple">
+<li>TypeError is raised if any of the functions can not be casted to ‘self’</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.invertible">
+<code class="descname">invertible</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.invertible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to make easier call the inversibility criteria specified when a DDRing was created.</p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal notranslate"><span class="pre">x</span></code>: an element of self.</li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt>
+<dd><ul class="first last simple">
+<li>True if <code class="docutils literal notranslate"><span class="pre">x</span></code> is in self and it is a unit.</li>
+<li>False otherwise.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.is_field">
+<code class="descname">is_field</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.is_field" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic method for checking if <code class="docutils literal notranslate"><span class="pre">self</span></code> is a field.</p>
+<p>As we always work on the Formal Ring of power series on <code class="docutils literal notranslate"><span class="pre">self.base_ring()</span></code>, this is never a field</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>False</dd>
+<dt>TESTS::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: all(F.is_field() is False for F in [DFinite, DDFinite])
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.is_finite">
+<code class="descname">is_finite</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.is_finite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic method for checking if <code class="docutils literal notranslate"><span class="pre">self</span></code> is finite.</p>
+<p>As we always work on the Formal Ring of power series on <code class="docutils literal notranslate"><span class="pre">self.base_ring()</span></code>, this is never finite</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>False</dd>
+<dt>TESTS::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: all(F.is_finite() is False for F in [DFinite, DDFinite])
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.is_noetherian">
+<code class="descname">is_noetherian</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.is_noetherian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic method for checking if <code class="docutils literal notranslate"><span class="pre">self</span></code> is noetherian.</p>
+<p>As we always work on the Formal Ring of power series on <code class="docutils literal notranslate"><span class="pre">self.base_ring()</span></code>, this is always noetherian.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>True</dd>
+<dt>TESTS::</dt>
+<dd>sage: from ajpastor.dd_functions import DFinite, DDFinite
+sage: all(F.is_noetherian() is True for F in [DFinite, DDFinite])
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.ngens">
+<code class="descname">ngens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.ngens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of generators of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+<p>General method for Parent structures that returns the number of generators required to generate <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>Number of generators obtainded by <code class="docutils literal notranslate"><span class="pre">selg.gens()</span></code>.</dd>
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: DFinite.ngens()
+0
+sage: DDFinite.ngens()
+0
+sage: R = ParametrizedDDRing(DFinite, [‘a’])
+sage: R.ngens()
+1
+sage: ParametrizedDDRing(R, [‘b’]).ngens()
+2</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.original_ring">
+<code class="descname">original_ring</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.original_ring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original ring from which we build the iterative DDRing.</p>
+<p>This method returns the original ring from which <span class="math notranslate nohighlight">\(self\)</span> can be constructed iteratively as a DDRing. 
+See <code class="docutils literal notranslate"><span class="pre">self.depth?</span></code> for further information.</p>
+<dl class="docutils">
+<dt>OUTPUT::</dt>
+<dd>A integral domain <span class="math notranslate nohighlight">\(R\)</span> such that <code class="docutils literal notranslate"><span class="pre">DDRing(R,</span> <span class="pre">depth=self.depth())</span></code> is <code class="docutils literal notranslate"><span class="pre">self</span></code>.</dd>
+<dt>EXAMPLES::</dt>
+<dd>sage: from ajpastor.dd_functions import *
+sage: DFinite.original_ring() == QQ[x]
+True
+sage: DDFinite.original_ring() == QQ[x]
+True</dd>
+<dt>As usual, the ParametrizedDDRing will include the parameters in the base field::</dt>
+<dd>sage: R = ParametrizedDDRing(DDFinite, [‘a’,’b’])
+sage: vars = R.parameters()
+sage: R.original_ring() == FractionField(PolynomialRing(QQ, vars))[x]
+True</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.random_element">
+<code class="descname">random_element</code><span class="sig-paren">(</span><em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.random_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute a random element in this ring.</p>
+<p>This method relies in a random generator of the self.base() ring and a generator of elements of the ring self.base_ring().
+This method accepts different named arguments:</p>
+<blockquote>
+<div><ul class="simple">
+<li>“min_order” – minimal order for the equation we would get (default to 1)</li>
+<li>“max_order” – maximal order for the equation we would get (default to 3)</li>
+<li>“simple” – if True, the leading coefficient will always be one (default True)</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.to_depth">
+<code class="descname">to_depth</code><span class="sig-paren">(</span><em>dest</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.to_depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.DDRing.variables">
+<code class="descname">variables</code><span class="sig-paren">(</span><em>as_symbolic=False</em>, <em>fill=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDRing.variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DFinite">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">DFinite</code><em class="property"> = DD-Ring over (Univariate Polynomial Ring in x over Rational Field)</em><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DFinite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DDFinite">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">DDFinite</code><em class="property"> = DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))</em><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFinite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.ddFunction.command">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">command</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ajpastor.dd_functions.ddFunction.zero_extraction">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">zero_extraction</code><span class="sig-paren">(</span><em>el</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.zero_extraction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing">
+<em class="property">class </em><code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">ParametrizedDDRing</code><span class="sig-paren">(</span><em>base_ddRing</em>, <em>parameters</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDRing" title="ajpastor.dd_functions.ddFunction.DDRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.dd_functions.ddFunction.DDRing</span></code></a></p>
+<p>This class represent a generilized concept of DDRing. If <span class="math notranslate nohighlight">\(R\)</span> is a domain of the power series space (<span class="math notranslate nohighlight">\(K[[x]]\)</span>), and <span class="math notranslate nohighlight">\(D(R)\)</span> is its associated DDRing, then we can consider new constants elements and consider <span class="math notranslate nohighlight">\(D(R)\)</span>  but with the basic field be <span class="math notranslate nohighlight">\(K(var_1,...,var_m)\)</span></p>
+<dl class="docutils">
+<dt>INPUT:</dt>
+<dd><ul class="first last simple">
+<li>base_ddRing: Base DDRing where this new ring will be based. This parameter can be got using method <code class="docutils literal notranslate"><span class="pre">getBaRing</span></code>.</li>
+<li>variables: a list of variables or strings which will be the names of the new variables.</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.base_ddRing">
+<code class="descname">base_ddRing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.base_ddRing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that retrieves the original DDRing where this parametrized space is based on.</p>
+<dl class="docutils">
+<dt>OUTPUT:</dt>
+<dd><ul class="first last simple">
+<li>DDRing where elements of <code class="docutils literal notranslate"><span class="pre">self</span></code> would be if we substitute the parameters by elements of the base ring.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.construction">
+<code class="descname">construction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.construction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.eval">
+<code class="descname">eval</code><span class="sig-paren">(</span><em>element</em>, <em>X=None</em>, <em>**input</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.eval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.extend_base_field">
+<code class="descname">extend_base_field</code><span class="sig-paren">(</span><em>new_field</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.extend_base_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.gens">
+<code class="descname">gens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.gens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.ngens">
+<code class="descname">ngens</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.ngens" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.parameter">
+<code class="descname">parameter</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.parameter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><em>as_symbolic=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="k">class</span> <span class="nc">Foo</span><span class="p">:</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
+<span class="o">....</span><span class="p">:</span>     <span class="nd">@cached_method</span>
+<span class="o">....</span><span class="p">:</span>     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="o">....</span><span class="p">:</span>         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="o">^</span><span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span>
+<span class="p">{}</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="p">()</span>
+<span class="mi">4</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">cache</span>
+<span class="p">{((),</span> <span class="p">()):</span> <span class="mi">4</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ajpastor.dd_functions.ddFunction.ParametrizedDDRing.to_depth">
+<code class="descname">to_depth</code><span class="sig-paren">(</span><em>dest</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.ParametrizedDDRing.to_depth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DFiniteP">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">DFiniteP</code><em class="property"> = DD-Ring over (Univariate Polynomial Ring in x over Rational Field) with parameter (P)</em><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DFiniteP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DFiniteI">
+<code class="descclassname">ajpastor.dd_functions.ddFunction.</code><code class="descname">DFiniteI</code><em class="property"> = DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1)</em><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DFiniteI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../dd_functions.html"
+                        title="previous chapter">Main package (dd_functions)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ddExamples.html"
+                        title="next chapter">DDExamples: built-in functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dd_functions/ddFunction.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../dd_functions.html" title="Main package (dd_functions)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">DD-finite functions in Sage 0.8 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Main package (dd_functions)</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>
