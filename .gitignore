@@ -101,7 +101,6 @@ ENV/
 /log
 
 # Ignored files for gh-pages
-docs/_sources
 docs/source
 docs/Makefile
 *.py
