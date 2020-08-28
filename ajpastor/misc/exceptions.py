@@ -33,3 +33,8 @@ class DebugError(RuntimeError):
     '''
     def __init__(self, message):
         super(DebugError, self).__init__("Debug Error found (%s): we are working in fixing it. Please be patient.\nFIXING TIME!" %message)
+
+class SizeMatrixError(TypeError):
+    r'''
+        Exception indicating that the size of the elements for building a matrix are not correct. See method :func:`~ajpastor.misc.matrix.block_matrix`
+    '''

@@ -36,6 +36,9 @@ from functools import reduce
 # Sage imports
 from sage.all import (Matrix, MatrixSpace, vector, kronecker_delta, ZZ, floor, random, identity_matrix, randint)
 
+# Local imports
+from .exceptions import SizeMatrixError
+
 ####################################################################################
 ###
 ### MATRICES BUILDERS
@@ -47,31 +50,142 @@ from sage.all import (Matrix, MatrixSpace, vector, kronecker_delta, ZZ, floor, r
 ####################################################################################
 def block_matrix(parent, rows, constant_or_identity = True):
     '''
-        Method that build a matrix using as blocks the elements of rows. The first step is check that dimensions matches for each row and column assuming that non-matrices elements can be extended to a matrix.
-        The way to extend that simple elements is marked by argument `constant_or_identity`: if it is False, then we put a constant matrix fullfilled with such element. Otherwise, we build a diagonal matrix with that element in the diagonal (i.e. it is the identity matrix times the element).
+        Method that build a matrix using as blocks the elements of rows. 
+        
+        This method allows the user to build a matrix defining its blocks. There are two options for the inputs:
+            * A matrix (that will be directly used as a block
+            * Elements alone: will build a constant matrix or a diagonal matrix depending on the argument ``constant_or_identity``.
+            
+        This method checks that the size of the input is correct, i.e., all rows have the same amount of columns and that all 
+        matrices within a row provide the same amount of rows.
+
+        INPUT:
+            * ``parent``: the desired parent for the final matrix. All elements mast be inside this parent.
+            * ``rows``: a list of arguments representing the rows of the matrix. Each row is another list
+              where the elements may be matrices (indicating the number of rows for this block) or elements
+              in ``parent`` that will create constant or diagonal matrices with such element.
+            * ``constant_or_identity``: this argument decides whether the elements create a diagonal
+              matrix (``True``) or a constant matrix (``False``).
+
+        OUTPUT:
+            A matrix with the corresponding struture. If any of the sizes does not match, a :class:`~ajpastor.misc.exceptions.SizeMatrixError`
+            will be raised.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ,[[1,2],[3,4]]); I = identity_matrix(QQ, 3)
+            sage: block_matrix(QQ,[[M,0],[0,I]])
+            [1 2 0 0 0]
+            [3 4 0 0 0]
+            [0 0 1 0 0]
+            [0 0 0 1 0]
+            [0 0 0 0 1]
+            sage: block_matrix(QQ, [[I, 1],[2, M]])
+            [1 0 0 1 0]
+            [0 1 0 0 1]
+            [0 0 1 0 0]
+            [2 0 0 1 2]
+            [0 2 0 3 4]
+            sage: block_matrix(QQ, [[I, 1],[2, M]], False)
+            [1 0 0 1 1]
+            [0 1 0 1 1]
+            [0 0 1 1 1]
+            [2 2 2 1 2]
+            [2 2 2 3 4]
+
+        This method also works with non-square matrices::
+
+            sage: N = Matrix(QQ, [[1,2,3],[4,5,6]])
+            sage: block_matrix(QQ, [[N,1],[0,M]])
+            [1 2 3 1 0]
+            [4 5 6 0 1]
+            [0 0 0 1 2]
+            [0 0 0 3 4]
+            sage: block_matrix(QQ, [[N,M],[1,2]], False)
+            [1 2 3 1 2]
+            [4 5 6 3 4]
+            [1 1 1 2 2]
+        
+        However, the sizes of the columns and rows has to fit::
+
+            sage: block_matrix(QQ, [[N, 1], [M, 0]])
+            Traceback (most recent call last):
+            ...
+            SizeMatrixError: The col has not the proper format -- different size
+
+        This method also allows matrices in list format::
+
+            sage: block_matrix(QQ, [[N, [[0, 1],[-1,0]]], [1, M]])
+            [ 1  2  3  0  1]
+            [ 4  5  6 -1  0]
+            [ 1  0  0  1  2]
+            [ 0  1  0  3  4]
+            sage: block_matrix(QQ, [[N, [[0, 1],[1,0],[1,1]]],[1, M]])
+            Traceback (most recent call last):
+            ...
+            SizeMatrixError: The row has not the proper format -- different size
+
+        And also, if all entries are matrices, we do not need to have in the input all the 
+        rows with the same length::
+
+            sage: L = Matrix(QQ, [[5, 4, 3, 2, 1]])
+            sage: block_matrix(QQ, [[M, N],[L]])
+            [1 2 1 2 3]
+            [3 4 4 5 6]
+            [5 4 3 2 1]
+            sage: block_matrix(QQ, [[N, I[:2]], [L,[[9]]]])
+            [1 2 3 1 0 0]
+            [4 5 6 0 1 0]
+            [5 4 3 2 1 9]
+            sage: block_matrix(QQ, [[N, I[:2]], [L]])
+            Traceback (most recent call last):
+            ...
+            SizeMatrixError: The given rows have different column size
     '''
-    ## we check that rows is a list of lists of the same size
-    d = len(rows[0 ])
-    for i in range(1 , len(rows)):
-        if(d != len(rows[i])):
-            raise ValueError("Te rows provided can not be seen as a matrix")
-    
-    ## We check the sizes
-    rows_hights = [__check_row(row, parent) for row in rows]
-    cols_widths = [__check_col([rows[i][j] for i in range(len(rows))], parent) for j in range(len(rows[0 ]))]
-    
-    rows_with_matrix = []
-    for i in range(len(rows)):
-        row_with_matrix = []
-        for j in range(len(rows[0 ])):
-            if(rows[i][j] in parent):
-                if(constant_or_identity):
-                    row_with_matrix += [Matrix(parent, [[rows[i][j]*kronecker_delta(k,l) for l in range(cols_widths[j])] for k in range(rows_hights[i])])]
+    ## We have two different ways of seeing the input: either all the provided rows are of the same size,
+    ## allowing to have input in the parent ring, or the sizes must match perfectly between the rows.
+
+    # Checking the first case: if any element is in parent
+    if(any(any((el in parent) for el in row) for row in rows)):
+        d = len(rows[0])
+        for i in range(1, len(rows)):
+            if(d != len(rows[i])):
+                raise SizeMatrixError("The rows provided can not be seen as a matrix")
+        
+        ## We check the sizes
+        rows_hights = [__check_row(row, parent) for row in rows]
+        cols_widths = [__check_col([rows[i][j] for i in range(len(rows))], parent) for j in range(len(rows[0]))]
+        
+        rows_with_matrix = []
+        for i in range(len(rows)):
+            row_with_matrix = []
+            for j in range(len(rows[0 ])):
+                if(rows[i][j] in parent):
+                    if(constant_or_identity):
+                        row_with_matrix += [Matrix(parent, [[rows[i][j]*kronecker_delta(k,l) for l in range(cols_widths[j])] for k in range(rows_hights[i])])]
+                    else:
+                        row_with_matrix += [Matrix(parent, [[rows[i][j] for l in range(cols_widths[j])] for k in range(rows_hights[i])])]
                 else:
-                    row_with_matrix += [Matrix(parent, [[rows[i][j] for l in range(cols_widths[j])] for k in range(rows_hights[i])])]
-            else:
+                    row_with_matrix += [Matrix(parent, rows[i][j])]
+            rows_with_matrix += [row_with_matrix]
+    else: # Second case: all elements are matrices, hence they must fit exactly
+        ## We check the sizes
+        rows_hights = [__check_row(row, parent) for row in rows]
+        cols_widths = [sum(__ncols(el) for el in row) for row in rows]
+
+        if(any(el != cols_widths[0] for el in cols_widths)):
+            raise SizeMatrixError("The given rows have different column size")
+        
+        rows_with_matrix = []
+        for i in range(len(rows)):
+            row_with_matrix = []
+            for j in range(len(rows[i])):
                 row_with_matrix += [Matrix(parent, rows[i][j])]
-        rows_with_matrix += [row_with_matrix]
+            rows_with_matrix += [row_with_matrix]
+
+    ## At this point the variable "row_with_matrix" has all the entries for the final matrix
+    ## No checks are needed
     final_rows = []
     for i in range(len(rows_with_matrix)):
         for j in range(rows_hights[i]):
@@ -96,7 +210,7 @@ def diagonal_matrix(parent, *args, **kwds):
     d = len(list_of_elements)
     rows = []
     for i in range(d):
-        rows += [[0  for j in range(i)] + [list_of_elements[i]] + [0  for j in range(i+1 ,d)]]
+        rows += [[0 for j in range(i)] + [list_of_elements[i]] + [0  for j in range(i+1 ,d)]]
         
     return block_matrix(parent, rows)
     
@@ -155,9 +269,7 @@ def random_matrix(parent, *args, **kwds):
     
 ### Auxiliary (and private) methods
 def __check_input(X, parent):
-    if(isinstance(X.parent(), MatrixSpace) and parent.has_coerce_map_from(X.parent().base())):
-        return True
-    elif(isinstance(X, list)):
+    if(isinstance(X, list)):
         try:
             is_matrix = True
             d = len(X[0 ])
@@ -170,6 +282,8 @@ def __check_input(X, parent):
                 return True
         except AttributeError:
             pass
+    elif(isinstance(X.parent(), MatrixSpace) and parent.has_coerce_map_from(X.parent().base())):
+        return True
     
     return False
 
@@ -187,7 +301,7 @@ def __check_row(row,parent):
                 hight = __nrows(el)
             else:
                 if(not (hight == __nrows(el))):
-                    raise ValueError("The row has not the proper format -- different size")
+                    raise SizeMatrixError("The row has not the proper format -- different size")
         elif(not (el in parent)):
             raise ValueError("The row has not the proper format -- non-castable element")
     if(hight is None):
@@ -202,7 +316,7 @@ def __check_col(col,parent):
                 width = __ncols(el)
             else:
                 if(not (width == __ncols(el))):
-                    raise ValueError("The col has not the proper format -- different size")
+                    raise SizeMatrixError("The col has not the proper format -- different size")
         elif(not (el in parent)):
             raise ValueError("The col has not the proper format -- non-castable element")
                                
@@ -214,16 +328,16 @@ def __ncols(X):
     try:
         try:
             return X.ncols()
-        except AttributeError:
-            return len(X[0 ])
+        except AttributeError: # Case of input with lists
+            return len(X[0])
     except Exception:
         raise TypeError("Impossible to compute the number of columns for element %s" %X)
         
 def __nrows(X):
     try:
         try:
-            return X.ncols()
-        except AttributeError:
+            return X.nrows()
+        except AttributeError: # Case of input with lists
             return len(X)
     except Exception:
         raise TypeError("Impossible to compute the number of rows for element %s" %X)
