@@ -803,7 +803,65 @@ def scal_col(M, d_c, el):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def swap_rows(M, r1,r2):
+    r'''
+        Method for performing the swap of two rows in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, two row indices and returns a new matrix where
+        the elements in the rows have been swapped.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``r1``: first index of the column to be swapped.
+            * ``r2``: second index of the column to be swapped.
+
+        OUTPUT:
+            A new matrix where the elements of the columns indexed by ``r1`` and ``r2``
+            have been exchanged.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: swap_rows(M, 0, 1)
+            [3 4]
+            [1 2]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: swap_rows(N, 0, 1)
+            [3 4 0]
+            [1 2 0]
+            [0 0 1]
+            sage: swap_rows(N, 1, 2)
+            [1 2 0]
+            [0 0 1]
+            [3 4 0]
+
+        This method raises a ValueError when the index is not valid::
+            
+            sage: swap_rows(N, -1, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The first row index is not valid
+            sage: swap_rows(N, 1, 10)
+            Traceback (most recent call last):
+            ...
+            ValueError: The second row index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: swap_rows([[1,2,0],[3,4,0],[0,0,1]], 2, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+    '''
     try:
+        if(0 > r1 or r1 >= M.ncols()):
+            raise ValueError("The first row index is not valid")
+        if(0 > r2 or r2 >= M.ncols()):
+            raise ValueError("The second row index is not valid")
+
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
@@ -819,7 +877,65 @@ def swap_rows(M, r1,r2):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def swap_cols(M, c1,c2):
+    r'''
+        Method for performing the swap of two columns in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, two column indices and returns a new matrix where
+        the elements in the columns have been swapped.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``c1``: first index of the column to be swapped.
+            * ``c2``: second index of the column to be swapped.
+
+        OUTPUT:
+            A new matrix where the elements of the columns indexed by ``c1`` and ``c2``
+            have been exchanged.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: swap_cols(M, 0, 1)
+            [2 1]
+            [4 3]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: swap_cols(N, 0, 1)
+            [2 1 0]
+            [4 3 0]
+            [0 0 1]
+            sage: swap_cols(N, 1, 2)
+            [1 0 2]
+            [3 0 4]
+            [0 1 0]
+
+        This method raises a ValueError when the index is not valid::
+            
+            sage: swap_cols(N, -1, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The first column index is not valid
+            sage: swap_cols(N, 1, 10)
+            Traceback (most recent call last):
+            ...
+            ValueError: The second column index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: swap_cols([[1,2,0],[3,4,0],[0,0,1]], 2, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+    '''
     try:
+        if(0 > c1 or c1 >= M.ncols()):
+            raise ValueError("The first column index is not valid")
+        if(0 > c2 or c2 >= M.ncols()):
+            raise ValueError("The second column index is not valid")
+
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
@@ -835,6 +951,40 @@ def swap_cols(M, c1,c2):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def turn_matrix(M, vertical=False):
+    r'''
+        Method that turns a matrix either horizontally or vertically.
+
+        This method takes a matrix and compute its reverse matrix in one direction: 
+        horizontally, changing the position of the columns, or vertically, changing
+        the position of the rows.
+
+        If we do both turnings, we obtain the transpose matrix.
+
+        INPUT:
+            * ``M``: a matrix to be turned
+            * ``vertical``: whether the turn is vertically or not. If not given, we
+              always perform a horizontal turn.
+
+        OUTPUT: 
+            The corresponding turned matrix.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix([[1, 2],[3, 4]])
+            sage: turn_matrix(M)
+            [2 1]
+            [4 3]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: turn_matrix(N)
+            [0 2 1]
+            [0 4 3]
+            [1 0 0]
+            sage: turn_matrix(N, True)
+            [0 0 1]
+            [3 4 0]
+            [1 2 0]
+    '''
     if(vertical):
         new_rows = [[M[i][j] for j in range(M.ncols())] for i in range(-1 ,-M.nrows()-1 ,-1 )]
     else:
