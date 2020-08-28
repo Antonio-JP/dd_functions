@@ -472,7 +472,73 @@ def __nrows(X):
 ###
 ####################################################################################
 def op_rows(M, s_r, d_r, el):
+    r'''
+        Method for performing the row substraction in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, two rows indices and an element from the 
+        parent ring of `M` and returns a new matrix where the elements in the 
+        second row have been "reduced" by the elements in the first row times
+        such element.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``s_r``: index of the row that will be used in the reduction.
+            * ``d_r``: index of the row where the reduction will be performed.
+            * ``el``: element in the base ring of ``M`` that will be used in the reduction.
+
+        OUTPUT:
+            A new matrix `\tilde{M}` with entries `\tilde{m}_{i,j}` such that:
+                * If ``i != d_r``: `\tilde{m}_{i,j} = m_{i,j}`.
+                * Else: `\tilde{m}_{d_r,j} = m_{d_r,j} - (el)m_{s_r,j}`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: op_rows(M, 0, 1, 2)
+            [1 2]
+            [1 0]
+            sage: op_rows(M, 1, 0, -1)
+            [4 6]
+            [3 4]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: op_rows(N, 2, 0, 10)
+            [  1   2 -10]
+            [  3   4   0]
+            [  0   0   1]
+            sage: op_rows(N, 1, 2, 1)
+            [ 1  2  0]
+            [ 3  4  0]
+            [-3 -4  1]
+
+        This method raises a ValueError when the indices are not valid::
+            
+            sage: op_rows(N, -1, 2, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The source row index is not valid
+            sage: op_rows(N, 1, -2, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The destiny row index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: op_rows([[1,2,0],[3,4,0],[0,0,1]], 1, 2, 1)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+
+    '''
     try:
+        if(0 > s_r or s_r >= M.nrows()):
+            raise ValueError("The source row index is not valid")
+        if(0 > d_r or d_r >= M.nrows()):
+            raise ValueError("The destiny row index is not valid")
+
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
