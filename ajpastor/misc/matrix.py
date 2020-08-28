@@ -892,6 +892,48 @@ def direct_sum(*matrices):
     return diagonal_matrix(R, matrices)
 
 def kronecker_sum(M,N):
+    r'''
+        Method that computes the Kronecker sum of two matrices.
+
+        Given two square matrices `M` and `N` of sizes `m` and `n` the Kronecker sum is defined, using the tensor
+        product between matrices, as:
+
+        .. MATH::
+
+            M \boxplus N = M \otimes I_n + I_m \otimes N
+
+        This method simply computes the Kronecker sum of two square matrices.
+
+        INPUT:
+            * ``M``: first operand of the Kronecker sum
+            * ``N``: second operand of the Kronecker sum
+
+        OUTPUT:
+            The matrix ``M \boxplus N``.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix([[1,2],[3,4]]); N = Matrix([[1,0,2],[0,3,0],[4,0,5]])
+            sage: kronecker_sum(M,N)
+            [2 0 2 2 0 0]
+            [0 4 0 0 2 0]
+            [4 0 6 0 0 2]
+            [3 0 0 5 0 2]
+            [0 3 0 0 7 0]
+            [0 0 3 4 0 9]
+
+        The Kroenecker sum, when one of the operands is just one element, can be seen as the addition
+        of the corresponding diagonal matrix::
+
+            sage: kronecker_sum(M, Matrix([[1]]))
+            [2 2]
+            [3 5]
+            sage: kronecker_sum(Matrix([[7]]), N)
+            [ 8  0  2]
+            [ 0 10  0]
+            [ 4  0 12]
+    '''
     if(not (M.is_square() and N.is_square())):
         raise TypeError("Only square matrices for the Kronecker sum")
     
