@@ -142,6 +142,11 @@ def block_matrix(parent, rows, constant_or_identity = True):
             Traceback (most recent call last):
             ...
             SizeMatrixError: The given rows have different column size
+
+        Finally, this method also allows the user to create a Matrix in a normal fashion (providing each
+        of its elements)::
+            sage: block_matrix(QQ, [[1,2],[3,4]]) == M
+            True
     '''
     ## We have two different ways of seeing the input: either all the provided rows are of the same size,
     ## allowing to have input in the parent ring, or the sizes must match perfectly between the rows.
@@ -194,19 +199,68 @@ def block_matrix(parent, rows, constant_or_identity = True):
     
 def diagonal_matrix(parent, *args, **kwds):
     '''
-        Method that build a diagonal matrix in parent using the elements of args.
+        Method to build a diagonal matrix using the input given
+
+        This method allows the user to create a diagonal shaped matrix where the elements
+        on the diagonal can be not only elements of ``parent`` but also matrices that
+        will be used as blocks.
         
-            - If args has more than 1 element, we take consider the list as input
-            - If args has one element and it it a list, we build a diagonal matrix using such elements
-            - If args has one element and it is not a list, we build a diagonal matrix using such element repeated `size` times.
+        INPUT:
+            * ``parent``: the desired ambient space for the final matrix.
+            * ``args``: the list of elements that will be used as blocks for the diagonal
+              of the final matrix.
+            * ``kwds``: optional named parameters. The current valid arguments are the following:
+                * ``size``: if the input has only one argument, the diagonal matrix with such
+                  element ``size`` times will be created. This element has to be valid as 
+                  an input.
+        
+        OUTPUT:
+            A diagonal matrix with the corresponding structure.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]]); I = identity_matrix(QQ, 3); N = [[1,2,3],[4,5,6]]
+            sage: diagonal_matrix(QQ, [I,I])
+            [1 0 0 0 0 0]
+            [0 1 0 0 0 0]
+            [0 0 1 0 0 0]
+            [0 0 0 1 0 0]
+            [0 0 0 0 1 0]
+            [0 0 0 0 0 1]
+            sage: diagonal_matrix(QQ, M, I)
+            [1 2 0 0 0]
+            [3 4 0 0 0]
+            [0 0 1 0 0]
+            [0 0 0 1 0]
+            [0 0 0 0 1]
+            sage: diagonal_matrix(QQ, M, 9, N)
+            [1 2 0 0 0 0]
+            [3 4 0 0 0 0]
+            [0 0 9 0 0 0]
+            [0 0 0 1 2 3]
+            [0 0 0 4 5 6]
+
+        The extra argument ``size`` can be used to replicate the matrix in the diagonal a high number
+        of times. This allow a simpler syntax when creating big matrices::
+
+            sage: diagonal_matrix(QQ, M, size=2)
+            [1 2 0 0]
+            [3 4 0 0]
+            [0 0 1 2]
+            [0 0 3 4]
+            sage: diagonal_matrix(QQ, M, M, M, M, M, M, M) == diagonal_matrix(QQ, M, size=7)
+            True
     '''
-    if(len(args) > 1 ):
+    if(len(args) > 1):
         return diagonal_matrix(parent, args)
     
-    if(len(args) == 1  and (not (type(args[0 ]) == list))):
-        return diagonal_matrix(parent, [args[0 ] for i in range(kwds.get("size", 1 ))])
+    if(len(args) == 1  and __check_input(args[0], parent) or args[0] in parent):
+        return diagonal_matrix(parent, [args[0] for i in range(kwds.get("size", 1 ))])
         
-    list_of_elements = args[0 ]
+    ## We use the method block_matrix to build this diagonal. We need to create the zero
+    ## gaps between the elements on the diagonal
+    list_of_elements = args[0]
     d = len(list_of_elements)
     rows = []
     for i in range(d):
@@ -269,8 +323,9 @@ def random_matrix(parent, *args, **kwds):
     
 ### Auxiliary (and private) methods
 def __check_input(X, parent):
-    if(isinstance(X, list)):
-        try:
+    try:
+        if(isinstance(X, list)):
+       
             is_matrix = True
             d = len(X[0 ])
             i = 1 
@@ -280,11 +335,10 @@ def __check_input(X, parent):
                 
             if(is_matrix):
                 return True
-        except AttributeError:
-            pass
-    elif(isinstance(X.parent(), MatrixSpace) and parent.has_coerce_map_from(X.parent().base())):
-        return True
-    
+        elif(isinstance(X.parent(), MatrixSpace) and parent.has_coerce_map_from(X.parent().base())):
+            return True
+    except (AttributeError, TypeError):
+        pass
     return False
 
 def __cast_input(X, parent):
