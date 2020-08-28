@@ -531,7 +531,6 @@ def op_rows(M, s_r, d_r, el):
             Traceback (most recent call last):
             ...
             TypeError: First argument must be a matrix. ...
-
     '''
     try:
         if(0 > s_r or s_r >= M.nrows()):
@@ -553,7 +552,78 @@ def op_rows(M, s_r, d_r, el):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def op_cols(M, s_c, d_c, el):
+    r'''
+        Method for performing the column substraction in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, two column indices and an element from the 
+        parent ring of `M` and returns a new matrix where the elements in the 
+        second column have been "reduced" by the elements in the first column times
+        such element.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``s_c``: index of the column that will be used in the reduction.
+            * ``d_c``: index of the column where the reduction will be performed.
+            * ``el``: element in the base ring of ``M`` that will be used in the reduction.
+
+        OUTPUT:
+            A new matrix `\tilde{M}` with entries `\tilde{m}_{i,j}` such that:
+                * If ``j != d_c``: `\tilde{m}_{i,j} = m_{i,j}`.
+                * Else: `\tilde{m}_{i,d_c} = m_{i,d_c} - (el)m_{i,s_c}`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: op_cols(M, 0, 1, 2)
+            [ 1  0]
+            [ 3 -2]
+            sage: op_cols(M, 1, 0, -1)
+            [3 2]
+            [7 4]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: op_cols(N, 2, 0, 10)
+            [  1   2   0]
+            [  3   4   0]
+            [-10   0   1]
+            sage: op_cols(N, 1, 2, 1)
+            [ 1  2 -2]
+            [ 3  4 -4]
+            [ 0  0  1]
+
+        This method raises a ValueError when the indices are not valid::
+            
+            sage: op_cols(N, -1, 2, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The source column index is not valid
+            sage: op_cols(N, 1, -2, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The destiny column index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: op_cols([[1,2,0],[3,4,0],[0,0,1]], 1, 2, 1)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+
+        It is interesting to remark that this method is equivalent to the application of the 
+        method :func:`op_rows` on the transposed matrix::
+
+            sage: op_cols(N, 2, 0, 10) == (op_rows(N.transpose(), 2, 0, 10)).transpose()
+            True
+    '''
     try:
+        if(0 > s_c or s_c >= M.ncols()):
+            raise ValueError("The source column index is not valid")
+        if(0 > d_c or d_c >= M.ncols()):
+            raise ValueError("The destiny column index is not valid")
+
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
@@ -568,7 +638,75 @@ def op_cols(M, s_c, d_c, el):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def scal_row(M, d_r, el):
+    r'''
+        Method for performing the rescale of a row in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, a row index and an element from the 
+        parent ring of `M` and returns a new matrix where the elements in the 
+        row have been scaled by the element.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``d_r``: index of the row where the scaling will be performed.
+            * ``el``: element in the base ring of ``M`` that will be used in the scaling.
+
+        OUTPUT:
+            A new matrix `\tilde{M}` with entries `\tilde{m}_{i,j}` such that:
+                * If ``i != d_r``: `\tilde{m}_{i,j} = m_{i,j}`.
+                * Else: `\tilde{m}_{d_r,j} = (el)m_{d_r,j}`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: scal_row(M, 0, 2)
+            [2 4]
+            [3 4]
+            sage: scal_row(M, 1, -1)
+            [ 1  2]
+            [-3 -4]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: scal_row(N, 2, 10)
+            [ 1  2  0]
+            [ 3  4  0]
+            [ 0  0 10]
+            sage: scal_row(N, 1, 1)
+            [1 2 0]
+            [3 4 0]
+            [0 0 1]
+
+        This method raises a ValueError when the index is not valid::
+            
+            sage: scal_row(N, -1, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The row index is not valid
+            sage: scal_row(N, 10, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The row index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: scal_row([[1,2,0],[3,4,0],[0,0,1]], 2, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+
+        It is interesting to remark that this method is equivalent to the application of the 
+        method :func:`op_rows` with the same destiny and source indices and the element
+        being ``-element+1``::
+
+            sage: scal_row(N, 2, 10) == op_rows(N, 2, 2, -9)
+            True
+    '''
     try:
+        if(0 > d_r or d_r >= M.nrows()):
+            raise ValueError("The row index is not valid")
+
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
@@ -583,7 +721,74 @@ def scal_row(M, d_r, el):
         raise TypeError("First argument must be a matrix. Given %s" %M)
         
 def scal_col(M, d_c, el):
+    r'''
+        Method for performing the rescale of a column in Gauss-Jordan elimination.
+
+        This method takes a matrix `M`, a column index and an element from the 
+        parent ring of `M` and returns a new matrix where the elements in the 
+        column have been scaled by the element.
+
+        This is one of the basic steps while performing Gauss-Jordan elimination
+        on a matrix to compute its determinant/nullspace/solution space/rank etc.
+
+        INPUT:
+            * ``M``: the original matrix with entries `m_{i,j}`.
+            * ``d_c``: index of the column where the scaling will be performed.
+            * ``el``: element in the base ring of ``M`` that will be used in the scaling.
+
+        OUTPUT:
+            A new matrix `\tilde{M}` with entries `\tilde{m}_{i,j}` such that:
+                * If ``j != d_c``: `\tilde{m}_{i,j} = m_{i,j}`.
+                * Else: `\tilde{m}_{i,d_c} = (el)m_{i,d_c}`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = Matrix(QQ, [[1,2],[3,4]])
+            sage: scal_col(M, 0, 2)
+            [2 2]
+            [6 4]
+            sage: scal_col(M, 1, -1)
+            [ 1 -2]
+            [ 3 -4]
+            sage: N = block_matrix(QQ, [[M, 0],[0, 1]])
+            sage: scal_col(N, 2, 10)
+            [ 1  2  0]
+            [ 3  4  0]
+            [ 0  0 10]
+            sage: scal_col(N, 1, 1)
+            [1 2 0]
+            [3 4 0]
+            [0 0 1]
+
+        This method raises a ValueError when the index is not valid::
+            
+            sage: scal_col(N, -1, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The column index is not valid
+            sage: scal_col(N, 10, 1)
+            Traceback (most recent call last):
+            ...
+            ValueError: The column index is not valid
+
+        Also, if the input for the matrix is not such, the method raises a TypeError::
+
+            sage: scal_col([[1,2,0],[3,4,0],[0,0,1]], 2, 10)
+            Traceback (most recent call last):
+            ...
+            TypeError: First argument must be a matrix. ...
+
+        It is interesting to remark that this method is equivalent to the application of the 
+        method :func:`op_cols` with the same destiny and source indices and the element
+        being ``-element+1``::
+
+            sage: scal_col(N, 2, 10) == op_cols(N, 2, 2, -9)
+            True
+    '''
     try:
+        if(0 > d_c or d_c >= M.ncols()):
+            raise ValueError("The column index is not valid")
         ## We make a copy of the matrix
         new_rows = []
         for i in range(M.nrows()):
@@ -638,12 +843,27 @@ def turn_matrix(M, vertical=False):
     return Matrix(M.parent().base(), new_rows)
         
 def simplify_matrix(M):
+    r'''
+        Method to simplify the entries of a matrix.
+
+        This method computes an equivalent matrix to that given in the input and
+        call the method ``simplify`` of the entries in that matrix to try and
+        simplify it.
+
+        If this simplification method does not exist, this method **DO NOT** raise an
+        error. It just simply assumes that there is no simplification and return 
+        the original matrix.
+
+        INPUT:
+            * ``M``: a matrix that will be simplified.
+
+        OUTPUT:
+            A matrix `\tilde{M}` such that is equal to `M`.
+    '''
     try:
-        new_rows = [[M[i][j].simplify() for j in range(M.ncols())] for i in range(M.nrows())]
-        return Matrix(M.parent().base(), new_rows)
+        return Matrix(M.parent().base(), [[el.simplify() for el in row] for row in M])
     except AttributeError:
-        pass
-    return M
+        return M
     
 ####################################################################################
 ###
@@ -654,7 +874,22 @@ def simplify_matrix(M):
 ###
 ####################################################################################
 def direct_sum(*matrices):
-    return Matrix.block_diagonal(*matrices)
+    r'''
+        Method to compute the direct sum of several matrices.
+
+        This method computes the direct sum of several matrices, i.e., it computes a diagonal
+        matrix where the elements in the diagonal are the matrices that we have as input.
+
+        This method is just a generic alias for the method :func:`diagonal_matrix`. However,
+        it performs the checking of compatibility between the parents of the matrices.
+    '''
+    from sage.categories.pushout import pushout
+    #Computation of a common parent
+    try:
+        R = reduce(lambda p, q : pushout(p,q), [el.parent().base() for el in matrices])
+    except AttributeError:
+        raise TypeError("All the elements must be matrices")
+    return diagonal_matrix(R, matrices)
 
 def kronecker_sum(M,N):
     if(not (M.is_square() and N.is_square())):
@@ -673,24 +908,148 @@ def kronecker_sum(M,N):
 ###     a derivative over the domain where the coefficients of v lives.
 ###
 ####################################################################################
-def derivative_vector(v, D):
-    parent = v.parent().base()
+def kappa_v(v, D):
+    r'''
+        Methot that apply a derivation to each component of a vector.
+
+        When we have a vector space `V` over a differential field `(F,D)`, we can define
+        "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
+        and all `f \in F`:
+            * `\partial(v+w) = \partial(v) + \partial(w)`.
+            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+        this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
+        the derivation can be computed with a matrix-vector multiplication:
+
+        .. MATH::
+
+            \partial(v) = Mv + \kappa_D(v),
+
+        where this `\kappa_D` is the terminwise derivation of the coordinates.
+
+        This method computes, given the derivation `D`, the value of `\kappa_D(v)` for a given vector.
+
+        INPUT:
+            * ``v``: vector we want to manipulate.
+            * ``D``: derivation over the ground field.
+        
+        OUPUT:
+            The vector `w = \kappa_D(v)`.
+        
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: D = lambda p : p.derivative(x); v = vector(QQ[x], [1+x, 1, x^2])
+            sage: kappa_v(v, D)
+            (1, 0, 2*x)
+    '''
+    return vector(v.parent().base(), [D(a) for a in v])
     
-    return vector(parent, [D(a) for a in v])
-    
-def differential_movement(M, v, D):
-    w = M*v+derivative_vector(v,D)
-    return w
-    
-def __dm(M,v,D):
-    return differential_movement(M,v,D)
+def vector_derivative(M, v, D):
+    r'''
+        Method to compute the derivative of a vector.
+
+        When we have a vector space `V` over a differential field `(F,D)`, we can define
+        "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
+        and all `f \in F`:
+            * `\partial(v+w) = \partial(v) + \partial(w)`.
+            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+        this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
+        the derivation can be computed with a matrix-vector multiplication:
+
+        .. MATH::
+
+            \partial(v) = Mv + \kappa_D(v),
+
+        where this `\kappa_D` is the terminwise derivation of the coordinates.
+
+        This method takes the matrix `M`, a vector `v` and the corresponding derivation `D` and computes
+        the derivation of the vector `v`.
+
+        INPUT:
+            * ``M``: the matrix defining the derivation under the current basis.
+            * ``v``: the vector (expressed in the current basis) that we want to derivate
+            * ``D``: the derivation over the ground field.
+
+        OUTPUT:
+            A vector `w` such that `w = \partial(v)` for the derivation `\partial` defined from `D`
+            and `M`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = vandermonde_matrix(QQ[x], [1,x,x^2]); v = vector(QQ[x], [1+x, 1, x^2])
+            sage: D = lambda p : p.derivative(x)
+            sage: vector_derivative(M, v, D)
+            (x^2 + x + 3, x^4 + 2*x + 1, x^6 + x^2 + 3*x + 1)
+
+        We can see that the columns of `M` are exactly the derivatives of the trivial basis::
+
+            sage: vector_derivative(M, vector(QQ[x],[1,0,0]), D)
+            (1, 1, 1)
+            sage: vector_derivative(M, vector(QQ[x],[0,1,0]), D)
+            (1, x, x^2)
+            sage: vector_derivative(M, vector(QQ[x],[0,0,1]), D)
+            (1, x^2, x^4)
+    '''
+    return M*v+kappa_v(v,D)
     
 def matrix_of_dMovement(M,v,D, cols):
+    r'''
+        Method to construct a matrix where the columns are iterative derivations of a vector.
+
+        When we have a vector space `V` over a differential field `(F,D)`, we can define
+        "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
+        and all `f \in F`:
+            * `\partial(v+w) = \partial(v) + \partial(w)`.
+            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+        this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
+        the derivation can be computed with a matrix-vector multiplication:
+
+        .. MATH::
+
+            \partial(v) = Mv + \kappa_D(v),
+
+        where this `\kappa_D` is the terminwise derivation of the coordinates.
+
+        This method computes several derivations of a particular vector and arrange the return as a matrix
+        where these derivatives are in the columns of the matrix.
+
+        INPUT:
+            * ``M``: matrix defining the specific derivation for the fixed basis.
+            * ``v``: starig vector which will be derivated several times.
+            * ``D``: derivation over the ground field.
+            * ``cols``: number of columns (i.e., derivations) that we will return.
+
+        OUTPUT:
+            A matrix `N=(n_{i,j})` where the columns are the derivations of `v`, i.e.,
+            `(n_{0,j},n_{1,j},\ldots) = \partial^j(v)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: M = vandermonde_matrix(QQ[x], [1,x,x^2]); v = vector(QQ[x], [1+x, 1, x^2])
+            sage: D = lambda p : p.derivative(x)
+            sage: matrix_of_dMovement(M, v, D, 3)
+            [                                               x + 1                                          x^2 + x + 3                          x^6 + x^4 + 2*x^2 + 8*x + 6]
+            [                                                   1                                        x^4 + 2*x + 1            x^8 + x^5 + x^4 + 7*x^3 + 4*x^2 + 2*x + 5]
+            [                                                 x^2                                  x^6 + x^2 + 3*x + 1 x^10 + 2*x^6 + 9*x^5 + x^4 + 2*x^3 + 2*x^2 + 3*x + 6]
+
+        We can check that the second column of that matrix is the derivative of the vector `v`::
+
+            sage: [matrix_of_dMovement(M, v, D, 3)[i][1] for i in range(3)] == [el for el in vector_derivative(M, v, D)]
+            True
+    '''
     from sage.categories.pushout import pushout
     parent = pushout(M.parent().base(), v.parent().base())
     res = [v]
     for _ in range(1 ,cols):
-        res += [__dm(M,res[-1 ],D)]
+        res += [vector_derivative(M,res[-1 ],D)]
     return Matrix(parent, res).transpose()
     
 

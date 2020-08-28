@@ -47,7 +47,7 @@ from ajpastor.lazy.conversion import ConversionSystem;
 from ajpastor.dd_functions.ddFunction import *;
 
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence;
-from ajpastor.misc.matrix import differential_movement;
+from ajpastor.misc.matrix import vector_derivative;
 
 ####################################################################################################
 ####################################################################################################
@@ -685,7 +685,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         
         for i in range(len(vector)):
             extra_cons += [ivectors[-1][-1]*trans_const];
-            ivectors += [differential_movement(C, ivectors[-1], self.derivative)];
+            ivectors += [vector_derivative(C, ivectors[-1], self.derivative)];
             
         res_vector = sum([vector(cR,[vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(vector))]);
         res_constant = sum([vector[i]*extra_cons[i] for i in range(len(vector))], constant);

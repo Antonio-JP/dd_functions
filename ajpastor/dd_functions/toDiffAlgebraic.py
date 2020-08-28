@@ -42,7 +42,7 @@ from ajpastor.dd_functions.ddExamples import *;
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing;
 
 from ajpastor.misc.matrix import matrix_of_dMovement;
-from ajpastor.misc.matrix import differential_movement;
+from ajpastor.misc.matrix import vector_derivative;
 
 ################################################################################
 ###
@@ -634,7 +634,7 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, _debug=False):
                     
                     for i in range(len(cu_vector)):
                         extra_cons += [ivectors[-1][-1]*trans[edge[0]][0]];
-                        ivectors += [differential_movement(C, ivectors[-1], infinite_derivative)];
+                        ivectors += [vector_derivative(C, ivectors[-1], infinite_derivative)];
                     
                     vectors[edge[0]] = sum([vector(cR,[cu_vector[i]*ivectors[i][j] for j in range(len(ivectors[i]))]) for i in range(len(cu_vector))], de_vector);
                     const_val += sum([cu_vector[i]*extra_cons[i] for i in range(len(cu_vector))]);
