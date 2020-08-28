@@ -198,7 +198,7 @@ def block_matrix(parent, rows, constant_or_identity = True):
     return Matrix(parent, final_rows)
     
 def diagonal_matrix(parent, *args, **kwds):
-    '''
+    r'''
         Method to build a diagonal matrix using the input given
 
         This method allows the user to create a diagonal shaped matrix where the elements
@@ -210,7 +210,7 @@ def diagonal_matrix(parent, *args, **kwds):
             * ``args``: the list of elements that will be used as blocks for the diagonal
               of the final matrix.
             * ``kwds``: optional named parameters. The current valid arguments are the following:
-                * ``size``: if the input has only one argument, the diagonal matrix with such
+                * ``"size"``: if the input has only one argument, the diagonal matrix with such
                   element ``size`` times will be created. This element has to be valid as 
                   an input.
         
@@ -251,8 +251,16 @@ def diagonal_matrix(parent, *args, **kwds):
             [0 0 3 4]
             sage: diagonal_matrix(QQ, M, M, M, M, M, M, M) == diagonal_matrix(QQ, M, size=7)
             True
+
+        If the user forgets about putting at least one argument for the `\alpha_i`, we raise a ``TypeError``::
+            sage: diagonal_matrix(ZZ, size=4)
+            Traceback (most recent call last):
+            ...
+            ValueError: At least one element has to be provided
     '''
-    if(len(args) > 1):
+    if(len(args) == 0):
+        raise ValueError("At least one element has to be provided")
+    elif(len(args) > 1):
         return diagonal_matrix(parent, args)
     
     if(len(args) == 1  and __check_input(args[0], parent) or args[0] in parent):
@@ -269,57 +277,111 @@ def diagonal_matrix(parent, *args, **kwds):
     return block_matrix(parent, rows)
     
 def vandermonde_matrix(parent, *args, **kwds):
-    if(len(args) > 1 ):
+    r'''
+        Method to create a Vandermonde matrix
+
+        This method consider a list of elements from the ``parent`` ring and creates the corresponding Vandermonde Matrix.
+        This matrix (see the `Wikipedia webpage <https://en.wikipedia.org/wiki/Vandermonde_matrix>`) is constructed
+        by elements `\alpha_1,\ldots,\alpha_m` and a given a size `n` in the following way:
+        
+        .. MATH::
+
+            V = \begin{pmatrix}
+            1 & \alpha_1 & \ldots & \alpha_1^{n-1}\\
+            1 & \alpha_2 & \ldots & \alpha_2^{n-1}\\
+            \vdots & \vdots & \ddots & \vdots\\
+            1 & \alpha_m & \ldots & \alpha_m^{n-1}
+            \end{pmatrix}
+
+        or, naming `v_{i,j}` the corresponding entry of the matrix, we have `v_{i,j} = \alpha_i^{j-1}`.
+
+        INPUT:
+            * ``parent``: the desired parent for the matrix. All elements will be casted into this parent structure.
+            * ``args``: a list of elements in ``parent`` that will take the role of the `\alpha_i` in the definition.
+            * ``kwds``: optional arguments to consider. The following values are allowed:
+                * ``"size"`` or ``"ncols"``: the value for `n` in the definition. If not given, this value will be
+                  the number of elements in the input (i.e., we build a square matrix).
+
+        OUTPUT:
+            The corresponding Vandermonde matrix with the desired size.
+
+        EXAMPLES::
+
+            sage: from ajpastor.misc.matrix import *
+            sage: vandermonde_matrix(QQ, 1,2,3)
+            [1 1 1]
+            [1 2 4]
+            [1 3 9]
+            sage: vandermonde_matrix(ZZ, 5, size=2)
+            [1 5]
+            sage: vandermonde_matrix(ZZ, [1,2,3], ncols=10)
+            [    1     1     1     1     1     1     1     1     1     1]
+            [    1     2     4     8    16    32    64   128   256   512]
+            [    1     3     9    27    81   243   729  2187  6561 19683]
+            sage: vandermonde_matrix(QQ, [1,2,3,4,5,6,7,8,9], size=3)
+            [ 1  1  1]
+            [ 1  2  4]
+            [ 1  3  9]
+            [ 1  4 16]
+            [ 1  5 25]
+            [ 1  6 36]
+            [ 1  7 49]
+            [ 1  8 64]
+            [ 1  9 81]
+
+        If the two possible optional arguments (``"size"`` and ``"ncols"``) are present, the value for
+        ``"size"`` has preference::
+
+            sage: vandermonde_matrix(QQ, [2,3], ncols=10, size=3)
+            [1 2 4]
+            [1 3 9]
+
+        If the user forgets about putting at least one argument for the `\alpha_i`, we raise a ``TypeError``::
+            sage: vandermonde_matrix(ZZ, size=4)
+            Traceback (most recent call last):
+            ...
+            ValueError: At least one element has to be provided
+            
+    '''
+    if(len(args) == 0):
+        raise ValueError("At least one element has to be provided")
+    elif(len(args) > 1 or (not (type(args[0]) in (list, tuple)))):
         return vandermonde_matrix(parent, args, **kwds)
     else:
-        casted = [parent(el) for el in args[0 ]]
+        casted = [parent(el) for el in args[0]]
         
-    try:
-        ncols = kwds["size"]
-    except KeyError:
-        try:
-            ncols = kwds["ncols"]
-        except KeyError:
-            ncols = len(casted)
+    ncols = kwds.get("size", kwds.get("ncols", len(casted)))
         
     rows = [[pow(casted[i], j) for j in range(ncols)] for i in range(len(casted))]
     return Matrix(parent, rows)
     
-def random_matrix(parent, *args, **kwds):
-    if(len(args) > 1 ):
-        return random_matrix(parent, args, **kwds)
-    else:
-        casted = [int(el) for el in args[0 ]]
-        
-    try:
-        ncols = kwds["size"]
-        nrows = ncols
-    except KeyError:
-        try:
-            ncols = kwds["ncols"]
-            nrows = kwds["nrows"]
-        except KeyError:
-            if(len(casted) > 1 ):
-                nrows = casted[0 ]
-                ncols = casted[1 ]
-            else:
-                nrows = casted[0 ]
-                ncols = casted[1 ]
-            
-    try:    
-        min = kwds["min"]
-    except KeyError:
-        min = -sys.maxsize 
-    try:
-        max = kwds["max"]
-    except KeyError:
-        max = sys.maxsize
-    
-    if(min > max):
-        raise ValueError("Can not create random numbers between %d and %d.\n\tReason: the minimal value is higher than the maximal value" %(min,max))
-    
-    return Matrix(parent, [[randint(min, max) for i in range(ncols)] for j in range(nrows)])
-    
+def random_matrix(parent, nrows, ncols = None, *args, **kwds):
+    r'''
+        Method to create a random matrix in a particular parent structure.
+
+        This method uses the method ``random_element`` from a parent structure repeatively
+        to create a full matrix. Since the arguments for creating this random elements may vary
+        from different parent structures, the optional arguments ``args`` and ``kwds`` allows
+        the user to fix them in each particular example.
+
+        INPUT:
+            * ``parent``: parent structure where we create the random matrix.
+            * ``nrows``: the number of rows for the desired matrix.
+            * ``ncols``: the number of columns for the desired matrix. If not given, we take
+              the value of ``nrows`` as such number (i.e., the matrix is square)
+            * ``args`` and ``kwds``: optional arguments passed to the method ``random_element``
+              of the ``parent``.
+
+        OUPUT:
+            A random matrix with entries in ``parent`` and fixed size.
+    '''
+    nr = int(nrows)
+    nc = nr if ncols is None else int(ncols)
+
+    if(nr <= 0 or nc <= 0):
+        raise ValueError("The size for a random matrix is not valid: negative size")
+
+    return Matrix(parent, [[parent.random_element(**kwds) for j in range(nc)] for i in range(nr)])    
     
 ### Auxiliary (and private) methods
 def __check_input(X, parent):
@@ -396,9 +458,6 @@ def __nrows(X):
     except Exception:
         raise TypeError("Impossible to compute the number of rows for element %s" %X)
         
-def __rand(min, max):
-    return ZZ(floor((random()*(max-min))+min))
-
 ####################################################################################
 ###
 ### MATRICES OPERATIONS
