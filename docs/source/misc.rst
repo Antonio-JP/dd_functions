@@ -11,6 +11,7 @@ Files in the package
 .. toctree::
    :maxdepth: 1
 
+   misc/matrix
    misc/bareiss
    misc/dynamic_string
 

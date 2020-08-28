@@ -4,18 +4,9 @@ Python file for matrix operations and utilities
 This module offers several methods to build matrices and operate with them in a very general fashion.
 It also provides several method for differential linear algebra.
 
-EXAMPLES::
-    sage: from ajpastor.misc.matrix import *
-
-TODO::
-    * Complete the Examples section of this documentation
-    * Document the package
-    * Review the functionality of the package
-
 AUTHORS:
 
     - Antonio Jimenez-Pastor (2016-10-01): initial version
-
 """
 
 # ****************************************************************************
@@ -143,8 +134,9 @@ def block_matrix(parent, rows, constant_or_identity = True):
             ...
             SizeMatrixError: The given rows have different column size
 
-        Finally, this method also allows the user to create a Matrix in a normal fashion (providing each
-        of its elements)::
+        Finally, this method also allows the user to create a Matrix in a normal fashion 
+        (providing each of its elements)::
+
             sage: block_matrix(QQ, [[1,2],[3,4]]) == M
             True
     '''
@@ -253,6 +245,7 @@ def diagonal_matrix(parent, *args, **kwds):
             True
 
         If the user forgets about putting at least one argument for the `\alpha_i`, we raise a ``TypeError``::
+
             sage: diagonal_matrix(ZZ, size=4)
             Traceback (most recent call last):
             ...
@@ -281,7 +274,7 @@ def vandermonde_matrix(parent, *args, **kwds):
         Method to create a Vandermonde matrix
 
         This method consider a list of elements from the ``parent`` ring and creates the corresponding Vandermonde Matrix.
-        This matrix (see the `Wikipedia webpage <https://en.wikipedia.org/wiki/Vandermonde_matrix>`) is constructed
+        This matrix (see the `Wikipedia webpage <https://en.wikipedia.org/wiki/Vandermonde_matrix>`_) is constructed
         by elements `\alpha_1,\ldots,\alpha_m` and a given a size `n` in the following way:
         
         .. MATH::
@@ -337,6 +330,7 @@ def vandermonde_matrix(parent, *args, **kwds):
             [1 3 9]
 
         If the user forgets about putting at least one argument for the `\alpha_i`, we raise a ``TypeError``::
+        
             sage: vandermonde_matrix(ZZ, size=4)
             Traceback (most recent call last):
             ...
@@ -1107,8 +1101,9 @@ def kappa_v(v, D):
         When we have a vector space `V` over a differential field `(F,D)`, we can define
         "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
         and all `f \in F`:
-            * `\partial(v+w) = \partial(v) + \partial(w)`.
-            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        * `\partial(v+w) = \partial(v) + \partial(w)`.
+        * `\partial(fv) = D(f)v + f\partial(v)`.
 
         It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
         this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
@@ -1145,8 +1140,9 @@ def vector_derivative(M, v, D):
         When we have a vector space `V` over a differential field `(F,D)`, we can define
         "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
         and all `f \in F`:
-            * `\partial(v+w) = \partial(v) + \partial(w)`.
-            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        * `\partial(v+w) = \partial(v) + \partial(w)`.
+        * `\partial(fv) = D(f)v + f\partial(v)`.
 
         It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
         this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
@@ -1196,8 +1192,9 @@ def matrix_of_dMovement(M,v,D, cols):
         When we have a vector space `V` over a differential field `(F,D)`, we can define
         "derivations" over `V` as those maps `\partial: V \rightarrow V` such that for all `v, w \in V`
         and all `f \in F`:
-            * `\partial(v+w) = \partial(v) + \partial(w)`.
-            * `\partial(fv) = D(f)v + f\partial(v)`.
+
+        * `\partial(v+w) = \partial(v) + \partial(w)`.
+        * `\partial(fv) = D(f)v + f\partial(v)`.
 
         It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
         this derivation is uniquely determined by a matrix `M` in such a way that, for all `v \in V`,
