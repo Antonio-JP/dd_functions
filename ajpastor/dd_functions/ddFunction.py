@@ -2078,18 +2078,23 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         Method to get a DDFunction `g` that satisfies `D(self) = g`.
         
         INPUT:
-            - ``args``: ignored input
+            - ``args``: if it has length 1 and it is an integer, it will be considered
+              as how many derivatives we want to computed. Otherwise, we ignore this
+              arguments.
             - ''kwds'': if times is included, we compute the times-th derivative
         '''
-        if('times' in kwds):
-            if(kwds['times'] in ZZ):
-                times = kwds['times']
-                if(times < 0):
-                    raise ValueError("Negative derivatives can not be computed")
-                elif(times == 0):
-                    return self
-                elif(times > 1):
-                    return self.derivative(times=times-1).derivative()
+        if(len(args) == 1 and args[0] in ZZ):
+            times = args[0]
+        else:
+            times = kwds.get("times", 1)
+
+        if(times in ZZ):
+            if(times < 0):
+                raise ValueError("Negative derivatives can not be computed")
+            elif(times == 0):
+                return self
+            elif(times > 1):
+                return self.derivative(times=times-1).derivative()
                 
         if(self.__derivative is None):
             if(self.is_constant):
