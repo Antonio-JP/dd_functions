@@ -537,6 +537,14 @@ class Operator(object):
             return self.mult(other)
         except Exception:
             return NotImplemented
+
+    def __pow__(self, other):
+        if(not other in ZZ or other <= 0):
+            return NotImplemented
+        if(other == 1):
+            return self
+        else:
+            return self.__mul__(self.__pow__(other-1))
   
     ### Reverse addition
     def __radd__(self, other):
