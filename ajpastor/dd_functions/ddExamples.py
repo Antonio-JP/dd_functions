@@ -101,7 +101,8 @@ AUTHORS:
 
 # Sage imports
 from sage.all import (cached_function, factorial, bell_polynomial, NumberField, QQ, ZZ, pi,
-                        sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR)
+                        sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR,
+                        ideal)
 from sage.all_cmdline import x
 
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
@@ -2795,6 +2796,63 @@ def BernoulliD():
             True
     '''
     return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DynamicString("B(_1)", ["x"]))
+
+##################################################################################
+##################################################################################
+###
+### P-Weierstrass function
+###
+##################################################################################
+##################################################################################
+def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
+    r'''
+        Method that create the ring of diff. definable elements over the `\wp`-Weierstrass
+        function.
+
+        The `\wp`-Weierstrass function is a special function related with elliptic curves.
+        In fact, the `\wp`-Weierstrass function together with its derivative form
+        a very particular type of elliptic curves:
+
+        .. MATH::
+
+            \wp'^2 = \wp^3 - g_2\wp - g_3,
+
+        where `g_2,g_3` are constants complex elements.
+
+        TODO:
+            * Complete this introduction
+
+        INPUT:
+            * ``g2``: the constant `g_2` defining the elliptic curve.
+            * ``g3``: the constant `g_3` defining the elliptic curve.
+            * ``with_x``: boolean value deciding whether adding the `x` variable 
+              or not.
+    '''
+    ## Checking input
+    parent, vals = __check_list([g2, g3], ['x','u','v'])
+    rg2,rg3 = vals
+
+    vars = ['u','v']
+    if(with_x): vars = ['x'] + vars
+
+    base_ring = PolynomialRing(parent, vars)
+    if(with_x) : x = base_ring('x')
+    u = base_ring('u'); v = base_ring('v')
+    I = ideal(v**2 - u**3 + rg2*u + rg3)
+    final_base_ring = base_ring.quotient(I)
+
+    if(with_x):
+        def inner_derivation(p):
+            p = p.lift()
+            return final_base_ring(p.derivative(x) + v*p.derivative(u) + (3/2*u**2 - g3)*p.derivative(v))
+    else:
+        def inner_derivation(p):
+            p = p.lift()
+            return final_base_ring(v*p.derivative(u) + (3/2*u**2 - g3)*p.derivative(v))
+    
+    return DDRing(final_base_ring, 1, parent, derivation=inner_derivation)
+
+
             
 ##################################################################################
 ##################################################################################
@@ -2898,7 +2956,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ky = sum(polynomial[i].derivative()*y**i for i in range(polynomial.degree()+1))
     
     ### WARNING From this point until said otherwise, in the case base_ring is DDRing
-    ### we change the poylnomials to a finite setting because when this was code, 
+    ### we change the polynomials to a finite setting because when this was code, 
     ### computing remainders with InfinitePolynomial coefficients broke the program.
     ###
     ### For further information about it, please check the track: (pending)
