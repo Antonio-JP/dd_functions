@@ -2,7 +2,7 @@ r"""
 Python file for Ore Operators
 
 This module offers an implementation of an linear differential operator based on the implementation on the package ore_algebra
-by Manuel Kauers and Marc Mezzaroba. This class is a simply wrapper putting a common interface from the ore operators with
+by Manuel Kauers and Marc Mezzarobba. This class is a simply wrapper putting a common interface from the ore operators with
 the other operators provided in ajpastor.operator.
 
 EXAMPLES::
@@ -39,7 +39,7 @@ from sage.all_cmdline import x
 ###
 ### ------------------------------------------------------------------------------------------------
 ###
-### This file contains a wrapper that adapts the OreOperator class from Manuel Kauer's package (see
+### This file contains a wrapper that adapts the OreOperator class from Manuel Kauers' package (see
 ### ore_algebra.OreOperator) so we can use them together with other classes of Operators
 ### 
 ### ------------------------------------------------------------------------------------------------
@@ -216,6 +216,24 @@ class w_OreOperator(Operator):
         op1 = DirectStepOperator(self.base(), self, self.derivate())
         
         return w_OreOperator(self.base(), op1._compute_compose_solution(other), self.derivate())
+    ####################################################### 
+
+    ####################################################### 
+    ### SIMPLE SOLUTION ARITHMETHIC METHODS (ABSTRACT)
+    ####################################################### 
+    def _compute_simple_add_solution(self, other):
+        equ1 = DirectStepOperator(self.base(), self.operator)
+        equ2 = DirectStepOperator(self.base(), other.operator)
+        return w_OreOperator(self.base(), equ1._compute_simple_add_solution(equ2))
+        
+    def _compute_simple_mult_solution(self, other):
+        equ1 = DirectStepOperator(self.base(), self.operator)
+        equ2 = DirectStepOperator(self.base(), other.operator)
+        return w_OreOperator(self.base(), equ1._compute_simple_mult_solution(equ2))
+        
+    def _compute_simple_derivative_solution(self):
+        equ1 = DirectStepOperator(self.base(), self.operator)
+        return w_OreOperator(self.base(), equ1._compute_simple_derivative_solution())
     ####################################################### 
     
     ####################################################### 
