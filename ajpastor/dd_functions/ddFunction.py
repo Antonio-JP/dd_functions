@@ -1416,6 +1416,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ### Cached elements
         self.__pows = {0 :1 , 1 :self} # Powers-cache
         self.__derivative = None # The derivative of a function
+        self.__simple_derivative = None # The simple derivative of a function
         
         ### Assigning the differential operator
         ### We will save the leading coefficient of the equation (lc) to future uses.
@@ -2018,13 +2019,194 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ###
     #####################################
     def simple_add(self, other):
-        raise NotImplementedError("This method is not implemented")
+        r'''
+            Method to compute the simple addition of two DDFunctions.
+
+            This method computes the addition of two DDFunctions that are represented with an 
+            annihilating differential equation and some initial values. These defining equations
+            have a particular set of singularities. This method guarantees that the annihilator
+            returned have the same apparent singularities as the two operands.
+
+            Currently, this method only works with D-finite functions.
+
+            INPUT:
+                * ``other``: the other :class:`DDFunction` that will be added to ``self``.
+
+            OUTPUT:
+            
+            A new :class:`DDFunction` representing the addition of ``self`` and ``other`` such that
+            the defining equation has the same singularities as ``self`` and ``other``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = AiryD(); g = Sin(x)
+                sage: h = f.simple_add(g)
+                sage: h.singularities()
+                Empty Set
+                sage: h.equation[h.getOrder()] in h.parent().base_field
+                True
+
+            TODO:
+                * Improve the tests
+        '''
+        ### We check some simplifications: if one of the functions is zero, then we can return the other
+        if(self.is_null):
+            return other
+        elif(other.is_null):
+            return self
+
+        if(self.parent().depth() > 1):
+            raise NotImplementedError("This method is not implemented")
+        
+        ### Computing the new name
+        newName = None
+        if(not(self.__name is None) and (not(other.__name is None))):
+            if(other.__name[0] == '-'):
+                newName = DynamicString("_1_2", [self.__name, other.__name])
+            else:
+                newName = DynamicString("_1+_2", [self.__name, other.__name])
+
+        newOperator = self.equation.simple_add_solution(other.equation)
+        needed_initial = newOperator.get_jp_fo()+1
+        
+        ### Getting as many initial values as possible until the new order
+        op1Init = self.getInitialValueList(needed_initial)
+        op2Init = other.getInitialValueList(needed_initial)
+        newInit = [op1Init[i] + op2Init[i] for i in range(min(len(op1Init),len(op2Init)))]
+
+        result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
+        result.change_built("polynomial", (PolynomialRing(self.parent().base_field,['x1','x2'])('x1+x2'), {'x1':self, 'x2': other}))
+
+        return result
 
     def simple_mult(self, other):
-        raise NotImplementedError("This method is not implemented")
+        r'''
+            Method to compute the simple product of two DDFunctions.
+
+            This method computes the product of two DDFunctions that are represented with an 
+            annihilating differential equation and some initial values. These defining equations
+            have a particular set of singularities. This method guarantees that the annihilator
+            returned have the same apparent singularities as the two operands.
+
+            Currently, this method only works with D-finite functions.
+
+            INPUT:
+                * ``other``: the other :class:`DDFunction` that will be multiplied to ``self``.
+
+            OUTPUT:
+            
+            A new :class:`DDFunction` representing the product of ``self`` and ``other`` such that
+            the defining equation has the same singularities as ``self`` and ``other``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = AiryD(); g = Sin(x)
+                sage: h = f.simple_mult(g)
+                sage: h.singularities()
+                Empty Set
+                sage: h.equation[h.getOrder()] in h.parent().base_field
+                True
+
+            TODO:
+                * Improve the tests
+        '''
+        ### We check some simplifications: if one of the functions is zero, then we can return directly 0
+        if ((other.is_null) or (self.is_null)):
+            return 0 
+        if(self.is_one):
+            return other
+        elif(other.is_one):
+            return self
+        elif(self.is_constant and other.is_constant):
+            return self.getInitialValue(0 )*other.getInitialValue(0 )
+        elif(self.is_constant):
+            return other.scalar(self.getInitialValue(0 ))
+        elif(other.is_constant):
+            return self.scalar(other.getInitialValue(0 ))
+
+        if(self.parent().depth() > 1):
+            raise NotImplementedError("This method is not implemented")
+            
+        ### We build the new operator
+        newOperator = self.equation.simple_mult_solution(other.equation)
+        
+        ### Getting the needed initial values for the solution
+        needed_initial = newOperator.get_jp_fo()+1 
+               
+        ### Getting as many initial values as possible until the new order
+        op1Init = self.getInitialValueList(needed_initial)
+        op2Init = other.getInitialValueList(needed_initial)
+        newInit = [sum([binomial(i,j)*op1Init[j] * op2Init[i-j] for j in range(i+1 )]) for i in range(min(len(op1Init),len(op2Init)))]
+        
+        ### Computing the new name
+        newName = None
+        if(not(self.__name is None) and (not(other.__name is None))):
+            newName = DynamicString("(_1)*(_2)", [self.__name, other.__name])
+            
+        result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
+        result.change_built("polynomial", (PolynomialRing(self.parent().base_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
+        return result
 
     def simple_derivative(self):
-        raise NotImplementedError("This method is not implemented")
+        r'''
+            Method to compute the simple derivative of a DDFunction.
+
+            This method computes the derivative of a DDFunction that is represented with an 
+            annihilating differential equation and some initial values. This defining equation
+            have a particular set of singularities. This method guarantees that the annihilator
+            returned have the same apparent singularities.
+
+            Currently, this method only works with D-finite functions.
+
+            OUTPUT:
+            
+            A new :class:`DDFunction` representing the derivative of ``self`` such that
+            the defining equation has the same singularities as ``self``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = AiryD()
+                sage: h = f.simple_derivative()
+                sage: h.singularities()
+                Empty Set
+                sage: h.equation[h.getOrder()] in h.parent().base_field
+                True
+
+            TODO:
+                * Improve the tests
+        '''
+        if(self.parent().depth() > 1):
+            raise NotImplementedError("This method is not implemented")
+
+        if(self.__simple_derivative is None):
+            if(self.is_constant):
+                ### Special case: is a constant
+                self.__simple_derivative = self.parent()(0)
+            else:
+                ### We get the new operator
+                newOperator = self.equation.simple_derivative_solution()
+            
+                ### We get the required initial values (depending of the order of the next derivative)
+                initList = self.getInitialValueList(newOperator.get_jp_fo()+2 )
+                newInit = [initList[i+1] for i in range(min(len(initList)-1 ,newOperator.get_jp_fo()+1 ))]
+                
+                ### Computing the new name
+                newName = None
+                if(not(self.__name is None)):
+                    if(self.__name[-1] == "'"):
+                        newName = DynamicString("_1'", self.__name)
+                    else:
+                        newName = DynamicString("(_1)'", self.__name)
+                
+                ### We create the next derivative with the equation, initial values
+                self.__simple_derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
+                self.__simple_derivative.change_built("derivative",tuple([self]))
+                
+            
+        return self.__simple_derivative
 
     #####################################
     ### Sequence methods

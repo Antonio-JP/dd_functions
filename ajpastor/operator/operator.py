@@ -232,7 +232,7 @@ class Operator(object):
         '''
             Method to get a recursion polynomial associated with this operator.
             
-            If the requested polynomial is greater than zero, then we will return a `forward` polynomial, but if the request is lesser than zero, we will return a backward polynomial, computing it if neccessary.
+            If the requested polynomial is greater than zero, then we will return a `forward` polynomial, but if the request is lesser than zero, we will return a backward polynomial, computing it if necessary.
             
             INPUT:
                 - n: index of the recursion polynomial requested.
@@ -338,7 +338,7 @@ class Operator(object):
     
     @cached_method
     def jp_value(self):
-        ## TODO Be careful with this computation:oinly valid is the base field are the rational
+        ## TODO Be careful with this computation: only valid is the base field are the rational
         jp_pol = self.get_recursion_polynomial(self.forward_order)
         return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol))
        
@@ -446,7 +446,7 @@ class Operator(object):
         '''
         Let c be the coefficients of 'self'. This method computes a differential operator such any solution 'f' of the equation with coefficients 'c(other^(-1))' composed with 'other' will satisfy.
         
-        This method (akward by definition) requires that 'other' is in self.base().
+        This method (awkward by definition) requires that 'other' is in self.base().
         
         INPUT:
             - other: an element of 'self.base()'
@@ -490,6 +490,79 @@ class Operator(object):
         This method computes a new operator that annihilates any solution of 'self' compose with any solution of 'other'.
         '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+    #######################################################
+
+    ####################################################### 
+    ### SIMPLE ARITHMETHIC METHODS
+    ####################################################### 
+    def simple_add_solution(self, other):
+        r'''
+            Method to compute the annihilator of the addition of solutions to two operators.
+
+            This method computes a new operator `A` that annihilates all the functions that 
+            are the addition of the solutions of ``self`` and ``other``.
+            This method takes care that the singularities of the new equation are the same 
+            as the singularities of the input. 
+            
+            Currently this only work if the coefficients are univariate polynomials.
+        '''
+        ## If the input is not an operator, trying the casting
+        if(not isinstance(other, Operator)):
+            other = self.__class__(self.base(), other, self.derivate())
+            
+        ## If the input is an Operator we guess the hightest preference type
+        if(not isinstance(other, self.__class__)):
+            if(other._get_preference() > self._get_preference()):
+                return other.add_solution(self)
+            other = self.__class__(self.base(), other, self.derivate())
+            
+        return self._compute_simple_add_solution(other)
+
+    def simple_mult_solution(self, other):
+        r'''
+            Method to compute the annihilator of the product of solutions to two operators.
+
+            This method computes a new operator `A` that annihilates all the functions that 
+            are the product of the solutions of ``self`` and ``other``.
+            This method takes care that the singularities of the new equation are the same 
+            as the singularities of the input. 
+            
+            Currently this only work if the coefficients are univariate polynomials.
+        '''
+        ## If the input is not an operator, trying the casting
+        if(not isinstance(other, Operator)):
+            other = self.__class__(self.base(), other, self.derivate())
+            
+        ## If the input is an Operator we guess the hightest preference type
+        if(not isinstance(other, self.__class__)):
+            if(other._get_preference() > self._get_preference()):
+                return other.mult_solution(self)
+            other = self.__class__(self.base(), other, self.derivate())
+            
+        return self._compute_simple_mult_solution(other)
+
+    def simple_derivative_solution(self):
+        r'''
+            Method to compute the annihilator of the derivative of solutions to ``self``.
+
+            This method computes a new operator `A` that annihilates all the functions that 
+            are the derivative of the solutions of ``self``.
+            This method takes care that the singularities of the new equation are the same 
+            as the singularities of the input. 
+            
+            Currently this only work if the coefficients are univariate polynomials.
+        '''
+        return self._compute_simple_derivative_solution()
+
+    def _compute_simple_add_solution(self, other):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+
+    def _compute_simple_mult_solution(self, other):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+
+    def _compute_simple_derivative_solution(self):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+
     ####################################################### 
     
     ####################################################### 
