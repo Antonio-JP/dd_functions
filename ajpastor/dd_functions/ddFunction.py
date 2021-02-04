@@ -2646,7 +2646,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     lc = self.equation[self.equation.getOrder()]
                  
                 # only the zeros of the leading coefficient
-                self.__singularities = FiniteEnumeratedSet([root[0][0] for root in poly.roots()])
+                self.__singularities = FiniteEnumeratedSet([root[0][0] for root in lc.roots()])
             else:
                 d = self.getOrder()
                 s = self.equation[d].zeros()
@@ -2654,7 +2654,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     s = s.union(self.equation[i].singularities())
                 self.__singularities = s
         return self.__singularities
-        
+
     #####################################
     ### Symbolic methods
     #####################################    
