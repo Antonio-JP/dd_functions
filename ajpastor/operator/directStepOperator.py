@@ -1,7 +1,7 @@
 r"""
 Python file for directStepOperator
 
-This module offers an implementarion of a TwoStepsOperator.
+This module offers an implementation of a TwoStepsOperator.
 
 EXAMPLES::
     sage: from ajpastor.operator.twoStepsOperator import *
@@ -37,7 +37,7 @@ from sage.all import (lcm, Matrix, gcd, prod, vector)
 ###
 ### ------------------------------------------------------------------------------------------------
 ###
-### This file contains an extension of a TwoStepsOperator that computes the kernell of the appropiate matrix using standard SAGE algorithms.
+### This file contains an extension of a TwoStepsOperator that computes the kernell of the appropriate matrix using standard SAGE algorithms.
 ### ------------------------------------------------------------------------------------------------
 ###
 ### Version: 0.0
