@@ -48,9 +48,7 @@ from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
 #ajpastor imports
-from ajpastor.operator.operator import Operator
-from ajpastor.operator.directStepOperator import DirectStepOperator
-from ajpastor.operator.fullLazyOperator import FullLazyOperator
+from ajpastor.dd_functions.exceptions import DDFunctionError
 
 from ajpastor.misc.dynamic_string import DynamicString, m_dreplace
 from ajpastor.misc.serializable import SerializableObject
@@ -58,7 +56,12 @@ from ajpastor.misc.cached_property import derived_property
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 from ajpastor.misc.ring_w_sequence import sequence
+from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
 from ajpastor.misc.verbose import printProgressBar
+
+from ajpastor.operator.operator import Operator
+from ajpastor.operator.directStepOperator import DirectStepOperator
+from ajpastor.operator.fullLazyOperator import FullLazyOperator
 
 # Private variables for module
 _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
@@ -1502,9 +1505,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         
         ### Other attributes for DDFunctions
-        ### Setting up the name for the function
         self.__name = name
         self.__built = None
+        self.__zeros = None
+        self.__singularities = None
             
     def __buildOperator(self, coeffs):
         if(isinstance(coeffs, self.parent().default_operator)):
@@ -2572,10 +2576,85 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return result[-1]
 
     def zeros(self):
-        raise NotImplementedError("This method is not implemented")
+        r'''
+            Method to compute the zeros of a DDFunction.
+
+            Let `f(x) \in \mathbb{K}[[x]]` be the power series represented by ``self``.
+            This method computes symbolically a set `Z(f)` such that for all `\alpha \in Z(f)`
+            we are guaranteed that `f(\alpha) = 0`.
+
+            Currently this method only works with polynomials (since locating the zeros of 
+            *differentially definable functions* is an open problem) and with special cases
+            where we added the set of zeros manually while creating the function.
+
+            OUTPUT:
+
+            A set `Z(f)` of type :class:`~ajpastor.misc.sets.EnumeratedSet`.
+
+            TODO:
+                * Add manually zeros in the module DDExamples
+                * Add manually zeros in the multiplication computation
+                * Test this method
+        '''
+        if(self.__zeros is None):
+            if(self.is_constant):
+                self.__zeros = EmptySet()
+            try:
+                poly = self.is_polynomial()
+                self.__zeros = FiniteEnumeratedSet([root[0][0] for root in poly.roots()])
+            except DDFunctionError:
+                raise NotImplementedError("This method is not implemented")
+        return self.__zeros
 
     def singularities(self):
-        raise NotImplementedError("This method is not implemented")
+        r'''
+            Method to compute the singularities of a DDFunction.
+
+            Let `f(x) \in \mathbb{K}[[x]]` be the power series represented by ``self``.
+            This method computes symbolically a set `P(f)` such that if `\alpha \in \mathbb{C}`
+            is a singularity of `f(x)` then `\alpha \in P(f)`.
+
+            It is known that if `f(x)` satisfies a linear differential equation of the shape
+
+            .. MATH::
+
+                c_0(x)f(x) + \ldots + c_d(x)f^{(d)}(x) = 0,
+
+            then all the singularities of `f(x)` are contained in the set of singularities of 
+            the coefficients `c_0(x),\ldots,c_d(x)` and in the zero set of the leading 
+            coefficient `c_d(x)`. 
+
+            Hence, the singularity set can be computed recursively using this method on all
+            the coefficients of the equation and the method :func:`zeros` on the leading
+            coefficient exclusively. In the particular case of D-finite functions (i.e., 
+            the coefficients are polynomials) we perform special computations since they 
+            have no singularities and the zeros can be explicitly computed.
+
+            OUTPUT:
+
+            A set `P(f)` of type :class:`~ajpastor.misc.sets.EnumeratedSet`.
+
+            TODO:
+                * Test this method
+        '''
+        if(self.__singularities is None):
+            if(self.parent().depth() == 1): # D-finite case
+                try: # Trying to use desingularize from ore_algebra on the D-finite case
+                    eq = self.equation.operator.desingularize()
+                    lc = eq[eq.order()]
+                except AttributeError:
+                    lc = self.equation[self.equation.getOrder()]
+                 
+                # only the zeros of the leading coefficient
+                self.__singularities = FiniteEnumeratedSet([root[0][0] for root in poly.roots()])
+            else:
+                d = self.getOrder()
+                s = self.equation[d].zeros()
+                for i in range(d+1):
+                    s = s.union(self.equation[i].singularities())
+                self.__singularities = s
+        return self.__singularities
+        
     #####################################
     ### Symbolic methods
     #####################################    
@@ -2639,6 +2718,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             pass
         return self
         
+    def to_poly(self):
+        raise NotImplementedError("This method is not implemented")
     #####################################
     ### Magic Python methods
     #####################################

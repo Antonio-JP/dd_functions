@@ -5,7 +5,7 @@ r"""
     with DDFunctions and similar structures. These exceptions allows a better control
     of the errors through the package.
 
-    These exceptions are available publicaly, but need to be imported explicitly (i.e.,
+    These exceptions are available publicly, but need to be imported explicitly (i.e.,
     these exception are not directly imported with the package ``ajpastor.dd_function``)
 
     EXAMPLES::
@@ -47,7 +47,7 @@ class InitValueError(ValueError):
         incompatible initial conditions.
 
         TODO:
-            * Look and substitue for this error
+            * Look and substitute for this error
     '''
     pass
 
@@ -83,7 +83,7 @@ class ZeroValueRequired(InitValueError):
             ZeroValueRequired: required a zero value for f(x) in cos(f(x))
 
         TODO:
-            * Look and substitue for this error
+            * Look and substitute for this error
     '''
     def __init__(self, *args):
         if(len(args) == 0):
@@ -92,3 +92,12 @@ class ZeroValueRequired(InitValueError):
             super(ZeroValueRequired, self).__init__("required a zero value for %s" %args[0])
         else:
             super(ZeroValueRequired, self).__init__("required a zero value for %s in %s" %(args[0], args[1]))
+
+class DDFunctionError(Exception):
+    r'''
+        Generic error for the package ``dd_functions``.
+
+        This error has no specific value but allows to control errors within the package.
+        Use the message argument to convey specific meanings to the exception.
+    '''
+    pass
