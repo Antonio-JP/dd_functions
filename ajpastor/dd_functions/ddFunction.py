@@ -426,7 +426,12 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             if(derivation is None):
                 try:
                     self_var = self.variables(True,False)[0]
-                    self.base_derivation = lambda p : p.derivative(self.base()(self_var))
+                    def __standard_derivation(p):
+                        try:
+                            return p.derivative(self.base()(self_var))
+                        except AttributeError:
+                            return 0
+                    self.base_derivation = __standard_derivation
                 except IndexError:
                     self.base_derivation = lambda p : 0
             else:

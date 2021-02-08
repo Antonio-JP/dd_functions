@@ -111,6 +111,10 @@ class DirectStepOperator(TwoStepsOperator):
         ## Our solution has denominators. We clean them all
         p = prod([el.denominator() for el in sol])
         return vector(parent, [el*p for el in sol])
+    
+    
+    def _solve_linear_system(self, A, b, ring):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 
     
 

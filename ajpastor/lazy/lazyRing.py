@@ -115,7 +115,7 @@ class _LazyElement(IntegralDomainElement):
                 return tuple(set(var_n+var_d));
         return tuple();
         
-    def derivative(self):
+    def derivative(self, *args):
         '''
         Method that computes the derivative of an element in the laziest way possible.
         

@@ -39,9 +39,10 @@ from sage.all import (cached_method, kronecker_delta, Matrix, lcm, gcd, vector)
 ###
 ### ------------------------------------------------------------------------------------------------
 ###
-### This file contains an extension of a LazyStepOperator that computes the kernell of the appropiate matrix trnaslating the elements into polynomials and reversing the change once obtained the final vector.
+### This file contains an extension of a LazyStepOperator that computes the kernell of the appropriate 
+### matrix translating the elements into polynomials and reversing the change once obtained the final vector.
 ###
-### If some relations between the variables are known, Groebner basis reduction will be used.
+### If some relations between the variables are known, Gröbner basis reduction will be used.
 ### ------------------------------------------------------------------------------------------------
 ###
 ### Version: 0.0
@@ -205,6 +206,9 @@ class PolynomialLazyOperator(TwoStepsOperator):
         finalSolution = [self.__conversion.to_real(a).raw() for a in finalSolution]
         
         return vector(parent, finalSolution)
+    
+    def _solve_linear_system(self, A, b, ring):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 
     
     def __smart_is_null(self, p):

@@ -1,7 +1,7 @@
 r"""
 Python file for fullLazyOperators
 
-This module offers an implementarion of a TwoStepsOperator where all the operations are performed lazily.
+This module offers an implementation of a TwoStepsOperator where all the operations are performed lazily.
 
 EXAMPLES::
     sage: from ajpastor.operator.twoStepsOperator import *
@@ -37,9 +37,10 @@ from sage.all import (Matrix, vector, gcd, kronecker_delta, lcm, prod)
 ###
 ### ------------------------------------------------------------------------------------------------
 ###
-### This file contains an extension of a TwoStepsOperator that computes the kernell of the appropiate matrix trnaslating the elements into polynomials and reversing the change once obtained the final vector.
+### This file contains an extension of a TwoStepsOperator that computes the kernell of the appropriate matrix 
+### translating the elements into polynomials and reversing the change once obtained the final vector.
 ###
-### If some relations between the variables are known, Groebner basis reduction will be used.
+### If some relations between the variables are known, Gröbner basis reduction will be used.
 ### ------------------------------------------------------------------------------------------------
 ###
 ### Version: 0.0
@@ -103,49 +104,6 @@ class FullLazyOperator(TwoStepsOperator):
     ####################################################### 
     ### GETTING MATRICES METHODS
     ####################################################### 
-    def _get_system_addition(self, other):
-        '''
-            Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the sum (f+g) where f is solution to 'self=0' and g is solution to 'other=0'
-        '''        
-        from ajpastor.misc.matrix import diagonal_matrix as diagonal
-        from ajpastor.misc.matrix import matrix_of_dMovement as move
-        
-        f = self
-        g = other
-        
-        R = self.__conversion
-                
-        ## Computing the companion matrices
-        Mf = f.companion()
-        Mg = g.companion()
-        
-        full_companion = diagonal(R, [Mf,Mg])
-        init_vector = vector(R,([1] + [0 for i in range(self.getOrder()-1)])+([1] + [0 for i in range(other.getOrder()-1)]))
-        
-        return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+1)
-        
-    def _get_system_product(self, other):
-        '''
-            Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the product (fg) where f is solution to 'self=0' and g is solution to 'other=0'
-        '''        
-        from ajpastor.misc.matrix import matrix_of_dMovement as move
-        
-        f = self
-        g = other
-        
-        R = self.__conversion
-                
-        ## Computing the companion matrices
-        Mf = f.companion()
-        Mg = g.companion()
-        
-        ## Computing Kroenecker sum of the matrices
-        full_companion = Mf.tensor_product(Matrix.identity(R, Mg.nrows())) + Matrix.identity(R, Mf.nrows()).tensor_product(Mg)
-        
-        init_vector = vector(R,([1] + [0 for i in range(f.getOrder()*g.getOrder()-1)]))
-                
-        return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+1)
-        
     def _get_matrix_composition(self, other):
         from ajpastor.misc.matrix import matrix_of_dMovement as move
         R = self.__conversion
@@ -225,6 +183,9 @@ class FullLazyOperator(TwoStepsOperator):
                 pass
         
         return vector(R.base(), realSolution)
+
+    def _solve_linear_system(self, A, b, ring):
+        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def __get_lcm(self, input):
         try:

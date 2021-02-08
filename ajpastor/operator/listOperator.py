@@ -204,6 +204,8 @@ class ListOperator(Operator):
                         return False
                 return True
         return False
+    
+    __hash__ = Operator.__hash__
         
     ### Differential
     def derivative(self):

@@ -231,7 +231,7 @@ class TwoStepsOperator(ListOperator):
         Mf, Mg, parent = self._mix_matrices(other, Mf, Mg)
         
         ## Using tensor product for Kronecker sum
-        full_companion = Mf.tensor_product(Matrix.identity(parent.base(), Mg.nrows())) + Matrix.identity(parent.base(), Mf.nrows()).tensor_product(Mg)
+        full_companion = Mf.tensor_product(Matrix.identity(parent, Mg.nrows())) + Matrix.identity(parent, Mf.nrows()).tensor_product(Mg)
         return self._pre_proc(full_companion)
 
     def _get_vector_addition(self, other):
