@@ -221,19 +221,19 @@ class w_OreOperator(Operator):
     ####################################################### 
     ### SIMPLE SOLUTION ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
-    def _compute_simple_add_solution(self, other):
+    def _compute_simple_add_solution(self, other, bound = 5):
         equ1 = DirectStepOperator(self.base(), self.operator)
         equ2 = DirectStepOperator(self.base(), other.operator)
-        return w_OreOperator(self.base(), equ1._compute_simple_add_solution(equ2))
+        return w_OreOperator(self.base(), equ1._compute_simple_add_solution(equ2, bound))
         
-    def _compute_simple_mult_solution(self, other):
+    def _compute_simple_mult_solution(self, other, bound = 5):
         equ1 = DirectStepOperator(self.base(), self.operator)
         equ2 = DirectStepOperator(self.base(), other.operator)
-        return w_OreOperator(self.base(), equ1._compute_simple_mult_solution(equ2))
+        return w_OreOperator(self.base(), equ1._compute_simple_mult_solution(equ2, bound))
         
-    def _compute_simple_derivative_solution(self):
+    def _compute_simple_derivative_solution(self, bound = 5):
         equ1 = DirectStepOperator(self.base(), self.operator)
-        return w_OreOperator(self.base(), equ1._compute_simple_derivative_solution())
+        return w_OreOperator(self.base(), equ1._compute_simple_derivative_solution(bound))
     ####################################################### 
     
     ####################################################### 

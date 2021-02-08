@@ -554,13 +554,13 @@ class Operator(object):
         '''
         return self._compute_simple_derivative_solution()
 
-    def _compute_simple_add_solution(self, other):
+    def _compute_simple_add_solution(self, other, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-    def _compute_simple_mult_solution(self, other):
+    def _compute_simple_mult_solution(self, other, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-    def _compute_simple_derivative_solution(self):
+    def _compute_simple_derivative_solution(self, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
     ####################################################### 
