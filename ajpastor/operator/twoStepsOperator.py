@@ -286,7 +286,7 @@ class TwoStepsOperator(ListOperator):
 
             The vector representing `f(x)g(x)` in the module `M`.
         '''
-        return self._pre_proc(vector(parent,([1] + [0 for i in range(f.getOrder()*g.getOrder()-1)])))
+        return self._pre_proc(vector(([1] + [0 for i in range(self.getOrder()*other.getOrder()-1)])))
 
     @cached_method
     def _get_system_derivative(self, ncols, inhom=False):
@@ -329,7 +329,7 @@ class TwoStepsOperator(ListOperator):
             v = self._pre_proc(vector([0]+[1]+(self.getOrder()-2)*[0]))
             system = Matrix(d_matrix.parent().base(), [[]])
         else: # General case, we build the next column
-            aux_s, new_v = self._get_system_self(ncols-1, True)
+            aux_s, new_v = self._get_system_derivative(ncols-1, True)
             system = Matrix(aux_s.columns()+[new_v]).transpose()
             v = der(d_matrix, new_v, self.derivate())
         

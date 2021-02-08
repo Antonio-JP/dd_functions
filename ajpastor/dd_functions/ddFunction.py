@@ -1672,6 +1672,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def has_name(self):
         return not(self.__name is None)
             
+    @cached_method
     def noetherian_ring(self, structure=False):
         r'''
             Method to compute a minimal noetherian ring containing self.
@@ -1697,7 +1698,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
         '''
-        if(self.parent().depth == 1):
+        if(self.parent().depth() == 1):
             base, gens, dens = self.equation.noetherian_ring()
 
             d = self.getOrder()
@@ -1705,10 +1706,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             if(structure):
                 R = PolynomialRing(base, ["y_%d" %i for i in range(len(gens))])
-                sdens = [den if den in R else R("y_%d" %(gens.index(den))) for den in dens]
+                sdens = [R(den) if den in R else R("y_%d" %(gens.index(den))) for den in dens]
+                sdens = [el for el in sdens if not el.is_unit()]
                 return base, gens, dens, R.localization(sdens)
             return base, gens, dens
-            
+
         raise NotImplementedError("Noetherian rings are not yet implemented")
     #####################################
     ### Arithmetic methods

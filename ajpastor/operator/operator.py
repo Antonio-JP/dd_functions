@@ -71,8 +71,6 @@ from sage.all_cmdline import x
 ####################################################################################################
 ####################################################################################################
 
-from ajpastor.dd_functions.ddFunction import is_DDRing
-
 from ajpastor.misc.cached_property import derived_property
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
@@ -252,16 +250,20 @@ class Operator(object):
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
         '''
+        from ajpastor.dd_functions import is_DDRing
         if(is_DDRing(self.base())):
             raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
         c = [self.coefficients()[-1]]
-        if(other is None): c += [other.coefficients()[-1]]
-
+        if(not (other is None)): c += [other.coefficients()[-1]]
+        final_dens = []
+        for el in c:
+            if((not el in self.base()) or (not self.base()(el).is_unit())):
+                final_dens += [el]
         if(structure):
-            R = self.base().localization(c)
-            return self.base(), [], c, R
-        return self.base(), [], c
+            R = self.base().localization(tuple(final_dens))
+            return self.base(), [], final_dens, R
+        return self.base(), [], final_dens
 
     #######################################################
     
