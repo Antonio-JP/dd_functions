@@ -186,6 +186,8 @@ class w_OreOperator(Operator):
         except Exception:
             pass
         return False
+
+    __hash__ = Operator.__hash__
         
     ### Differential
     def derivative(self):

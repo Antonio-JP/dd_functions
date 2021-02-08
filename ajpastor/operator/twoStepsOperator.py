@@ -101,7 +101,7 @@ class TwoStepsOperator(ListOperator):
     ####################################################### 
     def _compute_simple_add_solution(self, other, bound=5):
         order = self.getOrder()+other.getOrder(); i = 0
-        ring = self.noetherian_ring(other, True)[-1]
+        ring = self.noetherian_ring(other)
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_addition(other, order+i, True)
@@ -114,7 +114,7 @@ class TwoStepsOperator(ListOperator):
         
     def _compute_simple_mult_solution(self, other, bound = 5):
         order = self.getOrder()+other.getOrder(); i = 0
-        ring = self.noetherian_ring(other, True)[-1]
+        ring = self.noetherian_ring(other)
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_product(other, order+i, True)
@@ -127,7 +127,7 @@ class TwoStepsOperator(ListOperator):
         
     def _compute_simple_derivation_solution(self, bound = 5):
         order = self.getOrder(); i = 0
-        ring = self.noetherian_ring(structure=True)[-1]
+        ring = self.noetherian_ring()
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_derivative(order+i, True)
@@ -484,6 +484,17 @@ class TwoStepsOperator(ListOperator):
             the field of fractions of the parent of `A`, then this is a simple
             linear algebra computation. Otherwise, special code may be needed for
             computations.
+
+            The given ring is either a ring structure in Sage or a triplet
+            with the following format:
+                * A ring `R`. This must be a Noetherian ring.
+                * A list of generators `\alpha_1,\ldots,\alpha_n`. We may need to
+                  compute algebraic relations between these elements.
+                * A list of valid denominators `\gamma_1,\ldots,\gamma_k`. These 
+                  elements must be either a generator `\alpha_l` or an element in 
+                  `R`.
+            If a triplet is provided, the computations will be performed in the 
+            ring `R[\alpha_1,\ldots,\alpha_n]_{\gamma_1,\ldots,\gamma_k}`.
         '''        
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 

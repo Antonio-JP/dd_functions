@@ -225,7 +225,7 @@ class Operator(object):
         return Matrix(field, rows)
     
     @cached_method
-    def noetherian_ring(self, other=None, structure=False):
+    def noetherian_ring(self, other=None):
         r'''
             Method that builds a noetherian ring that contains all the coefficients
 
@@ -260,9 +260,7 @@ class Operator(object):
         for el in c:
             if((not el in self.base()) or (not self.base()(el).is_unit())):
                 final_dens += [el]
-        if(structure):
-            R = self.base().localization(tuple(final_dens))
-            return self.base(), [], final_dens, R
+        
         return self.base(), [], final_dens
 
     #######################################################
@@ -631,6 +629,8 @@ class Operator(object):
         except Exception:
             raise NotImplementedError('Method not implemented -- Abstract class asked')
         
+    def __hash__(self):
+        return hash(tuple(self.coefficients()))
     ### Addition
     def __add__(self, other):
         try:
