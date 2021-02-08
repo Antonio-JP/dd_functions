@@ -71,6 +71,8 @@ from sage.all_cmdline import x
 ####################################################################################################
 ####################################################################################################
 
+from ajpastor.dd_functions.ddFunction import is_DDRing
+
 from ajpastor.misc.cached_property import derived_property
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
@@ -223,6 +225,44 @@ class Operator(object):
             
         ## Returning the matrix
         return Matrix(field, rows)
+    
+    @cached_method
+    def noetherian_ring(self, other=None, structure=False):
+        r'''
+            Method that builds a noetherian ring that contains all the coefficients
+
+            This method computes a differential noetherian ring in Sage that contains all
+            the coefficients of ``self`` and ``other`` and where we can divide
+            be the leading coefficients of both operators. This method will
+            rely on the method :func:`~ajpastor.dd_functions.ddFunction.DDFunction.noetherian_ring`.
+
+            This method currently does not work if ``self.base()`` is a DDRing.
+
+            INPUT:
+                * ``other``: other operator to compute the common noetherian ring at the same time
+                * ``structure``: determines the format of the output.
+
+            OUTPUT:
+
+            The output have always 3 main entries:
+                * The ring `R` that is the base of the Noetherian extension
+                * The list of elements `\alpha_i` that will generate the final ring.
+                * The list of generators of `S`.
+            In the case of ``structure`` being ``True``, a fourth entry will be added
+            with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
+            element `\alpha_i`.
+        '''
+        if(is_DDRing(self.base())):
+            raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+
+        c = [self.coefficients()[-1]]
+        if(other is None): c += [other.coefficients()[-1]]
+
+        if(structure):
+            R = self.base().localization(c)
+            return self.base(), [], c, R
+        return self.base(), [], c
+
     #######################################################
     
     #######################################################

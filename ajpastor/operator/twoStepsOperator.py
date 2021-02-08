@@ -101,7 +101,7 @@ class TwoStepsOperator(ListOperator):
     ####################################################### 
     def _compute_simple_add_solution(self, other, bound=5):
         order = self.getOrder()+other.getOrder(); i = 0
-        ring = self._build_noetherian_ring(other)
+        ring = self.noetherian_ring(other, True)[-1]
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_addition(other, order+i, True)
@@ -114,7 +114,7 @@ class TwoStepsOperator(ListOperator):
         
     def _compute_simple_mult_solution(self, other, bound = 5):
         order = self.getOrder()+other.getOrder(); i = 0
-        ring = self._build_noetherian_ring(other)
+        ring = self.noetherian_ring(other, True)[-1]
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_product(other, order+i, True)
@@ -127,7 +127,7 @@ class TwoStepsOperator(ListOperator):
         
     def _compute_simple_derivation_solution(self, bound = 5):
         order = self.getOrder(); i = 0
-        ring = self._build_noetherian_ring()
+        ring = self.noetherian_ring(structure=True)[-1]
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_derivative(order+i, True)
@@ -485,32 +485,6 @@ class TwoStepsOperator(ListOperator):
             linear algebra computation. Otherwise, special code may be needed for
             computations.
         '''        
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
-
-    def _build_noetherian_ring(self, other=None, structure=False):
-        r'''
-            Method that builds a noetherian ring that contains all the coefficients
-
-            This method computes a differential noetherian ring in Sage that contains all
-            the coefficients of ``self`` and ``other`` and where we can divide
-            be the leading coefficients of both operators. This method will
-            rely on the method :func:`~ajpastor.dd_functions.ddFunction.DDFunction.noetherian_ring`.  
-
-            INPUT:
-                * ``other``: other operator to compute the common noetherian ring at the same time
-                * ``structure``: determines the format of the output.
-
-            OUTPUT:
-
-            The output have always 3 main entries:
-                * The ring `R` that is the base of the Noetherian extension
-                * The list of elements `\alpha_i` that will generate the final ring.
-                * The list of generators of `S`.
-            In the case of ``structure`` being ``True``, a fourth entry will be added
-            with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
-            element `\alpha_i`.
-        '''
-              
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
     ####################################################### 
     
