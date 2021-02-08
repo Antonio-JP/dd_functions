@@ -45,7 +45,7 @@ AUTHORS:
 ###     - Deleted method getCoefficientParent (now the Operator method parent() do the same)
 ###     - Deleted attributes "parent" and "__derivate" (the Operator methods parent() and derivate() do the same)
 ###     - Added the option of initialize a FooOperator from another operator.
-###     - Maded the imports more precise
+###     - Made the imports more precise
 ###     - Rearrange file: more readable structure
 ###     - Added the methods __compute_add_solution, __compute_mult_solution, __compute_derivative_solution and __compute_integral_solution.
 ###     - Changed name: method "isZero" to "is_zero"

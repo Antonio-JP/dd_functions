@@ -103,7 +103,7 @@ class FullLazyOperator(TwoStepsOperator):
     ####################################################### 
     ### GETTING MATRICES METHODS
     ####################################################### 
-    def _get_matrix_add(self, other):
+    def _get_system_addition(self, other):
         '''
             Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the sum (f+g) where f is solution to 'self=0' and g is solution to 'other=0'
         '''        
@@ -124,7 +124,7 @@ class FullLazyOperator(TwoStepsOperator):
         
         return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+1)
         
-    def _get_matrix_mult(self, other):
+    def _get_system_product(self, other):
         '''
             Method to obtain a matrix such any element of the nullspace can be interpreted as a new operator that annihilates the product (fg) where f is solution to 'self=0' and g is solution to 'other=0'
         '''        
