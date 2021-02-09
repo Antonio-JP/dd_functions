@@ -143,7 +143,7 @@ class HermiteSolver(LinearSystemSolver):
             g = hs.echelon_form()[0][0]
             quo,rem = self.__euclidean(b[r],g)
             if(rem != 0):
-                raise NoSolutionError("There is no solution to equation %s = %s" %(M.tranpose(), b[r]))
+                raise NoSolutionError("There is no solution to equation %s = %s" %(M.transpose(), b[r]))
             
             U = hs.transformation_matrix()
             ## Solution to the particular equation (alpha + S*beta)

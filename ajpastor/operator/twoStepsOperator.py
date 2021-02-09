@@ -58,7 +58,7 @@ from sage.all import (Matrix, vector)
 ####################################################################################################
 
 #sage imports
-from sage.all import cached_method
+from sage.all import cached_method, lcm
 
 # Local imports
 from .listOperator import ListOperator
@@ -107,10 +107,12 @@ class TwoStepsOperator(ListOperator):
             A,b = self._get_system_addition(other, order+i, True)
             try:
                 solution = self._solve_linear_system(A,b,ring)
+                den_lcm = lcm([el.denominator() for el in solution])
+                solution = [(-el.numerator()*den_lcm)//el.denominator() for el in solution]
             except ValueError: # No solution to the system
                 i += 1
                 
-        return self.__class__(self.base(), [el for el in solution], self.derivate())
+        return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
     def _compute_simple_mult_solution(self, other, bound = 5):
         order = self.getOrder()+other.getOrder(); i = 0
@@ -120,12 +122,14 @@ class TwoStepsOperator(ListOperator):
             A,b = self._get_system_product(other, order+i, True)
             try:
                 solution = self._solve_linear_system(A,b,ring)
+                den_lcm = lcm([el.denominator() for el in solution])
+                solution = [(-el.numerator()*den_lcm)//el.denominator() for el in solution]
             except ValueError: # No solution to the system
                 i += 1
                 
-        return self.__class__(self.base(), [el for el in solution], self.derivate())
+        return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
-    def _compute_simple_derivation_solution(self, bound = 5):
+    def _compute_simple_derivative_solution(self, bound = 5):
         order = self.getOrder(); i = 0
         ring = self.noetherian_ring()
         solution = None
@@ -133,10 +137,12 @@ class TwoStepsOperator(ListOperator):
             A,b = self._get_system_derivative(order+i, True)
             try:
                 solution = self._solve_linear_system(A,b,ring)
+                den_lcm = lcm([el.denominator() for el in solution])
+                solution = [(-el.numerator()*den_lcm)//el.denominator() for el in solution]
             except ValueError: # No solution to the system
                 i += 1
                 
-        return self.__class__(self.base(), [el for el in solution], self.derivate())
+        return self.__class__(self.base(), solution + [den_lcm], self.derivate())
     ####################################################### 
     
     ####################################################### 
