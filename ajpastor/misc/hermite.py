@@ -139,6 +139,8 @@ class HermiteSolver(LinearSystemSolver):
         while(r > 0):
             M = Matrix(self.solution_parent(),[A.row(r)]).transpose()
             hs = HermiteSolver(self.solution_parent(), M, b[r], self.__euclidean, self.__xgcd)
+
+            ## We check the condition for having a solution
             g = hs.echelon_form()[0]
             quo,rem = self.__euclidean(b[r],g)
             if(rem != 0):
