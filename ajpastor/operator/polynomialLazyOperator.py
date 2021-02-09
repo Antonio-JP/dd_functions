@@ -163,7 +163,7 @@ class PolynomialLazyOperator(TwoStepsOperator):
         ## Computing the kernell of the matrix
         if(isUniPolynomial(R) or isMPolynomial(R)):
             bareiss_algorithm = BareissAlgorithm(R,M,f)
-            ker = bareiss_algorithm.right_kernel_matrix()
+            ker = bareiss_algorithm.syzygy().transpose()
             ## If some relations are found during this process, we add it to the conversion system
             self.__conversion.add_relations(bareiss_algorithm.relations())
         else:

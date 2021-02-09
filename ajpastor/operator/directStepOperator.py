@@ -81,7 +81,7 @@ class DirectStepOperator(TwoStepsOperator):
             N = Matrix(parent, [[el*lcms[i] for el in M[i]] for i in range(M.nrows())])
             ba = BareissAlgorithm(parent, N, lambda p : False)
             
-            ker = ba.right_kernel_matrix()
+            ker = ba.syzygy().trasnpose()
         except Exception as e:
             print(e)
             ker = M.right_kernel_matrix()

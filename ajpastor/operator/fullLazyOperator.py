@@ -139,7 +139,7 @@ class FullLazyOperator(TwoStepsOperator):
         ## Computing the kernell of the matrix
         if(len(R.map_of_vars()) > 0):
             bareiss_algorithm = BareissAlgorithm(R.poly_ring(),M,f,R._ConversionSystem__relations)
-            ker = bareiss_algorithm.right_kernel_matrix()
+            ker = bareiss_algorithm.syzygy().transpose()
             ## If some relations are found during this process, we add it to the conversion system
             R.add_relations(bareiss_algorithm.relations())
         else:
