@@ -82,7 +82,7 @@ def find_pivot(A, r,c, is_zero):
             * Add example
     '''
     for j in range(c,A.ncols()):
-        for i in range(c, A.nrows()):
+        for i in range(r, A.nrows()):
             if(not is_zero(A[i][j])):
                 return i,j
     return None, None

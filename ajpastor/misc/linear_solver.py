@@ -23,7 +23,7 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all import identity_matrix, Matrix, vector, ideal
+from sage.all import identity_matrix, Matrix, vector, ideal, cached_method
 import sage.structure.element as SAGE_element
 from sage.categories.pushout import pushout
 
@@ -134,6 +134,23 @@ class LinearSystemSolver():
         '''
         return self.__inhomogeneous
 
+    def relations(self):
+        r'''
+            Method to get the current known relations in the ring.
+        '''
+        return self.__gb
+
+    def have_ideal(self):
+        r'''
+            Auxiliary method to know if some relation have been already found.
+
+            This method returns ``True`` if the current Groebner basis we have computed
+            gives some non-trivial ideal.
+        '''
+        if(len(self.__gb) == 1):
+            return self.__gb[0] != 0
+        return len(self.__gb) > 0
+
     def echelon_form(self):
         r'''
             Method that returns the echelon form of the system matrix.
@@ -164,6 +181,7 @@ class LinearSystemSolver():
             self.__echelon, self.__transformation = self._compute_echelon()
         return self.__transformation
         
+    @cached_method
     def rank(self):
         r'''
             Method that returns the rank of the system matrix.
@@ -224,6 +242,7 @@ class LinearSystemSolver():
             self.__solution, self.__syzygy = self._compute_solution()
         return self.__syzygy
 
+    @cached_method
     def is_zero(self, el):
         r'''
             Method to check whether an element is the zero element or not.
@@ -236,9 +255,7 @@ class LinearSystemSolver():
         if(el == 0):
             return True
 
-        ## If the trivial checking fails, we need to reduce the element by the relations
-        if(self.__have_ideal()):
-            el = el.reduce(self.__gb)
+        el = self.simplify(el) #simplify el (if needed)
 
         if(self.__is_zero(el)): ## If it is zero, we update the relations
             self.__relations += [el]
@@ -265,7 +282,7 @@ class LinearSystemSolver():
             return [self.simplify(el) for el in obj]
         elif(isinstance(obj, tuple)):
             return tuple([self.simplify(el) for el in obj])
-        elif(self.__have_ideal()):
+        elif(self.have_ideal()):
             return obj.reduce(self.__gb)
         return obj
     ## Alias properties
@@ -299,17 +316,6 @@ class LinearSystemSolver():
         raise NotImplementedError("Abstract method not implemented in %s" %self.__class__)
 
     ## PRIVATE METHODS
-    def __have_ideal(self):
-        r'''
-            Auxiliary method to know if some relation have been already found.
-
-            This method returns ``True`` if the current Groebner basis we have computed
-            gives some non-trivial ideal.
-        '''
-        if(len(self.__gb) == 1):
-            return self.__gb[0] != 0
-        return len(self.__gb) > 0
-
 class SageSolver(LinearSystemSolver):
     r'''
         Toy implementation of a :class:`LinearSystemSolver`.
@@ -337,6 +343,9 @@ class SageSolver(LinearSystemSolver):
         if(self.is_homogeneous()):
             solution = vector(self.solution_parent(), self.A.ncols()*[0])
         else:
-            solution = self.A.solve_right(self.b).change_ring(self.solution_parent())
+            try:
+                solution = self.A.solve_right(self.b).change_ring(self.solution_parent())
+            except ValueError: #There is no solution
+                raise NoSolutionError("The system has no solutions")
         syzygy = self.A.right_kernel_matrix().change_ring(self.solution_parent())
         return solution, syzygy.transpose()
