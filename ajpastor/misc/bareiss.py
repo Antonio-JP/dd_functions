@@ -88,16 +88,16 @@ class BareissAlgorithm(LinearSystemSolver):
             sage: M = Matrix([[a, b, a],[-b,a,-b]])
             sage: BA = BareissAlgorithm(R, M)
             sage: BA.echelon_form()
-            [1 0 1]
-            [0 1 0]
+            [-1  0 -1]
+            [ 0  1  0]
             sage: BA.rank()
             2
             sage: BA.syzygy()
-            [-1]
-            [ 0]
             [ 1]
+            [ 0]
+            [-1]
             sage: # Example where M is not square and we have relations
-            sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
+            sage: BA = BareissAlgorithm(R, M, relations=[a^2+b^2])
             sage: BA.echelon_form()
             [a b a]
             [0 0 0]
@@ -106,7 +106,7 @@ class BareissAlgorithm(LinearSystemSolver):
             sage: BA.syzygy()
             [-b -a]
             [ a  0]
-            [-a  a]
+            [ 0  a]
             sage: # Another example with M being non-square
             sage: M = Matrix([[a,b],[-b,a],[a^3 - 3*b^4, 1+b^5]])
             sage: BA = BareissAlgorithm(R, M)
@@ -120,11 +120,10 @@ class BareissAlgorithm(LinearSystemSolver):
         This algorithm can find the relations on the fly thanks to the input ``is_zero``::
 
             sage: M = Matrix([[a, b, a],[-b,a,-b]])
-            sage: BA = BareissAlgorithm(R, M)
+            sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
             sage: BA.relations()
             [0]
-            sage: # Example where M is not square and we have relations
-            sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0)
+            sage: H = BA.echelon_form()
             sage: BA.relations()
             [a^2 + b^2]
 
@@ -140,9 +139,9 @@ class BareissAlgorithm(LinearSystemSolver):
             [a^4 + 2*a^2*b^2 + b^4]
             sage: BA = BareissAlgorithm(R, M, lambda p : p.reduce([a^2+b^2]) == 0, [a^4 + 2*a^2*b^2 + b^4])
             sage: BA.echelon_form()
-            [-1 0 -1]
-            [ 0 1  0]
-            [ 0 0  0]
+            [1 1 0]
+            [0 0 1]
+            [0 0 0]
             sage: BA.relations()
             [a^2 + b^2]
     '''
@@ -170,12 +169,9 @@ class BareissAlgorithm(LinearSystemSolver):
 
         ## Step 1: initialize
         r = 0; c = 0 # we look from the position (r,c)
-        rels = [el for el in self.relations()] # copy of the relations
         while(r < A.nrows() and c < A.ncols()):
             ir = self.__find_pivot(A, r, c)
-            if(self.relations() != rels): # If found relations, simplify
-                rels = [el for el in self.relations()]
-                A = self.simplify(A); U = self.simplify(U)
+            A = self.simplify(A); U = self.simplify(U) # we simplify in case relations pop up
             
             if(ir != None): # we found a pivot
                 # We do the swapping (if needed)

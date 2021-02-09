@@ -73,6 +73,8 @@ class LinearSystemSolver():
         self.__solution_parent = parent
 
         ## Setting other variables
+        if(relations is None):
+            relations = []
         self.__relations = [self.__parent(el) for el in relations]
         self.__gb = ideal(self.parent(), self.__relations).groebner_basis()
 
@@ -251,11 +253,11 @@ class LinearSystemSolver():
             or not regardless of its representation. In case the elements was not
             trivial, we add it to the ideal of relations and update the Gröbner basis.
         '''
+        el = self.simplify(el) #simplify el (if needed)
+
         ## Trivial checking
         if(el == 0):
             return True
-
-        el = self.simplify(el) #simplify el (if needed)
 
         if(self.__is_zero(el)): ## If it is zero, we update the relations
             self.__relations += [el]
