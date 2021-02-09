@@ -114,7 +114,8 @@ class DirectStepOperator(TwoStepsOperator):
     
     
     def _solve_linear_system(self, A, b, ring):
-        raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
+        from ajpastor.misc.hermite import HermiteSolver
+        return HermiteSolver(ring, A, b).solution()
     ####################################################### 
     
 
