@@ -34,7 +34,7 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all import identity_matrix, Matrix, vector
+from sage.all import identity_matrix, Matrix, vector, xgcd
 
 from ajpastor.misc.linear_solver import LinearSystemSolver, NoSolutionError
 
@@ -63,7 +63,7 @@ class HermiteSolver(LinearSystemSolver):
     def __init__(self, parent, matrix, inhomogeneous, euclidean=lambda p,q: (p//q, p%q), xgcd = lambda p,q : xgcd(p,q)):
         if(type(parent) is tuple):
             base,g,d = parent
-            if(not base.is_euclidean()):
+            if(not base.is_euclidean_domain()):
                 raise TypeError("The base ring for Hermite must be euclidean")
             if(len(g) > 0):
                 raise TypeError("The base ring for Hermite must not have generators")
@@ -127,7 +127,7 @@ class HermiteSolver(LinearSystemSolver):
     def _compute_solution(self):
         
         A = self.echelon_form()
-        b = self.inhomogeneous().change_ring(self.solution_parent())
+        b = self.transformation_matrix()*self.inhomogeneous().change_ring(self.solution_parent())
 
         ## We compute the solution equation by equation
         r = A.nrows()-1
@@ -136,21 +136,19 @@ class HermiteSolver(LinearSystemSolver):
         ## A.row(r) is the first real equation
         solution = vector(self.solution_parent(), self.A.ncols()*[0])
         syzygy = identity_matrix(self.solution_parent(), self.A.ncols())
-        while(r > 0):
+        while(r >= 0):
             M = Matrix(self.solution_parent(),[A.row(r)]).transpose()
-            hs = HermiteSolver(self.solution_parent(), M, b[r], self.__euclidean, self.__xgcd)
-
+            hs = HermiteSolver(self.solution_parent(), M, vector([b[r]]), self.__euclidean, self.__xgcd)
             ## We check the condition for having a solution
-            g = hs.echelon_form()[0]
+            g = hs.echelon_form()[0][0]
             quo,rem = self.__euclidean(b[r],g)
             if(rem != 0):
                 raise NoSolutionError("There is no solution to equation %s = %s" %(M.tranpose(), b[r]))
             
-            U = hs.syzygy()
+            U = hs.transformation_matrix()
             ## Solution to the particular equation (alpha + S*beta)
             alpha = quo*U.row(0)
             S = Matrix(self.solution_parent(), U.rows()[1:]).transpose()
-
             ##Update the general values
             solution += syzygy*alpha
             syzygy *= S
@@ -160,7 +158,7 @@ class HermiteSolver(LinearSystemSolver):
             A *= S
 
             # We update the index of the equation
-            while(all(self.is_zero(el) for el in A[r])):
+            while(r >= 0 and all(self.is_zero(el) for el in A[r])):
                 r-=1
         return solution, syzygy
     

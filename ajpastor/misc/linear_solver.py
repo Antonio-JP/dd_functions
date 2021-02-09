@@ -69,14 +69,25 @@ class LinearSystemSolver():
 
         ## Setting the parent for the solutions
         if(not pushout(parent, self.__parent) == parent):
-            raise TypeError("The parent for the solutions must be an extension of the parent for the input")
+            try:
+                self.__matrix = self.__matrix.change_ring(parent)
+                self.__inhomogeneous = self.__inhomogeneous.change_ring(parent)
+                self.__parent = parent
+            except:
+                raise TypeError("The parent for the solutions must be an extension of the parent for the input")
         self.__solution_parent = parent
 
         ## Setting other variables
         if(relations is None):
             relations = []
         self.__relations = [self.__parent(el) for el in relations]
-        self.__gb = ideal(self.parent(), self.__relations).groebner_basis()
+        try:
+                self.__gb = ideal(self.parent(), self.__relations).groebner_basis()
+        except AttributeError:
+            try:
+                self.__gb = [ideal(self.parent(), self.__relations).gen()]
+            except:
+                self.__gb = [0]
 
         self.__is_zero = is_zero
 
@@ -261,7 +272,13 @@ class LinearSystemSolver():
 
         if(self.__is_zero(el)): ## If it is zero, we update the relations
             self.__relations += [el]
-            self.__gb = ideal(self.parent(), self.__relations).groebner_basis()
+            try:
+                self.__gb = ideal(self.parent(), self.__relations).groebner_basis()
+            except AttributeError:
+                try:
+                    self.__gb = [ideal(self.parent(), self.__relations).gen()]
+                except:
+                    self.__gb = [0]
             return True
         return False
 
