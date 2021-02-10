@@ -57,8 +57,132 @@ class HermiteSolver(LinearSystemSolver):
             * ``euclidean``: method for computing the euclidean division with remainder.
             * ``xgcd``: method for computing the Extended Euclidean GCD.
 
-        TODO:
-            * Add tests
+        EXAMPLES::
+
+            sage: from ajpastor.misc.hermite import *
+
+        First we show that this solver gives the same Hermite normal forms as the usual method ``hermite_form``::
+
+            sage: A = MatrixSpace(ZZ,2)([1,2,3,4])
+            sage: hs = HermiteSolver(ZZ, A, vector([0,0]))
+            sage: hs.echelon_form()
+            [ 1  0]
+            [ 0 -2]
+            sage: B = MatrixSpace(ZZ,5)(range(25))
+            sage: hs = HermiteSolver(ZZ, B, vector([0,0,0,0,0]))
+            sage: hs.echelon_form()
+            [  5   0  -5 -10 -15]
+            [  0   1   2   3   4]
+            [  0   0   0   0   0]
+            [  0   0   0   0   0]
+            [  0   0   0   0   0]
+            sage: C = matrix(ZZ,5,3,[1..15])
+            sage: hs = HermiteSolver(ZZ, C, vector([0,0,0,0,0]))
+            sage: hs.echelon_form()
+            [1 2 3]
+            [0 3 6]
+            [0 0 0]
+            [0 0 0]
+            [0 0 0]
+            sage: hs.transformation_matrix()
+            [ 1  0  0  0  0]
+            [ 4 -1  0  0  0]
+            [-1  2 -1  0  0]
+            [ 2 -3  0  1  0]
+            [ 3 -4  0  0  1]
+            sage: hs.U*hs.A == hs.H
+            True
+
+        Some special cases when we have 0 or 1 row::
+
+            sage: a = matrix(ZZ, 1,2,[0,-1])
+            sage: hs = HermiteSolver(ZZ, a, vector([0]))
+            sage: hs.echelon_form()
+            [ 0 -1]
+            sage: b = matrix(ZZ, 1, 3)
+            sage: hs = HermiteSolver(ZZ, b, vector([0]))
+            sage: hs.echelon_form()
+            [0 0 0]
+
+        Since this class works for any Euclidean domain, we can also run the tests from the
+        :func:`hermite_form` method for matrices with univariate polynomials::
+
+            sage: M.<x> = GF(7)[]
+            sage: A = matrix(M, 2, 3, [x, 1, 2*x, x, 1+x, 2])
+            sage: hs = HermiteSolver(M, A, vector([0,0]))
+            sage: hs.echelon_form()
+            [      x       1     2*x]
+            [      0       x 5*x + 2]
+            sage: hs.transformation_matrix()
+            [1 0]
+            [6 1]
+            sage: hs.U*hs.A == hs.H
+            True
+            sage: B = matrix(M, 2, 3, [x, 1, 2*x, 2*x, 2, 4*x])
+            sage: hs = HermiteSolver(M, B, vector([0,0]))
+            sage: hs.echelon_form()
+            [  x   1 2*x]
+            [  0   0   0]
+            sage: hs.transformation_matrix()
+            [0 4]
+            [5 1]
+            sage: hs.U*hs.A == hs.H
+            True
+
+        But the main goal of this class is to solve linear systems::
+
+            sage: A = matrix(M, 2, 3, [x, 1, 2*x, x, 1+x, 2])
+            sage: v = vector([x,1+x])
+            sage: hs = HermiteSolver(M, A, v)
+            sage: hs.solution()
+            (6*x + 6, x, 4*x + 4)
+            sage: hs.syzygy()
+            [5*x^2 + 5*x + 2]
+            [    2*x^2 + 5*x]
+            [            x^2]
+            sage: hs.A*hs.syzygy()
+            [0]
+            [0]
+            sage: hs.A*hs.solution() == hs.b
+            True
+
+        This class also work with localized rings over Euclidean domains. The definition of the
+        localization is given in the input of this documentation::
+
+            sage: R.<x> = QQ[]
+            sage: A = matrix([[2, 3*x, 1/x],[1/(x+1), 2*x + 1, 1/(x^2+x)]])
+            sage: v = vector([3,x])
+            sage: hs = HermiteSolver((R, [], [x, 1+x]), A, v)
+            sage: hs.solution()
+            (-x^2 - x + 3, 0, 2*x^3 + 2*x^2 - 3*x)
+            sage: hs.syzygy()
+            [         (-2*x^2 - 1)/(x + 1)]
+            [                   -1/(x + 1)]
+            [(4*x^3 + 3*x^2 + 2*x)/(x + 1)]
+            sage: hs.A*hs.syzygy()
+            [0]
+            [0]
+            sage: hs.A*hs.solution() == hs.b
+            True
+
+        Sometimes, the system has zero solutions. Then a NoSolutionError is raised::
+
+            sage: A = matrix([[2, 3*x, -3],[1/(x+1), 2*x + 1, 2*x-1/2]])
+            sage: v = vector([1,x])
+            sage: hs = HermiteSolver((R, [], [x, 1+x]), A, v)
+            sage: hs.solution()
+            Traceback (most recent call last):
+            ...
+            NoSolutionError: There is no solution to equation ...
+
+        But we can still extract the Hermite Normal Form and the transformation matrix::
+
+            sage: hs.echelon_form()
+            [      1/(x + 1)         2*x + 1       2*x - 1/2]
+            [              0 4*x^2 + 3*x + 2 4*x^2 + 3*x + 2]
+            sage: hs.transformation_matrix()
+            [      0       1]
+            [     -1 2*x + 2]
     '''
     def __init__(self, parent, matrix, inhomogeneous, euclidean=lambda p,q: (p//q, p%q), xgcd = lambda p,q : xgcd(p,q)):
         if(type(parent) is tuple):
@@ -109,7 +233,7 @@ class HermiteSolver(LinearSystemSolver):
                 if(ir != r): # swapping rows
                     A.swap_rows(r, ir); U.swap_rows(r,ir)
                 
-                # We reduce in each row
+                # We reduce the next rows
                 for m in range(r+1, A.nrows()):
                     if(A[m][c] != 0):
                         g, t, s = self.__xgcd(A[r][c], A[m][c])
@@ -119,7 +243,15 @@ class HermiteSolver(LinearSystemSolver):
                         Ur = U.row(r); Um = U.row(m)
 
                         A.set_row(r,t*Ar + s*Am); U.set_row(r,t*Ur + s*Um)
-                        A.set_row(m,q*Ar - p*Am); U.set_row(m,q*Ur - p*Um)
+                        A.set_row(m,p*Am - q*Ar); U.set_row(m,p*Um - q*Ur)
+                # We reduce previous rows with the new gcd
+                for m in range(r):
+                    if(A[m][c] != 0):
+                        q,_ = self.__euclidean(A[m][c], A[r][c])
+                        Ar = A.row(r); Am = A.row(m)
+                        Ur = U.row(r); Um = U.row(m)
+
+                        A.set_row(m, Am - q*Ar); U.set_row(m, Um-q*Ur)
                 r += 1
             c+= 1
         return A, U
