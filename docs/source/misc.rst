@@ -12,7 +12,9 @@ Files in the package
    :maxdepth: 1
 
    misc/matrix
+   misc/linear_solver
    misc/bareiss
+   misc/hermite
    misc/dynamic_string
 
 Indices and Tables
