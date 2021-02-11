@@ -883,7 +883,7 @@ def diff_to_diffalg(func, varname="y", constant=True, infinite=True, debug=False
 
     ## Looking fot the field of constants
     if(is_DDRing(parent)):
-        var = parent.variables(as_symbolic=True)[0]
+        var = parent.variables(True)[0]
         F = parent.coeff_field
     elif(is_PolynomialRing(parent) or is_MPolynomialRing(parent)):
         ## In the case parent is a ring of polynomials, all variables except the first 

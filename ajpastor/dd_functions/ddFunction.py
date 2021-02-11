@@ -414,7 +414,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             if(invertibility is None):
                 # Default: invertibility as power series
                 try:
-                    self_var = self.variables(True,False)[0]
+                    self_var = self.variables(True)[0]
                     self.__base_invertibility = lambda p : p(**{self_var : 0 }) != 0 
                 except IndexError:
                     self.__base_invertibility = lambda p : self.base()(p) != 0
@@ -424,7 +424,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             ### Saving the base derivation
             if(derivation is None):
                 try:
-                    self_var = self.variables(True,False)[0]
+                    self_var = self.variables(True)[0]
                     def __standard_derivation(p):
                         try:
                             return p.derivative(self.base()(self_var))
@@ -1245,7 +1245,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     operator_class = property(default_operator, None) #: alias for method :func:`~DDRing.default_operator`
     
     def is_invertible(self,x):
-        '''
+        r'''
             Method that checks whether an element in ``self.base()`` is invertible.
             
             INPUT:
@@ -1269,90 +1269,307 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     base_derivation = property(derivation_on_base, None) #: alias for method :func:`~DDRing.derivation_on_base`
     
     def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None):
-        '''
-            Method to create a DDFunction contained in self with some coefficients, inhomogeneous term and initial values. This method just call the builder of DDFunction just puting the base argument as self.
+        r'''
+            Method to create a :class:`DDFunction` contained in ``self``.
+            
+            This method creates an object of type :class:`DDFunction` that is contained in ``self``. These objects
+            are formal power series that satisfy a linear differential equation with coefficients in the ring
+            given by :func:`~DDRing.base`. This method receives the list of coefficients for the differential 
+            equation (or the differential operator directly), and inhomogeneous term and initial values.
+
+            This is the unique *public* way of building :class:`DDFunction`, since the class itself is not public.
+
+            INPUT:
+                * ``coefficients``: either a differential operator (:class:`~ajpastor.operator.operator.Operator`)
+                  or a list of elements in the ring given by :func:`~DDRing.base`.
+                * ``init``: list of initial values for the function. This is a list of elements that must be 
+                  in the field given by :func:`~DDRing.base_ring`.
+                * ``inhomogeneous``: element on ``self`` that will denote the inhomogeneous term in the differential
+                  equation.
+                * ``check_init``: boolean value to check that initial conditions are valid or not.
+                * ``name``: optional argument for providing a name to the new built function.
+
+            OUTPUT:
+
+            A differentially definable function (:class:`DDFunction`) `f(x)` such that it satisfies the linear differential
+            equation with coefficients given by ``coefficients``, inhomogeneous term given by ``inhomogeneous`` and 
+            initial values (i.e., `f(0), f'(0), f''(0),\ldots`) given by ``init``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([-1,1],[1])
+                sage: f in DFinite
+                True
+                sage: f.equation[0]
+                -1
+                sage: f.equation[1]
+                1
+                sage: is_DDFunction(f)
+                True
+                sage: g = DFinite.element([1,-1],[1],name="g(x)"); g
+                g(x)
+                sage: g == f
+                True
         '''
         return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name)
         
     def eval(self, element, X=None, **input):
+        r'''
+            Method to evaluate an element of a :class:`DDRing`.
+
+            This method implements the evaluation of a :class:`DDFunction` in ``self``. Elements of a :class:`DDRing`
+            are formal power series, hence there are three types of evaluations:
+                * Value evaluation: we set a value for the main variable (see :func:`~DDRing.variables`)
+                * Parameter evaluation: in the case that ``self`` is a :class:`ParametrizedDDRing`, 
+                  the parameters can be evaluated into elements of the field given by :func:`~DDRing.base_ring`.
+                * Function evaluation (i.e., composition): we can also compute the composition as 
+                  formal power series (if possible).
+
+            INPUT:
+                * ``element``: the element in ``self`` to be evaluated.
+                * ``X``: the value to be evaluated. This has to be a :class:`DDFunction` or a value
+                  in the field :func:`~DDRing.base_ring`.
+                * ``input``: a dictionary with the values for the parameters. The keys need to be 
+                  the names of the parameters provided by :func:`~DDRing.parameters` and the main
+                  variable (see :func:`~DDRing.variables`). They have to be elements in the 
+                  base field (see :func:`~DDRing.base_ring`) or, in the case of the main variable, 
+                  another :class:`DDFunction`.
+
+            OUTPUT:
+
+            The result of evaluating the function:
+                * In the case of being a parametric evaluation, we return another :class:`DDFunction` in 
+                  the corresponding ring.
+                * In the case of value evaluation: this method returns the initial value at zero if that
+                  is the point of evaluation and a numerical approximation (see method :func:`DDFunction.numerical_solution`
+                  for further information) in case it is another point.
+                * In the case of function evaluation: this method returns the new :class:`DDFunction`
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([-1,1],[1])
+                sage: DFinite.eval(f, 0)
+                1
+                sage: DFinite.eval(f, f-1) == DDFinite.element([-f,1],[1])
+                True
+                sage: DFinite.eval(f, a=2) == f # no parameter 'a' in 'f'
+                True
+                sage: g = DFiniteP.element([-1,1],['P'])
+                sage: DFiniteP.eval(g, 0, P=3)
+                3
+                sage: DFiniteP.eval(g, P=1) == f
+                True
+                sage: DFiniteP.eval(f, P=1) == f # no parameter P appears in f
+                True
+                sage: DFiniteP.eval(g, 0, P=3, a=1)
+                3
+                sage: DFiniteP.eval(g, 0, b = 7)
+                P
+        '''
         if not element in self:
-            raise TypeError('The element we want to evaluate (%s) is not an element of this ring (%s)'%(element,self))
+            raise TypeError('The element to evaluate (%s) is not an element of this ring (%s)'%(repr(element),self))
         element = self(element)
             
+        ## Extracting the arguments
         rx = X
         self_var = str(self.variables(True)[0])
         if((rx is None) and (self_var in input)):
             rx = input.pop(self_var)
+
+        ## Numerical evaluation <=> rx in self.coeff_field
+        ## Parameter evaluation => len(input) > 0
+        ## Functional evaluation <=> (not rx is None) and (not rx in self.coeff_field)
+        
+        ## First we do the parametric evaluation in case it is needed:
+        element = self._parametric_evaluation(element, **input)
+
+        ## Now we do the evaluation of the main variable
         if not (rx is None):
-            if(rx == 0 ):
-                return element.getInitialValue(0 )
-            elif(rx in self.coeff_field):
+            if(rx == 0): # Simplest case: rx == 0 --> return the initial value
+                return element.getInitialValue(0)
+            elif(rx in self.coeff_field): # numerical evaluation: use the numerical evaluation method
                 return element.numerical_solution(rx,**input)[0]
-            try:
+            else: # in any other case, we return the composition
                 return element.compose(rx)
-            except ValueError:
-                pass
-        elif(len(input) == 0 ):
+        else:
             return element
-        
-        raise NotImplementedError("Not implemented evaluation of an element of this ring (%s) with the parameters %s and %s" %(self,repr(rx),input))
-        
-    def interlace_sequence(self, *functions):
+                
+    def _parametric_evaluation(self, element, **input):
+        r'''
+            Computes an evaluation of the parameters on an element of ``self``.
+
+            Since the class :class:`DDRing` has no parameters, this method returns the same element and leave intact
+            the dictionary ``input``.
         '''
-            Method that computes a function in 'self' which sequence is the interlacing of the sequences 
-            given as input in 'functions'. These functions must be contained in 'self' or an error will be
-            raised.
+        return element
+
+    def interlace_sequences(self, *functions):
+        r'''
+            Method to compute the interlacing of several functions in ``self``.
+
+            The interlacing of formal power series are the corresponding interlacing of the sequences 
+            that generates them. Namely, let `f_1(x),\ldots,f_m(x)` be formal power series such that:
+
+            .. MATH::
+
+                f_i(x) = f_{i,0} + f_{i,1}x + \ldots + f_{i,n}x^n + \ldots
+
+            Then the interlacing of these functions is the power series generated by the sequence
+
+            .. MATH::
+
+                (f_{1,0}, f_{2,0}, \ldots, f_{m,0}, f_{1,1}, f_{2,1}, \ldots)
+
+            Functionally speaking, this is equivalent to compute the sum
+
+            .. MATH::
+
+                f_1(x^m) + xf_2(x^m) + \ldots + x^{m-1}f_m(x^m)
+
+            This method computes this interlacing explicitly for a list of functions in ``self``. This 
+            method takes care of checking that all the elements in the input are valid elements of ``self``.
             
             INPUT:
-                - functions: list of function in 'self' which we want to interlace
+                * ``functions``: list of the functions `f_1(x),\ldots,f_m(x)`. In the case this input
+                  has length 1 and the first is a list, we consider the latter as the input.
             
             OUTPUT:
-                - DDFunction 'f' in 'self' such that for all n
-                    f.getSequenceElement(n) == functions[n%len(functions)].getSequenceElement(n//len(functions))
-                    
+                
+            The interlaced generating function.
+
             ERRORS:
-                - TypeError is raised if any of the functions can not be casted to 'self'
+                * :class:`TypeError` is raised if any of the functions can not be casted to 'self'
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([-1,1],[1])
+                sage: g = DFinite(1/(1-x))
+                sage: DFinite.interlace_sequences(f,g).getSequenceList(10)
+                [1, 1, 1, 1, 1/2, 1, 1/6, 1, 1/24, 1]
+                sage: DFinite.interlace_sequences(g,f,g,0).getSequenceList(20)
+                [1, 1, 1, 0, 1, 1, 1, 0, 1, 1/2, 1, 0, 1, 1/6, 1, 0, 1, 1/24, 1, 0]
+                sage: DFinite.interlace_sequences(f,0,0,0) == DFinite.eval(f, x^4)
+                True
         '''
         if(len(functions) == 1 and type(functions[0]) == list):
             functions = functions[0]
         
         ## Getting the main variable for the functions
         x = self.variables()[-1]
-        n = len(functions)
+        m = len(functions)
+
+        if(m == 1): ## Easy case: only one function -- nothing to do
+            return self(functions[0])
         
         ## Computing the dilated functions
-        functions = [self(el)(x=x**n) for el in functions]
+        functions = [self.eval(el, x**m) for el in functions]
         
         ## Returning the resulting function
-        return sum(x**i*functions[i] for i in range(n))
+        return sum(x**i*functions[i] for i in range(m))
         
-    #def get_recurrence(self, *args, **kwds):
-    #    if(self.__get_recurrence is None):
-    #        raise NotImplementedError("Recurrence method not implemented for %s" %self)  
-    #    return self.__get_recurrence(*args, **kwds)
-    
-    def variables(self, as_symbolic=False, fill = True):
+    def variables(self, as_symbolic=False):
+        r'''
+            Method that returns all the variables for ``self``.
+
+            This method returns a tuple with all the variables involved in the :class:`DDRing`.
+            These variables are considered to be non-constants. However, the main derivation
+            is related with the last element of this tuple.
+
+            This method allows to return these variables with different types,
+            i.e., elements of ``self.base()`` or in the :class:`sage.symbolic.ring.SR`. 
+
+            This method never returns a parameter. For getting the parameters (i.e., constant
+            variables), see method :func:`~DDRing.parameters`.
+
+            INPUT:
+                * ``as_symbolic``: boolean value to decide whether to return the object 
+                  as elements of :class:`sage.symbolic.ring.SR` (default: ``False``)
+
+            OUTPUT:
+
+            A tuple (maybe empty) with the variables of ``self``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite.variables()
+                (x,)
+                sage: DFiniteP.variables()
+                (x,)
+                sage: all(el.parent() is SR for el in DFiniteP.variables(True))
+                True
+                sage: all(el.parent() is DFiniteP.base() for el in DFiniteP.variables())
+                True
+        '''
         if(self.__variables is None):
             self.__variables = []
             current = self.base()
             while(current != self.coeff_field):
                 self.__variables += [var(str(el)) for el in current.gens()]
                 current = current.base()
+            if(len(self.__variables) == 0):
+                self.__variables += [var(DDRing._Default_variable)]
+
             self.__variables = tuple(set(self.__variables))
-        
+   
         if(as_symbolic):
-            if(len(self.__variables) == 0  and fill):
-                return tuple([var(DDRing._Default_variable)])
             return self.__variables
         else:
-            if(len(self.__variables) == 0  and fill):
-                return tuple([self.base()(var(DDRing._Default_variable))])
             return tuple(self.base()(el) for el in self.__variables)
 
     def parameters(self, as_symbolic = False):
-        return ()
+        r'''
+            Method that returns all the parameters for ``self``.
+
+            This method returns a tuple with all the parameters involved in the :class:`DDRing`.
+            These parameters are constants elements.
+
+            This method allows to return these variables with different types,
+            i.e., elements of ``self.coeff_field`` or in the :class:`sage.symbolic.ring.SR`. 
+
+            This method never returns a variable. For getting the variables, 
+            see method :func:`~DDRing.parameters`.
+
+            INPUT:
+                * ``as_symbolic``: boolean value to decide whether to return the object 
+                  as elements of :class:`sage.symbolic.ring.SR` (default: ``False``)
+
+            OUTPUT:
+
+            A tuple (maybe empty) with the parameters of ``self``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite.parameters()
+                ()
+                sage: DFiniteP.parameters()
+                (P,)
+                sage: all(el.parent() is SR for el in DFiniteP.parameters(True))
+                True
+                sage: all(el.parent() is DFiniteP.coeff_field for el in DFiniteP.parameters())
+                True
+        '''
+        return tuple([])
 
     def variable(self, input):
+        r'''
+            Method that gets a variable from the ring
+
+            This method gets a particular variable from the set of variables (see method
+            :func:`~DDRing.variables`). 
+            
+            INPUT:
+                * ``input``: an integer (that will be use in the tuple of variables as 
+                  an index) or a string that is the name of the corresponding variable.
+
+            OUTPUT:
+
+            The requested variable as an element in ``self.base()``.
+        '''
         if(input in ZZ):
             return self.variables()[ZZ(input)]
         elif(isinstance(input, str)):
@@ -1361,6 +1578,20 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             raise NotImplementedError("No parameter can be got with input %s" %input)
 
     def parameter(self,input):
+        r'''
+            Method that gets a parameter from the ring
+
+            This method gets a particular parameter from the set of parameters (see method
+            :func:`~DDRing.parameters`). 
+            
+            INPUT:
+                * ``input``: an integer (that will be use in the tuple of parameters as 
+                  an index) or a string that is the name of the corresponding parameter.
+
+            OUTPUT:
+
+            The requested parameter as an element in ``self.coeff_field``.
+        '''
         if(input in ZZ):
             return self.parameters()[ZZ(input)]
         elif(isinstance(input, str)):
@@ -1486,7 +1717,6 @@ class ParametrizedDDRing(DDRing):
         else:
             return "%s with parameter %s" %(self.base_ddRing(),res)
     
-    @cached_method
     def parameters(self, as_symbolic = False):
         if(as_symbolic):
             return self.__parameters
@@ -1511,44 +1741,48 @@ class ParametrizedDDRing(DDRing):
         return ParametrizedDDRing(self.base_ddRing().extend_base_field(new_field), self.parameters(True))
             
     # Override eval method from DDRing
-    def eval(self, element, X=None, **input):
-        rx = X
+    def _parametric_evaluation(self, element, **input):
+        r'''
+            Method to evaluate the parameters of an element of ``self``.
+
+            This method takes an element in ``self`` (which has already the appropriate structure)
+            and evaluates the parameters given by ``input``. These parameters are removed
+            from the dictionary ``input``, leavin extra arguments for the method :func:`~DDRing.eval`.
+
+            The output of this method is a :class:`DDFunction` that have evaluated all the given parameters.
+            These parameters have to be elements in the field given by :func:`~DDRing.base_ring`. Interestingly,
+            these values can have again new parameters  that need to be taken into consideration.
+        '''
         self_var = str(self.variables(True)[0])
-        if(X is None and self_var in input):
-            rx = input.pop(self_var)
-        ### If X is not None, then we evaluate the variable of the ring
-        if(not (rx is None)):
-            if(len(input) > 0 ):
-                return self.eval(element, **input)(**{self_var:rx})
-            else:
-                return super(ParametrizedDDRing, self).eval(element, rx)
-        elif(len(input) > 0 ):
-            ### Otherwise, we evaluate the parameters
-            element = self(element)
+        ### Getting the final parameters
+        original_parameters = set(str(el) for el in self.parameters()) # parameters from 'self'.
+        used_parameters = set([key for key in input.keys() if key in original_parameters]) # parameters on input
+
+        if(len(used_parameters) == 0): # nothing to evaluate
+            return element
+        ## We remove the used parameters
+        values = {key : input.pop(key) for key in used_parameters}
+
+        ### Getting the new parameters from the values at input
+        got_parameters = reduce(lambda p,q : p.union(q), [set(str(el) for el in SR(value).variables()) for value in values.values()])
+        
+        destiny_parameters = (original_parameters - used_parameters).union(got_parameters)
+                    
+        if(self_var in destiny_parameters):
+            raise TypeError("Parameters can only be evaluated to constants.\n\t- Got: %s" %(values))
+        
+        if(len(destiny_parameters) == 0): # all parameters evaluated: go to the DDRing
+            destiny_ring = self.base_ddRing()
+        else:
+            destiny_ring = ParametrizedDDRing(self.base_ddRing(), tuple(destiny_parameters))
             
-            ### Getting the final parameters
-            original_parameters = set(str(el) for el in self.parameters())
-            used_parameters = set(input.keys())
-            got_parameters = reduce(lambda p,q : p.union(q), [set(str(el) for el in SR(value).variables()) for value in input.values()])
-            
-            destiny_parameters = (original_parameters - used_parameters).union(got_parameters)
-                        
-            if(self_var in destiny_parameters):
-                raise TypeError("Parameters can only be evaluated to constants.\n\t- Got: %s" %(input))
-            
-            if(len(destiny_parameters) == 0 ):
-                destiny_ring = self.base_ddRing()
-            else:
-                destiny_ring = ParametrizedDDRing(self.base_ddRing(), tuple(destiny_parameters))
-                
-            new_equation = destiny_ring.element([el(**input) for el in element.equation.getCoefficients()]).equation
-            
-            new_init = [el(**input) for el in element.getInitialValueList(new_equation.get_jp_fo()+1 )]
-            new_name = None
-            if(element._DDFunction__name is not None):
-                new_name = m_dreplace(element._DDFunction__name, {key: str(input[key]) for key in input}, True)
-            return destiny_ring.element(new_equation,new_init,name=new_name)
-        return element
+        new_equation = destiny_ring.element([el(**values) for el in element.equation.getCoefficients()]).equation
+        
+        new_init = [el(**values) for el in element.getInitialValueList(new_equation.get_jp_fo()+1)]
+        new_name = None
+        if(element._DDFunction__name is not None):
+            new_name = m_dreplace(element._DDFunction__name, {key: str(values[key]) for key in values}, True)
+        return destiny_ring.element(new_equation,new_init,name=new_name)
             
         
 #####################################################
@@ -2483,7 +2717,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Method that computes a functions which sequence is the interlacing between 'self'
             and all the 'others' functions.
             
-            See method 'interlace_sequence' on class DDRing for further information.
+            See method 'interlace_sequences' on class DDRing for further information.
         '''
         ## Checking the argument so 'others' is a list of elements
         if(len(others) == 1 and type(others[0]) == list):
@@ -2495,7 +2729,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             po = pushout(po, el.parent())
             
         ## Calling the method in the DDRing level
-        return po.interlace_sequence([self]+list(others))
+        return po.interlace_sequences([self]+list(others))
     
     #####################################
     ### Differential methods
