@@ -1605,6 +1605,39 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 ###
 #############################################################################
 def is_ParametrizedDDRing(ring):
+    '''
+        Method that checks if an object is a :class:`ParametrizedDDRing`. 
+
+        This method provides a general function to check the class of an object without knowing 
+        exactly the name of the basic class of the module. This is basically an alias for the command 
+        ``instance(ring, ParametrizedDDRing)``.
+
+        INPUT:
+            * ``ring`` -- object to be checked.
+
+        OUTPUT: 
+            * ``True`` or ``False`` depending if ``ring`` is a :class:`ParametrizedDDRing` or not.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: is_ParametrizedDDRing(DFinite)
+            False
+            sage: is_ParametrizedDDRing(DDRing(QQ))
+            False
+            sage: is_ParametrizedDDRing(QQ)
+            False
+
+        Only :class:`ParametrizedDDRing` return ``True`` with this method::
+
+            sage: is_ParametrizedDDRing(DFiniteP)
+            True
+            sage: is_ParametrizedDDRing(ParametrizedDDRing(DFinite, ['a']))
+            True
+
+        SEE ALSO:
+            * :class:`ParametrizedDDRing`
+    '''
     return isinstance(ring, ParametrizedDDRing)
 
 class ParametrizedDDRing(DDRing):
