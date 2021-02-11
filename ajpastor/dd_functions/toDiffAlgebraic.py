@@ -884,7 +884,7 @@ def diff_to_diffalg(func, varname="y", constant=True, infinite=True, debug=False
     ## Looking fot the field of constants
     if(is_DDRing(parent)):
         var = parent.variables(as_symbolic=True)[0]
-        F = parent.base_field
+        F = parent.coeff_field
     elif(is_PolynomialRing(parent) or is_MPolynomialRing(parent)):
         ## In the case parent is a ring of polynomials, all variables except the first 
         ## are considered as parameters.
@@ -1117,7 +1117,7 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
             
         ##################################################
         ### Solving the system (groebner basis)
-        P = R.base_field.base()
+        P = R.coeff_field.base()
         fEqs = []
         for el in eqs:
             if(el.parent().is_field()):
@@ -1171,7 +1171,7 @@ def guess_homogeneous_DNfinite(poly, init):
         
         inhom = new_poly.constant_coefficient()
         if(is_DDRing(base)):
-            base_field = base.base_field
+            base_field = base.coeff_field
             base = base.to_depth(base.depth()+1)
         else:
             base_field = base.fraction_field()

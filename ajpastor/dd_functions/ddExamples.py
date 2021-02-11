@@ -1101,7 +1101,7 @@ def Arccosh(input, ddR = None):
     if(is_DDFunction(input)):
         return Arccosh(x)(input)
     g, dR = __decide_parent(input, ddR)
-    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.base_field.gens()[0]
+    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.coeff_field.gens()[0]
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
     evaluate = lambda p : dR.getSequenceElement(p,0)
@@ -1498,7 +1498,7 @@ def LegendreD(nu='n', mu = 0, kind=1):
     if((m == 0) and (n in ZZ) and (n >= 0)):
         try:
             init = [__init_value_associated_legendre(n,m,kind), __first_derivative_associated_legendre(n,m,kind)]
-            if(any(el not in parent.base_field for el in init)):
+            if(any(el not in parent.coeff_field for el in init)):
                 init = []
         except:
             pass
@@ -1703,7 +1703,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
         # Lambda method to get the operator in the appropriate operator ring
-        get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation)
+        get_op = lambda p : destiny_ring.operator_class(destiny_ring.base(),p,destiny_ring.base_derivation)
         
         ## Getting the operator for the numerator and for the denominator
         op_num = prod((get_op([el,x]) for el in numerator),x)
@@ -1762,7 +1762,7 @@ def PolylogarithmD(s=1):
     
     destiny_ring = DFinite
     
-    get_op = lambda p : destiny_ring.default_operator(destiny_ring.base(),p,destiny_ring.base_derivation)
+    get_op = lambda p : destiny_ring.operator_class(destiny_ring.base(),p,destiny_ring.base_derivation)
     pos_part = prod((get_op([1,x]) for i in range(1,s+2)), get_op([1]))
     neg_part = prod((get_op([1,x]) for i in range(1,s+1)), get_op([1])).derivative()
     
@@ -2511,7 +2511,7 @@ def FCoulombD(m='m', l='l'):
             0
             sage: for l in range(-1,10): # checking with m parameter
             ....:     F = FCoulombD('m',l)
-            ....:     m = F.parent().base_field.gens()[0]
+            ....:     m = F.parent().coeff_field.gens()[0]
             ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
             ....:         print(l)
     '''
