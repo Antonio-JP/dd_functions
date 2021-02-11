@@ -347,5 +347,5 @@ class LFFSimpleMorphism (sage.categories.map.Map):
         elif(self.codomain() in IntegralDomains()):
             return self.codomain()((p.numerator().divide(p.denominator())).raw());
             
-        raise TypeError("Impossible the conversion of %s to %s" (p, self.codomain()));
+        raise TypeError("Impossible the conversion of %s to %s" %(p, self.codomain()));
 

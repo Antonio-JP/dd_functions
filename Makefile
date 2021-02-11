@@ -21,6 +21,9 @@ create:
 install:
 	$(SAGE) -pip install --upgrade .
 
+no-deps:
+	$(SAGE) -pip install --upgrade --no-deps .
+
 uninstall:
 	$(SAGE) -pip uninstall $(PACKAGE)
 
@@ -34,7 +37,7 @@ coverage:
 	$(SAGE) -coverage $(PACKAGE)/*
 	
 # Documentation commands
-doc: install
+doc: no-deps
 	cd docs && $(SAGE) -sh -c "make html"
 
 doc-pdf:

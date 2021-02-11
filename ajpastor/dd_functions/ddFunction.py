@@ -68,13 +68,6 @@ _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
 _Fields = Fields.__classcall__(Fields)
 
 #####################################################
-### Definition of some exceptions
-#####################################################
-# class DevelopementError(NotImplementedError):
-#     def __init__(self, name):
-#         NotImplementedError.__init__(self, "Method %s still under construction. Please be patient and wait until it is finished." %name)
-
-#####################################################
 ### Definition of the particular warnings we are interested to raise
 #####################################################
 class DDFunctionWarning(RuntimeWarning):
@@ -105,17 +98,17 @@ def _aux_derivation(p):
 #####################################################
 def is_DDRing(ring):
     r'''
-        Method that checks if an object is a DDRing. 
+        Method that checks if an object is a :class:`DDRing`. 
 
         This method provides a general function to check the class of an object without knowing 
         exactly the name of the basic class of the module. This is basically an alias for the command 
-        ''sinstance(ring, DDRing)''.
+        ``instance(ring, DDRing)``.
 
         INPUT:
-            * ''ring'' -- object to be checked.
+            * ``ring`` -- object to be checked.
 
         OUTPUT: 
-            * ''True'' or ''False'' depending if ''ring'' is a ''DDRing'' or not.
+            * ``True`` or ``False`` depending if ``ring`` is a :class:`DDRing` or not.
 
         EXAMPLES::
 
@@ -127,17 +120,52 @@ def is_DDRing(ring):
             sage: is_DDRing(QQ)
             False
 
-        Also ''ParametrizedDDRing'' return ''True'' with this method::
+        Also :class:`ParametrizedDDRing` return ``True`` with this method::
 
             sage: is_DDRing(ParametrizedDDRing(DFinite, ['a']))
             True
 
         SEE ALSO:
-            * :class:'DDRing'
+            * :class:`DDRing`
     '''
     return isinstance(ring, DDRing)
 
 class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
+    r'''
+        Class for Differentially Definable Rings (or DDRing).
+
+        This class represents the Ring of Differentially Definable Functions with coefficients over a base ring. This rings contains all the functions
+        (formal power series) that satisfy a linear differential equation with coefficients in a base ring. For further theoretical information
+        about this class of functions, check https://www.sciencedirect.com/science/article/abs/pii/S0747717118300890.
+
+        INPUT::
+            - ``base``: an integral domain. Will provide the coefficients for the differential equations.
+            - ``depth``: positive integer. Points how many iterations of this construction we want.
+            - ``base_field``: a field. The elements of ``self`` will be formal power series over this field.
+            - ``invertibility``: method. This method checks if an element of ``base`` is invertible or not.
+            - ``derivation``: method. This method computes the derivative of elements in ``base``.
+            - ``default_operator`: class. Class inheriting from :class:`~ajpastor.operator.Operator` for the differential equations.
+
+        More formally, ``(base,derivation)`` is a differential integral domain and ``(self, self.derivative)`` a differential extension.
+
+        Note that these objects are unique, so calling the constructor with the same arguments retrieve the same object.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: DDRing(QQ)
+            DD-Ring over (Rational Field)
+            sage: DDRing(QQ) is DDRing(QQ)
+            True
+            
+        We can iterate the process using an iterative call of the constructor or the ``depth`` argument::
+
+            sage: DDRing(QQ, depth=2)
+            DD-Ring over (DD-Ring over (Rational Field))
+            sage: DDRing(QQ, depth=2) is DDRing(DDRing(QQ))
+            True
+    '''
+    
     Element = None
     
     _Default_Depth = 1 # Default value for the depth argument in __init__
@@ -162,13 +190,13 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     #################################################
     @staticmethod
     def __algebraic_equivalent__(R,S):
-        '''
-            Method that checks if two NumberField extensions are equivalent in SAGE. 
+        r'''
+            Method that checks if two :class:`~sage.rings.number_field.number_field.NumberField` extensions are equivalent in SAGE. 
             
-            We say that R~S if they have the same polynomials defining their elements
+            We say that `R\sim S` if they have the same polynomials defining their elements
             and they have exactly the same name.
             
-            If R or S are not an algebraic extension then the method returns R==S
+            If `R` or `S` are not an algebraic extension then the method returns simply ``R==S``.
         '''
         from sage.categories.pushout import AlgebraicExtensionFunctor as algebraic
         const_S = S.construction()
@@ -210,8 +238,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         
     @staticmethod
     def __get_gens__(parent):
-        '''
-            Static method that retrieves the complete list of a Parent object until the method gens returns nothing or `1`.
+        r'''
+            Method to get the generators of a parent structure.
+
+            Static method that explore the list of generators of a Parent object until the method gens returns nothing or `1`.
 
             This method is particularly focused on Algebraic extensions, Polynomial extensions and Fraction Fields.
         '''
@@ -287,7 +317,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     #################################################
     @staticmethod
     def __classcall__(cls, *args, **kwds):
-        '''
+        r'''
             Particular builder for DDRings. 
 
             This method do a special checking of uniqueness for two DDRings. It maps all the arguments provided by the user
@@ -328,40 +358,6 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         return DDRing._CACHED_DD_RINGS[cls][to_hash]
     
     def __init__(self, base, depth = _Default_Depth, base_field = _Default_Base_Field, invertibility = _Default_Invertibility, derivation = _Default_Derivation, default_operator = _Default_Operator):
-        '''
-            Class for Differentially Definable Rings (or DDRing).
-
-            This class represents the Ring of Differentially Definable Functions with coefficients over a base ring. This rings contains all the functions
-            (formal power series) that satisfy a linear differential equation with coefficients in a base ring.
-
-            INPUT::
-                - ``base`` -- an integral domain. Will provide the coefficients for the differential equations.
-                - ``depth`` -- positive integer. Points how many iterations of this construction we want.
-                - ``base_field`` -- a field. The elements of ``self`` will be formal power series over this field.
-                - ``invertibility`` -- method. This method checks if an element of ``base`` is invertible or not.
-                - ``derivation`` -- method. This method computes the derivative of elements in ``base``.
-                - ``default_operator`` -- class. Class inheriting from ``ajpastor.operator.Operator`` for the differential equations.
-
-            More formally, ``(base,derivation)`` is a Differential Integral Domain and ``(self, self.derivative)`` a Differential Extension.
-
-            Note that this objects are unique, so calling the constructor with the same arguments retrieve the same object.
-
-            EXAMPLES::
-
-                sage: from ajpastor.dd_functions import *
-                sage: DDRing(QQ)
-                DD-Ring over (Rational Field)
-                sage: DDRing(QQ) is DDRing(QQ)
-                True
-                
-            We can iterate the process using an iterative call of the constructor or the ``depth`` argument::
-
-                sage: DDRing(QQ, depth=2)
-                DD-Ring over (DD-Ring over (Rational Field))
-                sage: DDRing(QQ, depth=2) is DDRing(DDRing(QQ))
-                True
-
-        '''
         ## Other attributes initialization
         self.__variables = None
         SerializableObject.__init__(self, base, depth, base_field, invertibility, derivation, default_operator)
@@ -460,6 +456,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             To allow the algebraic numbers, we use the method ``__get_gens__`` to compare how the ring `S` and
             the ring ``self`` where built. If at some point we can not use the behavior of the generators, we 
             will rely on the usual ``_coerce_map_from_`` with ``self.base()``.
+
+            :meta public:
         '''
         ## Checking the easy cases
         coer = None
@@ -506,27 +504,47 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             return S.depth() <= self.depth()
         
     def _pushout_(self, S):
-        '''
-            This method compute the pushout of 'self' with the parent class 'S'. This method returns None if it is not possible to get the pushout or a DDRing with all the properties required to include 'self' and 'S'.
+        r'''
+            Method to compute the pushout of ``self`` with a parent class `S`.
+
+            This method returns ``None`` if it is not possible to get the pushout or a :class:`DDRing` with all the properties 
+            required to include ``self`` and `S`.
             
             The method goes as follows:
-                1 - Compute the simplest field over everything is based (let us call it 'F'). This will be 'QQ' or an algebraic extension of 'QQ' (see the class 'NumberField')
-                2 - Compute the list of parameters involved. This will be the constant transcendent elements that will extend the ring 'F' as a rational function ring. Let 'B' be such extension.
-                3 - Compute the list of variables involved. We usually expect just one variable but allow to have more of them. We will build 'R' the polynomial ring over 'F' with those variables.
-                4 - Compute the depth required for include 'self' and 'S'. Then we build the corresponding DDRing of the appropriate depth. If we had parameters, we build the ParametrizedDDRing.
+
+            1 - Compute the simplest field over everything is based (let us call it `F`). This will be `\mathbb{Q}` or an algebraic 
+              extension of \mathbb{Q}` (see :class:`~sage.rings.number_field.number_field.NumberField`)
+            2 - Compute the list of parameters involved. This will be the constant transcendent elements that will extend the ring 
+              `F` as a rational function ring. We denote by `B` that extension.
+            3 - Compute the list of variables involved. We usually expect just one variable but allow to have more of them. We will 
+              build `R` the polynomial ring over `B` with those variables.
+            4 - Compute the depth required for include ``self`` and `S`. Then we build the corresponding :class:`DDRing` of the appropriate 
+              depth. If we had parameters, we build the :class:`ParametrizedDDRing`.
                 
             INPUT:
-                - A parent structure of SAGE 'S'.
+                * ``S``: a parent structure of Sage.
                 
             OUTPUT:
-                - A DDRing or ParametrizedDDRing such that any element of 'self' and 'S' is in it.
+
+            A :class:`DDRing` or :class:`ParametrizedDDRing` such that contains all the elements in ``self`` and `S`.
                 
             WARNINGS:
-                - A warning will pop up if we merge rings with the same parameter names.
+                * A warning will pop up if we merge rings with the same parameter names.
                 
             ERRORS:
-                - TypeError will be raised if a problem with the algebraic extension is found.
-                - 
+                * TypeError will be raised if a problem with the algebraic extension is found.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: from sage.categories.pushout import pushout
+                sage: Qi.<i> = NumberField(QQ['i']('i^2+1'))
+                sage: pushout(QQ, DFinite) is DFinite
+                True
+                sage: pushout(Qi, DFinite)
+                DD-Ring over (Univariate Polynomial Ring in x over Number Field in i with defining polynomial x^2 + 1)
+                sage: pushout(DFiniteI, ParametrizedDDRing(DDFinite, 'a'))
+                DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1)) with parameter (a)
         '''        
         if(S is SR):
             return None
@@ -599,17 +617,18 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         return R
         
     def _has_coerce_map_from(self, S):
-        '''
+        r'''
             Standard implementation for ``_has_coerce_map_from``
         '''
         coer =  self._coerce_map_from_(S)
         return (not(coer is False) and not(coer is None))
         
     def _element_constructor_(self, *args, **kwds):
-        '''
-            Implementation of _element_constructor_.
+        r'''
+            Implementation of ``_element_constructor_``.
 
-            This method describes how to interpret the arguments that a DDRing can received to cast one element to a DDFunction in ``self``.
+            This method describes how to interpret the arguments that a :class:`DDRing` can received to cast one element to a 
+            :class:`DDFunction` in ``self``.
         '''
         if(len(args) < 1 ):
             raise ValueError("Impossible to build a lazy element without arguments")
@@ -668,16 +687,20 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e))
             
     def gens(self):
-        '''
+        r'''
             Implementation of the method ``gens``.
 
-            This method returns a list with all the generators of the ``DDRing``. This usually means nothing, although some ``DDRing`` can 
-            retrieve some special variables or its parameter as genertors.
+            This method returns a list with all the generators of the :class:`DDRing`. This usually means nothing, although some :class:`DDRing` can 
+            retrieve some special variables or its parameters as genertors.
 
-            OUTPUT::
-                List of generators provided by this ``DDRing``.
+            The methods :func:`~DDRing.variables` and :func:`~DDRing.parameters` are more useful in this regard since it separates
+            the meaning of each generator.
+
+            OUTPUT:
+                List of generators provided by this :class:`DDRing`.
 
             EXAMPLES::
+
                 sage: from ajpastor.dd_functions import *
                 sage: DFinite.gens()
                 ()
@@ -690,15 +713,17 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         return ()
     
     def ngens(self):
-        '''
+        r'''
             Return the number of generators of ``self``.
 
             General method for Parent structures that returns the number of generators required to generate ``self``.
 
-            OUTPUT::
-                Number of generators obtained by ``self.gens()``.
+            OUTPUT:
+
+            Number of generators obtained by ``self.gens()``.
 
             EXAMPLES::
+
                 sage: from ajpastor.dd_functions import *
                 sage: DFinite.ngens()
                 0
@@ -713,18 +738,18 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         return len(self.gens())
             
     def construction(self):
-        '''
-            Returns a functor that built the DDRing.
+        r'''
+            Returns a functor that builds the DDRing.
 
-            Method that returns a functor `F` and an Integral Domain `R` such that ``self == F(R)``. This method allows the 
-            coerce system in Sage to handle ``DDFunctions`` and ``DDRings`` appropriately.
+            Method that construct a functor `F` and an integral domain `R` such that ``self == F(R)``. This method allows the 
+            coerce system in Sage to handle :class:`DDFunction` and :class:`DDRing` appropriately.
 
-            OUTPUT::
-                - A DDRingFunctor `F`
-                - An Integral Domain `R`
-            Such that ``F(R) == self``. Moreover, ``R in IntegralDomains()`` and ``isinstance(DDRingFunctor, F)`` are both True.
+            OUTPUT:
+
+            This method returns a tuple `(F,R)` where `F` is a functor such that ``self == F(R)``.
 
             EXAMPLES::
+
                 sage: from ajpastor.dd_functions import *
                 sage: from ajpastor.dd_functions.ddFunction import DDRingFunctor
                 sage: from ajpastor.dd_functions.ddFunction import ParametrizedDDRingFunctor
@@ -739,7 +764,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: R == QQ[x]
                 True
 
-            The functor for Parametrized DDRings works a bit differently: it adds the parameters to the appropriate DDRing
+            The functor for Parametrized DDRings works a bit differently: it adds the parameters to the appropriate DDRing::
+
                 sage: S = ParametrizedDDRing(DDFinite, ['a','b'])
                 sage: F, R = S.construction()
                 sage: F == ParametrizedDDRingFunctor(2, QQ, set([var('a'), var('b')]))
@@ -750,19 +776,20 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         return (DDRingFunctor(self.depth(), self.base_field), self.__original)
         
     def __contains__(self, X):
-        '''
+        r'''
             Decide if an element belongs to ``self``.
 
             The method is implemented in a very generic way, looking if the parent of the input is related or has a coercion
-            with ``self``. In addition, we try to call the method ``_element_constructor_`` of ``self`` to build an element from the input X,
-            whatever it is.
+            with ``self``. In addition, we try to call the method :func:`~DDRing._element_constructor_` of ``self`` to build an 
+            element from the input ``X``, whatever it is.
 
-            See ``self._element_constructor_?``, and ``self._has_coerce_map_from?`` for further information.
+            See the methods :func:`~DDRing._element_constructor_`, and :func:`DDRing._has_coerce_map_from` for further information.
 
             OUTPUT::
                 ``True`` or ``False`` depending if ``X`` can be casted to an element of ``self`` or not.
 
             EXAMPLES::
+
                 sage: from ajpastor.dd_functions import *
                 sage: Exp(x) in DFinite
                 True
@@ -784,6 +811,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 False
                 sage: e2 in DDFinite
                 False
+
+            :meta public:
         '''
         try:
             if((X.parent() is self) or (self._has_coerce_map_from(X.parent()))):
@@ -1162,6 +1191,25 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             if(len(self.__variables) == 0  and fill):
                 return tuple([self.base()(var(DDRing._Default_variable))])
             return tuple(self.base()(el) for el in self.__variables)
+
+    def parameters(self, as_symbolic = False):
+        return ()
+
+    def variable(self, input):
+        if(input in ZZ):
+            return self.variables()[ZZ(input)]
+        elif(isinstance(input, str)):
+            return self.variables()[([str(v) for v in self.variables()]).index(input)]
+        else:
+            raise NotImplementedError("No parameter can be got with input %s" %input)
+
+    def parameter(self,input):
+        if(input in ZZ):
+            return self.parameters()[ZZ(input)]
+        elif(isinstance(input, str)):
+            return self.parameters()[([str(v) for v in self.parameters()]).index(input)]
+        else:
+            raise NotImplementedError("No parameter can be got with input %s" %input)
                 
 #############################################################################
 ###
@@ -1281,20 +1329,12 @@ class ParametrizedDDRing(DDRing):
         else:
             return "%s with parameter %s" %(self.base_ddRing(),res)
     
-    def parameter(self,input):
-        if(input in ZZ):
-            return self.parameters()[ZZ(input)]
-        elif(isinstance(input, str)):
-            return self.parameters()[([str(v) for v in self.parameters()]).index(input)]
-        else:
-            raise NotImplementedError("No parameter can be got with input %s" %input)
-    
     @cached_method
     def parameters(self, as_symbolic = False):
         if(as_symbolic):
             return self.__parameters
         else:
-            return [self.base_field(el) for el in self.__parameters]
+            return tuple([self.base_field(el) for el in self.__parameters])
             
     def gens(self):
         return self.parameters(True)
@@ -2210,9 +2250,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD()
                 sage: h = f.simple_derivative()
-                sage: h.singularities()
-                Empty Set
-                sage: h.equation[h.getOrder()] in h.parent().base_field
+                sage: h == f.derivative()
                 True
 
             TODO:

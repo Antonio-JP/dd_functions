@@ -1,10 +1,10 @@
 r"""
-Python file for an implementation of Bareiss' algorithm
+Python file for an implementation of Hermite normal form computations
 
 This module offers an implementation of Hermite Normal Form computation. This algorithm can later be used to
 solve linear system within Euclidean domains.
 
-This is an adaptation of method described in https://www.ams.org/journals/mcom/1996-65-216/S0025-5718-96-00766-1/
+This is an adaptation of method described in `this paper <https://www.ams.org/journals/mcom/1996-65-216/S0025-5718-96-00766-1/>`_
 for computing the Hermite Normal Form in Dedekind domains. Since Euclidean Domains are, in particular, Dedekind
 domains, we use the corresponding and adapted method.
 
@@ -55,7 +55,8 @@ class HermiteSolver(LinearSystemSolver):
             * ``matrix``: matrix for the system.
             * ``inhomogeneous``: the inhomogeneous vector for the system.
             * ``euclidean``: method for computing the euclidean division with remainder.
-            * ``xgcd``: method for computing the Extended Euclidean GCD.
+            * ``xgcd``: method for computing the Extended Euclidean GCD (by default, it takes the value of
+              :func:`~sage.all.xgcd`)
 
         EXAMPLES::
 
@@ -184,38 +185,43 @@ class HermiteSolver(LinearSystemSolver):
             [      0       1]
             [     -1 2*x + 2]
     '''
-    def __init__(self, parent, matrix, inhomogeneous, euclidean=lambda p,q: (p//q, p%q), xgcd = lambda p,q : xgcd(p,q)):
+    def __init__(self, parent, matrix, inhomogeneous, euclidean=lambda p,q: (p//q, p%q), xgcd = xgcd):
         if(type(parent) is tuple):
             base,g,d = parent
             if(not base.is_euclidean_domain()):
                 raise TypeError("The base ring for Hermite must be euclidean")
             if(len(g) > 0):
                 raise TypeError("The base ring for Hermite must not have generators")
-            parent = base.localization(tuple(d))
-            def new_euclidean(p,q):
-                pn = p.numerator(); pd = p.denominator()
-                qn = q.numerator(); qd = q.denominator()
-                d, r = euclidean(pn, qn)
-                return (parent((d*qd)/pd), parent(r/pd))
-            
-            def new_xgcd(p,q):
-                if(q == 0):
-                    return p, parent.one(), parent.zero()
-                aux_den,_,_ = xgcd(p.denominator(),q.denominator())
-                p *= aux_den; q *= aux_den
-                if(p.denominator() == 1 and q.denominator() == 1):
-                    g,P,Q = xgcd(p.numerator(),q.numerator())
-                    return g, aux_den*parent(P), aux_den*parent(Q)
-                m,r = new_euclidean(p,q)
-                if(self.is_zero(r)):
-                    return q, parent.zero(), parent.one()
-                if(r.is_unit()):
-                    return parent.one(), aux_den*parent(1/r), aux_den*parent(-m/r)
-                g, P, Q = new_xgcd(q,r)
-                return (g, aux_den*Q, aux_den*(P-m*Q))
+            if(len(d) > 0):
+                parent = base.localization(tuple(d))
+                def new_euclidean(p,q):
+                    pn = p.numerator(); pd = p.denominator()
+                    qn = q.numerator(); qd = q.denominator()
+                    d, r = euclidean(pn, qn)
+                    return (parent((d*qd)/pd), parent(r/pd))
+                
+                def new_xgcd(p,q):
+                    if(q == 0):
+                        return p, parent.one(), parent.zero()
+                    aux_den,_,_ = xgcd(p.denominator(),q.denominator())
+                    p *= aux_den; q *= aux_den
+                    if(p.denominator() == 1 and q.denominator() == 1):
+                        g,P,Q = xgcd(p.numerator(),q.numerator())
+                        return g, aux_den*parent(P), aux_den*parent(Q)
+                    m,r = new_euclidean(p,q)
+                    if(self.is_zero(r)):
+                        return q, parent.zero(), parent.one()
+                    if(r.is_unit()):
+                        return parent.one(), aux_den*parent(1/r), aux_den*parent(-m/r)
+                    g, P, Q = new_xgcd(q,r)
+                    return (g, aux_den*Q, aux_den*(P-m*Q))
 
-            self.__euclidean = new_euclidean
-            self.__xgcd = new_xgcd
+                self.__euclidean = new_euclidean
+                self.__xgcd = new_xgcd
+            else:
+                self.__euclidean = euclidean
+                self.__xgcd = xgcd
+                parent = base
         else:
             self.__euclidean = euclidean
             self.__xgcd = xgcd
@@ -300,13 +306,6 @@ class HermiteSolver(LinearSystemSolver):
     ###
     #########################################################
     def __find_pivot(self, A, r, c):
-        r'''
-            Method to find the next valid pivot.
-
-            TODO:
-                * Fill documentation
-                * Add example
-        '''
         for i in range(r, A.nrows()):
             if(not self.is_zero(A[i][c])):
                 return i
