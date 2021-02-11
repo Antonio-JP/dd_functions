@@ -307,18 +307,30 @@ class LinearSystemSolver():
     ## Alias properties
     @property
     def A(self):
+        r'''
+            Alias for :func:`~LinearSystemSolver.system_matrix`
+        '''
         return self.system_matrix()
     
     @property
     def b(self):
+        r'''
+            Alias for :func:`~LinearSystemSolver.inhomogeneous`
+        '''
         return self.inhomogeneous()
 
     @property
     def H(self):
+        r'''
+            Alias for :func:`~LinearSystemSolver.echelon_form`
+        '''
         return self.echelon_form()
     
     @property
     def U(self):
+        r'''
+            Alias for :func:`~LinearSystemSolver.transformation_matrix`
+        '''
         return self.transformation_matrix()
 
     ## ABSTRACT METHODS
