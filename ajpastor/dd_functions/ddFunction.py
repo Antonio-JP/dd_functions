@@ -105,10 +105,11 @@ def is_DDRing(ring):
         ``instance(ring, DDRing)``.
 
         INPUT:
-            * ``ring`` -- object to be checked.
+            * ``ring``: object to be checked.
 
         OUTPUT: 
-            * ``True`` or ``False`` depending if ``ring`` is a :class:`DDRing` or not.
+        
+        ``True`` or ``False`` depending if ``ring`` is a :class:`DDRing` or not.
 
         EXAMPLES::
 
@@ -136,15 +137,15 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
         This class represents the Ring of Differentially Definable Functions with coefficients over a base ring. This rings contains all the functions
         (formal power series) that satisfy a linear differential equation with coefficients in a base ring. For further theoretical information
-        about this class of functions, check https://www.sciencedirect.com/science/article/abs/pii/S0747717118300890.
+        about this class of functions, check `this paper <https://www.sciencedirect.com/science/article/abs/pii/S0747717118300890>`_.
 
-        INPUT::
-            - ``base``: an integral domain. Will provide the coefficients for the differential equations.
-            - ``depth``: positive integer. Points how many iterations of this construction we want.
-            - ``base_field``: a field. The elements of ``self`` will be formal power series over this field.
-            - ``invertibility``: method. This method checks if an element of ``base`` is invertible or not.
-            - ``derivation``: method. This method computes the derivative of elements in ``base``.
-            - ``default_operator`: class. Class inheriting from :class:`~ajpastor.operator.Operator` for the differential equations.
+        INPUT:
+            * ``base``: an integral domain. Will provide the coefficients for the differential equations.
+            * ``depth``: positive integer. Points how many iterations of this construction we want.
+            * ``base_field``: a field. The elements of ``self`` will be formal power series over this field.
+            * ``invertibility``: method. This method checks if an element of ``base`` is invertible or not.
+            * ``derivation``: method. This method computes the derivative of elements in ``base``.
+            * ``default_operator``: class. Class inheriting from :class:`~ajpastor.operator.Operator` for the differential equations.
 
         More formally, ``(base,derivation)`` is a differential integral domain and ``(self, self.derivative)`` a differential extension.
 
@@ -949,6 +950,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                     * ``min_order``: minimal order for the equation we would get (default to `1`)
                     * ``max_order``: maximal order for the equation we would get (default to `3`)
                     * ``simple``: if True, the leading coefficient will always be one (default ``True``)
+
                   All other parameters will be pass to the random generators.
 
             OUTPUT:
@@ -1320,11 +1322,12 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
             This method implements the evaluation of a :class:`DDFunction` in ``self``. Elements of a :class:`DDRing`
             are formal power series, hence there are three types of evaluations:
-                * Value evaluation: we set a value for the main variable (see :func:`~DDRing.variables`)
-                * Parameter evaluation: in the case that ``self`` is a :class:`ParametrizedDDRing`, 
-                  the parameters can be evaluated into elements of the field given by :func:`~DDRing.base_ring`.
-                * Function evaluation (i.e., composition): we can also compute the composition as 
-                  formal power series (if possible).
+                
+            * Value evaluation: we set a value for the main variable (see :func:`~DDRing.variables`)
+            * Parameter evaluation: in the case that ``self`` is a :class:`ParametrizedDDRing`, 
+              the parameters can be evaluated into elements of the field given by :func:`~DDRing.base_ring`.
+            * Functional evaluation (i.e., composition): we can also compute the composition as 
+              formal power series (if possible).
 
             INPUT:
                 * ``element``: the element in ``self`` to be evaluated.
@@ -1339,12 +1342,13 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             OUTPUT:
 
             The result of evaluating the function:
-                * In the case of being a parametric evaluation, we return another :class:`DDFunction` in 
-                  the corresponding ring.
-                * In the case of value evaluation: this method returns the initial value at zero if that
-                  is the point of evaluation and a numerical approximation (see method :func:`DDFunction.numerical_solution`
-                  for further information) in case it is another point.
-                * In the case of function evaluation: this method returns the new :class:`DDFunction`
+            
+            * In the case of being a parametric evaluation, we return another :class:`DDFunction` in 
+              the corresponding ring.
+            * In the case of value evaluation: this method returns the initial value at zero if that
+              is the point of evaluation and a numerical approximation (see method :func:`DDFunction.numerical_solution`
+              for further information) in case it is another point.
+            * In the case of function evaluation: this method returns the new :class:`DDFunction`
 
             EXAMPLES::
 
@@ -1605,7 +1609,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 ###
 #############################################################################
 def is_ParametrizedDDRing(ring):
-    '''
+    r'''
         Method that checks if an object is a :class:`ParametrizedDDRing`. 
 
         This method provides a general function to check the class of an object without knowing 
@@ -1641,9 +1645,52 @@ def is_ParametrizedDDRing(ring):
     return isinstance(ring, ParametrizedDDRing)
 
 class ParametrizedDDRing(DDRing):
+    r'''
+        Class for Parametrized Differentially Definable Rings.
 
+        This class represents a particular type of :class:`DDRing`. Namely, we add parameters
+        that we know are constant values that can be evaluated to elements in the ground field.
+
+        Theoretically speaking, if we were considering formal power series `\mathbb{K}[[x]]`
+        and we want to add a parameter `p`, we can this by simply considering the solutions in
+        `\mathbb{K}(p)[[x]]` where `\partial(p) = 0`.
+
+        This class add extra methods to handle the parameteres as such and allows the particular 
+        evaluation of these parameters (see method :func:`~ParametrizedDDRing._parametric_evaluation`).
+
+        The parameters of this ring can be obtain again by the method :func:`parameters`.
+
+        INPUT:
+            * ``base_ddRing``: this input indicates where the coefficients will live and 
+              the depth of the :class:`DDRing` we consider.
+            * ``parameters``: list of variables (symbolic expressions) or names for the 
+              parameters to be considered. This argument can also be given with the name
+              ``names`` in order to allow the <> syntax of Sage.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: ParametrizedDDRing(DFinite, 'a')
+            DD-Ring over (Univariate Polynomial Ring in x over Rational Field) with parameter (a)
+            sage: ParametrizedDDRing(DFinite, 'P') is DFiniteP
+            True
+            sage: ParametrizedDDRing(DFinite, 'a') == DFiniteP
+            False
+            sage: R.<P> = ParametrizedDDRing(DFinite)
+            sage: R is DFiniteP
+            True
+    '''
     @staticmethod
     def __classcall__(cls, *args, **kwds):
+        r'''
+            Particular builder for the class :class:`ParametrizedDDRing`. 
+
+            This method do a special checking of uniqueness for two :class:`ParametrizedDDRing`. It maps all the arguments provided by the user
+            and transform them into a standard notation that will be hashable and will allow the system to recognize two
+            exact differentially definable rings.
+
+            This implemention mimics the behavior of the class :class:`UniqueRepresentation`.
+        '''
         ## In order to call the __classcall__ of DDRing we treat the arguments received
         base_ddRing = args[0]
         if(len(args) > 1 ):
@@ -1721,6 +1768,13 @@ class ParametrizedDDRing(DDRing):
         self.__baseDDRing = base_ddRing
             
     def _coerce_map_from_(self, S):
+        r'''
+            Method to get the coerce map from the Sage structure `S` (if possible).
+            
+            To allow the algebraic numbers, we use the method :func:`DDRing.__get_gens__` to compare how the ring `S` and
+            the ring ``self`` where built. If at some point we can not use the behavior of the generators, we 
+            will rely on the function in the base :class:`DDRing`.
+        '''
         coer = super(ParametrizedDDRing, self)._coerce_map_from_(S)
         if(not(coer)):
             coer = self.__baseDDRing._coerce_map_from_(S)
@@ -1728,18 +1782,44 @@ class ParametrizedDDRing(DDRing):
         return not(not(coer))
             
     def construction(self):
+        r'''
+            Returns a functor that builds the DDRing.
+
+            Override method from class :class:`DDRing`.
+
+            See method :func:`DDRing.construction` for further information and tests.
+        '''
         return (ParametrizedDDRingFunctor(self.depth(), self.__baseDDRing.coeff_field, set(self.__parameters)), self.__baseDDRing._DDRing__original)
             
     def base_ddRing(self):
-        '''
-            Method that retrieves the original DDRing where this parametrized space is based on.
+        r'''
+            Method that returns the original :class:`DDRing`.
+
+            This method returns the basic :class:`DDRing` where we added the parameters. This 
+            ring must have the same depth as ``self``. 
             
             OUTPUT:
-                - DDRing where elements of ``self`` would be if we substitute the parameters by elements of the base ring.
+
+            A :class:`DDRing` where elements of ``self`` would be if we substitute the parameters by elements
+            of the base ring (see :func:`DDRing.base_ring`).
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFiniteP.base_ddRing() is DFinite
+                True
+                sage: DFiniteP.to_depth(5).base_ddRing() is DFinite.to_depth(5)
+                True
+
         '''
         return self.__baseDDRing
         
     def _repr_(self):
+        r'''
+            Method implementing the ``__repr__`` magic python method. 
+
+            Returns a string telling that self is a :class:`DDRing` with parameters and which ring is its base.
+        '''
         res = "(%s" %str(self.parameters()[0])
         for i in range(1 ,len(self.parameters())):
             res += ", " + str(self.parameters()[i])
@@ -1751,29 +1831,90 @@ class ParametrizedDDRing(DDRing):
             return "%s with parameter %s" %(self.base_ddRing(),res)
     
     def parameters(self, as_symbolic = False):
+        r'''
+            Method that returns all the parameters for ``self``.
+
+            Overrides the method from class :class:`DDRing`.
+
+            See method :func:`DDRing.parameters` for further information and examples.
+        '''
         if(as_symbolic):
             return self.__parameters
         else:
             return tuple([self.coeff_field(el) for el in self.__parameters])
             
     def gens(self):
+        r'''
+            Implementation of the method ``gens``.
+
+            Overrides the method from class :class:`DDRing`.
+
+            In the case of :class:`ParametrizedDDRing` and in order to make the <> creation syntax of 
+            Sage work, we return the list of paramters as symbolic variables.
+
+            For further information, see method :func:`DDRing.gens`
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: R = ParametrizedDDRing(DFinite, ['a'])
+                sage: R.gens()
+                (a,)
+                sage: ParametrizedDDRing(R, ['b']).gens()
+                (b, a)
+        '''
         return self.parameters(True)
         
     def _first_ngens(self, n):
+        r'''
+            Auxiliary method for getting the first generators.
+
+            This methods is required for the <> creation syntax of Sage and returns
+            the first `n` generators (i.e., parameters) as elements in ``self``.
+        '''
         return self.parameters(False)[:n]
-        
-    def ngens(self):
-        return len(self.parameters())
-                        
-    # Override to_depth method from DDRing
+                         
     def to_depth(self, dest):
+        r'''
+            Returns the :class:`DDRing` of the corresponding depth.
+
+            Overrides the method from class :class:`DDRing`.
+
+            In the case of :class:`ParametrizedDDRing`, this method guarantees that the output 
+            is again a :class:`ParametrizedDDRing`. Since we could build a :class:`DDRing` with 
+            the same field for the power series coefficients (see method :func:`~DDRing.base_ring`) 
+            but without the parametric behavior, we need to specifically call the constructor
+            of this class to keep that behavior.
+
+            INPUT:
+                * ``dest``: final depth for the :class:`DDRing`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFiniteP.to_depth(2) is ParametrizedDDRing(DDFinite, 'P')
+                True
+
+            For further information and examples, see method :func:`DDRing.to_depth`.
+        '''
         return ParametrizedDDRing(self.base_ddRing().to_depth(dest), self.parameters(True))
     
-    # Override extend_base_field method from DDRing
     def extend_base_field(self, new_field):
+        r'''
+            Method to extend the base field of the :class:`DDRing`.
+
+            Overrides the method from :class:`DDRing`.
+
+            In the case of :class:`ParametrizedDDRing`, this method guarantees that the output 
+            is again a :class:`ParametrizedDDRing`. Since we could build a :class:`DDRing` with 
+            the same field for the power series coefficients (see method :func:`~DDRing.base_ring`) 
+            but without the parametric behavior, we need to specifically call the constructor
+            of this class to keep that behavior.
+
+            For further information and examples, see :func:`DDRing.extend_base_field`.
+        '''
         return ParametrizedDDRing(self.base_ddRing().extend_base_field(new_field), self.parameters(True))
             
-    # Override eval method from DDRing
     def _parametric_evaluation(self, element, **input):
         r'''
             Method to evaluate the parameters of an element of ``self``.
@@ -1817,11 +1958,62 @@ class ParametrizedDDRing(DDRing):
             new_name = m_dreplace(element._DDFunction__name, {key: str(values[key]) for key in values}, True)
         return destiny_ring.element(new_equation,new_init,name=new_name)
             
+    def _to_command_(self):
+        r'''
+            Return a Sage command to create ``self``.
+
+            Overrides the method from class :class:`DDRing`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: command(DFiniteP)
+                "ParametrizedDDRing(DDRing(PolynomialRing(QQ, ['x'])), ['P'])"
+                sage: eval(command(DFiniteP)) is DFiniteP
+                True
+
+            See method :func:`command` for further information.
+        '''
+        return "ParametrizedDDRing(%s, %s)" %(self.base_ddRing()._to_command_(), [str(par) for par in self.parameters()])
         
 #####################################################
 ### Class for DD-Functions
 #####################################################
 def is_DDFunction(func):
+    r'''
+        Method that checks if an object is a :class:`DDFunction`. 
+
+        This method provides a general function to check the class of an object without knowing 
+        exactly the name of the basic class of the module. This is basically an alias for the command 
+        ``instance(ring, DDFunction)``.
+
+        INPUT:
+            * ``func`` -- object to be checked.
+
+        OUTPUT: 
+        
+        ``True`` or ``False`` depending if ``ring`` is a :class:`DDFunction` or not.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: is_DDFunction(DFinite)
+            False
+            sage: is_DDFunction(DDRing(QQ))
+            False
+            sage: is_DDFunction(QQ)
+            False
+
+        The objects returned by the method :func:`DDRing.element` are of this type::
+
+            sage: is_DDFunction(DFinite.element([-1,1],[1]))
+            True
+            sage: is_DDFunction(DFiniteP.element(['-P',1],['P']))
+            True
+
+        SEE ALSO:
+            * :class:`DDFunction`
+    '''
     return isinstance(func, DDFunction)
 
 class DDFunction (IntegralDomainElement, SerializableObject):
@@ -4167,6 +4359,7 @@ def command(e):
     except AttributeError:
         from sage.rings.polynomial import polynomial_ring as Uni_Polynomial
         from sage.rings.number_field.number_field import is_NumberField
+        from sage.rings.fraction_field import is_FractionField
         if(e in _IntegralDomains):
             if(e is QQ):
                 return "QQ"
@@ -4175,6 +4368,8 @@ def command(e):
             if(is_NumberField(e)):
                 poly = e.defining_polynomial(); gen = e.gen()
                 return "NumberField(%s('%s'), %s)" %(command(poly.parent()), poly, str(gen))
+            if(is_FractionField(e)):
+                return "FractionField(%s)" %command(e.base())
         return str(e)
         
 def _command_list(elements):
