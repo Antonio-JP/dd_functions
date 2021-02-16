@@ -287,7 +287,7 @@ def diffalg_reduction(poly, infinite=False, debug=False):
         
     ocoeffs = coeffs # Extra variable with the same list
     monomials = poly.monomials() # List of monomials
-    l_of_derivatives = [[f.derivative(times=i) for i in range(f.getOrder())] for f in coeffs] # List of derivatives for each coefficient
+    l_of_derivatives = [[f.derivative(times=i) for i in range(f.order())] for f in coeffs] # List of derivatives for each coefficient
     
     ## Step 2: simplification of coefficients
     __dprint("-- Starting step 2", debug)
@@ -491,11 +491,11 @@ def __find_linear_relation(f,g):
     
     try:
         of = 1; og = 1
-        while(f.getSequenceElement(of) == 0): of += 1
-        while(g.getSequenceElement(og) == 0): og += 1
+        while(f.sequence(of) == 0): of += 1
+        while(g.sequence(og) == 0): og += 1
         
         if(of == og):
-            c = f.getSequenceElement(of)/g.getSequenceElement(og)
+            c = f.sequence(of)/g.sequence(og)
             d = f(0) - c*g(0)
             
             if(f == c*g + d):
@@ -553,7 +553,7 @@ def __build_derivation_matrix(gens, coeffs, drelations, debug=False):
     coeff_order = [] # Collecting the real order of each coefficient in the vector space
     for i in range(len(coeffs)):
         if(drelations[i][0] is None):
-            coeff_order += [coeffs[i].getOrder()]
+            coeff_order += [coeffs[i].order()]
         else:
             coeff_order += [drelations[i][0]]
     coeff_index = [0] # Variable for the index of coeff[i] in gens
@@ -613,7 +613,7 @@ def __build_vector(coeffs, monomials, graph, drelations, cR, debug=False):
         if(i in maximal_elements and (not (drelations[maximal_elements.index(i)][0] is None))):
             coeff_order += [drelations[maximal_elements.index(i)][0]]
         else:
-            coeff_order += [coeffs[i].getOrder()]
+            coeff_order += [coeffs[i].order()]
     constant = (-1 in graph.vertices())
     
     __dprint("Is there constant: %s" %constant, debug)
@@ -796,11 +796,11 @@ def toDifferentiallyAlgebraic_Below(poly, infinite=False, debug=False):
                     pass
             if(not used):
                 list_of_derivatives = [coeff]
-                for _ in range(coeff.getOrder()-1):
+                for _ in range(coeff.order()-1):
                     list_of_derivatives += [list_of_derivatives[-1].derivative()]
                 dict_to_derivatives[coeff] = list_of_derivatives
-                dict_to_vectors[coeff] = [monomial] + [0 for j in range(coeff.getOrder()-1)]
-                S += coeff.getOrder()
+                dict_to_vectors[coeff] = [monomial] + [0 for j in range(coeff.order()-1)]
+                S += coeff.order()
     
     rows = []
     for el in dict_to_vectors:
@@ -905,7 +905,7 @@ def diff_to_diffalg(func, varname="y", constant=True, infinite=True, debug=False
 
     if(is_DDRing(parent)):
         T = InfinitePolynomialRing(parent.base(), varname); y_aux = T.gens()[0]
-        p = sum([y_aux[i]*func[i] for i in range(func.getOrder()+1)], T.zero())
+        p = sum([y_aux[i]*func[i] for i in range(func.order()+1)], T.zero())
         for i in range(parent.depth()-1):
             p = toDifferentiallyAlgebraic_Below(p, infinite=True, debug=debug)
 
@@ -1111,7 +1111,7 @@ def guess_DA_DDfinite(poly, init=[], bS=None, bd = None, all=True):
         ### Comparing the initial values
         for i in range(min(len(init), f.equation.jp_value()+1),len(init)):
             try:
-                eqs += [f.getInitialValue(i) - init[i]]
+                eqs += [f.init(i) - init[i]]
             except TypeError:
                 break ## Case when no initial value can be computed
             

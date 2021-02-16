@@ -46,7 +46,7 @@ def run():
     ##########################################
     def assert_initial(func, symbolic, size, name):
         for i in range(size):
-            func_val = func.getInitialValue(i);
+            func_val = func.init(i);
             real_val = symbolic.derivative(i)(x=_sage_const_0 );
             assert (func_val == real_val), "Error in the %d initial value of the function %s: expected %s but got %s"%(i,name,real_val,func_val);
 

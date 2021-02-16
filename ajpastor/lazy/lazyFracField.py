@@ -221,7 +221,7 @@ class LazyFracField(UniqueRepresentation, Field):
         if base not in IntegralDomains():
             raise ValueError("%s is no integral domain" % base);
         if (not isinstance(base, LazyIntegralDomain)):
-            base = GetLazyDomain(base);
+            base = LazyDomain(base);
         Field.__init__(self, base, category=QuotientFields());
         
         self.base().register_conversion(LFFSimpleMorphism(self, self.base()));

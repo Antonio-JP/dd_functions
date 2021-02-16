@@ -47,7 +47,7 @@ _MAX_INTEGER = Integer(_sage_const_2 **_sage_const_10 -_sage_const_1 );
 class LazyIDElement(IntegralDomainElement):
     def __init__(self, parent):
         if(not (isinstance(parent, LazyIntegralDomain))):
-            parent = GetLazyDomain(parent);
+            parent = LazyDomain(parent);
     
         self.__raw = None;
         self.__max_divisor = None;
@@ -1101,7 +1101,7 @@ class LIDSimpleMorphism (sage.categories.map.Map):
 ### Global and static elements
 #####################################################
 __MAP_TO_LAZY_DOMAINS = {};
-def GetLazyDomain(X):
+def LazyDomain(X):
     global  __MAP_TO_LAZY_DOMAINS;
     if(not X in __MAP_TO_LAZY_DOMAINS):
         __MAP_TO_LAZY_DOMAINS[X] = LazyIntegralDomain(X);

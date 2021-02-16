@@ -79,7 +79,7 @@ class FullLazyOperator(TwoStepsOperator):
         R = self.__conversion
         if(self.__companion is None or self.__version != R.version()):
             self.__version = R.version()
-            coefficients = [R(el) for el in self.getCoefficients()]
+            coefficients = [R(el) for el in self.coefficients()]
                                     
             ## We divide by the leading coefficient
             coefficients = [-(coefficients[i]/coefficients[-1]) for i in range(len(coefficients)-1)]
@@ -112,7 +112,7 @@ class FullLazyOperator(TwoStepsOperator):
         
         full_companion = dg*self.companion()
         
-        init_vector = vector(R, [1] + [0 for i in range(1,self.getOrder())])
+        init_vector = vector(R, [1] + [0 for i in range(1,self.order())])
         
         return move(full_companion, init_vector, lambda p : p.derivative(), full_companion.ncols()+1)
     ####################################################### 

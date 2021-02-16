@@ -175,8 +175,8 @@ def symbolic_simplify(function):
     
 def symbolic_simplify_coefficients(function):
     if(isinstance(function, DDFunction)):
-        for i in range(function.getOrder()+_sage_const_1 ):
-            symbolic_simplify(function.equation.getCoefficient(i));
+        for i in range(function.order()+_sage_const_1 ):
+            symbolic_simplify(function.equation.coefficient(i));
         
 ###################################################################################################
 ### PACKAGE ENVIRONMENT VARIABLES

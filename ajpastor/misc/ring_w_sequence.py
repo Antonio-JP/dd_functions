@@ -2,7 +2,7 @@
 Python file for Ring with Sequences
 
 This module implements a Ring Parent structure in Sage such that all its elements define a sequence in some space. This
-implies that the elements of a Ring with Sequence must provide a method (getSequenceElement).
+implies that the elements of a Ring with Sequence must provide a method (sequence).
 
 EXAMPLES::
     sage: from ajpastor.misc.ring_w_sequence import *
@@ -38,14 +38,14 @@ class Ring_w_Sequence (UniqueRepresentation, Ring):
         Ring.__init__(self, base, category=category)
         self.__method = method
         
-    def sequence(self, el, n):
-        return self.getSequenceElement(el,n)
-        
-    def getSequenceElement(self, el, n):
+    def sequence(self, el, n, list=False):
         if(el in self):
-            return self.__method(el,n)
+            if(list):
+                return [self.__method(el,i) for i in range(n)]
+            else: 
+                return self.__method(el, n)
         raise TypeError("Can not compute a sequence for an element which is not in the ring")
-
+        
 class Wrap_w_Sequence_Ring (Ring_w_Sequence):
     def __init__(self, base, method = None):
         super().__init__(base, method=method, category=base.category())
@@ -86,7 +86,9 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
     def __str__(self):
         return "(SR)" + str(self.base())
 
-    def getSequenceElement(self, el, n):
+    def sequence(self, el, n, list=False):
+        if(list):
+            return [self.sequence(el, i) for i in range(n)]
         self_gen = 'x'
         try:
             self_gen = self.base().gens()[-1 ]
@@ -119,7 +121,7 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
             raise TypeError("Element not in `self` to compute the sequence.")
 #####################################################################
 
-def sequence(el, n, x_required=True):
+def sequence(el, n, list=False, x_required=True):
     R = el.parent()
     if(R is SR):
         variables = [str(v) for v in el.variables()]
@@ -132,9 +134,12 @@ def sequence(el, n, x_required=True):
                 return 0
             else:
                 return el
-        return el.derivative(variable,n)(**{str(variable):0})/factorial(n)
+        if(list):
+            return [el.derivative(variable,i)(**{str(variable):0})/factorial(i) for i in range(n)]
+        else:
+            return el.derivative(variable,n)(**{str(variable):0})/factorial(n)
     if(not isinstance(R, Ring_w_Sequence)):
         R = Wrap_w_Sequence_Ring(R)
         
-    return R.getSequenceElement(el,n)
+    return R.sequence(el,n)
 

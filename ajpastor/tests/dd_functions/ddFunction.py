@@ -46,11 +46,11 @@ def run():
     ##########################################
     def assert_initialValues(func, values, name):
         for i in range(len(values)):
-            aux = func.getInitialValue(i);
+            aux = func.init(i);
             assert (aux == values[i]), "Error in the %d initial value of the function %s: expected %s but got %s"%(i,name,values[i],aux);
 
     def assert_coefficients(func, values, name):
-        aux = func.getOperator().getCoefficients()
+        aux = func.equation.coefficients()
         assert (aux == values), "Error in the coefficients of the function %s: expected %s but got %s"%(name,values,aux);  
 
     ####################################################################################
@@ -228,7 +228,7 @@ def run():
         _aux = DFinite.element([x,-_sage_const_1 ]);
         _aux = e*_aux;
         assert_coefficients(_aux, [-(x+_sage_const_1 ),_sage_const_1 ], 'e^x*e^(-x^2/2)');
-        assert (_aux.getInitialValueList(_sage_const_10 ) == []), "Error getting initial values: expected [] but got %s"%(_aux.getInitialValueList(_sage_const_10 ));
+        assert (_aux.init(_sage_const_10, True) == []), "Error getting initial values: expected [] but got %s"%(_aux.init(_sage_const_10, True));
     except (Exception, KeyboardInterrupt) as e:
         sverbose.reset_depth();
         sverbose.set_deep_wrapper(__deep_wrap);

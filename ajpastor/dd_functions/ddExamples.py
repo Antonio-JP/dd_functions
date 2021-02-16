@@ -75,7 +75,7 @@ The functions available in this module are the following::
 EXAMPLES::
 
     sage: from ajpastor.dd_functions import *
-    sage: Exp(x).getInitialValueList(10) == [1]*10
+    sage: Exp(x).init(10, True) == [1]*10
     True
 
 TODO:
@@ -157,7 +157,7 @@ def Sin(input, ddR = None):
         EXAMPLES::
 
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan
-            sage: Sin(x).getInitialValueList(10)
+            sage: Sin(x).init(10, True)
             [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
             sage: Sin(x)[0]
             1
@@ -175,19 +175,19 @@ def Sin(input, ddR = None):
             sage: polys = [QQ[x](x*(x-1)), QQ[x](x*(x-3)*(x+1)), QQ[x](x*(x-2/3)*(x+10)*(x-1)),
             ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: for p in polys:
-            ....:     l1 = Sin(p).getInitialValueList(10)
+            ....:     l1 = Sin(p).init(10, True)
             ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking the composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Sin(x)(p)).getInitialValueList(10)
+            ....:     l1 = (Sin(x)(p)).init(10, True)
             ....:     l2 = [sin(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: Sin(2*x) == 2*Sin(x)*Cos(x)
             True
-            sage: Sin(2*x).getInitialValueList(10) == [sin(2*x).derivative(i)(x=0) for i in range(10)]
+            sage: Sin(2*x).init(10, True) == [sin(2*x).derivative(i)(x=0) for i in range(10)]
             True
             sage: Sin(3*x) == 3*Sin(x) - 4*Sin(x)^3
             True
@@ -222,7 +222,7 @@ def Sin(input, ddR = None):
 
             sage: all(Sin(x^i).is_fully_defined for i in range(1,10))
             True
-            sage: Sin(x^4).getInitialValueList(20) == [sin(x^4).derivative(i)(x=0) for i in range(20)]
+            sage: Sin(x^4).init(20, True) == [sin(x^4).derivative(i)(x=0) for i in range(20)]
             True
 
         This method can throw some error when the input evaluates to something different than zero::
@@ -240,7 +240,7 @@ def Sin(input, ddR = None):
         return Sin(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ZeroValueRequired(input, "Sin(%s)" %input)
     
@@ -291,7 +291,7 @@ def Cos(input, ddR = None):
         EXAMPLES::
 
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos
-            sage: Cos(x).getInitialValueList(10)
+            sage: Cos(x).init(10, True)
             [1, 0, -1, 0, 1, 0, -1, 0, 1, 0]
             sage: Cos(x)[0]
             1
@@ -309,19 +309,19 @@ def Cos(input, ddR = None):
             ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: # checking the method with polynomial input
             sage: for p in polys:
-            ....:     l1 = Cos(p).getInitialValueList(10)
+            ....:     l1 = Cos(p).init(10, True)
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Cos(x)(p)).getInitialValueList(10)
+            ....:     l1 = (Cos(x)(p)).init(10, True)
             ....:     l2 = [cos(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: Cos(2*x) == Cos(x)^2 - Sin(x)^2
             True
-            sage: Cos(2*x).getInitialValueList(10) == [cos(2*x).derivative(i)(x=0) for i in range(10)]
+            sage: Cos(2*x).init(10, True) == [cos(2*x).derivative(i)(x=0) for i in range(10)]
             True
 
         We can also check identities with complex exponential::
@@ -341,7 +341,7 @@ def Cos(input, ddR = None):
 
             sage: all(Cos(x^i).is_fully_defined for i in range(1,10))
             True
-            sage: Cos(x^4).getInitialValueList(20) == [cos(x^4).derivative(i)(x=0) for i in range(20)]
+            sage: Cos(x^4).init(20, True) == [cos(x^4).derivative(i)(x=0) for i in range(20)]
             True
 
         This method can throw some error when the input evaluates to something different than zero::
@@ -359,7 +359,7 @@ def Cos(input, ddR = None):
         return Cos(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ZeroValueRequired(input, "Cos(%s)" %input)
     
@@ -411,7 +411,7 @@ def Tan(input, ddR = None):
 
             sage: from ajpastor.dd_functions.ddExamples import Sin,Cos,Tan
             sage: from ajpastor.dd_functions.ddFunction import is_DDFunction
-            sage: Tan(x).getInitialValueList(10)
+            sage: Tan(x).init(10, True)
             [0, 1, 0, 2, 0, 16, 0, 272, 0, 7936]
             sage: Tan(x)[0]
             -2
@@ -433,13 +433,13 @@ def Tan(input, ddR = None):
             ....: QQ[x](x*(x-1)^2*(x+3)^2)]
             sage: # checking the object with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = Tan(p).getInitialValueList(10)
+            ....:     l1 = Tan(p).init(10, True)
             ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
             sage: # checking the composition with polynomial coefficients
             sage: for p in polys:
-            ....:     l1 = (Tan(x)(p)).getInitialValueList(10)
+            ....:     l1 = (Tan(x)(p)).init(10, True)
             ....:     l2 = [tan(p).derivative(i)(x=0) for i in range(10)]
             ....:     if(not l1 == l2):
             ....:         print(p)
@@ -449,7 +449,7 @@ def Tan(input, ddR = None):
     g, dR = __decide_parent(input, ddR,2 )
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute tan(f) with f(0) != 0")
     
@@ -465,8 +465,8 @@ def Tan(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_tan = Tan(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_tan = Tan(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_tan[0]]+[sum([init_tan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -521,7 +521,7 @@ def Sinh(input, ddR = None):
             0
             sage: s[2]
             1
-            sage: s.getInitialValueList(10) # initial values
+            sage: s.init(10, True) # initial values
             [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
             sage: # checking derivatives
             sage: s.derivative() == c
@@ -554,7 +554,7 @@ def Sinh(input, ddR = None):
         return Sinh(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ValueError("Impossible to compute sin(f) with f(0) != 0")
     
@@ -609,7 +609,7 @@ def Cosh(input, ddR = None):
             0
             sage: c[2]
             1
-            sage: c.getInitialValueList(10) # initial values
+            sage: c.init(10, True) # initial values
             [1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
             sage: # checking derivatives
             sage: c.derivative() == s
@@ -642,7 +642,7 @@ def Cosh(input, ddR = None):
         return Cosh(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ValueError("Impossible to compute cos(f) with f(0) != 0")
     
@@ -697,7 +697,7 @@ def Tanh(input, ddR = None):
             0
             sage: t[2]
             (cosh(x))^2
-            sage: t.getInitialValueList(10) # initial values
+            sage: t.init(10, True) # initial values
             [0, 1, 0, -2, 0, 16, 0, -272, 0, 7936]
             sage: # checking derivatives
             sage: t.derivative() == 1-t^2
@@ -720,7 +720,7 @@ def Tanh(input, ddR = None):
     g, dR = __decide_parent(input, ddR,2 )
     
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute tan(f) with f(0) != 0")
     
@@ -736,8 +736,8 @@ def Tanh(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_tanh = Tanh(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_tanh = Tanh(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_tanh[0]]+[sum([init_tanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -793,7 +793,7 @@ def Arcsin(input, ddR = None):
             -x
             sage: arcsin[2]
             -x^2 + 1
-            sage: arcsin.getInitialValueList(10)
+            sage: arcsin.init(10, True)
             [0, 1, 0, 1, 0, 9, 0, 225, 0, 11025]
             sage: # cheking identities with trigonometric functions
             sage: Sin(arcsin) == x
@@ -810,7 +810,7 @@ def Arcsin(input, ddR = None):
         return Arcsin(x)(input)
     g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arcsin(f) with f(0) != 0")
     
@@ -826,8 +826,8 @@ def Arcsin(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arcsin = Arcsin(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arcsin = Arcsin(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arcsin[0]]+[sum([init_arcsin[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -893,7 +893,7 @@ def Arccos(input, ddR = None):
             -x
             sage: arccos[2]
             -x^2 + 1
-            sage: arccos.getInitialValueList(10)
+            sage: arccos.init(10, True)
             [1/2*pi, -1, 0, -1, 0, -9, 0, -225, 0, -11025]
             sage: # cheking identities with trigonometric functions
             sage: Sin(arccos - pi/2) == -x # cos(arccos(x)) = x
@@ -911,7 +911,7 @@ def Arccos(input, ddR = None):
     g, dR = __decide_parent(input, ddR)
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arccos(f) with f(0) != 0")
     
@@ -927,8 +927,8 @@ def Arccos(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arccos = Arccos(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arccos = Arccos(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arccos[0]]+[sum([init_arccos[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -984,7 +984,7 @@ def Arctan(input, ddR = None):
             2*x
             sage: arctan[2]
             x^2 + 1
-            sage: arctan.getInitialValueList(10)
+            sage: arctan.init(10, True)
             [0, 1, 0, -2, 0, 24, 0, -720, 0, 40320]
             sage: Arctan(-x) == -arctan
             True
@@ -1002,7 +1002,7 @@ def Arctan(input, ddR = None):
         return Arctan(x)(input)
     g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arctan(f) with f(0) != 0")
     
@@ -1018,8 +1018,8 @@ def Arctan(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arctan = Arctan(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arctan = Arctan(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arctan[0]]+[sum([init_arctan[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -1053,7 +1053,7 @@ def Arcsinh(input, ddR = None):
         return Arcsinh(x)(input)
     g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arcsinh(f) with f(0) != 0")
     
@@ -1068,8 +1068,8 @@ def Arcsinh(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arcsinh = Arcsinh(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arcsinh = Arcsinh(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arcsinh[0]]+[sum([init_arcsinh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -1104,7 +1104,7 @@ def Arccosh(input, ddR = None):
     dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.coeff_field.gens()[0]
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arccosh(f) with f(0) != 0")
     
@@ -1119,8 +1119,8 @@ def Arccosh(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arccosh = Arccosh(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arccosh = Arccosh(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arccosh[0]]+[sum([init_arccosh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -1153,7 +1153,7 @@ def Arctanh(input, ddR = None):
         return Arctanh(x)(input)
     g, dR = __decide_parent(input, ddR)
         
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(g) != 0):
         raise ValueError("Impossible to compute arctanh(f) with f(0) != 0")
     
@@ -1168,8 +1168,8 @@ def Arctanh(input, ddR = None):
     else:
         required = newOperator.get_jp_fo()+1
             
-        init_arctanh = Arctanh(x).getInitialValueList(required)
-        init_input = [factorial(i)*dR.getSequenceElement(g,i) for i in range(required)]
+        init_arctanh = Arctanh(x).init(required, True)
+        init_input = [factorial(i)*dR.sequence(g,i) for i in range(required)]
             
         newInit = [init_arctanh[0]]+[sum([init_arctanh[j]*bell_polynomial(i,j)(*init_input[1:i-j+2 ]) for j in range(1,i+1)]) for i in range(1,required)] ## See Faa di Bruno's formula
     
@@ -1209,7 +1209,7 @@ def Log(input, ddR = None):
         return Log(x+1)(input-1)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 1):
         raise ValueError("Impossible to compute ln(f) with f(0) != 1")
     
@@ -1242,7 +1242,7 @@ def Log1(input, ddR = None):
         return Log1(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ValueError("Impossible to compute cos(f) with f(0) != 0")
     
@@ -1277,7 +1277,7 @@ def Exp(input, ddR = None):
         return Exp(x)(input)
     f,dR = __decide_parent(input, ddR)
     
-    evaluate = lambda p : dR.getSequenceElement(p,0)
+    evaluate = lambda p : dR.sequence(p,0)
     if(evaluate(f) != 0):
         raise ValueError("Impossible to compute exp(f) with f(0) != 0")
     
@@ -2067,7 +2067,7 @@ def AiryD(init=('a','b')):
             True
             sage: Ai[2] == 1
             True
-            sage: Ai.getInitialValueList(10)
+            sage: Ai.init(10, True)
             [a, b, 0, a, 2*b, 0, 4*a, 10*b, 0, 28*a]
             sage: for n in range(3,10):
             ....:     Ai_n = [Ai.derivative(times=n-i) for i in range(4)]
@@ -2569,9 +2569,9 @@ def FactorialD():
             True
             sage: fa[2] == R(x^2)
             True
-            sage: fa.getSequenceList(10)
+            sage: fa.sequence(10, True)
             [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
-            sage: fa.getInitialValueList(10) == [factorial(i)^2 for i in range(10)]
+            sage: fa.init(10, True) == [factorial(i)^2 for i in range(10)]
             True
     '''
     return DFinite.element([1,3*x-1,x**2],[1], name=DynamicString("Fa(_1)", ["x"]))
@@ -2621,7 +2621,7 @@ def CatalanD():
             True
             sage: C[2] == R(4*x^2-x)
             True
-            sage: C.getSequenceList(10)
+            sage: C.sequence(10, True)
             [1, 1, 2, 5, 14, 42, 132, 429, 1430, 4862]
             sage: x*C^2 + 1 == C # algebraic relation
             True
@@ -2673,14 +2673,14 @@ def FibonacciD(init=('a','b')):
             sage: from ajpastor.dd_functions.ddExamples import FibonacciD
             sage: Fp = FibonacciD(); Fp
             F(a,b;x)
-            sage: Fp.getSequenceList(5)
+            sage: Fp.sequence(5, True)
             [a, b, b + a, 2*b + a, 3*b + 2*a]
             sage: F = FibonacciD((0,1))
-            sage: F.getSequenceList(10) == [fibonacci(i) for i in range(10)]
+            sage: F.sequence(10, True) == [fibonacci(i) for i in range(10)]
             True
             sage: F == x/(1-x-x^2)
             True
-            sage: a = Fp.getSequenceElement(0); b = Fp.getSequenceElement(1)
+            sage: a = Fp.sequence(0); b = Fp.sequence(1)
             sage: x = Fp.parent().variables()[0]
             sage: Fp == (a + (b-a)*x)/(1-x-x^2)
             True
@@ -2750,7 +2750,7 @@ def BellD():
             B(x)
             sage: B == Exp(Exp(x)-1)
             True
-            sage: B.getInitialValueList(10) == [bell_number(i) for i in range(10)]
+            sage: B.init(10, True) == [bell_number(i) for i in range(10)]
             True
     '''
     return DDFinite.element([-Exp(x),1], [1], name=DynamicString("B(_1)", ["x"]))
@@ -2792,7 +2792,7 @@ def BernoulliD():
             B(x)
             sage: B == DFinite(x)/(Exp(x)-1)
             True
-            sage: B.getInitialValueList(10) == [bernoulli(i) for i in range(10)]
+            sage: B.init(10, True) == [bernoulli(i) for i in range(10)]
             True
     '''
     return DDFinite.element([x*Exp(x)-Exp(x)+1, x*(Exp(x)-1)],[1], name=DynamicString("B(_1)", ["x"]))

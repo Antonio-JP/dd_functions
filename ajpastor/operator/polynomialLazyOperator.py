@@ -85,7 +85,7 @@ class PolynomialLazyOperator(TwoStepsOperator):
     def companion(self):
         field = LazyIntegralDomain(self._original_base).fraction_field()
         
-        coefficients = [field(el) for el in self.getCoefficients()]
+        coefficients = [field(el) for el in self.coefficients()]
         
         if(self.__conversion is None):  
             self.__conversion = LazyToPoly(self.base(), coefficients)

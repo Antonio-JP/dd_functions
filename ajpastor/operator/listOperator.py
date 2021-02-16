@@ -103,7 +103,7 @@ class ListOperator(Operator):
                 except Exception:
                     raise TypeError('The input (%s) is not valid for a ListOperator with coefficients in (%s)' %(input,format(base)))
         elif(isinstance(input, Operator)):
-            self.__coefficients = [self.base()(coeff) for coeff in input.getCoefficients()]
+            self.__coefficients = [self.base()(coeff) for coeff in input.coefficients()]
         else:
             try:
                 self.__coefficients = [self.base()(input)]
@@ -122,19 +122,12 @@ class ListOperator(Operator):
         #        self.__coefficients = [el/coeff_gcd for el in self.__coefficients]
             
     ### Getter methods
-    def getOrder(self):
+    def order(self):
         return len(self.__coefficients)-1
         
-    def getCoefficients(self):
+    def coefficients(self):
         return self.__coefficients
-    
-    def getCoefficient(self, i):
-        if (i < 0):
-            raise IndexError('The argument must be a number greater or equal to zero')
-        elif (i < len(self.__coefficients)):
-            return self.__coefficients[i]
-        
-        return 0
+
     #######################################################
         
     #######################################################
@@ -148,7 +141,7 @@ class ListOperator(Operator):
             if(other.is_zero()):
                 return self
             return self.__class__(self.base(), 
-                [self.getCoefficient(i)+self.base()(other.getCoefficient(i)) for i in range(max(self.getOrder(), other.getOrder())+1)], 
+                [self.coefficient(i)+self.base()(other.coefficient(i)) for i in range(max(self.order(), other.order())+1)], 
                 self.derivate())
         elif(isinstance(other, Operator)):
             return other.__radd__(self)
@@ -160,7 +153,7 @@ class ListOperator(Operator):
             r = self.base()(other)
             if(r == 0):
                 return self.__class__(self.base(), 0, self.derivate())
-            return self.__class__(self.base(), [r*coeff for coeff in self.getCoefficients()], self.derivate())
+            return self.__class__(self.base(), [r*coeff for coeff in self.coefficients()], self.derivate())
         except TypeError:
             raise TypeError("The argument for this method must be an element of the current domain")
         
@@ -171,7 +164,7 @@ class ListOperator(Operator):
                     self.__class__(self.base(), 0, self.derivate())
                 res = self.__class__(self.base(), 0, self.derivate())
                 aux = None
-                for coeff in self.getCoefficients():
+                for coeff in self.coefficients():
                     if(aux is None):
                         aux = other
                     else:
@@ -188,15 +181,15 @@ class ListOperator(Operator):
     
     ### Equality
     def is_zero(self):
-        for coeff in self.getCoefficients():
+        for coeff in self.coefficients():
             if not (coeff == 0):
                 return False
         return True
         
     def __eq__(self, other):
         if(isinstance(other, ListOperator)):
-            selfCoeffs = self.getCoefficients()
-            otherCoeffs = other.getCoefficients()
+            selfCoeffs = self.coefficients()
+            otherCoeffs = other.coefficients()
             
             if(len(selfCoeffs) == len(otherCoeffs)):
                 for i in range(len(selfCoeffs)):
@@ -209,10 +202,10 @@ class ListOperator(Operator):
         
     ### Differential
     def derivative(self):
-        newCoeffs = [self.derivate()(self.getCoefficient(0))]
-        for j in range(1,self.getOrder()+1):
-            newCoeffs += [self.derivate()(self.getCoefficient(j)) + self.getCoefficient(j-1)]
-        newCoeffs += [self.getCoefficient(self.getOrder())]
+        newCoeffs = [self.derivate()(self.coefficient(0))]
+        for j in range(1,self.order()+1):
+            newCoeffs += [self.derivate()(self.coefficient(j)) + self.coefficient(j-1)]
+        newCoeffs += [self.coefficient(self.order())]
         
         return self.__class__(self.base(), newCoeffs, self.derivate())
     ####################################################### 
@@ -221,7 +214,7 @@ class ListOperator(Operator):
     ### SOLUTION ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
     def _compute_derivative_solution(self):
-        r = self.getCoefficients()
+        r = self.coefficients()
         ### The operation depends on the first coefficient of the equation
         if(r[0] == 0):
             ### If is zero, then the next derivative has the same coefficients shifted 1 position to the left.
@@ -229,13 +222,13 @@ class ListOperator(Operator):
         else:
             ### Otherwise, we compute another operator
             der0 = self.derivate()(r[0])
-            newCoeffs = [r[i]*r[0] + self.derivate()(r[i+1])*r[0]-der0*r[i+1] for i in range(self.getOrder())]
+            newCoeffs = [r[i]*r[0] + self.derivate()(r[i+1])*r[0]-der0*r[i+1] for i in range(self.order())]
             newCoeffs += [r[0]*r[-1]]
             
         return self.__class__(self.base(), newCoeffs, self.derivate())
             
     def _compute_integral_solution(self):
-        return self.__class__(self.base(), [0] + self.getCoefficients(), self.derivate())
+        return self.__class__(self.base(), [0] + self.coefficients(), self.derivate())
     ####################################################### 
     
     ####################################################### 
@@ -243,7 +236,7 @@ class ListOperator(Operator):
     ####################################################### 
     def __call__(self, obj):
         res = 0
-        for coeff in self.getCoefficients():
+        for coeff in self.coefficients():
             res += coeff*obj
             obj = self.derivate()(obj)
         return res

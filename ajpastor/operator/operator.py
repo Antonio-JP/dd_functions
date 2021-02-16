@@ -58,7 +58,7 @@ from sage.all_cmdline import x
 ###     - Added the Ring_w_Sequence to this file
 ###     - Deleted the method _get_sequence_element
 ###     - Added cached methods "parent" and "derivate"
-###     - Deleted the method getCoefficientsParent (now self.parent() do the same)
+###     - Deleted the method coefficientsParent (now self.parent() do the same)
 ###     - Rearrange file: more readable structure
 ###     - Added the methods add_solution, mult_solution, derivative_solution and integral_solution.
 ###     - Added the methods __compute_add_solution, __compute_mult_solution, __compute_derivative_solution and __compute_integral_solution.
@@ -167,7 +167,7 @@ class Operator(object):
         return self._op_preference
     
     ### Getter methods
-    def getOrder(self):
+    def order(self):
         '''
         This method allows the user to get the order of the operator. 
         
@@ -175,10 +175,7 @@ class Operator(object):
         '''
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
-    def order(self):
-        return self.getOrder()
-        
-    def getCoefficients(self):
+    def coefficients(self):
         '''
         This method allows the user to get the coefficients of the operator. 
         
@@ -186,25 +183,19 @@ class Operator(object):
         '''
         raise NotImplementedError('Method not implemented -- Abstract class asked')
     
-    def coefficients(self):
-        return self.getCoefficients()
-    
-    def getCoefficient(self, i):
-        '''
-        This method allows the user to get a coefficient of the operator. 
-        
-        This method must be extended in each child-class of Operator.
-        '''
-        raise NotImplementedError('Method not implemented -- Abstract class asked')
-        
     def coefficient(self, i):
-        return self.getCoefficient(i)
+        if (i < 0):
+            raise IndexError('The argument must be a number greater or equal to zero')
+        elif (i <= self.order()):
+            return self.coefficients()[i]
+        else:
+            return 0
         
     @cached_method
     def companion(self):
         field = self.base().fraction_field()
         
-        coefficients = [field(el) for el in self.getCoefficients()]
+        coefficients = [field(el) for el in self.coefficients()]
         
         ## We divide by the leading coefficient
         coefficients = [-(coefficients[i]/coefficients[-1]) for i in range(len(coefficients)-1)]
@@ -292,14 +283,14 @@ class Operator(object):
     def forward(self, n):
         if(n < 0):
             raise IndexError("Forward polynomials have only positive index")
-        elif(n > self.getOrder()):
+        elif(n > self.order()):
             return 0
         elif(self.is_zero()):
             return 0
         else: 
             var = self.__polynomialRing.gens()[-1]
             
-            return sum([self.base().sequence(self.getCoefficient(l),l-n)*falling_factorial(var+n,l) for l in range(n, self.getOrder()+1)])
+            return sum([self.base().sequence(self.coefficient(l),l-n)*falling_factorial(var+n,l) for l in range(n, self.order()+1)])
           
     @cached_method  
     def backward(self, n):
@@ -309,11 +300,11 @@ class Operator(object):
             return 0
         
         var = self.__polynomialRing.gens()[-1]
-        return sum([self.base().sequence(self.getCoefficient(l), l+n)*falling_factorial(var-n, l) for l in range(0,self.getOrder()+1)])
+        return sum([self.base().sequence(self.coefficient(l), l+n)*falling_factorial(var-n, l) for l in range(0,self.order()+1)])
         
     def get_recursion_row(self,i):
-        r = self.getCoefficients()
-        d = self.getOrder()
+        r = self.coefficients()
+        d = self.order()
         row = []
         
         #var = self.__polynomialRing.gens()[-1]
@@ -370,7 +361,7 @@ class Operator(object):
         if(self.is_zero()):
             raise ValueError("The zero operator has not forward order")
         
-        n = self.getOrder()
+        n = self.order()
         while(self.get_recursion_polynomial(n) == 0):
             n -= 1
         
@@ -380,7 +371,7 @@ class Operator(object):
     def jp_value(self):
         ## TODO Be careful with this computation: only valid is the base field are the rational
         jp_pol = self.get_recursion_polynomial(self.forward_order)
-        return max([self.getOrder()-self.forward_order] + get_integer_roots(jp_pol))
+        return max([self.order()-self.forward_order] + get_integer_roots(jp_pol))
        
     @cached_method
     def jp_matrix(self):
@@ -609,9 +600,9 @@ class Operator(object):
     ### MAGIC PYTHON METHODS
     ####################################################### 
     def __getitem__(self, key):
-        if(key > self.getOrder() or key < 0):
+        if(key > self.order() or key < 0):
             raise IndexError("No coefficient can be get bigger than the order or with negative index")
-        return self.getCoefficient(key)
+        return self.coefficient(key)
     
     def __call__(self, obj):
         '''
@@ -622,8 +613,8 @@ class Operator(object):
         try:
             res = obj.parent().zero()
             to_mult = obj
-            for i in range(self.getOrder()+1):
-                res += self.getCoefficient(i)*to_mult
+            for i in range(self.order()+1):
+                res += self.coefficient(i)*to_mult
                 to_mult = to_mult.derivative()
             return res
         except Exception:

@@ -78,13 +78,13 @@ class TwoStepsOperator(ListOperator):
     ### SOLUTION ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
     def _compute_add_solution(self, other):
-        M = self._get_system_addition(other, self.getOrder()+other.getOrder()+1, False)
+        M = self._get_system_addition(other, self.order()+other.order()+1, False)
         v = self._get_element_nullspace(M)
         
         return self.__class__(self.base(), [el for el in v], self.derivate())
         
     def _compute_mult_solution(self, other):
-        M = self._get_system_product(other,self.getOrder()*other.getOrder()+1, False)
+        M = self._get_system_product(other,self.order()*other.order()+1, False)
         v = self._get_element_nullspace(M)
         
         return self.__class__(self.base(), [el for el in v], self.derivate())
@@ -100,7 +100,7 @@ class TwoStepsOperator(ListOperator):
     ### SOLUTION SIMPLE ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
     def _compute_simple_add_solution(self, other, bound=5):
-        order = self.getOrder()+other.getOrder(); i = 0
+        order = self.order()+other.order(); i = 0
         ring = self.noetherian_ring(other)
         solution = None
         while((solution is None) and (i < bound)):
@@ -115,7 +115,7 @@ class TwoStepsOperator(ListOperator):
         return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
     def _compute_simple_mult_solution(self, other, bound = 5):
-        order = self.getOrder()+other.getOrder(); i = 0
+        order = self.order()+other.order(); i = 0
         ring = self.noetherian_ring(other)
         solution = None
         while((solution is None) and (i < bound)):
@@ -130,7 +130,7 @@ class TwoStepsOperator(ListOperator):
         return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
     def _compute_simple_derivative_solution(self, bound = 5):
-        order = self.getOrder(); i = 0
+        order = self.order(); i = 0
         ring = self.noetherian_ring()
         solution = None
         while((solution is None) and (i < bound)):
@@ -265,8 +265,8 @@ class TwoStepsOperator(ListOperator):
             The vector representing `f(x)+g(x)` in the module `M`.
         '''
         return self._pre_proc(vector(
-            ([1] + [0 for i in range(self.getOrder()-1)])+
-            ([1] + [0 for i in range(other.getOrder()-1)])))
+            ([1] + [0 for i in range(self.order()-1)])+
+            ([1] + [0 for i in range(other.order()-1)])))
 
     def _get_vector_product(self, other):
         r'''
@@ -292,7 +292,7 @@ class TwoStepsOperator(ListOperator):
 
             The vector representing `f(x)g(x)` in the module `M`.
         '''
-        return self._pre_proc(vector(([1] + [0 for i in range(self.getOrder()*other.getOrder()-1)])))
+        return self._pre_proc(vector(([1] + [0 for i in range(self.order()*other.order()-1)])))
 
     @cached_method
     def _get_system_derivative(self, ncols, inhom=False):
@@ -332,7 +332,7 @@ class TwoStepsOperator(ListOperator):
 
         ## Base case: 0 column, only inhomogeneous term
         if(ncols == 0):
-            v = self._pre_proc(vector([0]+[1]+(self.getOrder()-2)*[0]))
+            v = self._pre_proc(vector([0]+[1]+(self.order()-2)*[0]))
             system = Matrix(d_matrix.parent().base(), [[]])
         else: # General case, we build the next column
             aux_s, new_v = self._get_system_derivative(ncols-1, True)
@@ -454,7 +454,7 @@ class TwoStepsOperator(ListOperator):
         Mf = self.companion()
         
         full_companion, parent = self._compose_companion(Mf,g)
-        init_vector = vector(parent, [1] + [0 for i in range(1,self.getOrder())])
+        init_vector = vector(parent, [1] + [0 for i in range(1,self.order())])
         
         return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+1))
         

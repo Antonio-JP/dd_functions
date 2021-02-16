@@ -114,7 +114,7 @@ class w_OreOperator(Operator):
                 self.operator = input.operator
             else:
                 if isinstance(input, Operator):
-                    input = input.getCoefficients()
+                    input = input.coefficients()
                 if isinstance(input, list):
                     res = self.__oa(0)
                     for i in range(len(input)):
@@ -133,19 +133,12 @@ class w_OreOperator(Operator):
             
             
     ### Getter methods
-    def getOrder(self):
+    def order(self):
         return self.operator.order()
         
-    def getCoefficients(self):
+    def coefficients(self):
         return self.operator.coefficients(sparse=False)
     
-    def getCoefficient(self, i):
-        if (i < 0):
-            raise IndexError('The argument must be a number greater or equal to zero')
-        elif (i < self.getOrder()+1):
-            return self.getCoefficients()[i]
-        
-        return 0
     #######################################################
         
     #######################################################
@@ -156,7 +149,7 @@ class w_OreOperator(Operator):
         if(isinstance(other, w_OreOperator)):
             return w_OreOperator(self.base(), self.operator+self.__oa(other.operator))
         elif(isinstance(other, Operator)):
-            return self+w_OreOperator(self.base(),other.getCoefficients())
+            return self+w_OreOperator(self.base(),other.coefficients())
         else:
             return w_OreOperator(self.base(), self.operator+self.__oa(other))
         
@@ -168,7 +161,7 @@ class w_OreOperator(Operator):
             return w_OreOperator(self.base(), self.operator*self.__oa(other.operator))
         elif(isinstance(other, Operator)):
             try:
-                return self*w_OreOperator(self.base(),other.getCoefficients())
+                return self*w_OreOperator(self.base(),other.coefficients())
             except Exception:
                 return other.__class__(self.base(),self).mult(other)
         else:

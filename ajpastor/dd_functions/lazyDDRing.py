@@ -454,11 +454,11 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     ################################################################################################
     ### Other Methods for LazyRing
     ################################################################################################
-    def sequence(self, el, n):
+    def sequence(self, el, n, list=False):
         if(not isinstance(el, _LazyDDFunction)):
-            return el.parent().sequence(el,n);
+            return el.parent().sequence(el,n,list=list);
         
-        return self.base().sequence(el.raw(),n);
+        return self.base().sequence(el.raw(),n, list=list);
         
     def clean_ring(self):
         ## Cleaning the relations
@@ -698,11 +698,11 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             
     def __add_function(self, f, gen=False):
         ## We look for relations with the derivatives of itself
-        derivatives = [f.derivative(times=i) for i in range(f.getOrder())];
+        derivatives = [f.derivative(times=i) for i in range(f.order())];
         
-        order = f.getOrder();
+        order = f.order();
         relation = None;
-        for i in range(f.getOrder()-1,0,-1):
+        for i in range(f.order()-1,0,-1):
             n_relation = self.__find_relation(derivatives[i], derivatives[:i]);
             if(not (n_relation is None)):
                 order = i;
@@ -715,7 +715,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         # Companion matrix
         companion = f.equation.companion();
         companion = Matrix(self, [[self(companion[i][j]) for j in range(companion.ncols())] for i in range(companion.nrows())]);
-        if(order < f.getOrder()): # Relation found
+        if(order < f.order()): # Relation found
             C = [];
             for i in range(order):
                 new_row = [companion[i][j] for j in range(order)];
@@ -767,7 +767,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
                 - d: Optional parameter to limit
         '''
         if(is_DDFunction(f)): # If f is a function, computing the derivatives
-            f = [f.derivative(times=i) for i in range(f.getOrder())];
+            f = [f.derivative(times=i) for i in range(f.order())];
         if(not(d is None)):
             f = f[:d]; # Limiting the list with the optional parameter d
         
@@ -794,11 +794,11 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         
         try:
             of = 1; og = 1;
-            while(f.getSequenceElement(of) == 0): of += 1;
-            while(g.getSequenceElement(og) == 0): og += 1;
+            while(f.sequence(of) == 0): of += 1;
+            while(g.sequence(og) == 0): og += 1;
             
             if(of == og):
-                c = f.getSequenceElement(of)/g.getSequenceElement(og);
+                c = f.sequence(of)/g.sequence(og);
                 d = f(0) - c*g(0);
                 
                 if(f == c*g + d):

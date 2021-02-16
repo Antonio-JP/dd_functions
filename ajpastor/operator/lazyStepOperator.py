@@ -79,7 +79,7 @@ class LazyStepOperator(TwoStepsOperator):
     def companion(self):
         field = LazyIntegralDomain(self._original_base).fraction_field()
         
-        coefficients = [field(el) for el in self.getCoefficients()]
+        coefficients = [field(el) for el in self.coefficients()]
             
         ## We divide by the leading coefficient
         coefficients = [-(coefficients[i]/coefficients[-1]) for i in range(len(coefficients)-1)]

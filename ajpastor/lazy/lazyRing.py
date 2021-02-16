@@ -52,7 +52,7 @@ from ajpastor.misc.ring_w_sequence import Ring_w_Sequence;
 class _LazyElement(IntegralDomainElement):
     def __init__(self, parent, el):
         if(not (isinstance(parent, LazyRing))):
-            parent = GetLazyDomain(parent);
+            parent = LazyDomain(parent);
     
         self.__raw = None;
         self.__poly = None;
@@ -414,11 +414,11 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     ################################################################################################
     ### Other Methods for LazyRing
     ################################################################################################
-    def sequence(self, el, n):
+    def sequence(self, el, n, list=False):
         if(not isinstance(el, _LazyElement)):
-            return el.parent().sequence(el,n);
+            return el.parent().sequence(el,n,list=list);
         
-        return self.base().sequence(el.raw(),n);
+        return self.base().sequence(el.raw(),n,list=list);
         
     def clean_ring(self):
         ## Clean the relations
