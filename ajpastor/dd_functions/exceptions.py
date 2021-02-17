@@ -93,6 +93,17 @@ class ZeroValueRequired(InitValueError):
         else:
             super(ZeroValueRequired, self).__init__("required a zero value for %s in %s" %(args[0], args[1]))
 
+class NoValueError(TypeError):
+    r'''
+        Error when computing initial values.
+
+        Whenever a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` can not compute
+        an initial value, this type of exception is raised, distinguishing it from other
+        Python errors.
+    '''
+    def __init__(self, n):
+        super(NoValueError,self).__init__("Impossible to compute recursively the %s-th coefficient" %(n))
+
 class DDFunctionError(Exception):
     r'''
         Generic error for the package ``dd_functions``.

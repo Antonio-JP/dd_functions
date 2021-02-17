@@ -173,9 +173,9 @@ class w_OreOperator(Operator):
         
     def __eq__(self, other):
         try:
-            if(not isinstance(other, OreOperator)):
-                other = self.__oa(other)
-            return self.operator == other.operator
+            if(isinstance(other, Operator)):
+                other = self.__oa(other.coefficients())
+            return self.operator == other
         except Exception:
             pass
         return False

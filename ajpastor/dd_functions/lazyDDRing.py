@@ -351,7 +351,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             
         ## Now we check if the element has a built method
         try:
-            built = element.built();
+            built = element.built;
             if(not (built is None)):
                 if(built[0 ] == "derivative"):
                     if(not(element in built[1 ])):

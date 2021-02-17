@@ -178,7 +178,7 @@ class FullLazyOperator(TwoStepsOperator):
         realSolution = [R.to_real(a) for a in finalSolution]
         for i in range(len(realSolution)):
             try:
-                realSolution[i].change_built("polynomial", (finalSolution[i], {str(key): R.map_of_vars()[str(key)] for key in finalSolution[i].variables()}))
+                realSolution[i].built = ("polynomial", (finalSolution[i], {str(key): R.map_of_vars()[str(key)] for key in finalSolution[i].variables()}))
             except AttributeError:
                 pass
         

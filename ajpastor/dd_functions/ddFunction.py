@@ -39,7 +39,7 @@ from functools import reduce
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator)
+                        sage_eval, log, BackslashOperator, parent)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -48,7 +48,7 @@ from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
 #ajpastor imports
-from ajpastor.dd_functions.exceptions import DDFunctionError, InitValueError
+from ajpastor.dd_functions.exceptions import DDFunctionError, InitValueError, NoValueError
 
 from ajpastor.misc.dynamic_string import DynamicString, m_dreplace
 from ajpastor.misc.serializable import SerializableObject
@@ -641,7 +641,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 if(X.parent() is self):
                     return X
                 else:
-                    return self.element([coeff for coeff in X.equation.coefficients()], X.init(X.equation.get_jp_fo()+1, True), name=X._DDFunction__name)
+                    return self.element([coeff for coeff in X.equation.coefficients()], X.init(X.equation.get_jp_fo()+1, True, True), name=X._DDFunction__name)
             else:
                 try:
                     try:
@@ -682,7 +682,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                         print("WHAT??")
                         return self(str(X))
         except TypeError as e:
-            raise TypeError("Cannot cast an element to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e))
+            raise TypeError("Cannot cast an elements to a DD-Function of (%s):\n\tElement: %s (%s)\n\tReason: %s" %(self, X, type(X), e)).with_traceback(e.__traceback__)
             
     def gens(self):
         r'''
@@ -812,7 +812,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 False
         '''
         try:
-            if((X.parent() is self) or (self._has_coerce_map_from(X.parent()))):
+            pX = parent(X) # avoids error when X is a type (such as 'int', 'list' or 'tuple')
+            if((pX is self) or (self._has_coerce_map_from(pX))):
                 return True
         except AttributeError:
             pass
@@ -1952,7 +1953,7 @@ class ParametrizedDDRing(DDRing):
             
         new_equation = destiny_ring.element([el(**values) for el in element.equation.coefficients()]).equation
         
-        new_init = [el(**values) for el in element.init(new_equation.get_jp_fo()+1, True)]
+        new_init = [el(**values) for el in element.init(new_equation.get_jp_fo()+1, True, True)]
         new_name = None
         if(element._DDFunction__name is not None):
             new_name = m_dreplace(element._DDFunction__name, {key: str(values[key]) for key in values}, True)
@@ -2079,7 +2080,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             sage: from ajpastor.dd_functions import *
             sage: f = DFinite.element([-1,1],[1])
             sage: f
-            (1:1:1)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            (1:1:3)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
             sage: g = DFinite.element([-1,1],[1,1])
             sage: f == g
             True
@@ -2087,6 +2088,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Traceback (most recent call last):
             ...
             InitValueError: There is no such function satisfying ...
+
+        TODO:
+
+        * Add examples of incomplete DDFunctions
+        * Add examples of DDFunctions that does not require the first coefficients
+        * Add examples where we use the dict input for ``init``
+        * Add examples with inhomogeneous term
     '''
     #####################################
     ### Init and Interface methods
@@ -2110,12 +2118,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Checking the argument ``init``
         if(type(init) in [list, tuple]):
             inits = {i : init[i] for i in range(len(init))}
+        elif(type(init) == dict):
+            inits = {k : init[k] for k in init} # if it is a dictionary, we copy it
 
         ## Checking the argument ``inhomogeneous``
         if(not inhomogeneous in parent):
             raise TypeError("The inhomogeneous term must be an element of parent (%s)" %inhomogeneous)
-        else:
-            inhom = parent(inhomogeneous)
 
         ## Initializing the serializable structure
         SerializableObject.__init__(self, parent, equation, init=init, inhomogeneous=inhomogeneous, name=name)
@@ -2159,9 +2167,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ### INHOMOGENEOUS PART
         # If that is not zero, then we compute the new operator and initial values needed
         # to define the equation.
-        if(inhom != 0):
+        if(inhomogeneous != 0):
             ## Getting the basic elements
-            inhom = self.parent()(inhom)
+            inhom = self.parent()(inhomogeneous)
             field = parent.coeff_field
             
             ## Getting the homogeneous differential equation
@@ -2191,7 +2199,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             ## Putting the new values for the equation and initial values
             inits = X+sum([to_sum[i]*ker[i] for i in range(len(to_sum))])
-            inits = [inits[i]*factorial(i) for i in range(len(inits))]
+            inits = {i: inits[i]*factorial(i) for i in range(len(inits))}
             self.__equation = new_eq
         #################################################################################
         
@@ -2213,18 +2221,26 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
         #################################################################################
         ### Managing the initial values
-        self.__sequence = {n : self.parent().coeff_field(str(inits[n])) for n in inits}
+        self.__sequence = {n : self.parent().coeff_field(str(inits[n]))/factorial(n) for n in inits}
         if(check_init):
-            m = max(n for n in inits)
-            try:
-                initSequence = [self.sequence(i) for i in range(m)]
-            except TypeError as exception: # Catching the impossibility to compute initial values
-                raise InitValueError("Error hecking initial values") from exception
-            M = self.equation.get_recursion_matrix(len(initSequence)-self.equation.forward_order-1 )
-            if(M*vector(initSequence) != 0 ):
-                raise InitValueError("There is no such function satisfying %s with initial values %s"%(self.equation,inits))     
+            m = max([n for n in inits], default=0)+1
+            if(m >= self.equation.get_recursion_matrix(0).ncols()): # if we have enough data to check
+                try:
+                    initSequence = self.sequence(m, True)
+                except TypeError as exception: # Catching the impossibility to compute initial values
+                    raise InitValueError("Error getting initial values").with_traceback(exception.__traceback__)
+                M = self.equation.get_recursion_matrix(len(initSequence)-self.equation.forward_order-1)
+                if(M*vector(initSequence) != 0 ):
+                    raise InitValueError("There is no such function satisfying %s with initial values %s"%(self.equation,inits))     
             
     def __buildOperator(self, coeffs):
+        r'''
+            Auxiliary method to build an operator the fits into the parent class operator.
+
+            This method takes care of building an operator (see :class:`~ajpastor.operator.Operator`) that 
+            is valid for the parent of ``self``. The input for this operator must be a compatible input
+            for the constructor of the operator class, namely, a list of coefficients or an operator itself.
+        '''
         if(isinstance(coeffs, self.parent().operator_class)):
             return coeffs
         elif(type(coeffs) == list):
@@ -2249,13 +2265,49 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return self.__equation
         
     def order(self):
-        '''
-            Getter method for the order of the equation that defines the DDFunction.
+        r'''
+            Getter for the order of the equation that defines the :class:`DDFunction`.
         '''
         return self.equation.order()
         
     @derived_property
     def ps_order(self):
+        r'''
+            Order of the power series.
+
+            This attribute is the order of ``self`` as a power series. A :class:`DDFunction` represents 
+            a formal power series in `\mathbb{K}[[x]]` where `\mathbb{K}` is the field returned by
+            ``self.parent().base_ring()``. 
+
+            A formal power series is a formal sum of the form:
+
+            .. MATH::
+
+                f(x) = f_0 + f_1 x + \ldots + f_nx^n + \ldots = \sum_{n \geq 0} f_n x^n
+
+            We say that the order of `f(x)` is the minimal `n \in \mathbb{N}` such that
+            `f_n \neq 0`. In the case that `f(x) = 0`, we say that the order of 
+            `f(x)` is `\infty` (here we return `-1`)
+
+            All non-zero formal power series (see method :func:`~DDFunction.zero_extraction`) can be 
+            uniquely written as a product of a power of `x` and a formal power series of order zero.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite.element([-1,1],[1]).ps_order
+                0
+                sage: DFinite.element([1,0,1],[0,1]).ps_order
+                1
+                sage: DFinite.element([1,0,1],[1,0]).ps_order
+                0
+                sage: DFinite(x^5*(x-1)).ps_order
+                5
+                sage: DFinite.element([-5, x], {5:3}).ps_order
+                5
+                sage: DFinite.element([-1,1],[0]).ps_order
+                -1
+        '''
         if(self.is_null):
             return -1 
         else:
@@ -2264,19 +2316,83 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 i += 1 
             
             return i
-        
-    def sequence(self, n, list=False):
+
+    def sequence(self, n, list=False, incomplete=False):
         r'''
             Method to get the `n`th coefficient of the power series.
 
-            This method returns the coefficients of the power series represented by ``self``. This 
+            A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
+            where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. 
+
+            A formal power series is a formal sum of the form:
+
+            .. MATH::
+
+                f(x) = f_0 + f_1 x + \ldots + f_nx^n + \ldots = \sum_{n \geq 0} f_n x^n
+
+            This method returns the `n`th coefficient of the power series (i.e., `f_n`). This 
             method also allows an optional parameter (called ``list``) to return instead the 
             first `n` coefficients of the power series.
 
-            TODO: Improve documentation
+            INPUT:
+
+            * ``n``: index for the coefficient of number of coefficients to compute
+            * ``list``: boolean flag. If ``True``, the method returns a list with the ``n``
+              first coefficients of the sequence. Otherwise, it returns the coefficient
+              `f_n`. By default, this argument is ``False``.
+            * ``incomplete``: boolean flag. If ``False``, the method will raise an error when
+              the coefficients can not be computed. Only valid in the case that ``list`` is 
+              ``True``, the output (instead of an :class:`~ajpastor.dd_functions.exceptions.NoValueError`)
+              will be the list up to the first element we could not compute.
+
+            OUTPUT:
+
+            If ``list`` is ``True``, this method returns the list `[f_0,\ldots,f_{n-1}]`. Otherwise,
+            this method returns the element `f_n`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite(1/(1-x)).sequence(10, True)
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                sage: DFinite.element([-1,1],[1]).sequence(5)
+                1/120
+                sage: DFinite.element([1,0,1],[1,0]).sequence(4)
+                1/24
+                sage: DFinite.element([1,0,1],[1,0]).sequence(4, True)
+                [1, 0, -1/2, 0]
+
+            If the :class:`DDFunction` is not fully defined (i.e., not enough initial data is given)
+            this method can also return (when returning lists) an incomplete list instead of an error::
+
+                sage: DFinite.element([-1,1]).sequence(2)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 0-th coefficient
+                sage: DFinite.element([-1,1]).sequence(2, True)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 0-th coefficient
+                sage: DFinite.element([-1,1]).sequence(2, True, True)
+                []
+                sage: DFinite.element([-4, x]).sequence(4)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 4-th coefficient
+                sage: DFinite.element([-4, x]).sequence(10, True, True)
+                [0, 0, 0, 0]
         '''
         if(list):
-            return [self.sequence(i, False) for i in range(n)]
+            if(incomplete):
+                result = []
+                for i in range(n):
+                    try:
+                        result += [self.sequence(i)]
+                    except NoValueError:
+                        break
+                return result
+            return [self.sequence(i) for i in range(n)]
+        
         if(not n in self.__sequence):
             if(n > self.equation.get_jp_fo()):
                 ## If the required value is "too far" we can get quickly the equation
@@ -2290,11 +2406,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     i += 1 
                     rec = self.equation.get_recursion_row(i)
                 if(rec[n] == 0 ):
-                    raise TypeError("Impossible to compute recursively the required value")
+                    raise NoValueError(n)
                 ## Checking that we only need previous elements
                 for i in range(n+1 , len(rec)):
                     if(not (rec[i] == 0 )):
-                        raise TypeError("Impossible to compute recursively the required value")
+                        raise NoValueError(n)
             
             ## We do this operation in a loop to avoid computing initial values 
             ## if they are not needed
@@ -2307,22 +2423,94 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
         return self.__sequence[n]
             
-    def init(self, n, list=False):
+    def init(self, n, list=False, incomplete=False):
         r'''
             Method to get the `n`th initial value of the power series.
 
-            This method returns the initial values of the power series represented by ``self``. This 
-            method also allows an optional parameter (called ``list``) to return instead the 
-            first `n` initial values of the power series.
+            A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
+            where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. 
 
-            TODO: Improve documentation
+            A formal power series is a formal sum of the form:
+
+            .. MATH::
+
+                f(x) = f_0 + f_1 x + \ldots + f_nx^n + \ldots = \sum_{n \geq 0} f_n x^n
+
+            This method returns the `n`th coefficient of the power series (i.e., `f^{(n)}(0)`
+            or, equivalently, `n!f_n`). This method also allows an optional parameter 
+            (called ``list``) to return instead the first `n` initial values of the power series.
+
+            INPUT:
+
+            * ``n``: index for the coefficient of number of initial values to compute
+            * ``list``: boolean flag. If ``True``, the method returns a list with the ``n``
+              first initial values of the sequence. Otherwise, it returns the initial value
+              `n!f_n`. By default, this argument is ``False``.
+            * ``incomplete``: boolean flag. If ``False``, the method will raise an error when
+              the coefficients can not be computed. Only valid in the case that ``list`` is 
+              ``True``, the output (instead of an :class:`~ajpastor.dd_functions.exceptions.NoValueError`)
+              will be the list up to the first element we could not compute.
+
+            OUTPUT:
+
+            If ``list`` is ``True``, this method returns the list `[f_0,\ldots,(n-1)!f_{n-1}]`. Otherwise,
+            this method returns the element `n!f_n`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: DFinite(1/(1-x)).init(10, True)
+                [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880]
+                sage: DFinite.element([-1,1],[1]).init(5)
+                1
+                sage: DFinite.element([1,0,1],[1,0]).init(4)
+                1
+                sage: DFinite.element([1,0,1],[1,0]).init(4, True)
+                [1, 0, -1, 0]
+
+            If the :class:`DDFunction` is not fully defined (i.e., not enough initial data is given)
+            this method can also return (when returning lists) an incomplete list instead of an error::
+
+                sage: DFinite.element([-1,1]).init(2)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 0-th coefficient
+                sage: DFinite.element([-1,1]).init(2, True)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 0-th coefficient
+                sage: DFinite.element([-1,1]).init(2, True, True)
+                []
+                sage: DFinite.element([-4, x]).init(4)
+                Traceback (most recent call last):
+                ...
+                NoValueError: Impossible to compute recursively the 4-th coefficient
+                sage: DFinite.element([-4, x]).init(10, True, True)
+                [0, 0, 0, 0]
         '''
         if(list):
+            if(incomplete):
+                result = []
+                for i in range(n):
+                    try:
+                        result += [self.init(i)]
+                    except NoValueError:
+                        break
+                return result
             return [self.init(i) for i in range(n)]
         return self.sequence(n)*factorial(n)
         
     @cached_method
     def size(self):
+        r'''
+            Method to get a number representing the size of this object
+
+            We create a number that represents the size of the object by combining the size of 
+            the coefficients  of the defining equation and the size of the initial values defining
+            this object.
+
+            This should be a reasonable representation on how much space on disk this objects takes.
+        '''
         to_sum = [self.order()]
         if(isinstance(self.parent().base(), DDRing)):
             to_sum += [el.size() for el in self.equation.coefficients()]
@@ -2330,15 +2518,38 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             for coeff in self.equation.coefficients():
                 try:
                     if(coeff != 0 ):
-                        to_sum += [coeff.degree()]
-                except Exception:
+                        to_sum += [coeff.degree()+1]
+                except AttributeError:
                     pass
         return sum(to_sum)
         
+    @property
     def built(self):
+        r'''
+            Attribute determining how this object was built.
+
+            We save in each :class:`DDFunction` the way it was construct. Namely, if we know
+            it was the addition or multiplication of two :class:`DDFunction`, we indicate it
+            in this attribute. 
+
+            This always have the following format: [type, data]. we distinguish between two 
+            type of constructions:
+
+            * ``derivative``: then ``self`` is the derivative of ``data[0]``.
+            * ``polynomial``: then ``self`` is a polynomial evaluation. The polynomial can be
+              found in ``data[0]`` and the relations between the variables and the actual values
+              is found in a dictionary in ``data[1]``.
+
+            If this was not known, the attribute will take the (default) value ``None``.
+        '''
         return self.__built
         
-    def change_built(self, type, data):
+    @built.setter
+    def built(self, input):
+        r'''
+            Documenting the setter
+        '''
+        type, data = input
         if(type == "derivative"):
             ## Nothing to check
             pass
@@ -2355,19 +2566,45 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             for var in vars_in_pol:
                 if(not str(var) in variables):
                     raise TypeError("The variables in the polynomial does not appear in the given map.\n\t- Polynomial: %s\n\t- Map: %s" %(polynomial, variables))
+        else:
+            raise ValueError("Built format not recognized.")
                             
         self.__built = tuple([type,data])
-        
-    def change_name(self, new_name):
+
+    @property 
+    def name(self):
+        r'''
+            Attribute with the given name for ``self``.
+
+            A :class:`DDFunction` is a formal power series that satisfies a linear differential
+            equation. However, sometimes we would like to provide a name to refer to this function
+            in a shorter way. This is only helpful for printing the object (see method :func:`DDFunction._repr_`)
+            and for transforming these object to symbolic expressions.
+
+            This attribute is extensively used in the module :mod:`~ajpastor.dd_functions.ddExamples`.
+
+            WARNING:
+            
+            This attribute can only be set once. After that, trying to set a new name will raise a :class:`ValueError`.
+        '''
+        return self.__name
+
+    @name.setter
+    def name(self, new_name):
+        if(self.has_name()):
+            raise ValueError("The name for this function was already given (%s)" %self.name)
         self.__name = new_name
         
     def has_name(self):
-        return not(self.__name is None)
+        r'''
+            Checks whether ``self`` has a name or not.
+        '''
+        return not(self.name is None)
             
     @cached_method
     def noetherian_ring(self):
         r'''
-            Method to compute a minimal noetherian ring containing self.
+            Method to compute a minimal noetherian ring containing ``self``.
 
             This method computes a minimal Noetherian differential ring in Sage that contains ``self``.
             These Noetherian rings are always of the form `R[\alpha_1,\ldots,\alpha_n]_S` where 
@@ -2375,10 +2612,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             multiplicatively closed set generated by a finite set of elements.
 
             Currently, this methods only works for D-finite functions (i.e., the depth of the 
-            DDRing is equal to 1).
-
-            INPUT:
-                * ``structure``: determines the format of the output.
+            :class:`DDRing` is equal to 1).
 
             OUTPUT:
 
@@ -2389,6 +2623,26 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             In the case of ``structure`` being ``True``, a fourth entry will be added
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([-1,1],[1])
+                sage: R,g,d = f.noetherian_ring()
+                sage: R
+                (SR)Univariate Polynomial Ring in x over Rational Field
+                sage: len(g) == 1 and g[0] == f
+                True
+                sage: d
+                []
+                sage: f = DFinite.element([x^2, 3*x, 1-x],[1,1])
+                sage: R,g,d = f.noetherian_ring()
+                sage: R
+                (SR)Univariate Polynomial Ring in x over Rational Field
+                sage: len(g) == 2 and g == [f, f.derivative()]
+                True
+                sage: d
+                [-x + 1]
         '''
         if(self.parent().depth() == 1):
             base, gens, dens = self.equation.noetherian_ring()
@@ -2396,29 +2650,122 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             d = self.order()
             gens += [self.derivative(times=i) for i in range(d)]
 
-            return base, gens, dens
+            return (base, gens, dens)
 
         raise NotImplementedError("Noetherian rings are not yet implemented")
     #####################################
     ### Arithmetic methods
     #####################################
     def scale_operator(self, r):
+        r'''
+            Method to scale by a constant the operator defining ``self``.
+
+            This method returns a *new* :class:`DDFunction` that is equal to ``self``
+            but hasthe differential operator multiplied by a scalar operator. Namely, 
+            if `r` is the scalar factor, and ``self`` is defined with the 
+            differential operator `\mathcal{A}`, then the output of this method
+            has the operator `r\mathcal{A}` as a defining equation.
+
+            If the ring of coefficients (see :func:`DDRing.base`) has a nice ``gcd``
+            routine, this method does nothing.
+
+            INPUT:
+
+            * ``r``: the scalar factor to multiply the operator of ``self``.
+
+            OUTPUT:
+
+            A new :class:`DDFunction` that is equal to self after multiplying the 
+            defining operator of ``self`` (see :func:`DDFunction.equation`) by `r`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([-1,1],[1])
+                sage: print(f.scale_operator(x))
+                (1:1:3)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+                -------------------------------------------------
+                        -- Equation (self = f):
+                                -     f  
+                                +   D(f) 
+                                = 0 
+                        -- Initial values:
+                        [1, 1]
+                -------------------------------------------------
+                sage: f.scale_operator(x-1).equation == f.equation
+                True
+
+            This behavior (of simplifying the operator by ``gcd``) does not happen any longer for 
+            higher depths::
+
+                sage: g = DDFinite.element([-f, 1],[1]) # exp(exp(x)-1)
+                sage: h = g.scale_operator(x+1) 
+                sage: h.equation == g.equation
+                False
+                sage: h == g
+                True
+                sage: all(h.equation[i] == (x+1)*g.equation[i] for i in range(g.order() + 1))
+                True
+
+            However, the ``gcd`` computation for DD-finite functions detects a common `x` factor
+            that is, indeed, simplified in this method::
+
+                sage: l = g.scale_operator(x*(x+1))
+                sage: h.equation == l.equation
+                True
+                sage: l == g
+                True
+        '''
         r = self.parent().base()(r)
         
-        return self.parent().element(r*self.equation, self.init(self.order(), True), check_init=False)
+        return self.parent().element(r*self.equation, self.init(self.order(), True, True), check_init=False)
         
-    def change_init_values(self,newInit,name=None):
-        newElement = self.parent().element(self.equation, newInit,name=name)
-        
-        ## Returning the new created element
-        return newElement
-        
+    def change_init_values(self,new_init,name=None):
+        r'''
+            Method to build new :class:`DDFunction` changing the initial values.
+
+            This method allows the user to create a new :class:`DDFunction` from 
+            ``self`` changing the initial values. Namely, we keep the operator
+            defining ``self`` (see :func:`DDFunction.equation`) but changes the
+            initial conditions to the given ones.
+
+            INPUT:
+
+            * ``new_init``: list or dictionary (see :class:`DDFunction`) for the 
+              new initial values.
+            * ``name``: optional argument for declaring the name of the new function.
+
+            OUTPUT:
+
+            A *new* :class:`DDFunction` that is annihilated by the same differential 
+            operator as ``self`` but have the initial values provided by ``new_init``.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = DFinite.element([1,0,1])
+                sage: f.change_init_values([4,0]).init(4, True)
+                [4, 0, -4, 0]
+                sage: f.change_init_values([1]).init(5, True, True)
+                [1]
+                sage: f.change_init_values([4,0,2])
+                Traceback (most recent call last):
+                ...
+                InitValueError: There is no such function satisfying ...
+
+            If we provide the name, the new function's name is directly set::
+
+                sage: f.change_init_values([1,0], name="sin(x)")
+                sin(x)
+        '''
+        return self.parent().element(self.equation, new_init, name=name)
+                
     @derived_property
     def inverse(self):
         '''
             Method that compute and return a DD-Function `f` such `f*self == 1`, i.e. this method computes the multiplicative inverse of `self`.
         '''
-        if(self.init(0 ) == 0 ):
+        if(self.init(0) == 0):
             raise ValueError("Can not invert a function with initial value 0 --> That is not a power series")
         
         coeffs = self.equation.coefficients()
@@ -2474,13 +2821,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 newOperator = parent.element(self.equation, inhomogeneous=other(0 )*self.equation.coefficient(0 )).equation
                 newInit = [self(0 )+other(0 )] + [self.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-                result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1+%s" %other(0 )), {'x1':self}))
+                result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1+%s" %other(0 )), {'x1':self}))
             elif(self.is_constant):
                 parent = other.parent()
                 newOperator = parent.element(other.equation, inhomogeneous=self(0 )*other.equation.coefficient(0 )).equation
                 newInit = [self(0 )+other(0 )] + [other.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-                result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1+%s" %self(0 )), {'x1':other}))
+                result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1+%s" %self(0 )), {'x1':other}))
             return result
         
         ## We build the new operator
@@ -2493,12 +2840,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         needed_initial = newOperator.get_jp_fo()+1 
         
         ### Getting as many initial values as possible until the new order
-        op1Init = self.init(needed_initial, True)
-        op2Init = other.init(needed_initial, True)
+        op1Init = self.init(needed_initial, True, True)
+        op2Init = other.init(needed_initial, True, True)
         newInit = [op1Init[i] + op2Init[i] for i in range(min(len(op1Init),len(op2Init)))]
                    
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-        result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1+x2'), {'x1':self, 'x2': other}))
+        result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1+x2'), {'x1':self, 'x2': other}))
         return result
     
     def sub(self, other):
@@ -2535,13 +2882,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 newOperator = parent.element(self.equation, inhomogeneous=other(0 )*self.equation.coefficient(0 )).equation
                 newInit = [self(0 )-other(0 )] + [self.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-                result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1-%s" %other(0 )), {'x1':self}))
+                result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1-%s" %other(0 )), {'x1':self}))
             elif(self.is_constant):
                 parent = other.parent()
                 newOperator = parent.element(other.equation, inhomogeneous=self(0 )*other.equation.coefficient(0 )).equation
                 newInit = [self(0 )-other(0 )] + [-other.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-                result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("-x1+%s" %self(0 )), {'x1':other}))
+                result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("-x1+%s" %self(0 )), {'x1':other}))
             return result
            
         ## We build the new operator
@@ -2554,12 +2901,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         needed_initial = newOperator.get_jp_fo()+1 
         
         ### Getting as many initial values as possible until the new order
-        op1Init = self.init(needed_initial, True)
-        op2Init = other.init(needed_initial, True)
+        op1Init = self.init(needed_initial, True, True)
+        op2Init = other.init(needed_initial, True, True)
         newInit = [op1Init[i] - op2Init[i] for i in range(min(len(op1Init),len(op2Init)))]
                            
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-        result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1-x2'), {'x1':self, 'x2': other}))
+        result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1-x2'), {'x1':self, 'x2': other}))
         return result
     
     def mult(self, other):
@@ -2594,8 +2941,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         needed_initial = newOperator.get_jp_fo()+1 
                
         ### Getting as many initial values as possible until the new order
-        op1Init = self.init(needed_initial, True)
-        op2Init = other.init(needed_initial, True)
+        op1Init = self.init(needed_initial, True, True)
+        op2Init = other.init(needed_initial, True, True)
         newInit = [sum([binomial(i,j)*op1Init[j] * op2Init[i-j] for j in range(i+1 )]) for i in range(min(len(op1Init),len(op2Init)))]
         
         ### Computing the new name
@@ -2604,7 +2951,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             newName = DynamicString("(_1)*(_2)", [self.__name, other.__name])
             
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-        result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
+        result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
         return result
     
     def scalar(self, r):
@@ -2634,7 +2981,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(r == 1 ):
                 return self
             n = self.equation.get_jp_fo()+1 
-            init = self.init(n, True)
+            init = self.init(n, True, True)
             
             if(isinstance(r, DDFunction)):
                 r = r.init(0 )
@@ -2648,7 +2995,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     newName = DynamicString("(_1)*(_2)", [repr(r), self.__name])
                    
             result = self.parent().element(self.equation, [r*el for el in init], check_init=False, name=newName)
-            result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1'])('(%s)*x1' %repr(r)), {'x1':self}))
+            result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1'])('(%s)*x1' %repr(r)), {'x1':self}))
             return result
         else:
             return self.mult(self.parent()(r))
@@ -2677,7 +3024,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 newName = DynamicString("(_1)/(_2^%d)" %n, [self.__name, repr(X)])
                
             result = self.parent().element(newEquation, newInit, check_init=False, name=newName)
-            result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,[repr(X),'x1']).fraction_field()('x1/(%s^%d)' %(repr(X),n)), {repr(X):self.parent()(X),'x1':self}))
+            result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,[repr(X),'x1']).fraction_field()('x1/(%s^%d)' %(repr(X),n)), {repr(X):self.parent()(X),'x1':self}))
             return (n,result)
         
     def min_coefficient(self):
@@ -2797,12 +3144,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         needed_initial = newOperator.get_jp_fo()+1
         
         ### Getting as many initial values as possible until the new order
-        op1Init = self.init(needed_initial, True)
-        op2Init = other.init(needed_initial, True)
+        op1Init = self.init(needed_initial, True, True)
+        op2Init = other.init(needed_initial, True, True)
         newInit = [op1Init[i] + op2Init[i] for i in range(min(len(op1Init),len(op2Init)))]
 
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-        result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1+x2'), {'x1':self, 'x2': other}))
+        result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1+x2'), {'x1':self, 'x2': other}))
 
         return result
 
@@ -2860,8 +3207,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         needed_initial = newOperator.get_jp_fo()+1 
                
         ### Getting as many initial values as possible until the new order
-        op1Init = self.init(needed_initial, True)
-        op2Init = other.init(needed_initial, True)
+        op1Init = self.init(needed_initial, True, True)
+        op2Init = other.init(needed_initial, True, True)
         newInit = [sum([binomial(i,j)*op1Init[j] * op2Init[i-j] for j in range(i+1 )]) for i in range(min(len(op1Init),len(op2Init)))]
         
         ### Computing the new name
@@ -2870,7 +3217,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             newName = DynamicString("(_1)*(_2)", [self.__name, other.__name])
             
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-        result.change_built("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
+        result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
         return result
 
     def simple_derivative(self):
@@ -2911,7 +3258,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 newOperator = self.equation.simple_derivative_solution()
             
                 ### We get the required initial values (depending of the order of the next derivative)
-                initList = self.init(newOperator.get_jp_fo()+2, True)
+                initList = self.init(newOperator.get_jp_fo()+2, True, True)
                 newInit = [initList[i+1] for i in range(min(len(initList)-1 ,newOperator.get_jp_fo()+1 ))]
                 
                 ### Computing the new name
@@ -2924,7 +3271,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
                 ### We create the next derivative with the equation, initial values
                 self.__simple_derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-                self.__simple_derivative.change_built("derivative",tuple([self]))
+                self.__simple_derivative.built = ("derivative",tuple([self]))
                 
             
         return self.__simple_derivative
@@ -3026,7 +3373,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 newOperator = self.equation.derivative_solution()
             
                 ### We get the required initial values (depending of the order of the next derivative)
-                initList = self.init(newOperator.get_jp_fo()+2, True)
+                initList = self.init(newOperator.get_jp_fo()+2, True, True)
                 newInit = [initList[i+1] for i in range(min(len(initList)-1 ,newOperator.get_jp_fo()+1 ))]
                 
                 ### Computing the new name
@@ -3039,7 +3386,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
                 ### We create the next derivative with the equation, initial values
                 self.__derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-                self.__derivative.change_built("derivative",tuple([self]))
+                self.__derivative.built = ("derivative",tuple([self]))
                 
             
         return self.__derivative
@@ -3056,7 +3403,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### We get the initial values for the integral just adding at the begining of the list the constant value
         # If not enough initial values can be given, we create the integral with so many initial values we have
-        newInit = [self.parent().coeff_field(constant)] + self.init(newOperator.get_jp_fo()+1, True)
+        newInit = [self.parent().coeff_field(constant)] + self.init(newOperator.get_jp_fo()+1, True, True)
         
         ### Computing the new name
         newName = None
@@ -3154,10 +3501,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ######################################
         required = new_equation.get_jp_fo()+1 
         ## Getting as many initial values as we can and need
-        init_f = self.init(required, True)
+        init_f = self.init(required, True, True)
         init_g = None
         try:
-            init_g = g.init(required, True)
+            init_g = g.init(required, True, True)
         except AttributeError:
             init_g = [0] + [factorial(n)*new_equation.base().sequence(g,n) for n in range(1 ,required)]
         ## Computing the new initial values
@@ -3303,8 +3650,15 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             This means that, given some initial values and the differential equation, the solution of such problem is unique (True) or not (False)
         '''
         max_init = self.equation.get_jp_fo()+1 
-        return len(self.init(max_init, True)) == max_init
+        return len(self.init(max_init, True, True)) == max_init
         
+    @property
+    def computed(self):
+        r'''
+            Mutable attribute that counts how many coefficients have been computed.
+        '''
+        return max([n for n in self.__sequence], default=-1)
+
     def equals(self,other): ### TO REVIEW
         '''
             Method that checks if two DDFunctions are equal (as power-series). In orther to do so, we substract one to the other and check if the result is zero.
@@ -3337,7 +3691,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return False
                 
             if(not (self.is_fully_defined and other.is_fully_defined)):
-                return (self.equation == other.equation) and (self.init(self.equation.get_jp_fo()+1, True) == other.init(other.equation.get_jp_fo()+1, True))
+                return (self.equation == other.equation) and (self.init(self.equation.get_jp_fo()+1, True,True) == other.init(other.equation.get_jp_fo()+1, True, True))
              
             ### THREE OPTIONS
             ## 1. Compare with the JP-Values of each function
@@ -3375,7 +3729,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 other = self.parent()(other)
                 
             m = self.equation.get_jp_fo()+other.equation.get_jp_fo()+1 
-            return self.init(m, True) == other.init(m, True)
+            return self.init(m, True, True) == other.init(m, True, True)
         except Exception:
             return False
 
@@ -3598,7 +3952,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 else:
                     raise TypeError("1:No optimization found in the simplification")
                 
-                return dR.element([dR.base()(el) for el in coeffs], self.init(self.equation.jp_value()+1, True), name=self.__name).to_simpler()
+                return dR.element([dR.base()(el) for el in coeffs], self.init(self.equation.jp_value()+1, True, True), name=self.__name).to_simpler()
                         
             elif(is_PolynomialRing(R)):
                 degs = [self[i].degree() - i for i in range(self.order()+1)]
@@ -3807,7 +4161,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 #    try:
                 #        newDDRing = DDRing(self.parent())
                 #        other = self.parent().base_ring()(other)
-                #        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.init(1, True)], check_init=False)
+                #        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.init(1, True, True)], check_init=False)
                 #        
                 #        newName = None
                 #        if(not(self.__name is None)):
@@ -3850,7 +4204,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             Since several representations may be equal, we use the initial conditions as a mark for the hash.
         '''
-        return sum(hash(el) for el in self.init(20, True))
+        return sum(hash(el) for el in self.init(20, True, True))
 
     def __getitem__(self, key):
         r'''
@@ -3898,7 +4252,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         res += '\n\t\t = 0 \n\t'
 
         res += '-- Initial values:\n\t'
-        res += format(self.init(self.equation.get_jp_fo()+1, True))
+        res += format(self.init(self.equation.get_jp_fo()+1, True, True))
         
         res += '\n-------------------------------------------------'
         
@@ -4273,7 +4627,7 @@ class DDSimpleMorphism (Morphism):
     def _call_(self, p):
         if(isinstance(self.codomain(), DDRing)):
             try:
-                return self.codomain().element([self.codomain().base()(coeff) for coeff in p.equation.coefficients()], p.init(p.equation.get_jp_fo()+1, True))
+                return self.codomain().element([self.codomain().base()(coeff) for coeff in p.equation.coefficients()], p.init(p.equation.get_jp_fo()+1, True, True))
             except:
                 raise ValueError("Impossible the coercion of element \n%s\n into %s" %(p, self.codomain()))
         if(p.is_constant):

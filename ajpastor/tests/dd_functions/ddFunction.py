@@ -228,7 +228,7 @@ def run():
         _aux = DFinite.element([x,-_sage_const_1 ]);
         _aux = e*_aux;
         assert_coefficients(_aux, [-(x+_sage_const_1 ),_sage_const_1 ], 'e^x*e^(-x^2/2)');
-        assert (_aux.init(_sage_const_10, True) == []), "Error getting initial values: expected [] but got %s"%(_aux.init(_sage_const_10, True));
+        assert (_aux.init(_sage_const_10, True, True) == []), "Error getting initial values: expected [] but got %s"%(_aux.init(_sage_const_10, True, True));
     except (Exception, KeyboardInterrupt) as e:
         sverbose.reset_depth();
         sverbose.set_deep_wrapper(__deep_wrap);
