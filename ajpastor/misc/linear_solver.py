@@ -27,6 +27,8 @@ from sage.all import identity_matrix, Matrix, vector, ideal, cached_method
 import sage.structure.element as SAGE_element
 from sage.categories.pushout import pushout
 
+from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
+
 class NoSolutionError(ValueError):
     pass
 
@@ -57,6 +59,9 @@ class LinearSystemSolver():
         
         if(not SAGE_element.is_Vector(inhomogeneous)):
             inhomogeneous = vector(inhomogeneous)
+
+        if(isinstance(parent, Wrap_w_Sequence_Ring)):
+            parent = parent.base()
         
         ## Building the parent of the matrix and the vector
         pmatrix = matrix.parent().base()

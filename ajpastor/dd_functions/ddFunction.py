@@ -3116,9 +3116,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
-                sage: # h = f.simple_add(g)
+                sage: h = f.simple_add(g)
                 sage: # h.singularities()
-                sage: # h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation[h.order()] in h.parent().coeff_field
+                True
 
             TODO:
                 * Improve the tests
@@ -3176,9 +3177,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
-                sage: # h = f.simple_mult(g)
+                sage: h = f.simple_mult(g)
                 sage: # h.singularities()
-                sage: # h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation[h.order()] in h.parent().coeff_field
+                True
 
             TODO:
                 * Improve the tests
@@ -3240,8 +3242,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD()
-                sage: # h = f.simple_derivative()
-                sage: # h == f.derivative()
+                sage: h = f.simple_derivative()
+                sage: h == f.derivative()
+                True
+                sage: h.equation[h.order()] in h.parent().coeff_field
+                True
 
             TODO:
                 * Improve the tests
