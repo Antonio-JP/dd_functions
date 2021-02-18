@@ -289,7 +289,14 @@ class HermiteSolver(LinearSystemSolver):
             S = Matrix(self.solution_parent(), U.rows()[1:]).transpose()
             ##Update the general values
             solution += syzygy*alpha
-            syzygy *= S
+            if(S.nrows() == 0): # the solution is unique
+                if(self.A*solution != self.b): # the solution is not valid --> no solution to system
+                    raise NoSolutionError("There is no solution to the system")
+                # otherwise, we found the solution, we break the loop
+                syzygy = Matrix(self.solution_parent(), [])
+                break
+            else:
+                syzygy *= S
 
             ## Update the system
             b -= A*alpha
