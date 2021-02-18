@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # sample documentation build configuration file,
-# inspried by slabbe configuration file created sphinx-quickstart
+# inspried by slabbed configuration file created sphinx-quickstart
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -22,9 +22,8 @@ authors = u"Antonio Jimenez-Pastor"
 import sys
 import os
 
-from sage.env import SAGE_DOC_SRC, SAGE_DOC, SAGE_SRC
-
 try:
+    from sage.env import SAGE_DOC_SRC, SAGE_DOC, SAGE_SRC
     import sage.all
 except ImportError:
     raise RuntimeError("to build the documentation you need to be inside a Sage shell (run first the command 'sage -sh' in a shell")
@@ -51,6 +50,7 @@ extensions = [
     #'sage_package.sphinx',
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
+    'sphinx.ext.extlinks',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -124,7 +124,10 @@ extlinks = {
     'arxiv': ('http://arxiv.org/abs/%s', 'Arxiv '),
     'oeis': ('https://oeis.org/%s', 'OEIS sequence '),
     'doi': ('https://dx.doi.org/%s', 'doi:'),
-    'mathscinet': ('http://www.ams.org/mathscinet-getitem?mr=%s', 'MathSciNet ')
+    'mathscinet': ('http://www.ams.org/mathscinet-getitem?mr=%s', 'MathSciNet '),
+    'dlmf': ('https://dlmf.nist.gov/%s', 'DLMF Chapter '),
+    'wolf': ('https://mathworld.wolfram.com/%s.html', 'Wolfram MathWorld '),
+    'sageref': ('https://doc.sagemath.org/html/en/reference/%s', 'Sage doc:')
     }
 
 # -- Options for HTML output ----------------------------------------------
@@ -148,7 +151,7 @@ html_theme_path = [os.path.join(SAGE_DOC_SRC, 'common', 'themes', 'sage')]
 # "<project> v<release> documentation".
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+html_short_title = "dd_functions"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
