@@ -3249,6 +3249,18 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 True
                 sage: h.equation[h.order()] in h.parent().coeff_field
                 True
+                sage: f = Exp(x)
+                sage: h = f.simple_derivative()
+                sage: h == f.derivative()
+                True
+                sage: h.equation[h.order()] in h.parent().coeff_field
+                True
+                sage: f = BesselD(2)
+                sage: h = f.simple_derivative()
+                sage: h == f.derivative()
+                True
+                sage: h.equation[h.order()]%x == 0 and len(h.equation[h.order()]) == 1
+                True
 
             TODO:
                 * Improve the tests
