@@ -2319,7 +2319,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
     def sequence(self, n, list=False, incomplete=False):
         r'''
-            Method to get the `n`th coefficient of the power series.
+            Method to get the `n`-th coefficient of the power series.
 
             A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
             where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. 
@@ -2425,7 +2425,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
     def init(self, n, list=False, incomplete=False):
         r'''
-            Method to get the `n`th initial value of the power series.
+            Method to get the `n`-th initial value of the power series.
 
             A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
             where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. 
@@ -2528,7 +2528,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         r'''
             Attribute determining how this object was built.
 
-            We save in each :class:`DDFunction` the way it was construct. Namely, if we know
+            We save in each :class:`DDFunction` the way it was constructed. Namely, if we know
             it was the addition or multiplication of two :class:`DDFunction`, we indicate it
             in this attribute. 
 
@@ -2617,9 +2617,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             OUTPUT:
 
             The output have always 3 main entries:
-                * The ring `R` that is the base of the Noetherian extension
-                * The list of elements `\alpha_i` that will generate the final ring.
-                * The list of generators of `S`.
+
+            * The ring `R` that is the base of the Noetherian extension
+            * The list of elements `\alpha_i` that will generate the final ring.
+            * The list of generators of `S`.
+
             In the case of ``structure`` being ``True``, a fourth entry will be added
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
@@ -3779,21 +3781,25 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             This method compares two sequences via division or difference (see optional arguments) and 
             may provide empirical evidence of similarity in asymptotics between the sequences.
 
-            INPUT::
-                - other: the sequence with ''self'' is compared. If it is not a DDFunction it will be casted to one.
-                - max_depth: element of the sequence it will be compared. 
-                - step: step-jump between comparisons. As the sequences are created recursively, this avoids a recursion overflow in Python.
-                - verbose: if set to True, the method will print the progress of the computation.
-                - kwds: there are several extra options that can be provided with boolean values:
-                    - comparison: the comparison can be "quotient" (''self.sequence(n)/other.sequence(n)'') 
-                    or "difference" (''self.sequence(n) - other.sequence(n)'').
-                    - sequence: the answer will be a list of comparisons in all the elements $0 (mod step)$. If not given, the answer will be just the last comparison.
+            INPUT:
 
-            OUTPUT::
-                A value with the appropriate comparison between the ''max_depth'' element of the sequences from ''self'' and ''other''.
+            * ``other``: the sequence with ``self`` is compared. If it is not a :class:`DDFunction` it will be casted into one.
+            * ``max_depth``: number of elements of the sequence to be compared. 
+            * ``step``: step-jump between comparisons. As the sequences are created recursively, this avoids a recursion overflow in Python.
+            * ``verbose``: if set to ``True``, the method will print the progress of the computation.
+            * ``kwds``: there are several extra options:
+                * ``comparison``: the comparison can be ``"quotient"`` (``self.sequence(n)/other.sequence(n)``) 
+                  or ``"difference"`` (``self.sequence(n) - other.sequence(n)``).
+                * ``sequence``: the answer will be a list of comparisons in all the elements $0 (mod step)$. If not given, the 
+                  answer will be just the last comparison.
 
-            WARNING::
-                This method can be interrupted at any point with Ctr-C and the last reached point will be returned.
+            OUTPUT:
+
+            A value with the appropriate comparison between the ``max_depth`` element of the sequences from ``self`` and ``other``.
+
+            WARNING:
+
+            This method can be interrupted at any point with Ctr-C and the last reached point will be returned.
         '''
         ## Treating the arguments
         if(comparison == "quotient"):
@@ -4827,6 +4833,7 @@ __all__ = [
     "is_ParametrizedDDRing", 
     "is_DDFunction", 
     "DDRing", 
+    "DDFunction",
     "DFinite", 
     "DDFinite", 
     "command", 

@@ -360,7 +360,7 @@ class SageSolver(LinearSystemSolver):
         for :class:`LinearSystemSolver`. This class uses Sage method to compute
         the solutions, the echelon form, etc.
 
-        WARNING (https://trac.sagemath.org/ticket/23715): sometimes, the 
+        WARNING (:trac:`23715`): sometimes, the 
         method echelon_form ignore the transformation argument, so the output
         is None.
     '''

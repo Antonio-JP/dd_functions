@@ -120,7 +120,7 @@ pythonversion = sys.version.split(' ')[0]
 extlinks = {
     'python': ('https://docs.python.org/release/'+pythonversion+'/%s', ''),
     'trac': ('http://trac.sagemath.org/%s', 'trac ticket #'),
-    'wikipedia': ('https://en.wikipedia.org/wiki/%s', 'Wikipedia article '),
+    'wiki': ('https://en.wikipedia.org/wiki/%s', 'Wikipedia article '),
     'arxiv': ('http://arxiv.org/abs/%s', 'Arxiv '),
     'oeis': ('https://oeis.org/%s', 'OEIS sequence '),
     'doi': ('https://dx.doi.org/%s', 'doi:'),

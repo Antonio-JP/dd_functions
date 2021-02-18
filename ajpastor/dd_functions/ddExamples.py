@@ -1,76 +1,78 @@
 r"""
 Python file for DD-examples
 
-With this package the user has access to many special functions with the DDFunction structure.
+With this package the user has access to many special functions with the :class:`~ajpastor.dd_functions.ddFunction.DDFunction` structure.
 Here we describe the functions available in this module. For further information on each function, 
 please access the documentation for that particular function.
         
-All the elements that are returned in this module instances of DDFunction, i.e.,
-formal power series defined with a linear differential equation and
-some appropriate initial values.
+All the elements that are returned in this module instances of :class:`~ajpastor.dd_functions.ddFunction.DDFunction`, i.e.,
+formal power series defined with a linear differential equation and some appropriate initial values. See the module
+:mod:`~ajpastor.dd_functions.ddFunction` for further information.
         
 When possible, the functions returned by this module are associated with
-the usual implementation of those functions in SAGE, so using the 
-method ``to_symbolic()`` returns the same object in the Symbolic Ring.
+the usual implementation of those functions in Sage, so using the 
+method :func:`~ajpastor.dd_functions.ddFunction.to_symbolic` returns the same object in the Symbolic Ring
+(see :sageref:`calculus/sage/symbolic/ring`)
         
-The functions available in this module are the following::
-    * TRIGONOMETRIC FUNCTIONS:
-        * :func:`Sin`
-        * :func:`Cos`
-        * :func:`Tan`
-        * :func:`Sinh`
-        * :func:`Cosh`
-        * :func:`Tanh`
-        * :func:`Arcsin`
-        * :func:`Arccos`
-        * :func:`Arctan`
-        * :func:`Arcsinh`
-        * :func:`Arccosh`
-        * :func:`Arctanh`
-    * EXPONENTIAL FUNCTIONS:
-        * :func:`Exp`
-        * :func:`Log`
-        * :func:`Log1`
-    * BESSEL TYPE FUNCTIONS (see chapters 10, 11 in https://dlmf.nist.gov):
-        * :func:`BesselD`
-        * :func:`StruveD`
-    * ORTHOGONAL POLRNOMAILS:
-        * :func:`LegendreD` (see chapter 14 in https://dlmf.nist.gov)
-        * :func:`ChebyshevD` (see chapter 18 in https://dlmf.nist.gov)
-    * HYPERGEOMETRIC FUNCTIONS (see chapters 15, 16 in https://dlmf.nist.gov):
-        * :func:`HypergeometricFunction`
-        * :func:`GenericHypergeometricFunction`
-        * :func:`PolylogarithmD` (see section 25.12 in https://dlmf.nist.gov)
-    * RICCATI EQUATION (see https://en.wikipedia.org/wiki/Riccati_equation):
-        * :func:`RiccatiD`
-    * MATHIEU TYPE FUNCTIONS (see chapter 28 in https://dlmf.nist.gov):
-        * :func:`MathieuD`
-        * :func:`MathieuSin`
-        * :func:`MathieuCos`
-        * :func:`MathieuH`
-        * :func:`MathieuSinh`
-        * :func:`MathieuCosh`
-        * :func:`HillD`
-    * AIRY'S FUNCTIONS:
-        * :func:`AiryD`
-    * PARABOLIC-CYLINDER TYPE FUNCTIONS:
-        * :func:`ParabolicCylinderD`
-    * ELLIPTIC INTEGRALS (see chapter 19 in https://dlmf.nist.gov):
-        * :func:`EllipticLegendreD`
-    * SPHEROIDAL WAVE FUNCTIONS (see chapter 30 in https://dlmf.nist.gov):
-        * :func:`CoulombSpheroidalFunctionD`
-        * :func:`SpheroidalWaveFunctionD`
-    * HEUN'S FUNCTIONS (see chapter 31 in https://dlmf.nist.gov):
-        * :func:`FuschianD`
-        * :func:`HeunD`
-    * COULOMB WAVE FUNCTION (see chapter 33 in https://dlmf.nist.gov):
-        * :func:`FCoulombD`  
-    * COMBINATORIAL FUNCTIONS: 
-        * :func:`FactorialD`
-        * :func:`CatalanD`
-        * :func:`FibonacciD`
-        * :func:`BellD`
-        * :func:`BernoulliD`
+The functions available in this module are the following:
+
+* TRIGONOMETRIC FUNCTIONS:
+    * :func:`Sin`
+    * :func:`Cos`
+    * :func:`Tan`
+    * :func:`Sinh`
+    * :func:`Cosh`
+    * :func:`Tanh`
+    * :func:`Arcsin`
+    * :func:`Arccos`
+    * :func:`Arctan`
+    * :func:`Arcsinh`
+    * :func:`Arccosh`
+    * :func:`Arctanh`
+* EXPONENTIAL FUNCTIONS:
+    * :func:`Exp`
+    * :func:`Log`
+    * :func:`Log1`
+* BESSEL TYPE FUNCTIONS (:dlmf:`10` and :dlmf:`11`):
+    * :func:`BesselD`
+    * :func:`StruveD`
+* ORTHOGONAL POLYNOMIALS:
+    * :func:`LegendreD` (:dlmf:`14`)
+    * :func:`ChebyshevD` (:dlmf:`18`)
+* HYPERGEOMETRIC FUNCTIONS (:dlmf:`15` and :dlmf:`16`):
+    * :func:`HypergeometricFunction`
+    * :func:`GenericHypergeometricFunction`
+    * :func:`PolylogarithmD` (:dlmf:`25.12`)
+* RICCATI EQUATION (:wiki:`Riccati_equation`):
+    * :func:`RiccatiD`
+* MATHIEU TYPE FUNCTIONS (:dlmf:`28`):
+    * :func:`MathieuD`
+    * :func:`MathieuSin`
+    * :func:`MathieuCos`
+    * :func:`MathieuH`
+    * :func:`MathieuSinh`
+    * :func:`MathieuCosh`
+    * :func:`HillD`
+* AIRY'S FUNCTIONS:
+    * :func:`AiryD`
+* PARABOLIC-CYLINDER TYPE FUNCTIONS:
+    * :func:`ParabolicCylinderD`
+* ELLIPTIC INTEGRALS (:dlmf:`19`):
+    * :func:`EllipticLegendreD`
+* SPHEROIDAL WAVE FUNCTIONS (:dlmf:`30`):
+    * :func:`CoulombSpheroidalFunctionD`
+    * :func:`SpheroidalWaveFunctionD`
+* HEUN'S FUNCTIONS (:dlmf:`31`):
+    * :func:`FuschianD`
+    * :func:`HeunD`
+* COULOMB WAVE FUNCTION (:dlmf:`33`):
+    * :func:`FCoulombD`  
+* COMBINATORIAL FUNCTIONS: 
+    * :func:`FactorialD`
+    * :func:`CatalanD`
+    * :func:`FibonacciD`
+    * :func:`BellD`
+    * :func:`BernoulliD`
 
 EXAMPLES::
 
@@ -528,7 +530,7 @@ def Sinh(input, ddR = None):
             True
             sage: s.derivative(times=2) == s
             True
-            sage: # checking definition by exponetial
+            sage: # checking definition by exponential
             sage: s == (Exp(x) - Exp(-x))/2
             True
             sage: s == (1 - Exp(-2*x))/(2*Exp(-x))
@@ -616,7 +618,7 @@ def Cosh(input, ddR = None):
             True
             sage: c.derivative(times=2) == c
             True
-            sage: # checking definition by exponetial
+            sage: # checking definition by exponential
             sage: c == (Exp(x) + Exp(-x))/2
             True
             sage: c == (1 + Exp(-2*x))/(2*Exp(-x))
@@ -704,7 +706,7 @@ def Tanh(input, ddR = None):
             True
             sage: t.derivative() == 1/(c^2)
             True
-            sage: # checking definition by exponetial
+            sage: # checking definition by exponential
             sage: t == s/c
             True
             sage: t == (Exp(x) - Exp(-x))/(Exp(x) + Exp(-x))
@@ -854,7 +856,7 @@ def Arccos(input, ddR = None):
         Since the default initial conditions for `\arccos(x)` is `\pi/2`, this method
         extends the DFinite ring with a parameter called ``"pi"``. Since `\pi` is a
         transcendental number, this implementation works without any issue. However
-        it implies some innecessary performance difficulties when computing with
+        it implies some unnecessary performance difficulties when computing with
         this function, since::
 
             sage: from ajpastor.dd_functions.ddExamples import *
@@ -1362,7 +1364,7 @@ def StruveD(mu='P',kind=1):
             
         Following the definition that we can find in the references above, we have that the Struve
         function only have power series solutions for integers parameters greater than -1. Then the first 
-        non-zero value of the power serie has a factor of 'pi'. To avoid adding the element 'pi' to the
+        non-zero value of the power series has a factor of 'pi'. To avoid adding the element 'pi' to the
         coefficients, we work with the function f_mu(x) = pi*H_mu(x).
         
         INPUT:
@@ -1465,8 +1467,8 @@ def LegendreD(nu='n', mu = 0, kind=1):
         Legendre differential equation. 
         
         INPUT:
-    - nu: the parameter 'n' on the assocaited differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - mu: the parameter 'm' on the assocaited differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+    - nu: the parameter 'n' on the associated differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+    - mu: the parameter 'm' on the associated differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - kind: the kind of the Legendre function the user want to get. It can take the values 1 and 2 (1 by default).
             
         WARNING:
@@ -1525,14 +1527,14 @@ def ChebyshevD(input='n', kind = 1, poly=True):
         The Chebyshev polynomials of the first kind T_n(x) are the polynomial solutions 
         to the differential equation
             (1-x^2)f'' - xf' + n^2f = 0
-        with a parameter 'n'. The poylnomial solutions (with the appropriate normalization)
+        with a parameter 'n'. The polynomial solutions (with the appropriate normalization)
         form a orthogonal basis with the orthogonality relation:
             \int_{-1}^{1} (T_n(x)T_m(x))/(sqrt(1-x^2)) = \delta_{n,m}pi/(2-\delta_{0,n})
         
         The Chebyshev polynomials of the second kind U_n(x) are the polynomial solutions 
         to the differential equation
             (1-x^2)f'' - 3xf' + n(n+2)f = 0
-        with a parameter 'n'. The poylnomial solutions (with the appropriate normalization)
+        with a parameter 'n'. The polynomial solutions (with the appropriate normalization)
         form a orthogonal basis with the orthogonality relation:
             \int_{-1}^{1} U_n(x)U_m(x))sqrt(1-x^2) = \delta_{n,m}pi/2
             
@@ -1550,7 +1552,7 @@ def ChebyshevD(input='n', kind = 1, poly=True):
         INPUT:
     - input: the parameter 'n' on the differential equation. If not provided, it takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
     - kind: the kind of the Chebyshev polynomials the user want to get. It can take the values 1, 2, 3 and 4 (1 by default).
-    - poly: a boolean value that refer to the polynomial solution to the differential equation or the other power series solution. If False, the other power serie solution will be returned such that the Wronskian of this solution with the polynomial solution is 1. NOTE: when the parameter is not an integer, this parameter only makes a difference in the name of the function, adding a "P_" at the beginning.
+    - poly: a boolean value that refer to the polynomial solution to the differential equation or the other power series solution. If False, the other power series solution will be returned such that the Wronskian of this solution with the polynomial solution is 1. NOTE: when the parameter is not an integer, this parameter only makes a difference in the name of the function, adding a "P_" at the beginning.
             
         WARNING:
     - Initial values will also be computed for the integer parameter values.
@@ -1692,7 +1694,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         else:
             i += 1
     
-    ## Sort list for cannonical input
+    ## Sort list for canonical input
     numerator.sort(); denominator.sort()
     
     ## Casting to tuples to have hash  
@@ -1777,7 +1779,7 @@ def PolylogarithmD(s=1):
 @cached_function
 def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     '''
-        Implementation using DDFunctions of the solutions for the Ricatti differential equation.
+        Implementation using DDFunctions of the solutions for the Riccati differential equation.
         
         References:
     - https://en.wikipedia.org/wiki/Riccati_equation
@@ -1795,7 +1797,7 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
         INPUT:
     - a: function to represent the constant term in the quadratic polynomial that is the derivative of u(x)
     - b: function to represent the linear term in the quadratic polynomial that is the derivative of u(x)
-    - c: function to represent the leading term in the quadratic polynomial that is the dericative of u(x)
+    - c: function to represent the leading term in the quadratic polynomial that is the derivative of u(x)
     - init: initial condition u(0) of the solution. None is also valid
     - ddR: basic DDRing where to put all the inputs a,b,c if they are not DDFunctions
     - full: if True, it returns also the function w used to build the solution in a tuple (solution, w)
@@ -1837,7 +1839,7 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
 @cached_function
 def MathieuD(a='a',q='q',init=()):
     '''
-        DD-finite implementation of the Matheiu function
+        DD-finite implementation of the Mathieu function
         
         References:
     - https://dlmf.nist.gov/28.2
@@ -1845,10 +1847,13 @@ def MathieuD(a='a',q='q',init=()):
     - http://mathworld.wolfram.com/MathieuFunction.html
             
         The Mathieu functions are the solutions to the DD-finite differential equation
-            f'' + (a - 2qcos(2x))f = 0.
+
+        .. MATH::
+
+            f'' + (a - 2 q cos(2x))f = 0.
             
         This is a generalization of the differential equation of the trigonometric functions
-        sine and cosine (for q=0, a=1), and have several physical aplications.
+        sine and cosine (for q=0, a=1), and have several physical applications.
         
         INPUT:
     - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
@@ -1900,17 +1905,20 @@ def MathieuCos(a='a',q='q'):
 @cached_function
 def MathieuH(a='a',q='q',init=()):
     '''
-        DD-finite implementation of the Modified Matheiu functions.
+        DD-finite implementation of the Modified Mathieu functions.
         
         References:
     - https://dlmf.nist.gov/28.20
     - https://en.wikipedia.org/wiki/Mathieu_function
             
         The Modified Mathieu functions are the solutions to the DD-finite differential equation
-            f'' - (a - 2qcosh(2x))f = 0.
+
+        .. MATH::
+
+            f'' - (a - 2 q cosh(2x))f = 0.
             
         This is a generalization of the differential equation of the hyperbolic trigonometric functions
-        sinh and cosh (for q=0, a=1), and have several physical aplications.
+        sinh and cosh (for q=0, a=1), and have several physical applications.
         
         INPUT:
     - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
@@ -1931,7 +1939,7 @@ def MathieuH(a='a',q='q',init=()):
 @cached_function
 def MathieuSinh(a='a',q='q'):
     '''
-        DD-finite implementation of the Modified Matheiu functions.
+        DD-finite implementation of the Modified Mathieu functions.
         
         References:
     - https://dlmf.nist.gov/28.20
@@ -1945,7 +1953,7 @@ def MathieuSinh(a='a',q='q'):
 @cached_function
 def MathieuCosh(a='a',q='q'):
     '''
-        DD-finite implementation of the Modified Matheiu functions.
+        DD-finite implementation of the Modified Mathieu functions.
         
         References:
     - https://dlmf.nist.gov/28.20
@@ -2015,7 +2023,7 @@ def AiryD(init=('a','b')):
     r'''
         D-finite implementation of the Airy's functions (Ai(x), Bi(x)).
         
-        The Airy dunctions `Ai(x)` and `Bi(x)` are the two linearly independent
+        The Airy functions `Ai(x)` and `Bi(x)` are the two linearly independent
         solutions to the *Airy* or *Stokes* equation:
         
         .. MATH::
@@ -2175,7 +2183,7 @@ def EllipticLegendreD(kind,var='phi'):
         
         INPUT:
     - kind: determines the kind of the Legendre elliptic integral the user will get. Can only take the values 1,2 or 3 and MUST be provided.
-    - var: the variable to consider. If str(var) is 'k', then the compelte Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
+    - var: the variable to consider. If str(var) is 'k', then the complete Legendre elliptic integral is returned. If it is 'phi' (as it is by default) then the incomplete Legendre elliptic integral is returned with k as a parameter.
     '''
     if(kind not in [1,2,3]):
         raise ValueError("The kind of legendre elliptic integral is not valid. Required 0,1 or 2")
@@ -2212,14 +2220,14 @@ def EllipticLegendreD(kind,var='phi'):
 @cached_function
 def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     '''
-        D-finite implementation of the Coulomb speroidal function 
+        D-finite implementation of the Coulomb spheroidal function 
         
         References:
     - https://dlmf.nist.gov/30.12
             
         This method retrieves the Coulomb Spheroidal Wave function that is a generalization of the Spheroidal Wave 
         function (see documentation of SpheroidalWaveFunctionD). This function adds a new parameter (d). There are
-        two kinds of generalizations (both catched vy this function with the argumen 'kind'). They satisfy 
+        two kinds of generalizations (both caught vy this function with the argument 'kind'). They satisfy 
         the following differential equation:
     - First kind:
                 ((1-x^2)f')' + (a + dx + b^2(1-x^2) - c^2/(1-x^2))f = 0
@@ -2325,7 +2333,7 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
 
         This differential equation is a generalization of the Heun differential 
         equation (see :func:`HeunD`) when ``len(a) == 3``, and the parameters are 
-        appropriately addapted.
+        appropriately adapted.
         
         INPUT:
             * ``a``: a **tuple** with the values for the singularity parameter. 
@@ -2336,7 +2344,7 @@ def FuschianD(a = (), gamma = (), q = (), init=()):
               be a string to create a variable, any rational 
               number or any polynomial expression which variables will be 
               considered as parameters (so ``x`` is not allowed).
-            * ``q``: a **tuple** with the accesory parameters for the equation. 
+            * ``q``: a **tuple** with the accessory parameters for the equation. 
               Each element can be a string to create a variable, any rational 
               number or any polynomial expression which variables will be 
               considered as parameters (so ``x`` is not allowed).
@@ -2421,7 +2429,7 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
         
         The parameter `a` is called *singularity parameter*, `\alpha`, `\beta`,
         `\gamma`, `\delta`, `\epsilon` are called *exponent parameters* 
-        and `q` is called the *accesory parameter*.
+        and `q` is called the *accessory parameter*.
         
         INPUT:
             * ``a``: the parameter `a` on the differential equation. If not provided, 
@@ -2490,7 +2498,7 @@ def FCoulombD(m='m', l='l'):
 
             f''(x) + \left(1-\frac{2m}{x} - \frac{l(l+1)}{x^2}\right)f(x) = 0
             
-        If `l` is integer, there is a power serie solution of order `l+1`, and 
+        If `l` is integer, there is a power series solution of order `l+1`, and 
         this function return that solution with first sequence element `1`.
         
         INPUT:
@@ -2661,7 +2669,7 @@ def FibonacciD(init=('a','b')):
         sequence provided the initial conditions `f_0` and `f_1`.
         
         INPUT:
-            * ``init``: a tuple with the intial conditions `f_0` and `f_1`. This
+            * ``init``: a tuple with the initial conditions `f_0` and `f_1`. This
               list can be of any length containing integer, strings or polynomials
               with variables that will be considered as parameters. If not enough 
               elements are provided, more parameters will be added.
@@ -2753,7 +2761,8 @@ def BellD():
             sage: B.init(10, True) == [bell_number(i) for i in range(10)]
             True
     '''
-    return DDFinite.element([-Exp(x),1], [1], name=DynamicString("B(_1)", ["x"]))
+    f = DFinite.element([-1,1],[-1], name = DynamicString("-exp(_1)", ["x"])) # -exp(x)
+    return DDFinite.element([f, 1], [1], name=DynamicString("B(_1)", ["x"]))
     
 @cached_function
 def BernoulliD():
@@ -3055,7 +3064,7 @@ def polynomial_inverse(polynomial):
     if(polynomial.constant_coefficient() != 0):
         raise ValueError("Non-invertible polynomial given: %s" %polynomial)
     
-    ## Building the extra variable needed for algebraicity    
+    ## Building the extra variable needed for algebraic   
     x = parent.gens()[0]
     y = str(x)+"_y"
     R = PolynomialRing(parent.fraction_field(), [y])
