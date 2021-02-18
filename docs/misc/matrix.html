@@ -1,0 +1,1033 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrices and Linear Algebra: useful operations &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="A generic class for solvers of linear systems" href="linear_solver.html" />
+    <link rel="prev" title="Miscellaneous package (misc)" href="../misc.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="linear_solver.html" title="A generic class for solvers of linear systems"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../misc.html" title="Miscellaneous package (misc)"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" accesskey="U">Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Matrices and Linear Algebra: useful operations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.misc.matrix">
+<span id="matrices-and-linear-algebra-useful-operations"></span><h1>Matrices and Linear Algebra: useful operations<a class="headerlink" href="#module-ajpastor.misc.matrix" title="Permalink to this headline">¶</a></h1>
+<p>Python file for matrix operations and utilities</p>
+<p>This module offers several methods to build matrices and operate with them in a very general fashion.
+It also provides several method for differential linear algebra.</p>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2016-10-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.block_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">block_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">rows</span></em>, <em class="sig-param"><span class="n">constant_or_identity</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.block_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that build a matrix using as blocks the elements of rows.</p>
+<dl class="simple">
+<dt>This method allows the user to build a matrix defining its blocks. There are two options for the inputs:</dt><dd><ul class="simple">
+<li><p>A matrix (that will be directly used as a block</p></li>
+<li><p>Elements alone: will build a constant matrix or a diagonal matrix depending on the argument <code class="docutils literal notranslate"><span class="pre">constant_or_identity</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>This method checks that the size of the input is correct, i.e., all rows have the same amount of columns and that all 
+matrices within a row provide the same amount of rows.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the desired parent for the final matrix. All elements mast be inside this parent.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rows</span></code>: a list of arguments representing the rows of the matrix. Each row is another list
+where the elements may be matrices (indicating the number of rows for this block) or elements
+in <code class="docutils literal notranslate"><span class="pre">parent</span></code> that will create constant or diagonal matrices with such element.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">constant_or_identity</span></code>: this argument decides whether the elements create a diagonal
+matrix (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or a constant matrix (<code class="docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A matrix with the corresponding struture. If any of the sizes does not match, a <code class="xref py py-class docutils literal notranslate"><span class="pre">SizeMatrixError</span></code>
+will be raised.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]);</span> <span class="n">I</span> <span class="o">=</span> <span class="n">identity_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,[[</span><span class="n">M</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="n">I</span><span class="p">]])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">I</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span> <span class="n">M</span><span class="p">]])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">I</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span> <span class="n">M</span><span class="p">]],</span> <span class="kc">False</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method also works with non-square matrices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="n">M</span><span class="p">]])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span><span class="n">M</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]],</span> <span class="kc">False</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>However, the sizes of the columns and rows has to fit:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">SizeMatrixError</span><span class="p">:</span> <span class="n">The</span> <span class="n">col</span> <span class="n">has</span> <span class="ow">not</span> <span class="n">the</span> <span class="n">proper</span> <span class="nb">format</span> <span class="o">--</span> <span class="n">different</span> <span class="n">size</span>
+</pre></div>
+</div>
+<p>This method also allows matrices in list format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span><span class="p">]])</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">3</span>  <span class="mi">0</span>  <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">4</span>  <span class="mi">5</span>  <span class="mi">6</span> <span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">3</span>  <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]]],[</span><span class="mi">1</span><span class="p">,</span> <span class="n">M</span><span class="p">]])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">SizeMatrixError</span><span class="p">:</span> <span class="n">The</span> <span class="n">row</span> <span class="n">has</span> <span class="ow">not</span> <span class="n">the</span> <span class="n">proper</span> <span class="nb">format</span> <span class="o">--</span> <span class="n">different</span> <span class="n">size</span>
+</pre></div>
+</div>
+<p>And also, if all entries are matrices, we do not need to have in the input all the 
+rows with the same length:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">L</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">],[</span><span class="n">L</span><span class="p">]])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">5</span> <span class="mi">4</span> <span class="mi">3</span> <span class="mi">2</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span> <span class="n">I</span><span class="p">[:</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="n">L</span><span class="p">,[[</span><span class="mi">9</span><span class="p">]]]])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">5</span> <span class="mi">4</span> <span class="mi">3</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">9</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">N</span><span class="p">,</span> <span class="n">I</span><span class="p">[:</span><span class="mi">2</span><span class="p">]],</span> <span class="p">[</span><span class="n">L</span><span class="p">]])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">SizeMatrixError</span><span class="p">:</span> <span class="n">The</span> <span class="n">given</span> <span class="n">rows</span> <span class="n">have</span> <span class="n">different</span> <span class="n">column</span> <span class="n">size</span>
+</pre></div>
+</div>
+<p>Finally, this method also allows the user to create a Matrix in a normal fashion 
+(providing each of its elements):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span> <span class="o">==</span> <span class="n">M</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.diagonal_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">diagonal_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.diagonal_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to build a diagonal matrix using the input given</p>
+<p>This method allows the user to create a diagonal shaped matrix where the elements
+on the diagonal can be not only elements of <code class="docutils literal notranslate"><span class="pre">parent</span></code> but also matrices that
+will be used as blocks.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the desired ambient space for the final matrix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">args</span></code>: the list of elements that will be used as blocks for the diagonal
+of the final matrix.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">kwds</span></code>: optional named parameters. The current valid arguments are the following:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;size&quot;</span></code>: if the input has only one argument, the diagonal matrix with such
+element <code class="docutils literal notranslate"><span class="pre">size</span></code> times will be created. This element has to be valid as 
+an input.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A diagonal matrix with the corresponding structure.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]);</span> <span class="n">I</span> <span class="o">=</span> <span class="n">identity_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="n">N</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">]]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[</span><span class="n">I</span><span class="p">,</span><span class="n">I</span><span class="p">])</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">I</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">9</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The extra argument <code class="docutils literal notranslate"><span class="pre">size</span></code> can be used to replicate the matrix in the diagonal a high number
+of times. This allow a simpler syntax when creating big matrices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span> <span class="o">==</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>If the user forgets about putting at least one argument for the <span class="math notranslate nohighlight">\(\alpha_i\)</span>, we raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">diagonal_matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">At</span> <span class="n">least</span> <span class="n">one</span> <span class="n">element</span> <span class="n">has</span> <span class="n">to</span> <span class="n">be</span> <span class="n">provided</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.direct_sum">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">direct_sum</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">matrices</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.direct_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the direct sum of several matrices.</p>
+<p>This method computes the direct sum of several matrices, i.e., it computes a diagonal
+matrix where the elements in the diagonal are the matrices that we have as input.</p>
+<p>This method is just a generic alias for the method <a class="reference internal" href="#ajpastor.misc.matrix.diagonal_matrix" title="ajpastor.misc.matrix.diagonal_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">diagonal_matrix()</span></code></a>. However,
+it performs the checking of compatibility between the parents of the matrices.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.kappa_v">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">kappa_v</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">D</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.kappa_v" title="Permalink to this definition">¶</a></dt>
+<dd><p>Methot that apply a derivation to each component of a vector.</p>
+<p>When we have a vector space <span class="math notranslate nohighlight">\(V\)</span> over a differential field <span class="math notranslate nohighlight">\((F,D)\)</span>, we can define
+“derivations” over <span class="math notranslate nohighlight">\(V\)</span> as those maps <span class="math notranslate nohighlight">\(\partial: V \rightarrow V\)</span> such that for all <span class="math notranslate nohighlight">\(v, w \in V\)</span>
+and all <span class="math notranslate nohighlight">\(f \in F\)</span>:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\partial(v+w) = \partial(v) + \partial(w)\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\partial(fv) = D(f)v + f\partial(v)\)</span>.</p></li>
+</ul>
+<p>It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+this derivation is uniquely determined by a matrix <span class="math notranslate nohighlight">\(M\)</span> in such a way that, for all <span class="math notranslate nohighlight">\(v \in V\)</span>,
+the derivation can be computed with a matrix-vector multiplication:</p>
+<div class="math notranslate nohighlight">
+\[\partial(v) = Mv + \kappa_D(v),\]</div>
+<p>where this <span class="math notranslate nohighlight">\(\kappa_D\)</span> is the terminwise derivation of the coordinates.</p>
+<p>This method computes, given the derivation <span class="math notranslate nohighlight">\(D\)</span>, the value of <span class="math notranslate nohighlight">\(\kappa_D(v)\)</span> for a given vector.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">v</span></code>: vector we want to manipulate.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code>: derivation over the ground field.</p></li>
+</ul>
+</dd>
+<dt>OUPUT:</dt><dd><p>The vector <span class="math notranslate nohighlight">\(w = \kappa_D(v)\)</span>.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">D</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="n">x</span><span class="p">);</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">kappa_v</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.kronecker_sum">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">kronecker_sum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">N</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.kronecker_sum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that computes the Kronecker sum of two matrices.</p>
+<p>Given two square matrices <span class="math notranslate nohighlight">\(M\)</span> and <span class="math notranslate nohighlight">\(N\)</span> of sizes <span class="math notranslate nohighlight">\(m\)</span> and <span class="math notranslate nohighlight">\(n\)</span> the Kronecker sum is defined, using the tensor
+product between matrices, as:</p>
+<div class="math notranslate nohighlight">
+\[M \boxplus N = M \otimes I_n + I_m \otimes N\]</div>
+<p>This method simply computes the Kronecker sum of two square matrices.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: first operand of the Kronecker sum</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code>: second operand of the Kronecker sum</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>The matrix <code class="docutils literal notranslate"><span class="pre">M</span> <span class="pre">\boxplus</span> <span class="pre">N</span></code>.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]]);</span> <span class="n">N</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">kronecker_sum</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">2</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">0</span> <span class="mi">6</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">5</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">3</span> <span class="mi">0</span> <span class="mi">0</span> <span class="mi">7</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span> <span class="mi">9</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The Kroenecker sum, when one of the operands is just one element, can be seen as the addition
+of the corresponding diagonal matrix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">kronecker_sum</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">]]))</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">kronecker_sum</span><span class="p">(</span><span class="n">Matrix</span><span class="p">([[</span><span class="mi">7</span><span class="p">]]),</span> <span class="n">N</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">8</span>  <span class="mi">0</span>  <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span> <span class="mi">10</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">4</span>  <span class="mi">0</span> <span class="mi">12</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.matrix_of_dMovement">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">matrix_of_dMovement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">cols</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.matrix_of_dMovement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to construct a matrix where the columns are iterative derivations of a vector.</p>
+<p>When we have a vector space <span class="math notranslate nohighlight">\(V\)</span> over a differential field <span class="math notranslate nohighlight">\((F,D)\)</span>, we can define
+“derivations” over <span class="math notranslate nohighlight">\(V\)</span> as those maps <span class="math notranslate nohighlight">\(\partial: V \rightarrow V\)</span> such that for all <span class="math notranslate nohighlight">\(v, w \in V\)</span>
+and all <span class="math notranslate nohighlight">\(f \in F\)</span>:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\partial(v+w) = \partial(v) + \partial(w)\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\partial(fv) = D(f)v + f\partial(v)\)</span>.</p></li>
+</ul>
+<p>It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+this derivation is uniquely determined by a matrix <span class="math notranslate nohighlight">\(M\)</span> in such a way that, for all <span class="math notranslate nohighlight">\(v \in V\)</span>,
+the derivation can be computed with a matrix-vector multiplication:</p>
+<div class="math notranslate nohighlight">
+\[\partial(v) = Mv + \kappa_D(v),\]</div>
+<p>where this <span class="math notranslate nohighlight">\(\kappa_D\)</span> is the terminwise derivation of the coordinates.</p>
+<p>This method computes several derivations of a particular vector and arrange the return as a matrix
+where these derivatives are in the columns of the matrix.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: matrix defining the specific derivation for the fixed basis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v</span></code>: starig vector which will be derivated several times.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code>: derivation over the ground field.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cols</span></code>: number of columns (i.e., derivations) that we will return.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A matrix <span class="math notranslate nohighlight">\(N=(n_{i,j})\)</span> where the columns are the derivations of <span class="math notranslate nohighlight">\(v\)</span>, i.e.,
+<span class="math notranslate nohighlight">\((n_{0,j},n_{1,j},\ldots) = \partial^j(v)\)</span>.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">]);</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">D</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">matrix_of_dMovement</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="p">[</span>                                               <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>                                          <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">3</span>                          <span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">8</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span>                                                   <span class="mi">1</span>                                        <span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>            <span class="n">x</span><span class="o">^</span><span class="mi">8</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">5</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">7</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">5</span><span class="p">]</span>
+<span class="p">[</span>                                                 <span class="n">x</span><span class="o">^</span><span class="mi">2</span>                                  <span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="n">x</span><span class="o">^</span><span class="mi">10</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="mi">9</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">5</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We can check that the second column of that matrix is the derivative of the vector <span class="math notranslate nohighlight">\(v\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="p">[</span><span class="n">matrix_of_dMovement</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span> <span class="o">==</span> <span class="p">[</span><span class="n">el</span> <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">vector_derivative</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">D</span><span class="p">)]</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.op_cols">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">op_cols</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">s_c</span></em>, <em class="sig-param"><span class="n">d_c</span></em>, <em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.op_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the column substraction in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, two column indices and an element from the 
+parent ring of <span class="math notranslate nohighlight">\(M\)</span> and returns a new matrix where the elements in the 
+second column have been “reduced” by the elements in the first column times
+such element.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s_c</span></code>: index of the column that will be used in the reduction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d_c</span></code>: index of the column where the reduction will be performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">el</span></code>: element in the base ring of <code class="docutils literal notranslate"><span class="pre">M</span></code> that will be used in the reduction.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>A new matrix <span class="math notranslate nohighlight">\(\tilde{M}\)</span> with entries <span class="math notranslate nohighlight">\(\tilde{m}_{i,j}\)</span> such that:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">j</span> <span class="pre">!=</span> <span class="pre">d_c</span></code>: <span class="math notranslate nohighlight">\(\tilde{m}_{i,j} = m_{i,j}\)</span>.</p></li>
+<li><p>Else: <span class="math notranslate nohighlight">\(\tilde{m}_{i,d_c} = m_{i,d_c} - (el)m_{i,s_c}\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">7</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">2</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">3</span>   <span class="mi">4</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">10</span>   <span class="mi">0</span>   <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span>  <span class="mi">4</span> <span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the indices are not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">source</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">destiny</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>It is interesting to remark that this method is equivalent to the application of the 
+method <a class="reference internal" href="#ajpastor.misc.matrix.op_rows" title="ajpastor.misc.matrix.op_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">op_rows()</span></code></a> on the transposed matrix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.op_rows">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">op_rows</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">s_r</span></em>, <em class="sig-param"><span class="n">d_r</span></em>, <em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.op_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the row substraction in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, two rows indices and an element from the 
+parent ring of <span class="math notranslate nohighlight">\(M\)</span> and returns a new matrix where the elements in the 
+second row have been “reduced” by the elements in the first row times
+such element.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s_r</span></code>: index of the row that will be used in the reduction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d_r</span></code>: index of the row where the reduction will be performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">el</span></code>: element in the base ring of <code class="docutils literal notranslate"><span class="pre">M</span></code> that will be used in the reduction.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>A new matrix <span class="math notranslate nohighlight">\(\tilde{M}\)</span> with entries <span class="math notranslate nohighlight">\(\tilde{m}_{i,j}\)</span> such that:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">!=</span> <span class="pre">d_r</span></code>: <span class="math notranslate nohighlight">\(\tilde{m}_{i,j} = m_{i,j}\)</span>.</p></li>
+<li><p>Else: <span class="math notranslate nohighlight">\(\tilde{m}_{d_r,j} = m_{d_r,j} - (el)m_{s_r,j}\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">[</span>  <span class="mi">1</span>   <span class="mi">2</span> <span class="o">-</span><span class="mi">10</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">3</span>   <span class="mi">4</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span>  <span class="mi">4</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">3</span> <span class="o">-</span><span class="mi">4</span>  <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the indices are not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">source</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">destiny</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">op_rows</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.random_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">random_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">nrows</span></em>, <em class="sig-param"><span class="n">ncols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.random_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to create a random matrix in a particular parent structure.</p>
+<p>This method uses the method <code class="docutils literal notranslate"><span class="pre">random_element</span></code> from a parent structure repeatively
+to create a full matrix. Since the arguments for creating this random elements may vary
+from different parent structures, the optional arguments <code class="docutils literal notranslate"><span class="pre">args</span></code> and <code class="docutils literal notranslate"><span class="pre">kwds</span></code> allows
+the user to fix them in each particular example.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: parent structure where we create the random matrix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nrows</span></code>: the number of rows for the desired matrix.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ncols</span></code>: the number of columns for the desired matrix. If not given, we take
+the value of <code class="docutils literal notranslate"><span class="pre">nrows</span></code> as such number (i.e., the matrix is square)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">args</span></code> and <code class="docutils literal notranslate"><span class="pre">kwds</span></code>: optional arguments passed to the method <code class="docutils literal notranslate"><span class="pre">random_element</span></code>
+of the <code class="docutils literal notranslate"><span class="pre">parent</span></code>.</p></li>
+</ul>
+</dd>
+<dt>OUPUT:</dt><dd><p>A random matrix with entries in <code class="docutils literal notranslate"><span class="pre">parent</span></code> and fixed size.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.scal_col">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">scal_col</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">d_c</span></em>, <em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.scal_col" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the rescale of a column in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, a column index and an element from the 
+parent ring of <span class="math notranslate nohighlight">\(M\)</span> and returns a new matrix where the elements in the 
+column have been scaled by the element.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d_c</span></code>: index of the column where the scaling will be performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">el</span></code>: element in the base ring of <code class="docutils literal notranslate"><span class="pre">M</span></code> that will be used in the scaling.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>A new matrix <span class="math notranslate nohighlight">\(\tilde{M}\)</span> with entries <span class="math notranslate nohighlight">\(\tilde{m}_{i,j}\)</span> such that:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">j</span> <span class="pre">!=</span> <span class="pre">d_c</span></code>: <span class="math notranslate nohighlight">\(\tilde{m}_{i,j} = m_{i,j}\)</span>.</p></li>
+<li><p>Else: <span class="math notranslate nohighlight">\(\tilde{m}_{i,d_c} = (el)m_{i,d_c}\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">6</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span> <span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span>  <span class="mi">4</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the index is not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>It is interesting to remark that this method is equivalent to the application of the 
+method <a class="reference internal" href="#ajpastor.misc.matrix.op_cols" title="ajpastor.misc.matrix.op_cols"><code class="xref py py-func docutils literal notranslate"><span class="pre">op_cols()</span></code></a> with the same destiny and source indices and the element
+being <code class="docutils literal notranslate"><span class="pre">-element+1</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_col</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="n">op_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.scal_row">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">scal_row</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">d_r</span></em>, <em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.scal_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the rescale of a row in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, a row index and an element from the 
+parent ring of <span class="math notranslate nohighlight">\(M\)</span> and returns a new matrix where the elements in the 
+row have been scaled by the element.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">d_r</span></code>: index of the row where the scaling will be performed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">el</span></code>: element in the base ring of <code class="docutils literal notranslate"><span class="pre">M</span></code> that will be used in the scaling.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><dl class="simple">
+<dt>A new matrix <span class="math notranslate nohighlight">\(\tilde{M}\)</span> with entries <span class="math notranslate nohighlight">\(\tilde{m}_{i,j}\)</span> such that:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">!=</span> <span class="pre">d_r</span></code>: <span class="math notranslate nohighlight">\(\tilde{m}_{i,j} = m_{i,j}\)</span>.</p></li>
+<li><p>Else: <span class="math notranslate nohighlight">\(\tilde{m}_{d_r,j} = (el)m_{d_r,j}\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">3</span> <span class="o">-</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span>  <span class="mi">4</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">0</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the index is not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>It is interesting to remark that this method is equivalent to the application of the 
+method <a class="reference internal" href="#ajpastor.misc.matrix.op_rows" title="ajpastor.misc.matrix.op_rows"><code class="xref py py-func docutils literal notranslate"><span class="pre">op_rows()</span></code></a> with the same destiny and source indices and the element
+being <code class="docutils literal notranslate"><span class="pre">-element+1</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">scal_row</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="n">op_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.simplify_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">simplify_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.simplify_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to simplify the entries of a matrix.</p>
+<p>This method computes an equivalent matrix to that given in the input and
+call the method <code class="docutils literal notranslate"><span class="pre">simplify</span></code> of the entries in that matrix to try and
+simplify it.</p>
+<p>If this simplification method does not exist, this method <strong>DO NOT</strong> raise an
+error. It just simply assumes that there is no simplification and return 
+the original matrix.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: a matrix that will be simplified.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A matrix <span class="math notranslate nohighlight">\(\tilde{M}\)</span> such that is equal to <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.swap_cols">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">swap_cols</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">c1</span></em>, <em class="sig-param"><span class="n">c2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.swap_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the swap of two columns in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, two column indices and returns a new matrix where
+the elements in the columns have been swapped.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">c1</span></code>: first index of the column to be swapped.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">c2</span></code>: second index of the column to be swapped.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A new matrix where the elements of the columns indexed by <code class="docutils literal notranslate"><span class="pre">c1</span></code> and <code class="docutils literal notranslate"><span class="pre">c2</span></code>
+have been exchanged.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">3</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">0</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the index is not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">first</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">second</span> <span class="n">column</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">swap_cols</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.swap_rows">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">swap_rows</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">r1</span></em>, <em class="sig-param"><span class="n">r2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.swap_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for performing the swap of two rows in Gauss-Jordan elimination.</p>
+<p>This method takes a matrix <span class="math notranslate nohighlight">\(M\)</span>, two row indices and returns a new matrix where
+the elements in the rows have been swapped.</p>
+<p>This is one of the basic steps while performing Gauss-Jordan elimination
+on a matrix to compute its determinant/nullspace/solution space/rank etc.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the original matrix with entries <span class="math notranslate nohighlight">\(m_{i,j}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r1</span></code>: first index of the column to be swapped.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">r2</span></code>: second index of the column to be swapped.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A new matrix where the elements of the columns indexed by <code class="docutils literal notranslate"><span class="pre">r1</span></code> and <code class="docutils literal notranslate"><span class="pre">r2</span></code>
+have been exchanged.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This method raises a ValueError when the index is not valid:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">first</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">second</span> <span class="n">row</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, if the input for the matrix is not such, the method raises a TypeError:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">swap_rows</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">First</span> <span class="n">argument</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">matrix</span><span class="o">.</span> <span class="o">...</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.turn_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">turn_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">vertical</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.turn_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that turns a matrix either horizontally or vertically.</p>
+<p>This method takes a matrix and compute its reverse matrix in one direction: 
+horizontally, changing the position of the columns, or vertically, changing
+the position of the rows.</p>
+<p>If we do both turnings, we obtain the transpose matrix.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: a matrix to be turned</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vertical</span></code>: whether the turn is vertically or not. If not given, we
+always perform a horizontal turn.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT: </dt><dd><p>The corresponding turned matrix.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">turn_matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">2</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">4</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="n">block_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[[</span><span class="n">M</span><span class="p">,</span> <span class="mi">0</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">turn_matrix</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">2</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">4</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">turn_matrix</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">3</span> <span class="mi">4</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.vandermonde_matrix">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">vandermonde_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.vandermonde_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to create a Vandermonde matrix</p>
+<p>This method consider a list of elements from the <code class="docutils literal notranslate"><span class="pre">parent</span></code> ring and creates the corresponding Vandermonde Matrix.
+This matrix (see the <a class="reference external" href="https://en.wikipedia.org/wiki/Vandermonde_matrix">Wikipedia webpage</a>) is constructed
+by elements <span class="math notranslate nohighlight">\(\alpha_1,\ldots,\alpha_m\)</span> and a given a size <span class="math notranslate nohighlight">\(n\)</span> in the following way:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}V = \begin{pmatrix}
+1 &amp; \alpha_1 &amp; \ldots &amp; \alpha_1^{n-1}\\
+1 &amp; \alpha_2 &amp; \ldots &amp; \alpha_2^{n-1}\\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
+1 &amp; \alpha_m &amp; \ldots &amp; \alpha_m^{n-1}
+\end{pmatrix}\end{split}\]</div>
+<p>or, naming <span class="math notranslate nohighlight">\(v_{i,j}\)</span> the corresponding entry of the matrix, we have <span class="math notranslate nohighlight">\(v_{i,j} = \alpha_i^{j-1}\)</span>.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the desired parent for the matrix. All elements will be casted into this parent structure.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">args</span></code>: a list of elements in <code class="docutils literal notranslate"><span class="pre">parent</span></code> that will take the role of the <span class="math notranslate nohighlight">\(\alpha_i\)</span> in the definition.</p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">kwds</span></code>: optional arguments to consider. The following values are allowed:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;size&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;ncols&quot;</span></code>: the value for <span class="math notranslate nohighlight">\(n\)</span> in the definition. If not given, this value will be
+the number of elements in the input (i.e., we build a square matrix).</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>The corresponding Vandermonde matrix with the desired size.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">1</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">3</span> <span class="mi">9</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">5</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">[</span>    <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span>     <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">1</span>     <span class="mi">2</span>     <span class="mi">4</span>     <span class="mi">8</span>    <span class="mi">16</span>    <span class="mi">32</span>    <span class="mi">64</span>   <span class="mi">128</span>   <span class="mi">256</span>   <span class="mi">512</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">1</span>     <span class="mi">3</span>     <span class="mi">9</span>    <span class="mi">27</span>    <span class="mi">81</span>   <span class="mi">243</span>   <span class="mi">729</span>  <span class="mi">2187</span>  <span class="mi">6561</span> <span class="mi">19683</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">1</span>  <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">3</span>  <span class="mi">9</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">4</span> <span class="mi">16</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">5</span> <span class="mi">25</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">6</span> <span class="mi">36</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">7</span> <span class="mi">49</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">8</span> <span class="mi">64</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">9</span> <span class="mi">81</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>If the two possible optional arguments (<code class="docutils literal notranslate"><span class="pre">&quot;size&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;ncols&quot;</span></code>) are present, the value for
+<code class="docutils literal notranslate"><span class="pre">&quot;size&quot;</span></code> has preference:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">ncols</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">3</span> <span class="mi">9</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>If the user forgets about putting at least one argument for the <span class="math notranslate nohighlight">\(\alpha_i\)</span>, we raise a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">At</span> <span class="n">least</span> <span class="n">one</span> <span class="n">element</span> <span class="n">has</span> <span class="n">to</span> <span class="n">be</span> <span class="n">provided</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.matrix.vector_derivative">
+<code class="sig-prename descclassname">ajpastor.misc.matrix.</code><code class="sig-name descname">vector_derivative</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">M</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">D</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.matrix.vector_derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the derivative of a vector.</p>
+<p>When we have a vector space <span class="math notranslate nohighlight">\(V\)</span> over a differential field <span class="math notranslate nohighlight">\((F,D)\)</span>, we can define
+“derivations” over <span class="math notranslate nohighlight">\(V\)</span> as those maps <span class="math notranslate nohighlight">\(\partial: V \rightarrow V\)</span> such that for all <span class="math notranslate nohighlight">\(v, w \in V\)</span>
+and all <span class="math notranslate nohighlight">\(f \in F\)</span>:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\partial(v+w) = \partial(v) + \partial(w)\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\partial(fv) = D(f)v + f\partial(v)\)</span>.</p></li>
+</ul>
+<p>It can be shown (see Appendix A of the thesis by the author of the file) that, fixed a basis,
+this derivation is uniquely determined by a matrix <span class="math notranslate nohighlight">\(M\)</span> in such a way that, for all <span class="math notranslate nohighlight">\(v \in V\)</span>,
+the derivation can be computed with a matrix-vector multiplication:</p>
+<div class="math notranslate nohighlight">
+\[\partial(v) = Mv + \kappa_D(v),\]</div>
+<p>where this <span class="math notranslate nohighlight">\(\kappa_D\)</span> is the terminwise derivation of the coordinates.</p>
+<p>This method takes the matrix <span class="math notranslate nohighlight">\(M\)</span>, a vector <span class="math notranslate nohighlight">\(v\)</span> and the corresponding derivation <span class="math notranslate nohighlight">\(D\)</span> and computes
+the derivation of the vector <span class="math notranslate nohighlight">\(v\)</span>.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">M</span></code>: the matrix defining the derivation under the current basis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">v</span></code>: the vector (expressed in the current basis) that we want to derivate</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code>: the derivation over the ground field.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><p>A vector <span class="math notranslate nohighlight">\(w\)</span> such that <span class="math notranslate nohighlight">\(w = \partial(v)\)</span> for the derivation <span class="math notranslate nohighlight">\(\partial\)</span> defined from <span class="math notranslate nohighlight">\(D\)</span>
+and <span class="math notranslate nohighlight">\(M\)</span>.</p>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.matrix</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">vandermonde_matrix</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">]);</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">D</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">derivative</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vector_derivative</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+<span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">6</span> <span class="o">+</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can see that the columns of <span class="math notranslate nohighlight">\(M\)</span> are exactly the derivatives of the trivial basis:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">vector_derivative</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">D</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vector_derivative</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]),</span> <span class="n">D</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">vector_derivative</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">vector</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]),</span> <span class="n">D</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="o">^</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../misc.html"
+                        title="previous chapter">Miscellaneous package (misc)</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="linear_solver.html"
+                        title="next chapter">A generic class for solvers of linear systems</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/matrix.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="linear_solver.html" title="A generic class for solvers of linear systems"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../misc.html" title="Miscellaneous package (misc)"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" >Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Matrices and Linear Algebra: useful operations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

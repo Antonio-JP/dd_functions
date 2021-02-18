@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exceptions for DDFunctions and DDRings &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Miscellaneous package (misc)" href="../misc.html" />
+    <link rel="prev" title="Differentially Agebraic functions as DD-finite elements" href="toDiffAlgebraic.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../misc.html" title="Miscellaneous package (misc)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="toDiffAlgebraic.html" title="Differentially Agebraic functions as DD-finite elements"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Main package (dd_functions)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Exceptions for DDFunctions and DDRings</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.dd_functions.exceptions">
+<span id="exceptions-for-ddfunctions-and-ddrings"></span><h1>Exceptions for DDFunctions and DDRings<a class="headerlink" href="#module-ajpastor.dd_functions.exceptions" title="Permalink to this headline">¶</a></h1>
+<p>Python file for exceptions in the package dd_functions</p>
+<p>This file contains all the different exceptions that we need in the computations
+with DDFunctions and similar structures. These exceptions allows a better control
+of the errors through the package.</p>
+<p>These exceptions are available publicly, but need to be imported explicitly (i.e.,
+these exception are not directly imported with the package <code class="docutils literal notranslate"><span class="pre">ajpastor.dd_function</span></code>)</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions.exceptions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">InitValueError</span><span class="p">(</span><span class="s2">&quot;error with initial values&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">InitValueError</span><span class="p">:</span> <span class="n">error</span> <span class="k">with</span> <span class="n">initial</span> <span class="n">values</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">ZeroValueRequired</span><span class="p">()</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">ZeroValueRequired</span><span class="p">:</span> <span class="n">required</span> <span class="n">a</span> <span class="n">zero</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2020-05-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py exception">
+<dt id="ajpastor.dd_functions.exceptions.DDFunctionError">
+<em class="property">exception </em><code class="sig-prename descclassname">ajpastor.dd_functions.exceptions.</code><code class="sig-name descname">DDFunctionError</code><a class="headerlink" href="#ajpastor.dd_functions.exceptions.DDFunctionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>Generic error for the package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code>.</p>
+<p>This error has no specific value but allows to control errors within the package.
+Use the message argument to convey specific meanings to the exception.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="ajpastor.dd_functions.exceptions.InitValueError">
+<em class="property">exception </em><code class="sig-prename descclassname">ajpastor.dd_functions.exceptions.</code><code class="sig-name descname">InitValueError</code><a class="headerlink" href="#ajpastor.dd_functions.exceptions.InitValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
+<p>Exception due to an error in initial values of a DDFunction</p>
+<p>This error is provoke because a DDFunction needs a different type
+of initial condition that the one given. This could be because
+the user is imposing an impossible value for a derivative, an 
+unexpected error on computations or composing two DDFunctions with
+incompatible initial conditions.</p>
+<dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Look and substitute for this error</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="ajpastor.dd_functions.exceptions.NoValueError">
+<em class="property">exception </em><code class="sig-prename descclassname">ajpastor.dd_functions.exceptions.</code><code class="sig-name descname">NoValueError</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.exceptions.NoValueError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeError</span></code></p>
+<p>Error when computing initial values.</p>
+<p>Whenever a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> can not compute
+an initial value, this type of exception is raised, distinguishing it from other
+Python errors.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="ajpastor.dd_functions.exceptions.ZeroValueRequired">
+<em class="property">exception </em><code class="sig-prename descclassname">ajpastor.dd_functions.exceptions.</code><code class="sig-name descname">ZeroValueRequired</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.exceptions.ZeroValueRequired" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ajpastor.dd_functions.exceptions.InitValueError" title="ajpastor.dd_functions.exceptions.InitValueError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.dd_functions.exceptions.InitValueError</span></code></a></p>
+<p>Particular exception for requiring a zero initial condition.</p>
+<p>This error is a particular case of <a class="reference internal" href="#ajpastor.dd_functions.exceptions.InitValueError" title="ajpastor.dd_functions.exceptions.InitValueError"><code class="xref py py-class docutils literal notranslate"><span class="pre">InitValueError</span></code></a> (see its documentation
+for further information) where the problem is that <span class="math notranslate nohighlight">\(0\)</span> was required as the
+first initial condition.</p>
+<p>Two different type of errors can be build: with one or two arguments. The 
+message is adapted to the type of error.</p>
+<p>EXAMPLE:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions.exceptions</span> <span class="k">import</span> <span class="n">ZeroValueRequired</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">ZeroValueRequired</span><span class="p">()</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">ZeroValueRequired</span><span class="p">:</span> <span class="n">required</span> <span class="n">a</span> <span class="n">zero</span> <span class="n">value</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">ZeroValueRequired</span><span class="p">(</span><span class="s2">&quot;f(x)&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">ZeroValueRequired</span><span class="p">:</span> <span class="n">required</span> <span class="n">a</span> <span class="n">zero</span> <span class="n">value</span> <span class="k">for</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">ZeroValueRequired</span><span class="p">(</span><span class="s2">&quot;f(x)&quot;</span><span class="p">,</span> <span class="s2">&quot;cos(f(x))&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">ZeroValueRequired</span><span class="p">:</span> <span class="n">required</span> <span class="n">a</span> <span class="n">zero</span> <span class="n">value</span> <span class="k">for</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cos</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="k">raise</span> <span class="n">ZeroValueRequired</span><span class="p">(</span><span class="s2">&quot;f(x)&quot;</span><span class="p">,</span> <span class="s2">&quot;cos(f(x))&quot;</span><span class="p">,</span> <span class="s2">&quot;useless argument&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">ZeroValueRequired</span><span class="p">:</span> <span class="n">required</span> <span class="n">a</span> <span class="n">zero</span> <span class="n">value</span> <span class="k">for</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cos</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Look and substitute for this error</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="toDiffAlgebraic.html"
+                        title="previous chapter">Differentially Agebraic functions as DD-finite elements</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../misc.html"
+                        title="next chapter">Miscellaneous package (misc)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dd_functions/exceptions.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../misc.html" title="Miscellaneous package (misc)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="toDiffAlgebraic.html" title="Differentially Agebraic functions as DD-finite elements"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Main package (dd_functions)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Exceptions for DDFunctions and DDRings</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

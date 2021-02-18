@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solving linear systems using Hermite Normal Forms &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Dynamic Strings: A module for easy replacements" href="dynamic_string.html" />
+    <link rel="prev" title="Bareiss: Division-free Linear Algebra for computing Nullspace" href="bareiss.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dynamic_string.html" title="Dynamic Strings: A module for easy replacements"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bareiss.html" title="Bareiss: Division-free Linear Algebra for computing Nullspace"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" accesskey="U">Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Solving linear systems using Hermite Normal Forms</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.misc.hermite">
+<span id="solving-linear-systems-using-hermite-normal-forms"></span><h1>Solving linear systems using Hermite Normal Forms<a class="headerlink" href="#module-ajpastor.misc.hermite" title="Permalink to this headline">¶</a></h1>
+<p>Python file for an implementation of Hermite normal form computations</p>
+<p>This module offers an implementation of Hermite Normal Form computation. This algorithm can later be used to
+solve linear system within Euclidean domains.</p>
+<p>This is an adaptation of method described in <a class="reference external" href="https://www.ams.org/journals/mcom/1996-65-216/S0025-5718-96-00766-1/">this paper</a>
+for computing the Hermite Normal Form in Dedekind domains. Since Euclidean Domains are, in particular, Dedekind
+domains, we use the corresponding and adapted method.</p>
+<p>The main differences with the algorithm described in that paper is that we do a row echelon form and 
+that we do not force the diagonal to have 1. Moreover, we do not need to have maximal rank, obtaining zero
+rows in the end of the matrix.</p>
+<p>Given a matrix <span class="math notranslate nohighlight">\(M\)</span> with <span class="math notranslate nohighlight">\(n\)</span> rows and <span class="math notranslate nohighlight">\(m\)</span> columns, a Hermite normal form (or HNF) is a matrix <span class="math notranslate nohighlight">\(H\)</span> equivalent
+to <span class="math notranslate nohighlight">\(M\)</span> (i.e., there is a unimodular matrix <span class="math notranslate nohighlight">\(U\)</span> such that <span class="math notranslate nohighlight">\(UM = H\)</span>, also called <em>transformation matrix</em>)
+such that every element below the main diagonal is zero. This is similar to computing the echelon
+form as in a Gauss-Jordan elimination, but all operations stays in the same ring as the elements of 
+<span class="math notranslate nohighlight">\(M\)</span> belong (given that it is an Euclidean domain).</p>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2021-02-08): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt id="ajpastor.misc.hermite.HermiteSolver">
+<em class="property">class </em><code class="sig-prename descclassname">ajpastor.misc.hermite.</code><code class="sig-name descname">HermiteSolver</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">matrix</em>, <em class="sig-param">inhomogeneous</em>, <em class="sig-param">euclidean=&lt;function HermiteSolver.&lt;lambda&gt; at 0x7f131b3a2dc0&gt;</em>, <em class="sig-param">xgcd=&lt;function xgcd at 0x7f13289eb040&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.hermite.HermiteSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="linear_solver.html#ajpastor.misc.linear_solver.LinearSystemSolver" title="ajpastor.misc.linear_solver.LinearSystemSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.misc.linear_solver.LinearSystemSolver</span></code></a></p>
+<p>This class represents the solving of a linear system using Hermite Normal Forms.</p>
+<p>Solving a linear system using Hermite normal forms is possible by solving each of the equations
+and extending the result to the rest of the system. This can be done in every Euclidean Domain.</p>
+<p>This algorithm is based on the Euclidean division algorithm and work anywhere where the elements
+of the parent structure have the methods <code class="docutils literal notranslate"><span class="pre">__div__</span></code>, <code class="docutils literal notranslate"><span class="pre">__rem__</span></code> and <code class="docutils literal notranslate"><span class="pre">xgcd</span></code>.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the ring where the solutions will be searched. This parent can be a localization 
+ring that can be provided as a triplet <code class="docutils literal notranslate"><span class="pre">(R,</span> <span class="pre">g,</span> <span class="pre">d)</span></code> where <code class="docutils literal notranslate"><span class="pre">R</span></code> is a euclidean domain, <code class="docutils literal notranslate"><span class="pre">g</span></code>
+is an empty list and <code class="docutils literal notranslate"><span class="pre">d</span></code> is a list of elements on <code class="docutils literal notranslate"><span class="pre">R</span></code> that will be localized.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matrix</span></code>: matrix for the system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inhomogeneous</span></code>: the inhomogeneous vector for the system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">euclidean</span></code>: method for computing the euclidean division with remainder.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xgcd</span></code>: method for computing the Extended Euclidean GCD (by default, it takes the value of
+<code class="xref py py-func docutils literal notranslate"><span class="pre">xgcd()</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.hermite</span> <span class="k">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>First we show that this solver gives the same Hermite normal forms as the usual method <code class="docutils literal notranslate"><span class="pre">hermite_form</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">MatrixSpace</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span><span class="mi">2</span><span class="p">)([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">B</span> <span class="o">=</span> <span class="n">MatrixSpace</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span><span class="mi">5</span><span class="p">)(</span><span class="nb">range</span><span class="p">(</span><span class="mi">25</span><span class="p">))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span>  <span class="mi">5</span>   <span class="mi">0</span>  <span class="o">-</span><span class="mi">5</span> <span class="o">-</span><span class="mi">10</span> <span class="o">-</span><span class="mi">15</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">1</span>   <span class="mi">2</span>   <span class="mi">3</span>   <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">C</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">3</span><span class="p">,[</span><span class="mf">1.</span><span class="o">.</span><span class="mi">15</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">3</span> <span class="mi">6</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">()</span>
+<span class="p">[</span> <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">4</span> <span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">1</span>  <span class="mi">2</span> <span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">2</span> <span class="o">-</span><span class="mi">3</span>  <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">3</span> <span class="o">-</span><span class="mi">4</span>  <span class="mi">0</span>  <span class="mi">0</span>  <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">U</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">A</span> <span class="o">==</span> <span class="n">hs</span><span class="o">.</span><span class="n">H</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>Some special cases when we have 0 or 1 row:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">a</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span> <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">b</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">ZZ</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Since this class works for any Euclidean domain, we can also run the tests from the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">hermite_form()</span></code> method for matrices with univariate polynomials:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span><span class="o">.&lt;</span><span class="n">x</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">GF</span><span class="p">(</span><span class="mi">7</span><span class="p">)[]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span>      <span class="n">x</span>       <span class="mi">1</span>     <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">]</span>
+<span class="p">[</span>      <span class="mi">0</span>       <span class="n">x</span> <span class="mi">5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">6</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">U</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">A</span> <span class="o">==</span> <span class="n">hs</span><span class="o">.</span><span class="n">H</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">B</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">vector</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span>  <span class="n">x</span>   <span class="mi">1</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">]</span>
+<span class="p">[</span>  <span class="mi">0</span>   <span class="mi">0</span>   <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">4</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">5</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">U</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">A</span> <span class="o">==</span> <span class="n">hs</span><span class="o">.</span><span class="n">H</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>But the main goal of this class is to solve linear systems:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">([</span><span class="n">x</span><span class="p">,</span><span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span>
+<span class="p">(</span><span class="mi">6</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">6</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">5</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>    <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">5</span><span class="o">*</span><span class="n">x</span><span class="p">]</span>
+<span class="p">[</span>            <span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">A</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">A</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span> <span class="o">==</span> <span class="n">hs</span><span class="o">.</span><span class="n">b</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>This class also work with localized rings over Euclidean domains. The definition of the
+localization is given in the input of this documentation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.&lt;</span><span class="n">x</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">QQ</span><span class="p">[]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="n">x</span><span class="p">],[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">x</span><span class="p">)]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="n">x</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">]),</span> <span class="n">A</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span>
+<span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span>         <span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="p">[</span>                   <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="p">[(</span><span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">A</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">A</span><span class="o">*</span><span class="n">hs</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span> <span class="o">==</span> <span class="n">hs</span><span class="o">.</span><span class="n">b</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>Sometimes, the system has zero solutions. Then a NoSolutionError is raised:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="p">([[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">],[</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vector</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="n">x</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span> <span class="o">=</span> <span class="n">HermiteSolver</span><span class="p">((</span><span class="n">R</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">x</span><span class="p">]),</span> <span class="n">A</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">solution</span><span class="p">()</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="n">NoSolutionError</span><span class="p">:</span> <span class="n">There</span> <span class="ow">is</span> <span class="n">no</span> <span class="n">solution</span> <span class="n">to</span> <span class="n">equation</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>But we can still extract the Hermite Normal Form and the transformation matrix:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span>      <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>         <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>       <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">]</span>
+<span class="p">[</span>              <span class="mi">0</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">hs</span><span class="o">.</span><span class="n">transformation_matrix</span><span class="p">()</span>
+<span class="p">[</span>      <span class="mi">0</span>       <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span>     <span class="o">-</span><span class="mi">1</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bareiss.html"
+                        title="previous chapter">Bareiss: Division-free Linear Algebra for computing Nullspace</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dynamic_string.html"
+                        title="next chapter">Dynamic Strings: A module for easy replacements</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/hermite.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dynamic_string.html" title="Dynamic Strings: A module for easy replacements"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="bareiss.html" title="Bareiss: Division-free Linear Algebra for computing Nullspace"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" >Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Solving linear systems using Hermite Normal Forms</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

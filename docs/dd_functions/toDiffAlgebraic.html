@@ -1,0 +1,465 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Differentially Agebraic functions as DD-finite elements &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Exceptions for DDFunctions and DDRings" href="exceptions.html" />
+    <link rel="prev" title="DDExamples: built-in functions" href="ddExamples.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions for DDFunctions and DDRings"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Main package (dd_functions)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Differentially Agebraic functions as DD-finite elements</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.dd_functions.toDiffAlgebraic">
+<span id="differentially-agebraic-functions-as-dd-finite-elements"></span><h1>Differentially Agebraic functions as DD-finite elements<a class="headerlink" href="#module-ajpastor.dd_functions.toDiffAlgebraic" title="Permalink to this headline">¶</a></h1>
+<p>Python file for DDFunctions as DA-Functions</p>
+<p>This package provides functions to work with DDFunctions as differentially algebraic functions.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>TODO::</dt><dd><ul class="simple">
+<li><p>Do the examples section of this documentation</p></li>
+<li><p>Document this package</p></li>
+<li><p>Review the functionality of this package</p></li>
+</ul>
+</dd>
+</dl>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2016-10-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.is_InfinitePolynomialRing">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">is_InfinitePolynomialRing</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.is_InfinitePolynomialRing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.get_InfinitePolynomialRingGen">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">get_InfinitePolynomialRingGen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">with_number</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.get_InfinitePolynomialRingGen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.infinite_derivative">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">infinite_derivative</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em>, <em class="sig-param"><span class="n">times</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">derivation</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.infinite_derivative" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that computes the times-th derivative of a differential polynomial.</p>
+<p>Given a differential ring <span class="math notranslate nohighlight">\((R,\partial)\)</span>, the ring of differential
+polynomials (denoted by <span class="math notranslate nohighlight">\(R\{y\}\)</span>) is the polynomial ring with infinitely
+many variables</p>
+<div class="math notranslate nohighlight">
+\[R[y_0, y_1, y_2, \ldots],\]</div>
+<p>where the derivation <span class="math notranslate nohighlight">\(\partial\)</span> is extended such that</p>
+<div class="math notranslate nohighlight">
+\[\partial(y_i) = y_{i+1}\quad \forall i \in \mathbb{N}.\]</div>
+<p>This method takes as an input a differential polynomial and it computes
+its derivative. The derivation on <span class="math notranslate nohighlight">\(R\)</span> will be assume with the 
+method <code class="docutils literal notranslate"><span class="pre">derivative</span></code>. However, the user is allowed to force
+a particular derivation with the input <code class="docutils literal notranslate"><span class="pre">derivation</span></code>.</p>
+<p>The output of this method is always a differential polynomial. If the 
+user wants the output to be considered as a multivariate polynomial
+(fixing the amount of variables), the method <code class="docutils literal notranslate"><span class="pre">polynomial</span></code> from
+the output do that job.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">element</span></code>: the differential polynomial we want to differentiate. 
+This object has to be a polynomial with infinitely many variables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">times</span></code>: a positive integer indicating the amount of derivations to compute.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">derivation</span></code>: derivation of the coefficients. If set to <code class="docutils literal notranslate"><span class="pre">None</span></code>, we use
+the derivation on the coefficients of the polynomial ring.</p></li>
+</ul>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<blockquote>
+<div><p>A polynomial with infinitely many variables on the same ring as <code class="docutils literal notranslate"><span class="pre">element</span></code>
+representing the derivation of <code class="docutils literal notranslate"><span class="pre">element</span></code>.</p>
+</div></blockquote>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.&lt;</span><span class="n">y</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">InfinitePolynomialRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]);</span> <span class="n">a</span> <span class="o">=</span> <span class="n">R</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">*</span><span class="n">y_2</span><span class="o">*</span><span class="n">y_3</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">a</span><span class="o">*</span><span class="n">y_2</span> <span class="o">+</span> <span class="n">y_1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">^</span><span class="mi">2</span> <span class="o">-</span> <span class="n">a</span><span class="p">,</span> <span class="n">derivation</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="mi">2</span><span class="o">*</span><span class="n">y_2</span><span class="o">*</span><span class="n">y_3</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">derivation</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">a</span><span class="o">*</span><span class="n">y_2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">a</span><span class="o">*</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">times</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">a</span><span class="o">*</span><span class="n">y_3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">y_2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">^</span><span class="mi">7</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">y_5</span><span class="o">^</span><span class="mi">7</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">base</span><span class="p">()(</span><span class="n">a</span><span class="p">))</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">infinite_derivative</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">times</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">argument</span> <span class="s1">&#39;times&#39;</span> <span class="n">must</span> <span class="n">be</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">negative</span> <span class="n">integer</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.diffalg_reduction">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">diffalg_reduction</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.diffalg_reduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that receives a polynomial ‘poly’ with variables y_0,…,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
+‘result’ with coefficients in R where, for any function f(x) such that poly(f) == 0, result(f) == 0.</p>
+<dl class="simple">
+<dt>The algorithm works as follows:</dt><dd><p>1 - Collect all the coefficients and their derivatives
+2 - Perform the simplification to each pair of coefficients
+3 - Perform the simplification for the last derivatives of the remaining coefficients –&gt; gens
+4 - Build the final derivation matrix for ‘gens’
+5 - Create a vector v for represent ‘poly’ w.r.t. ‘gens’
+6 - Build a square matrix –&gt; M = (v | v’ | … | v^(n))
+7 - Return det(M)</p>
+</dd>
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p>poly: a polynomial with variables y_0,…,y_m. Also an infinite polynomial with variable y_* is valid.</p></li>
+<li><p>infinite: if True the result polynomial will be an infinite polynomial. Otherwise, a finite variable polynomial will be returned.</p></li>
+<li><p>debug: if True, the steps of the algorithm will be printed.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.toDifferentiallyAlgebraic_Below">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">toDifferentiallyAlgebraic_Below</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.toDifferentiallyAlgebraic_Below" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that receives a polynomial with variables y_0,…,y_m with coefficients in some ring DD(R) and reduce it to a polynomial
+with coefficients in R.</p>
+<p>The optional input ‘debug’ allow the user to print extra information as the matrix that the determinant is computed.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.diff_to_diffalg">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">diff_to_diffalg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">varname</span><span class="o">=</span><span class="default_value">'y'</span></em>, <em class="sig-param"><span class="n">constant</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.diff_to_diffalg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that compute an differentially algebraic equation for the object <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p>
+<p>All <em>differentially definable</em> functions are also <em>differentially algebraic</em>. This
+method do the transformation from a linear differential equation with <em>difficult</em>
+coefficients into a non-linear equation with <em>simple</em> coefficients.</p>
+<dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Improve this introdcution.</p></li>
+<li><p>Link references to theory.</p></li>
+</ul>
+</dd>
+<dt>INPUT: </dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">func</span></code>: rational function or <code class="xref py py-class docutils literal notranslate"><span class="pre">ddFunction</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">varname</span></code>: name of the variable of the output polynomial. This must be a string
+different from the name of the variable of <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">constant</span></code>: whether to eliminate all non-constant coefficients or just
+the <code class="xref py py-class docutils literal notranslate"><span class="pre">ddRing</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">infinite</span></code>: whether the output would be in a InfinitePolynomialRing or not.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug</span></code>: if set to True, the method print several useful information 
+during the execution of the algorithm.</p></li>
+</ul>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<blockquote>
+<div><p>A polynomial with variable names of the shape <code class="docutils literal notranslate"><span class="pre">varname_*</span></code>, where <code class="docutils literal notranslate"><span class="pre">varname</span></code> is 
+the input <code class="docutils literal notranslate"><span class="pre">varname</span></code> and <code class="docutils literal notranslate"><span class="pre">*</span></code> is an integer representing the derivative of 
+the function <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p>
+</div></blockquote>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="o">-</span><span class="n">y_2</span><span class="o">*</span><span class="n">y_0</span> <span class="o">+</span> <span class="n">y_1</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y_1</span><span class="o">*</span><span class="n">y_0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">AiryD</span><span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">)))</span>
+<span class="n">y_3</span><span class="o">*</span><span class="n">y_0</span> <span class="o">-</span> <span class="n">y_2</span><span class="o">*</span><span class="n">y_1</span> <span class="o">-</span> <span class="n">y_0</span><span class="o">^</span><span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">AiryD</span><span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">)),</span> <span class="n">constant</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">y_2</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">y_0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.&lt;</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">QQ</span><span class="p">[]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="mi">3</span><span class="o">*</span><span class="n">b</span><span class="o">*</span><span class="n">a</span><span class="p">)</span>
+<span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">y_2</span> <span class="o">+</span> <span class="mi">4</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">AiryD</span><span class="p">((</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)),</span> <span class="n">varname</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">variable</span> <span class="n">name</span> <span class="s1">&#39;a&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span> <span class="k">for</span> <span class="o">...</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">varname</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">The</span> <span class="n">variable</span> <span class="n">name</span> <span class="s1">&#39;x&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span> <span class="k">for</span> <span class="o">...</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">diff_to_diffalg</span><span class="p">(</span><span class="n">SR</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">The</span> <span class="nb">type</span> <span class="n">of</span> <span class="n">the</span> <span class="n">argument</span> <span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">valid</span><span class="o">.</span> <span class="n">Required</span> <span class="n">DDFunction</span> <span class="ow">or</span> <span class="n">polynomial</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.inverse_DA">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">inverse_DA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">vars</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.inverse_DA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that computes the DA equation for the multiplicative inverse 
+of the solutions of a DA equation.</p>
+<p>We assume that the variables given by vars are the variables representing
+the solution, namely vars[i+1] = vars[i].derivative().
+If vars is not provided, we take all the variables from the polynomial
+that is given.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.func_inverse_DA">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">func_inverse_DA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">infinite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.func_inverse_DA" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: Add documentation</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.guess_DA_DDfinite">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">guess_DA_DDfinite</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">bS</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">bd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">all</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.guess_DA_DDfinite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that tries to compute a DD-finite differential equation
+for a DA-function with constant coefficients.</p>
+<p>It just tries all the possibilities. It uses the Composition class
+to get the possibilities of the orders for the coefficients.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p>poly: polynomial with the differential equation we want to mimic with DD-finite elements</p></li>
+<li><p>init: initial values of the solution of poly</p></li>
+<li><p>bS: bound to the sum of orders in the DD-finite equation</p></li>
+<li><p>db: bound to the order of the DD-finite equation</p></li>
+<li><p>all: compute all the possibles equations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.guess_homogeneous_DNfinite">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">guess_homogeneous_DNfinite</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">init</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.guess_homogeneous_DNfinite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that tries to compute a Dn-finite differential equation
+for a DA-function defined from an homogeneous equation.</p>
+<p>This method simplifies the equation supposing that the solution
+is of the form y(x) = exp(int(u(x))), getting a differential equation
+for u(x) of less order.</p>
+<p>If we end up with a linear equation, then we can return a Dn-finite function
+where n depends on how many iterations we needed.</p>
+<p>If the final algebraic equation is not linear, then we return this
+last equation together with the number of iterations done.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p>poly: polynomial with the differential equation we want to mimic with DD-finite elements</p></li>
+<li><p>init: initial values of the solution of poly (must be enough).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.FaaDiBruno_polynomials">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">FaaDiBruno_polynomials</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.FaaDiBruno_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Add documentation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.Exponential_polynomials">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">Exponential_polynomials</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.Exponential_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the <span class="math notranslate nohighlight">\(n\)</span>-th exponential polynomial.</p>
+<p>Assume that <span class="math notranslate nohighlight">\(f(x)\)</span> is a function that can be written in terms of the
+exponential function in the following way:</p>
+<div class="math notranslate nohighlight">
+\[f(x) = e^{\int_x u(t)dt}.\]</div>
+<p>Then we have that for any <span class="math notranslate nohighlight">\(n \in \mathbb{N}\)</span>, the <span class="math notranslate nohighlight">\(n\)</span>-th derivative of 
+<span class="math notranslate nohighlight">\(f(x)\)</span> can be written as</p>
+<div class="math notranslate nohighlight">
+\[f^{(n)}(x) = f(x) p_n(u),\]</div>
+<p>where <span class="math notranslate nohighlight">\(p_n \in \mathbb{Q}\{u\}\)</span>, i.e., <span class="math notranslate nohighlight">\(p_n\)</span> is a differential polynomial.
+This <span class="math notranslate nohighlight">\(p_n\)</span> is called the <span class="math notranslate nohighlight">\(n\)</span>-th exponential polynomial. This can be computed
+with a recursive formula:</p>
+<div class="math notranslate nohighlight">
+\[f^{(n)}(x) = (f^{(n-1)}(x))' = f(x)(p_1(u)p_{n-1}(u) + (p_n(u))')\]</div>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code>: positive integer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the resulting polynomial will be included into this parent structure.</p></li>
+</ul>
+</dd>
+</dl>
+<p>OUTPUT:</p>
+<blockquote>
+<div><p>The <span class="math notranslate nohighlight">\(n\)</span>-th exponential polynomial in the corresponding <code class="docutils literal notranslate"><span class="pre">parent</span></code> structure.</p>
+</div></blockquote>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="n">include</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Exponential_polynomials</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">QQ</span><span class="p">)</span>
+<span class="n">y_0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Exponential_polynomial</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">QQ</span><span class="p">)</span>
+<span class="n">y_1</span> <span class="o">+</span> <span class="n">y_0</span><span class="o">^</span><span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">parent</span><span class="p">(</span><span class="n">Exponential_polynomial</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">QQ</span><span class="p">))</span>
+<span class="n">Infinite</span> <span class="n">polynomial</span> <span class="n">ring</span> <span class="ow">in</span> <span class="n">y</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">parent</span><span class="p">(</span><span class="n">Exponential_polynomial</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">QQ</span><span class="p">[</span><span class="n">x</span><span class="p">]))</span>
+<span class="n">Infinite</span> <span class="n">polynomial</span> <span class="n">ring</span> <span class="ow">in</span> <span class="n">y</span> <span class="n">over</span> <span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Exponential_polynomial</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QQ</span><span class="p">)</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">Exponential_polynomial</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="n">QQ</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">No</span> <span class="n">Exponential</span> <span class="n">polynomial</span> <span class="n">can</span> <span class="n">be</span> <span class="n">computed</span> <span class="k">for</span> <span class="n">non</span><span class="o">-</span><span class="n">positive</span> <span class="n">index</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.Logarithmic_polynomials">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">Logarithmic_polynomials</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">parent</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.Logarithmic_polynomials" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Add this documentation</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.is_Riccati">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">is_Riccati</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.is_Riccati" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that checks if a non-linear differential equation is of Riccati type 
+and returns the change of coordinates and the linear differential equation in case
+we can.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.change_variable">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">change_variable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">poly</span></em>, <em class="sig-param"><span class="n">new_var</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.change_variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.simplify_coefficients">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">simplify_coefficients</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base</span></em>, <em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">derivatives</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.simplify_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.simplify_derivatives">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">simplify_derivatives</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">derivatives</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.simplify_derivatives" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.find_relation">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">find_relation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">g</span></em>, <em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.find_relation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.find_linear_relation">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">find_linear_relation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">g</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.find_linear_relation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.build_derivation_matrix">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">build_derivation_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gens</span></em>, <em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">drelations</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.build_derivation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.toDiffAlgebraic.build_vector">
+<code class="sig-prename descclassname">ajpastor.dd_functions.toDiffAlgebraic.</code><code class="sig-name descname">build_vector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">coeffs</span></em>, <em class="sig-param"><span class="n">monomials</span></em>, <em class="sig-param"><span class="n">graph</span></em>, <em class="sig-param"><span class="n">drelations</span></em>, <em class="sig-param"><span class="n">cR</span></em>, <em class="sig-param"><span class="n">debug</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.toDiffAlgebraic.build_vector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ddExamples.html"
+                        title="previous chapter">DDExamples: built-in functions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="exceptions.html"
+                        title="next chapter">Exceptions for DDFunctions and DDRings</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dd_functions/toDiffAlgebraic.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="exceptions.html" title="Exceptions for DDFunctions and DDRings"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Main package (dd_functions)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Differentially Agebraic functions as DD-finite elements</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

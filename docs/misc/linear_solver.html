@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A generic class for solvers of linear systems &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bareiss: Division-free Linear Algebra for computing Nullspace" href="bareiss.html" />
+    <link rel="prev" title="Matrices and Linear Algebra: useful operations" href="matrix.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bareiss.html" title="Bareiss: Division-free Linear Algebra for computing Nullspace"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="matrix.html" title="Matrices and Linear Algebra: useful operations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" accesskey="U">Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A generic class for solvers of linear systems</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.misc.linear_solver">
+<span id="a-generic-class-for-solvers-of-linear-systems"></span><h1>A generic class for solvers of linear systems<a class="headerlink" href="#module-ajpastor.misc.linear_solver" title="Permalink to this headline">¶</a></h1>
+<p>Python file for an implementation of linear solver.</p>
+<p>This module offers an abstract class that represents a solver for a linear system. This
+class stablish a common interface for all the linear solvers that can be used.</p>
+<p>This module also includes one toy implementation that uses Sage solving methods to compute
+the solutions to a linear system with coefficients in integral domains (since we build the
+field of fractions).</p>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2021-02-09): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver">
+<em class="property">class </em><code class="sig-prename descclassname">ajpastor.misc.linear_solver.</code><code class="sig-name descname">LinearSystemSolver</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">matrix</em>, <em class="sig-param">inhomogeneous</em>, <em class="sig-param">is_zero=&lt;function LinearSystemSolver.&lt;lambda&gt; at 0x7f131d7efdc0&gt;</em>, <em class="sig-param">relations=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generic class for solving a linear system.</p>
+<p>The methods described in this class are an interface that all
+the subclasses must implement. This allow the user to change between 
+algorithms very easily since all the information that can be extracted
+has always the same format.</p>
+<p>A linear system is always given in the form</p>
+<div class="math notranslate nohighlight">
+\[A \alpha = \mathbf{b},\]</div>
+<p>where <span class="math notranslate nohighlight">\(A\)</span> is a matrix of size <span class="math notranslate nohighlight">\(n\times m\)</span> with coefficients in a ring <span class="math notranslate nohighlight">\(R\)</span>,
+<span class="math notranslate nohighlight">\(\mathbf{b}\)</span> is the inhomogeneous term, i.e., a column vector of size <span class="math notranslate nohighlight">\(n\)</span> also 
+with entries in the ring <span class="math notranslate nohighlight">\(R\)</span>) and <span class="math notranslate nohighlight">\(\alpha\)</span> a column vector of size <span class="math notranslate nohighlight">\(m\)</span> that
+represents the unknowns of the system.</p>
+<dl class="py attribute">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.A">
+<code class="sig-name descname">A</code><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.A" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.system_matrix" title="ajpastor.misc.linear_solver.LinearSystemSolver.system_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">system_matrix()</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.H">
+<code class="sig-name descname">H</code><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.H" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.echelon_form" title="ajpastor.misc.linear_solver.LinearSystemSolver.echelon_form"><code class="xref py py-func docutils literal notranslate"><span class="pre">echelon_form()</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.U">
+<code class="sig-name descname">U</code><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.U" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.transformation_matrix" title="ajpastor.misc.linear_solver.LinearSystemSolver.transformation_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">transformation_matrix()</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.b">
+<code class="sig-name descname">b</code><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.b" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.inhomogeneous" title="ajpastor.misc.linear_solver.LinearSystemSolver.inhomogeneous"><code class="xref py py-func docutils literal notranslate"><span class="pre">inhomogeneous()</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.echelon_form">
+<code class="sig-name descname">echelon_form</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.echelon_form" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the echelon form of the system matrix.</p>
+<p>This method returns the echelon form computed by the current algorithm in order to solve
+the linear system. The structure of this matrix is highly dependent on the algorithm
+and it can be upper-triangular, lower-triangular, diagonal, etc.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.have_ideal">
+<code class="sig-name descname">have_ideal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.have_ideal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Auxiliary method to know if some relation have been already found.</p>
+<p>This method returns <code class="docutils literal notranslate"><span class="pre">True</span></code> if the current Groebner basis we have computed
+gives some non-trivial ideal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.inhomogeneous">
+<code class="sig-name descname">inhomogeneous</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.inhomogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the inhomogeneous vector of the linear system.</p>
+<p>This method returns the original inhomogeneous vector provided to present the linear 
+system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.is_homogeneous">
+<code class="sig-name descname">is_homogeneous</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.is_homogeneous" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that return whether the system is homogeneous or not.</p>
+<p>This method checks if all the elements in the vector <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> are zero.
+This checking may lead to more relations on the system considered and will be added, 
+as expected, in the relation ideal that the algorithm have.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.is_zero">
+<code class="sig-name descname">is_zero</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">el</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.is_zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to check whether an element is the zero element or not.</p>
+<p>This method computes the real value of <code class="docutils literal notranslate"><span class="pre">el</span></code> and checks if it is zero
+or not regardless of its representation. In case the elements was not
+trivial, we add it to the ideal of relations and update the Gröbner basis.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.parent">
+<code class="sig-name descname">parent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the ring <span class="math notranslate nohighlight">\(R\)</span> where the system is defined.</p>
+<p>The matrix <span class="math notranslate nohighlight">\(A\)</span> and the vector <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> have their coefficients in a 
+common ring (or at least in rings where Sage can compute the <em>pushout</em>). This
+method returns such ring. This ring may be different from the ring where we look for 
+solutions to the system <span class="math notranslate nohighlight">\(A\alpha = \mathbf{b}\)</span>, but it will always be included
+in it.</p>
+<p>In order to know the ring where the solutions are searched, see the method 
+<a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent" title="ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent"><code class="xref py py-func docutils literal notranslate"><span class="pre">solution_parent()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.rank">
+<code class="sig-name descname">rank</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.rank" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the rank of the system matrix.</p>
+<p>This methods returns the rank of the system matrix. This rank is the maximal number of rows
+of the system that are linearly independent. This number usually defines the dimension
+of the solution space of the system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.relations">
+<code class="sig-name descname">relations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.relations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the current known relations in the ring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.simplify">
+<code class="sig-name descname">simplify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to simplify an object using the relations found.</p>
+<p>This method simplifies an object (either an element, vector, list, tuple or matrix)
+using the relations that we found during the computation of the solutions of this linear
+system.</p>
+<p>WARNING: repeated executions of this method may return different outputs since we may have
+found more relations.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.solution">
+<code class="sig-name descname">solution</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.solution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns a particular solution to the linear system.</p>
+<p>This method computes a particular vector <span class="math notranslate nohighlight">\(\alpha\)</span> that solves 
+the linear system <span class="math notranslate nohighlight">\(A\alpha = \mathbf{b}\)</span> in the parent given
+by <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent" title="ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent"><code class="xref py py-func docutils literal notranslate"><span class="pre">LinearSystemSolver.solution_parent()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent">
+<code class="sig-name descname">solution_parent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.solution_parent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the ring where the solutions to the system are searched.</p>
+<p>The matrix <span class="math notranslate nohighlight">\(A\)</span> and the vector <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> have their coefficients in a 
+common ring (or at least in rings where Sage can compute the <em>pushout</em>). This 
+ring may be different from the ring where we look for 
+solutions to the system <span class="math notranslate nohighlight">\(A\alpha = \mathbf{b}\)</span>, but it will always be included
+in it. This method returns that ring where we look for solutions.</p>
+<p>In order to know the ring of the matrix <span class="math notranslate nohighlight">\(A\)</span> and vector <span class="math notranslate nohighlight">\(\mathbf{b}\)</span>, see the method 
+<a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver.parent" title="ajpastor.misc.linear_solver.LinearSystemSolver.parent"><code class="xref py py-func docutils literal notranslate"><span class="pre">parent()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.system_matrix">
+<code class="sig-name descname">system_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.system_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the matrix of the linear system.</p>
+<p>This method returns the original matrix provided to present the linear 
+system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.syzygy">
+<code class="sig-name descname">syzygy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.syzygy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the solution space for the homogeneous system.</p>
+<p>Given a linear system <span class="math notranslate nohighlight">\(A\alpha = \mathbf{b}\)</span>, it is clear that 
+for any two solutions <span class="math notranslate nohighlight">\(\alpha_1,\alpha_2\)</span> we have that its difference
+is a solution to the homogeneous linear system <span class="math notranslate nohighlight">\(A\beta = \mathbf{0}\)</span>.</p>
+<p>This method computes the solution space of the homogeneous system and
+return it as a matrix <span class="math notranslate nohighlight">\(S\)</span> of size <span class="math notranslate nohighlight">\(m\times p\)</span> where <span class="math notranslate nohighlight">\(m\)</span> is the number
+of columns of <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(p\)</span> the dimension of the solution space. Hence, 
+any solution to the original system can be written as</p>
+<div class="math notranslate nohighlight">
+\[\alpha_0 + S\beta\]</div>
+<p>where <span class="math notranslate nohighlight">\(\alpha_0\)</span> is a particular solution to the linear system <span class="math notranslate nohighlight">\(A\alpha_0 = \mathbf{b}\)</span>
+and <span class="math notranslate nohighlight">\(\beta\)</span> is any vector with entries in the parent for the solutions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.linear_solver.LinearSystemSolver.transformation_matrix">
+<code class="sig-name descname">transformation_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.LinearSystemSolver.transformation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that returns the transformation matrix of the system</p>
+<p>This method returns a square matrix <span class="math notranslate nohighlight">\(U\)</span> that transforms the linear system
+matrix into the echelon form. This means that if <span class="math notranslate nohighlight">\(H\)</span> is the echelon form
+of the system matrix <span class="math notranslate nohighlight">\(A\)</span>, then</p>
+<div class="math notranslate nohighlight">
+\[UA = H\]</div>
+<p>This matrix is computed simultaneously to the echelon form of the system.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt id="ajpastor.misc.linear_solver.NoSolutionError">
+<em class="property">exception </em><code class="sig-prename descclassname">ajpastor.misc.linear_solver.</code><code class="sig-name descname">NoSolutionError</code><a class="headerlink" href="#ajpastor.misc.linear_solver.NoSolutionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="ajpastor.misc.linear_solver.SageSolver">
+<em class="property">class </em><code class="sig-prename descclassname">ajpastor.misc.linear_solver.</code><code class="sig-name descname">SageSolver</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">matrix</span></em>, <em class="sig-param"><span class="n">inhomogeneous</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.linear_solver.SageSolver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver" title="ajpastor.misc.linear_solver.LinearSystemSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.misc.linear_solver.LinearSystemSolver</span></code></a></p>
+<p>Toy implementation of a <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver" title="ajpastor.misc.linear_solver.LinearSystemSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearSystemSolver</span></code></a>.</p>
+<p>This class is a simple example on how to implement specific classes
+for <a class="reference internal" href="#ajpastor.misc.linear_solver.LinearSystemSolver" title="ajpastor.misc.linear_solver.LinearSystemSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearSystemSolver</span></code></a>. This class uses Sage method to compute
+the solutions, the echelon form, etc.</p>
+<p>WARNING (<a class="reference external" href="http://trac.sagemath.org/23715">trac ticket #23715</a>): sometimes, the 
+method echelon_form ignore the transformation argument, so the output
+is None.</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="matrix.html"
+                        title="previous chapter">Matrices and Linear Algebra: useful operations</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bareiss.html"
+                        title="next chapter">Bareiss: Division-free Linear Algebra for computing Nullspace</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/linear_solver.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bareiss.html" title="Bareiss: Division-free Linear Algebra for computing Nullspace"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="matrix.html" title="Matrices and Linear Algebra: useful operations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" >Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">A generic class for solvers of linear systems</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

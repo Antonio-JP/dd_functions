@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Strings: A module for easy replacements &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Solving linear systems using Hermite Normal Forms" href="hermite.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hermite.html" title="Solving linear systems using Hermite Normal Forms"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" accesskey="U">Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Dynamic Strings: A module for easy replacements</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.misc.dynamic_string">
+<span id="dynamic-strings-a-module-for-easy-replacements"></span><h1>Dynamic Strings: A module for easy replacements<a class="headerlink" href="#module-ajpastor.misc.dynamic_string" title="Permalink to this headline">¶</a></h1>
+<p>Python file for a dynamic string</p>
+<p>This module offers an implementation of a class (<code class="docutils literal notranslate"><span class="pre">DynamicString</span></code>) that behaves like a string 
+but can be built using different common pieces so it is possible to perform simultaneos
+substitutions on the string.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Complete the Examples section of this documentation</p></li>
+</ul>
+</dd>
+</dl>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2016-10-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt id="ajpastor.misc.dynamic_string.DynamicString">
+<em class="property">class </em><code class="sig-prename descclassname">ajpastor.misc.dynamic_string.</code><code class="sig-name descname">DynamicString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template</span></em>, <em class="sig-param"><span class="n">arguments</span></em>, <em class="sig-param"><span class="n">escape</span><span class="o">=</span><span class="default_value">'_'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for dynamic strings, developed to make easier the substitution of elements through the string.</p>
+<p>This class allows the user to manage strings dynamically, which means, being able to make substitutions
+through the whole string simultaneously, or iterated substitutions in a simple and consistent manner.</p>
+<p>For doing so, this string works with “templates”. The string is defined as a main structure for the 
+main message where some escape characters may be used to mark where the substitutions will be made.</p>
+<p>For example, if we have the name of a function <code class="docutils literal notranslate"><span class="pre">exp(x)</span> <span class="pre">+</span> <span class="pre">7x^2</span> <span class="pre">-</span> <span class="pre">sin(x)</span></code>, we may want to compute 
+a composition with <code class="docutils literal notranslate"><span class="pre">3ysin(y)</span></code>. Then we could create a <code class="docutils literal notranslate"><span class="pre">DynamicString</span></code> with the command</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">DymanicString(&quot;exp(_1)</span> <span class="pre">+</span> <span class="pre">7_1^2</span> <span class="pre">-</span> <span class="pre">sin(_1)&quot;,</span> <span class="pre">[&quot;x&quot;])</span></code></p>
+</div></blockquote>
+<p>This command creates the object that can be read as the first name. However, substituing the <code class="docutils literal notranslate"><span class="pre">x</span></code> by the 
+new name, is easy, since we have marked where <code class="docutils literal notranslate"><span class="pre">x</span></code> appeared originally.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">template</span></code>: a string with the main structure for the Dynamic String. This string may contain
+the escape character (see below) followed by integers to mark where each of the arguments will be replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">arguments</span></code>: a list or tuple containing the arguments for this DynamicString. A <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+is raised if the number of arguments is too small.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">escape</span></code>: a character to mark how the arguments are introduced. By default, it takes the value <code class="docutils literal notranslate"><span class="pre">'_'</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1 + _2_1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">]);</span> <span class="n">s</span>
+<span class="n">a</span> <span class="o">+</span> <span class="n">ba</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">+</span> <span class="n">bc</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;+1 - +2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">],</span> <span class="s1">&#39;+&#39;</span><span class="p">);</span> <span class="n">t</span>
+<span class="n">a</span> <span class="o">+</span> <span class="n">ba</span> <span class="o">-</span> <span class="n">x</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">+</span> <span class="n">s</span> <span class="c1"># concatenation</span>
+<span class="n">a</span> <span class="o">+</span> <span class="n">ba</span> <span class="o">-</span> <span class="n">xa</span> <span class="o">+</span> <span class="n">ba</span>
+<span class="n">sage</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">+</span> <span class="n">bx</span> <span class="o">-</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">bx</span>
+</pre></div>
+</div>
+<p>This class does not allow a as escape character anything but strings of length 1:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sage: DynamicString(&quot;##1 + ##2##1&quot;, [&#39;a&#39;,&#39;b&#39;], escape=&#39;##&#39;)
+Traceback (most recent call last):
+...
+TypeError: The escape character must be of type &#39;str&#39; with length 1 or &#39;chr&#39;. Received &lt;class &#39;str&#39;&gt;: ##
+sage: DynamicString(&quot;11 + 12&quot;, [&#39;a&#39;,&#39;b&#39;], escape=1)
+Traceback (most recent call last):
+...
+TypeError: The escape character must be of type &#39;str&#39; with length 1 or &#39;chr&#39;. Received &lt;class &#39;sage.rings.integer.Integer&#39;&gt;: 1
+</pre></div>
+</div>
+<p>Although numbers can be used as escape characterers if set as strings:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;11 + 12&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">],</span> <span class="n">escape</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+</div>
+<p>The method also checks that the number of arguments are enough to perform the substitution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_3 + _1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">number</span> <span class="n">of</span> <span class="n">arguments</span><span class="p">:</span> <span class="n">required</span> <span class="n">at</span> <span class="n">least</span> <span class="mi">3</span><span class="p">,</span> <span class="n">provided</span> <span class="mi">2</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.change_argument">
+<code class="sig-name descname">change_argument</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_argument</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.change_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to change the arguments of a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>.</p>
+<p>This method allows the user to set a new value for a particular argument. The user must provide
+the new value (that has to be valid for an argument, see <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>) and an index
+that has to be bounded in the number of required.</p>
+<p>The method also allows a list of new arguments that has to be long enough to be valid. Then the argument
+<code class="docutils literal notranslate"><span class="pre">index</span></code> will be ignored and all arguments will be changed.</p>
+<p>This method clean the cache for the method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.real" title="ajpastor.misc.dynamic_string.DynamicString.real"><code class="xref py py-func docutils literal notranslate"><span class="pre">real()</span></code></a>.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">new_argument</span></code>: a valid argument or a list (long enough) for all the arguments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">index</span></code>: index of the argument that will be changed. Ignored if <code class="docutils literal notranslate"><span class="pre">new_argument</span></code> is a list. By defualt
+its value is “1”</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1) + cos(_1_2)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">]);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">ay</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;b&quot;</span><span class="p">]);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The new argument can be a DynamicString:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;c&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">xexp</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>However, changing the argument of <code class="docutils literal notranslate"><span class="pre">s</span></code> will not change the arguments of the inner String:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">);</span> <span class="n">s</span>                
+<span class="n">exp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">yexp</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="n">yexp</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Providing a string that is not valid (see method <a class="reference internal" href="#ajpastor.misc.dynamic_string.is_string" title="ajpastor.misc.dynamic_string.is_string"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_string()</span></code></a>) will cause a <code class="docutils literal notranslate"><span class="pre">TypeError</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">No</span> <span class="n">valid</span> <span class="n">argument</span> <span class="k">for</span> <span class="n">a</span> <span class="n">DynamicString</span><span class="p">:</span> <span class="n">only</span> <span class="n">strings</span> <span class="ow">and</span> <span class="n">DynamicStrings</span> <span class="n">are</span> <span class="n">valid</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">No</span> <span class="n">valid</span> <span class="n">arguments</span> <span class="k">for</span> <span class="n">a</span> <span class="n">DynamicString</span><span class="p">:</span> <span class="n">only</span> <span class="n">strings</span> <span class="ow">and</span> <span class="n">DynamicStrings</span> <span class="n">are</span> <span class="n">valid</span>
+</pre></div>
+</div>
+<p>Also, a bad number of arguments or index will raise a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">([</span><span class="s2">&quot;1&quot;</span><span class="p">,</span><span class="s2">&quot;2&quot;</span><span class="p">,</span><span class="s2">&quot;3&quot;</span><span class="p">]);</span> <span class="n">s</span>
+<span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">([</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">number</span> <span class="n">of</span> <span class="n">arguments</span><span class="p">:</span> <span class="n">required</span> <span class="n">at</span> <span class="n">least</span> <span class="mi">2</span><span class="p">,</span> <span class="n">provided</span> <span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">index</span><span class="p">:</span> <span class="n">the</span> <span class="n">index</span> <span class="n">has</span> <span class="n">to</span> <span class="n">be</span> <span class="n">between</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mf">2.</span> <span class="n">Got</span><span class="p">:</span> <span class="mi">3</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">index</span><span class="p">:</span> <span class="n">the</span> <span class="n">index</span> <span class="n">has</span> <span class="n">to</span> <span class="n">be</span> <span class="n">between</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mf">2.</span> <span class="n">Got</span><span class="p">:</span> <span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">ValueError</span><span class="p">:</span> <span class="n">Invalid</span> <span class="n">index</span><span class="p">:</span> <span class="n">the</span> <span class="n">index</span> <span class="n">has</span> <span class="n">to</span> <span class="n">be</span> <span class="n">between</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mf">2.</span> <span class="n">Got</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.clean">
+<code class="sig-name descname">clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method for manually cleaning the cache for <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.real" title="ajpastor.misc.dynamic_string.DynamicString.real"><code class="xref py py-func docutils literal notranslate"><span class="pre">real()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.m_replace">
+<code class="sig-name descname">m_replace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">to_replace</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.m_replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to perform several replacements simultaneously.</p>
+<p>This method do exactly the same as ‘self.replace(key, value) for all (key,value) in to_replace but all at once, avoiding that one
+substitution affects the next one. This method returns always a new DynamicString with the replacements already done.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">to_replace</span></code>: dictionary with the pairs (pattern, out) to replace in <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deep</span></code>: this do the same as the argument <code class="docutils literal notranslate"><span class="pre">deep</span></code> on <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.replace" title="ajpastor.misc.dynamic_string.DynamicString.replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">replace()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1 + exp(_2) - _3&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="s2">&quot;y&quot;</span><span class="p">,</span><span class="s2">&quot;e&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">m_replace</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">})</span>
+<span class="n">y</span> <span class="o">+</span> <span class="n">eyp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">e</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">e</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">m_replace</span><span class="p">({</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">},</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">+</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">e</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.nargs">
+<code class="sig-name descname">nargs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.nargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for the number of arguments for a DynamicString.</p>
+<p>This method returns the exact amount of arguments that this DynamicString has. This method does not iterate
+through inner DynamicStrings since the substitution is independent in each case.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(x)&quot;</span><span class="p">,[])</span><span class="o">.</span><span class="n">nargs</span><span class="p">()</span>
+<span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">nargs</span><span class="p">()</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1 + _2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]),</span> <span class="s2">&quot;a&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">nargs</span><span class="p">()</span>
+<span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="p">(</span><span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;exp(x)&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]))</span><span class="o">.</span><span class="n">nargs</span><span class="p">()</span>
+<span class="mi">2</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.real">
+<code class="sig-name descname">real</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.real" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to compute the current representation of the DynamicString</p>
+<p>This method computes the actual string object that the Dynamic String is currently representing.
+This method is cached, so calling it several times will not repeat the computations. However, the user
+can call the method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.clean" title="ajpastor.misc.dynamic_string.DynamicString.clean"><code class="xref py py-func docutils literal notranslate"><span class="pre">clean()</span></code></a> for removing the cached result.</p>
+<p>This cached result is also cleaned automatically when using the method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.change_argument" title="ajpastor.misc.dynamic_string.DynamicString.change_argument"><code class="xref py py-func docutils literal notranslate"><span class="pre">change_argument()</span></code></a>.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]);</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+<span class="s1">&#39;exp(x)&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">);</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+<span class="s1">&#39;exp(y)&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">()</span> <span class="c1"># no computations done</span>
+<span class="s1">&#39;exp(y)&#39;</span>
+</pre></div>
+</div>
+<p>This method is not affected by the method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.replace" title="ajpastor.misc.dynamic_string.DynamicString.replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">replace()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;l&quot;</span><span class="p">)</span>
+<span class="n">elp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+<span class="s1">&#39;exp(y)&#39;</span>
+</pre></div>
+</div>
+<p>This method returns always the same as casting the elemtn to a string:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">()</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.misc.dynamic_string.DynamicString.replace">
+<code class="sig-name descname">replace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pattern</span></em>, <em class="sig-param"><span class="n">out</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.DynamicString.replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replacing method for DynamicStrings</p>
+<p>This method performs a similar operation as the method <code class="xref py py-func docutils literal notranslate"><span class="pre">str.replace()</span></code>. However, 
+this method splits the string into the template and the arguments perfoming the substitution
+in both separately and then combining them together into a final DynamicString.</p>
+<p>If the required pattern includes the escape character, the method will raise an error.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pattern</span></code>: the string we want to change in <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">out</span></code>: the new string to put where <code class="docutils literal notranslate"><span class="pre">pattern</span></code> is found.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deep</span></code>: extra argument that allows the user to only perform substitutions within the 
+arguments. The default value is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1 and _2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="n">xnd</span> <span class="n">b</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">x</span> <span class="ow">and</span> <span class="n">b</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1, _2) - a&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">change_argument</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span> <span class="n">s</span>
+<span class="n">a</span> <span class="ow">and</span> <span class="n">exp</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">)</span>
+<span class="n">P</span> <span class="n">Pnd</span> <span class="n">exp</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span> <span class="o">-</span> <span class="n">P</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">P</span> <span class="ow">and</span> <span class="n">exp</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">P</span><span class="p">)</span> <span class="o">-</span> <span class="n">a</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.dynamic_string.dreplace">
+<code class="sig-prename descclassname">ajpastor.misc.dynamic_string.</code><code class="sig-name descname">dreplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em>, <em class="sig-param"><span class="n">pattern</span></em>, <em class="sig-param"><span class="n">out</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.dreplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enhanced “replace” method.</p>
+<p>This function is equivalent to the <code class="docutils literal notranslate"><span class="pre">replace</span></code> method of the <code class="docutils literal notranslate"><span class="pre">str</span></code> class when 
+both <code class="docutils literal notranslate"><span class="pre">element</span></code> and <code class="docutils literal notranslate"><span class="pre">out</span></code> are strings. However, this method mix together the use
+of <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a> and strings.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">element</span></code>: a string or <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a> where we want to replace <code class="docutils literal notranslate"><span class="pre">pattern</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pattern</span></code>: a string with the pattern to replace in <code class="docutils literal notranslate"><span class="pre">element</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">out</span></code>: a string or <code class="docutils literal notranslate"><span class="pre">DynamicString</span></code> that will be put in the places where <code class="docutils literal notranslate"><span class="pre">pattern</span></code> appears in <code class="docutils literal notranslate"><span class="pre">element</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deep</span></code>: in case <code class="docutils literal notranslate"><span class="pre">element</span></code> is a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>, this argument is equivalent to that in method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.replace" title="ajpastor.misc.dynamic_string.DynamicString.replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">DynamicString.replace()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">element</span></code> and <code class="docutils literal notranslate"><span class="pre">out</span></code> are both strings, then the method return the equivalent string
+after the replacement.</p></li>
+<li><p>Otherwise, this method returns a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="n">dreplace</span><span class="p">(</span><span class="s2">&quot;testing string&quot;</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">);</span> <span class="n">t</span>
+<span class="n">testing</span> <span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">DynamicString</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">u</span> <span class="o">=</span> <span class="n">dreplace</span><span class="p">(</span><span class="s2">&quot;testing string&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="s2">&quot; a &quot;</span><span class="p">);</span> <span class="n">u</span>
+<span class="s1">&#39;te a ting  a tring&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">DynamicString</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">dreplace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">);</span> <span class="n">v</span>
+<span class="n">eyp</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<p>This method raise an error if <code class="docutils literal notranslate"><span class="pre">element</span></code> is not a string or a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">dreplace</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">No</span> <span class="n">string</span> <span class="n">given</span><span class="o">.</span> <span class="n">Impossible</span> <span class="n">to</span> <span class="n">replace</span> <span class="n">string</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.dynamic_string.m_dreplace">
+<code class="sig-prename descclassname">ajpastor.misc.dynamic_string.</code><code class="sig-name descname">m_dreplace</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em>, <em class="sig-param"><span class="n">to_replace</span></em>, <em class="sig-param"><span class="n">deep</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.m_dreplace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that replace simultaneously patters in a string.</p>
+<p>This method perfoms a simoultanously substitution on <code class="docutils literal notranslate"><span class="pre">element</span></code> (if it is either a string or 
+a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>) patterns that can be found in <code class="docutils literal notranslate"><span class="pre">to_replace</span></code>. This is equivalent,
+in the case of <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>, to the method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.m_replace" title="ajpastor.misc.dynamic_string.DynamicString.m_replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">DynamicString.m_replace()</span></code></a>.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">element</span></code>: string or <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a> to perform the replacement.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_replace</span></code>: dictionary with entries <code class="docutils literal notranslate"><span class="pre">(pattern</span> <span class="pre">:</span> <span class="pre">out)</span></code> to be replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">deep</span></code>: see argument <code class="docutils literal notranslate"><span class="pre">deep</span></code> in method <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString.replace" title="ajpastor.misc.dynamic_string.DynamicString.replace"><code class="xref py py-func docutils literal notranslate"><span class="pre">DynamicString.replace()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt>OUTPUT:</dt><dd><ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">element</span></code> and all the entries in <code class="docutils literal notranslate"><span class="pre">to_replace</span></code> are strings, this method returns a
+string object after performing the substitution.</p></li>
+<li><p>Otherwise, this method returns a new DynamicString.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">s</span> <span class="o">=</span> <span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;exp(_1)&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">t</span> <span class="o">=</span> <span class="s2">&quot;a + b&quot;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">u</span> <span class="o">=</span> <span class="n">m_dreplace</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="p">:</span> <span class="s2">&quot;a&quot;</span><span class="p">});</span> <span class="n">u</span>
+<span class="s1">&#39;b + a&#39;</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">DynamicString</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span> <span class="o">=</span> <span class="n">m_dreplace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">});</span> <span class="n">v</span>
+<span class="n">eyp</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">DynamicString</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">nargs</span><span class="p">()</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">m_dreplace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="s2">&quot;y&quot;</span><span class="p">},</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">exp</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This method raise an error if <code class="docutils literal notranslate"><span class="pre">element</span></code> is not a string or a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">m_dreplace</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">:</span> <span class="s2">&quot;3&quot;</span><span class="p">})</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+<span class="o">...</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">No</span> <span class="n">string</span> <span class="n">given</span><span class="o">.</span> <span class="n">Impossible</span> <span class="n">to</span> <span class="n">replace</span> <span class="n">multiple</span> <span class="n">strings</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.misc.dynamic_string.is_string">
+<code class="sig-prename descclassname">ajpastor.misc.dynamic_string.</code><code class="sig-name descname">is_string</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">element</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.dynamic_string.is_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method that checks whether an object can be considered a string.</p>
+<p>This method check that the type of the input is either <code class="docutils literal notranslate"><span class="pre">str</span></code> 
+or a <a class="reference internal" href="#ajpastor.misc.dynamic_string.DynamicString" title="ajpastor.misc.dynamic_string.DynamicString"><code class="xref py py-class docutils literal notranslate"><span class="pre">DynamicString</span></code></a> so it is valid for use for the latter class.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">element</span></code>: the object to be checked</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.dynamic_string</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_string</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="kc">False</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_string</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span><span class="mi">1</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">is_string</span><span class="p">(</span><span class="n">DynamicString</span><span class="p">(</span><span class="s2">&quot;_1 + _2&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">]))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="hermite.html"
+                        title="previous chapter">Solving linear systems using Hermite Normal Forms</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/dynamic_string.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hermite.html" title="Solving linear systems using Hermite Normal Forms"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" >Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Dynamic Strings: A module for easy replacements</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

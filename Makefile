@@ -38,10 +38,10 @@ coverage:
 	
 # Documentation commands
 doc: no-deps
-	cd docs && $(SAGE) -sh -c "make html"
+	cd docsrc && $(SAGE) -sh -c "make html"
 
-doc-pdf:
-	cd docs && $(SAGE) -sh -c "make latexpdf"
+doc-github: doc
+	cp -a docsrc/build/html/. ./docs
 	
 # Distribution commands
 	
@@ -57,7 +57,7 @@ clean: clean_doc clean_pyc
 
 clean_doc:
 	@echo "Cleaning documentation"
-	@cd docs && $(SAGE) -sh -c "make clean"
+	@cd docsrc && $(SAGE) -sh -c "make clean"
 	
 clean_pyc:
 	@echo "Cleaning the Python precompiled files (.pyc)"

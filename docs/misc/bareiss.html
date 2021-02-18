@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bareiss: Division-free Linear Algebra for computing Nullspace &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Solving linear systems using Hermite Normal Forms" href="hermite.html" />
+    <link rel="prev" title="A generic class for solvers of linear systems" href="linear_solver.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hermite.html" title="Solving linear systems using Hermite Normal Forms"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="linear_solver.html" title="A generic class for solvers of linear systems"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" accesskey="U">Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Bareiss: Division-free Linear Algebra for computing Nullspace</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.misc.bareiss">
+<span id="bareiss-division-free-linear-algebra-for-computing-nullspace"></span><h1>Bareiss: Division-free Linear Algebra for computing Nullspace<a class="headerlink" href="#module-ajpastor.misc.bareiss" title="Permalink to this headline">¶</a></h1>
+<p>Python file for an implementation of Bareiss’ algorithm</p>
+<p>This module offers an implementation of Bareiss algorithm (<a class="reference external" href="https://www.ams.org/journals/mcom/1968-22-103/S0025-5718-1968-0226829-0/">https://www.ams.org/journals/mcom/1968-22-103/S0025-5718-1968-0226829-0/</a>).
+Such algorithm computes (fraction-free) an echelon form of a matrix whose coefficients are in an integral domain.</p>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2016-10-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py class">
+<dt id="ajpastor.misc.bareiss.BareissAlgorithm">
+<em class="property">class </em><code class="sig-prename descclassname">ajpastor.misc.bareiss.</code><code class="sig-name descname">BareissAlgorithm</code><span class="sig-paren">(</span><em class="sig-param">parent</em>, <em class="sig-param">matrix</em>, <em class="sig-param">is_zero=&lt;function BareissAlgorithm.&lt;lambda&gt; at 0x7f131d806ca0&gt;</em>, <em class="sig-param">relations=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.misc.bareiss.BareissAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="linear_solver.html#ajpastor.misc.linear_solver.LinearSystemSolver" title="ajpastor.misc.linear_solver.LinearSystemSolver"><code class="xref py py-class docutils literal notranslate"><span class="pre">ajpastor.misc.linear_solver.LinearSystemSolver</span></code></a></p>
+<p>This class represents the application of the Bareiss’ algorithm over a matrix with polynomial coefficients.</p>
+<p>Bareiss’ algorithm is a division-free algorithm to compute an echelon form of a matrix over an integral domain. 
+The main idea from Bareiss algorithm is to perform some type of Gauss-Jordan elimination on the matrix but keeping track
+that we never get denominators and ensuring that, in the end, the main diagonal has the extra property that <span class="math notranslate nohighlight">\(d_{i+1,i+1}\ |\ d_{i,i}\)</span>.</p>
+<p>This implementation only works with polynomial coefficients, however we allow to provide a method that solves the 
+membership problem for the ideal <span class="math notranslate nohighlight">\(I = \{p(X) \in R[X]\ |\ p(X) = 0\}\)</span>. If such method is not provided, the algorithm work over
+the polynomials as no relation between the variables exist.</p>
+<p>This algorithm allows to solve homogeneous system (no inhomogeneous term is allowed).</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">parent</span></code>: the ring where the coefficients will be treated. It has to be a polynomial ring or its field of
+fractions.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">matrix</span></code>: matrix for the homogeneous system.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code>: method for the membership problem for the ideal <span class="math notranslate nohighlight">\(I\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">relations</span></code>: list of relation known for the variables of <code class="docutils literal notranslate"><span class="pre">parent</span></code>. This, together with <code class="docutils literal notranslate"><span class="pre">method</span></code> is use to 
+check the membership to the ideal <span class="math notranslate nohighlight">\(I\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.misc.bareiss</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">R</span><span class="o">.&lt;</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">&gt;</span> <span class="o">=</span> <span class="n">PolynomialRing</span><span class="p">(</span><span class="n">QQ</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">b</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+<span class="n">Multivariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+<span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">FractionField</span><span class="p">(</span><span class="n">R</span><span class="p">),</span> <span class="n">M</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span>
+<span class="n">Multivariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
+</pre></div>
+</div>
+<p>We can see how the relations involved on the coefficients are important:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">reduce</span><span class="p">([</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+<span class="mi">1</span>
+</pre></div>
+</div>
+<p>This class also works with non-square matrices:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">],[</span><span class="o">-</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="o">-</span><span class="n">b</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">1</span>  <span class="mi">0</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+<span class="mi">2</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="c1"># Example where M is not square and we have relations</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">relations</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="n">a</span> <span class="n">b</span> <span class="n">a</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+<span class="mi">1</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">syzygy</span><span class="p">()</span>
+<span class="p">[</span><span class="o">-</span><span class="n">b</span> <span class="o">-</span><span class="n">a</span><span class="p">]</span>
+<span class="p">[</span> <span class="n">a</span>  <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">0</span>  <span class="n">a</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="c1"># Another example with M being non-square</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">],[</span><span class="o">-</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">],[</span><span class="n">a</span><span class="o">^</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">b</span><span class="o">^</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="n">b</span><span class="o">^</span><span class="mi">5</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">rank</span><span class="p">()</span>
+<span class="mi">2</span>
+</pre></div>
+</div>
+<p>This algorithm can find the relations on the fly thanks to the input <code class="docutils literal notranslate"><span class="pre">is_zero</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">],[</span><span class="o">-</span><span class="n">b</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="o">-</span><span class="n">b</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">reduce</span><span class="p">([</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">relations</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">H</span> <span class="o">=</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">relations</span><span class="p">()</span>
+<span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The algorithm can improve the given relations on the fly:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">M</span> <span class="o">=</span> <span class="n">Matrix</span><span class="p">([[</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span><span class="n">b</span><span class="p">],[</span><span class="o">-</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">relations</span><span class="o">=</span><span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">*</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">^</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">relations</span><span class="p">()</span>
+<span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">*</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">^</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span> <span class="o">=</span> <span class="n">BareissAlgorithm</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">p</span> <span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">reduce</span><span class="p">([</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">+</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">4</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span><span class="o">*</span><span class="n">b</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">^</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">echelon_form</span><span class="p">()</span>
+<span class="p">[</span><span class="mi">1</span> <span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">BA</span><span class="o">.</span><span class="n">relations</span><span class="p">()</span>
+<span class="p">[</span><span class="n">a</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">^</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="linear_solver.html"
+                        title="previous chapter">A generic class for solvers of linear systems</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hermite.html"
+                        title="next chapter">Solving linear systems using Hermite Normal Forms</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/misc/bareiss.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hermite.html" title="Solving linear systems using Hermite Normal Forms"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="linear_solver.html" title="A generic class for solvers of linear systems"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../misc.html" >Miscellaneous package (misc)</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Bareiss: Division-free Linear Algebra for computing Nullspace</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>
