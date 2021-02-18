@@ -13,7 +13,7 @@ def readfile(filename):
 # For the tests
 class SageTest(TestCommand):
     def run_tests(self):
-        errno = os.system("sage -t --force-lib dd_function")
+        errno = os.system("sage -t --force-lib .")
         if errno != 0:
             sys.exit(1)
 
@@ -46,10 +46,8 @@ setup(
         "ajpastor.dd_functions",
         "ajpastor.operator",
         "ajpastor.lazy",
-        "ajpastor.misc",
-        "ajpastor.tests",
-        "ajpastor.tests.dd_functions"],
-    cmdclass = {'test': SageTest}, # adding a special setup command for tests
+        "ajpastor.misc"],
+    # cmdclass = {'test': SageTest}, # adding a special setup command for tests
     setup_requires   = [],
     install_requires = ['ore_algebra @ git+https://github.com/mkauers/ore_algebra.git','sphinx'],
 )

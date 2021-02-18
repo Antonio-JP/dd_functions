@@ -30,7 +30,7 @@ develop:
 	$(SAGE) -pip install --upgrade -e .
 
 test: install
-	$(SAGE) -t $(PACKAGE)
+	$(SAGE) -t --force-lib .
 
 coverage:
 	$(SAGE) -coverage $(PACKAGE)/*
