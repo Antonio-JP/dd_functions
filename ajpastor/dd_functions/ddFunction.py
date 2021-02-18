@@ -3259,7 +3259,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()]%x == 0 and len(h.equation[h.order()]) == 1
+                sage: h.equation[h.order()]%h.parent().base()(x) == 0 and len(h.equation[h.order()].factor()) == 1
                 True
 
             TODO:
