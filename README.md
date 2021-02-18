@@ -3,7 +3,8 @@
 
 `dd_functions` is a Sage package free to get from the git repository in https://github.com/Antonio-JP/dd_functions.git (GitHub). This package was developed in the research funded by the Austrian Science Fund  (FWF): W1214-N15, project DK15.
 
-This package allows Sage users to use _naturally_ DD-finite functions on the computer. This README includes a guide to how to install the package.
+This package allows Sage users to use _naturally_ DD-finite functions on the computer. This README includes a guide to how to install the package. For a extensive documentation
+of the package, please visit the url https://antonio-jp.github.io/dd_functions/.
 
 ## **1. Installing the package**
 There are three different ways to obtain the package.
