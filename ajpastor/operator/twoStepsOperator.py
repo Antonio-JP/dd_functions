@@ -332,7 +332,7 @@ class TwoStepsOperator(ListOperator):
 
         ## Base case: 0 column, only inhomogeneous term
         if(ncols == 0):
-            v = self._pre_proc(vector([0]+[1]+(self.order()-2)*[0]))
+            v = d_matrix*self._pre_proc(vector([1]+(self.order()-1)*[0]))
             system = Matrix(d_matrix.parent().base(), [[]])
         else: # General case, we build the next column
             aux_s, new_v = self._get_system_derivative(ncols-1, True)
