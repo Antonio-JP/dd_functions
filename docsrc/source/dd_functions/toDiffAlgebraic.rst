@@ -1,7 +1,7 @@
 .. nodoctest
 
-Differentially Agebraic functions as DD-finite elements
-========================================================
+Differentially algebraic functions as differentially definable functions
+============================================================================
 
 .. automodule:: ajpastor.dd_functions.toDiffAlgebraic
    :members:

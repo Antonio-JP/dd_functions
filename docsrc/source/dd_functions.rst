@@ -1,12 +1,12 @@
 =============================
-Main package (dd_functions)
+Package ``dd_functions``
 =============================
 
-Package "dd_function" for Sage which allows to work
-with Differentially definable functions. See `this paper <https://www.sciencedirect.com/science/article/abs/pii/S0747717118300890>`_ 
-for further information.
+This package includes the main structures and built-in functions for working with differentially definable
+functions. Access each of the modules included in this package to see further documentation and a complete
+description of the implementation.
 
-Files in the package 
+Modules 
 ====================
 
 .. toctree::

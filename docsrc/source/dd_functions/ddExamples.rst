@@ -1,7 +1,7 @@
 .. nodoctest
 
-DDExamples: built-in functions
-==============================
+DDExamples: built-in functions and examples 
+=============================================
 
 .. automodule:: ajpastor.dd_functions.ddExamples
    :members:

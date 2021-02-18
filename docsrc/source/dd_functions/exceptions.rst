@@ -1,7 +1,7 @@
 .. nodoctest
 
-Exceptions for DDFunctions and DDRings
-=========================================
+Exceptions for :class:`~ajpastor.dd_functions.ddFunction.DDFunction` and :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+=============================================================================================================================
 
 .. automodule:: ajpastor.dd_functions.exceptions
    :members:
