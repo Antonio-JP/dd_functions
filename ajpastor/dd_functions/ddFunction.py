@@ -48,7 +48,7 @@ from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
 #ajpastor imports
-from ajpastor.dd_functions.exceptions import DDFunctionError, InitValueError, NoValueError
+from ajpastor.dd_functions.exceptions import DDFunctionError, ZeroValueRequired, InitValueError, NoValueError
 
 from ajpastor.misc.dynamic_string import DynamicString, m_dreplace
 from ajpastor.misc.serializable import SerializableObject
@@ -2591,8 +2591,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
     @name.setter
     def name(self, new_name):
-        if(self.has_name()):
-            raise ValueError("The name for this function was already given (%s)" %self.name)
+        if(not (isinstance(new_name, str) or isinstance(new_name, DynamicString))):
+            raise TypeError("The name for this function must be a string or a DynamicString" %self.name)
         self.__name = new_name
         
     def has_name(self):
@@ -3484,7 +3484,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             warnings.warn("Be careful my friend!! Evaluation at zero were not possible!!\nElement %s" %other, DDFunctionWarning, stacklevel=2 )
             raise e
         if(value != 0 ):
-            raise ValueError("Can not compose with a power series with non-zero constant term. Obtained: %s" %(other(**{str(self_var):0 })))
+            raise ZeroValueRequired(repr(other))
         
         ######################################
         ## Computing the destiny ring

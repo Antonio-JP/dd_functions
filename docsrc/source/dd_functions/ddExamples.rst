@@ -7,3 +7,4 @@ DDExamples: built-in functions and examples
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource

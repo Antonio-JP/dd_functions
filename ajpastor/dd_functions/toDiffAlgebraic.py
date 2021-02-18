@@ -9,7 +9,7 @@ EXAMPLES::
     sage: DFinite
     DD-Ring over (Univariate Polynomial Ring in x over Rational Field)
     
-TODO::
+TODO:
     * Do the examples section of this documentation
     * Document this package
     * Review the functionality of this package

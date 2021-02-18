@@ -6,9 +6,10 @@ one can perform operations in the polynomial setting, discover relations between
 final result in the appropriate context.
         
 EXAMPLES::
-    sage: from ajpastor.lazy.conversion
 
-TODO::
+    sage: from ajpastor.lazy.conversion import *
+
+TODO:
     * Do the examples section in this documentation
     * Document all the package
     * Review the functionality of the package

@@ -6,9 +6,10 @@ based on Integral Domains. It contains all the arithmetic functionality
 required to make it work with linear algebra algorithms.
         
 EXAMPLES::
-    sage: from ajpastor.lazy.lazyIDElements
 
-TODO::
+    sage: from ajpastor.lazy.lazyIDElements import *
+
+TODO:
     * Do the examples section in this documentation
     * Document all the package
     * Review the functionality of the package

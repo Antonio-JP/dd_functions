@@ -4,9 +4,10 @@ Python file for a Lazy Fraction Field
 This module implements a conversion system based on a Fraction Field. This requires a Lazy Integral Domain.
 
 EXAMPLES::
-    sage: from ajpastor.lazy.lazyFracField
 
-TODO::
+    sage: from ajpastor.lazy.lazyFracField import *
+
+TODO:
     * Do the examples section in this documentation
     * Document all the package
     * Review the functionality of the package
