@@ -39,7 +39,7 @@ from functools import reduce
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator, parent)
+                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -1523,7 +1523,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         if(as_symbolic):
             return self.__variables
         else:
-            return tuple(self.base()(el) for el in self.__variables)
+            return tuple(self.original_ring()(el) for el in self.__variables)
 
     def parameters(self, as_symbolic = False):
         r'''
@@ -2096,6 +2096,83 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         * Add examples where we use the dict input for ``init``
         * Add examples with inhomogeneous term
     '''
+    @staticmethod
+    def __chyzak_dac(A, s, p, v, K, x):
+        r'''
+            Divide and conquer scheme in Figure 3 of arxiv:`abs/cs/0604101`.
+            
+            This method presents the Divide and conquer scheme in the paper by Chyzak et. al. for computing the expansion
+            of a power series solution for a differential system:
+            
+            .. MATH::
+            
+                Y' = AY, Y(0) = v
+                
+            where `Y \in \mathbb{M}_{r\times 1}(\mathbb{K}[[x]])` and `A` is a square matrix with coefficients in
+            `\mathbb{K}[[x]]`. Here, the vector `v \in \mathbb{M}_{r\times 1}(\mathbb{K})`.
+            
+            More precisely, this method solves the truncated system:
+            
+            .. MATH::
+            
+                tY' + (pI_r - tA)Y = s\ (mod x^m).
+            
+            INPUT:
+            
+            * ``A``: a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=0}^m A_it^i` is 
+            a truncation of the system matrix `A`. We denote the length of his list as `m`.
+            * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
+            If this is `0`, then a solution for the original system is computed. The length should be again `m`.
+            * ``p``: a value on `\mathbb{K}` for the extended equation.
+            * ``v``: a vector in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains the value of `Y(0)`.
+            * ``K``: field where we base all computations. It must have characteristic zero.
+            * ``x``: variable for the ring of formal power series `\mathbb{K}[[x]]`
+            
+            OUTPUT:
+            
+            A vector `Y \in \mathbb{M}_{r\times 1}(\mathbb{k}[x])` such that 
+            
+            .. MATH::
+            
+                tY' + (pI_r - tA)Y = s\ (mod x^m)        
+        '''
+        ## Checking te input
+        if(not K.is_field() or K.characteristic()!= 0):
+            raise TypeError("The input 'K' must be a field of characteristic zero")
+            
+        Kx = PolynomialRing(K, x) # polynomial ring for truncations
+        x = Kx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
+            
+        A = [a.change_ring(K) for a in A] # checking everything in A is in K
+        s = [el.change_ring(K) for el in s] # checking everything in s is in K
+        p = K(p) # checking p is in K
+        v = v.change_ring(K) # checking everything in v is in K    
+        
+        m = len(s); r = len(s[0])
+        if(len(A) < m):
+            raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
+        A = A[:m] # Removing extra data
+        if(len(v) != r or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
+            raise TypeError("The dimensions of the input are not correct")
+            
+        ## Base case
+        if(m == 1):
+            if(p == 0): return v
+            else: return s[0]/p
+        
+        ## General case
+        d = m//2
+        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, K, x) # first recursive cal
+        AA = sum(A[i]*x**i for i in range(m)); ss = sum(s[i]*x**i for i in range(m))
+        R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+        # transforming R into a valid input of DivideAndConquer
+        R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]
+        
+        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, K, x) #second recursive call
+        solution = y0 + x**d*y1
+        
+        return solution
+
     #####################################
     ### Init and Interface methods
     #####################################
@@ -2157,6 +2234,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         self.__built = None
         self.__zeros = None
         self.__singularities = None
+        self.__computed = None
+        self.__chyzak = {}
         
         ### Assigning the differential operator
         ### We will save the leading coefficient of the equation (lc) to future uses.
@@ -2393,7 +2472,36 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return result
             return [self.sequence(i) for i in range(n)]
         
-        if(not n in self.__sequence):
+        while(not n in self.__sequence):
+            self.__extend_sequence()
+        
+        return self.__sequence[n]
+
+    def __extend_sequence(self, algorithm="default"):
+        r'''
+            Method to actually extend the list of the computed sequence.
+
+            This method takes as input an algorithm with name of the algorithm to extend the 
+            computed list of elements in the sequences for which ``self`` is the ordinary 
+            generating function.
+
+            There are two possible values for the algorithm name:
+
+            * ``"direct"``: we perform the computations unrolling term by term.
+            * ``"chyzak"``: we use the ideas and divide-and-conquer algorithms presented in 
+              :arxiv:`abs/cs/0604101`.
+        '''
+        if(self.__computed is None):
+            self.__computed = max([i for i in self.__sequence], default=-1)
+            if(any(j not in self.__sequence for j in range(self.__computed))):
+                raise ValueError("Missing element in the sequence")
+        n = self.__computed # last computed element
+
+        if(algorithm in ("direct")):
+            ## This is the direct approach. Leads to a quadratic algorithm for extract the
+            ## first elements of the sequence. It wars easily in every case.
+
+            n  += 1 # element to be computed
             if(n > self.equation.get_jp_fo()):
                 ## If the required value is "too far" we can get quickly the equation
                 rec = self.equation.get_recursion_row(n-self.equation.forward_order)
@@ -2420,9 +2528,53 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     res -= rec[i]*(self.sequence(i))
                     
             self.__sequence[n] = self.parent().coeff_field(res/rec[n])
-            
-        return self.__sequence[n]
-            
+            self.__computed += 1
+        elif(algorithm in ("default", "chyzak")):
+            ## We heck that the leading coefficient is valid
+            if(self.equation[self.equation.order()](x=0) == 0):
+                self.__extend_sequence("direct")
+                return
+
+            ## This is a divide-and-conquer approach. This translates the problem into
+            ## a first order linear system and computes the next bunch of coefficients always
+            ## doubling the amount of elements in the sequence computed. 
+            ## This method relies on the static private method __chyzak_dac
+            m = 2*n # we double the amount of data
+            K = self.parent().coeff_field
+            x = self.parent().variables()[0]
+            r = self.equation.order()
+            v = vector(self.init(r, True))
+            Kx = PolynomialRing(K, x); x = Kx(x)
+
+            ## we need to get the truncated associated system Y' = AY
+            ## here A is the companion matrix transposed
+            if(self.parent().depth() > 1): # the coefficients are DDFunctions
+                if(not "companion" in self.__chyzak):
+                    self.__chyzak["companion"] = Matrix([[el.raw() for el in row] for row in self.equation.companion().transpose()]) # TODO: problem with infinite recursion
+                A = [Matrix(K, [[el.sequence(k) for el in row] for row in self.__chyzak["companion"]]) for k in range(m)]
+            else: # the coefficients are polynomials
+                A = [Matrix(K, (
+                    ([[1 if j == i+1 else 0 for j in range(r)] for i in range(r-1)] if k == 0 else (r-1)*[r*[0]] ) + 
+                    [[diff(-self.equation[j]/self.equation[r], k)(**{str(x): 0})/factorial(k) for j in range(r)]] # TODO: improve this
+                    )) for k in range(m)]
+
+            if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
+                y0 = self.__chyzak["last"][0]
+                AA = sum(A[i]*x**i for i in range(m))
+                R = -x*vector(diff(el) for el in y0) + x*AA*y0
+                # transforming R into a valid input of DivideAndConquer
+                R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
+                y1 = DDFunction.__chyzak_dac(A, R, n, v, K, x)
+
+                self.__chyzak["last"] = (y0 + x**n*y1, m)
+            else:
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, m*[vector(K, r*[0])], 0, v, K, x), m)
+                
+            y = self.__chyzak["last"][0][0] 
+            for i in range(n,m):
+                self.__sequence[i] = y[i]
+            self.__computed = m
+
     def init(self, n, list=False, incomplete=False):
         r'''
             Method to get the `n`-th initial value of the power series.
