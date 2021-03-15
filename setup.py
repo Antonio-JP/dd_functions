@@ -39,7 +39,6 @@ setup(
         "ajpastor.operator",
         "ajpastor.lazy",
         "ajpastor.misc"],
-    # cmdclass = {'test': SageTest}, # adding a special setup command for tests
     setup_requires   = [],
     install_requires = ['ore_algebra @ git+https://github.com/mkauers/ore_algebra.git','sphinx'],
 )
