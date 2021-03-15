@@ -1,5 +1,5 @@
 
-# **DD-finite functions in Sage** [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/v0.7-sage8.8?filepath=dd_functions_demo.ipynb)
+# **DD-finite functions in Sage** [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
 
 `dd_functions` is a Sage package free to get from the git repository in https://github.com/Antonio-JP/dd_functions.git (GitHub). This package was developed in the research funded by the Austrian Science Fund  (FWF): W1214-N15, project DK15.
 
@@ -30,7 +30,7 @@ Now that the package is installed, we can start using it importing the appropria
 Or start a Jupyter notebook session for Sage (launching `sage -n jupyter`) and launch the demo contained in `dd_functions_demo.ipynb`.
 
 If you did not want to install the package (or simply, you do not have Sage) do not worry, you can still try it at Binder:
-https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/v0.7-sage8.8?filepath=dd_functions_demo.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/v0.7-sage8.8?filepath=dd_functions_demo.ipynb)
+https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
 
 ## **3. External dependencies**
 This package installs the *ore_algebra* package from M. Kauers and M. Mezzarobba (see their *git* repository [here](https://github.com/mkauers/ore_algebra)).
