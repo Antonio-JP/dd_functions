@@ -10,7 +10,7 @@ COPY --chown=sage:sage . ${HOME}
 # Adding git to the list of commands
 USER root
 RUN apt-get -qq update \
- && apt-get -qq install -y --no-install-recommends git \
+ && apt-get -qq install -y --no-install-recommends git apt-transport-https ca-certificates \
  && apt-get -qq clean
 USER sage
 
