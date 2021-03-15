@@ -1,5 +1,0 @@
-name: sage-ddfunctions
-channels:
-  - conda-forge
-dependencies:
-  - sage
