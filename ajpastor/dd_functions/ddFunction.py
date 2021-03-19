@@ -57,7 +57,6 @@ from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 from ajpastor.misc.ring_w_sequence import sequence
 from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
-from ajpastor.misc.verbose import printProgressBar
 
 from ajpastor.operator.operator import Operator
 from ajpastor.operator.directStepOperator import DirectStepOperator
@@ -2774,8 +2773,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None)):
-            newName = DynamicString("1/(_1)",self.__name)
+        if(not(self.name is None)):
+            newName = DynamicString("1/(_1)",self.name)
         if(self.order() == 0 ):
             raise ZeroDivisionError("Impossible to invert the zero function")
         elif(self.order() == 1 ):
@@ -2803,11 +2802,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None) and (not(other.__name is None))):
-            if(other.__name[0] == '-'):
-                newName = DynamicString("_1_2", [self.__name, other.__name])
+        if(not(self.name is None) and (not(other.name is None))):
+            if(other.name[0] == '-'):
+                newName = DynamicString("_1_2", [self.name, other.name])
             else:
-                newName = DynamicString("_1+_2", [self.__name, other.__name])
+                newName = DynamicString("_1+_2", [self.name, other.name])
                 
         
         ## We check other simplifications: if the elements are constants
@@ -2868,8 +2867,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
         ### Computing the new name
         newName = None
-        if(not(self.__name is None) and (not(other.__name is None))):
-            newName = DynamicString("_1-_2", [self.__name, other.__name])
+        if(not(self.name is None) and (not(other.name is None))):
+            newName = DynamicString("_1-_2", [self.name, other.name])
         
         ## We check other simplifications: if the elements are constants
         if(self.is_constant or other.is_constant):
@@ -2949,8 +2948,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None) and (not(other.__name is None))):
-            newName = DynamicString("(_1)*(_2)", [self.__name, other.__name])
+        if(not(self.name is None) and (not(other.name is None))):
+            newName = DynamicString("(_1)*(_2)", [self.name, other.name])
             
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
         result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
@@ -2990,11 +2989,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             ### Computing the new name
             newName = None
-            if(not(self.__name is None)):
+            if(not(self.name is None)):
                 if(r == -1 ):
-                    newName = DynamicString("-(_1)" ,self.__name)
+                    newName = DynamicString("-(_1)" ,self.name)
                 else:
-                    newName = DynamicString("(_1)*(_2)", [repr(r), self.__name])
+                    newName = DynamicString("(_1)*(_2)", [repr(r), self.name])
                    
             result = self.parent().element(self.equation, [r*el for el in init], check_init=False, name=newName)
             result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1'])('(%s)*x1' %repr(r)), {'x1':self}))
@@ -3022,8 +3021,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             ### Computing the new name
             newName = None
-            if(not(self.__name is None)):
-                newName = DynamicString("(_1)/(_2^%d)" %n, [self.__name, repr(X)])
+            if(not(self.name is None)):
+                newName = DynamicString("(_1)/(_2^%d)" %n, [self.name, repr(X)])
                
             result = self.parent().element(newEquation, newInit, check_init=False, name=newName)
             result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,[repr(X),'x1']).fraction_field()('x1/(%s^%d)' %(repr(X),n)), {repr(X):self.parent()(X),'x1':self}))
@@ -3061,10 +3060,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             ### Computing the new name
             newName=None
-            if(not(self.__name is None) and (not(other.__name is None))):
-                newName = DynamicString("(_1)/(_2)", [self.__name, other.__name])
+            if(not(self.name is None) and (not(other.name is None))):
+                newName = DynamicString("(_1)/(_2)", [self.name, other.name])
                 
-            result.__name = newName
+            result.name = newName
             return result
         else:
             raise ValueError("Impossible perform a division if the x factor of the denominator (%d) is greater than in the numerator (%d)"%(o_ze[0],s_ze[0]))
@@ -3137,11 +3136,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None) and (not(other.__name is None))):
-            if(other.__name[0] == '-'):
-                newName = DynamicString("_1_2", [self.__name, other.__name])
+        if(not(self.name is None) and (not(other.name is None))):
+            if(other.name[0] == '-'):
+                newName = DynamicString("_1_2", [self.name, other.name])
             else:
-                newName = DynamicString("_1+_2", [self.__name, other.__name])
+                newName = DynamicString("_1+_2", [self.name, other.name])
 
         newOperator = self.equation.simple_add_solution(other.equation)
         needed_initial = newOperator.get_jp_fo()+1
@@ -3217,8 +3216,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None) and (not(other.__name is None))):
-            newName = DynamicString("(_1)*(_2)", [self.__name, other.__name])
+        if(not(self.name is None) and (not(other.name is None))):
+            newName = DynamicString("(_1)*(_2)", [self.name, other.name])
             
         result = self.parent().element(newOperator, newInit, check_init=False, name=newName)
         result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
@@ -3282,11 +3281,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
                 ### Computing the new name
                 newName = None
-                if(not(self.__name is None)):
-                    if(self.__name[-1] == "'"):
-                        newName = DynamicString("_1'", self.__name)
+                if(not(self.name is None)):
+                    if(self.name[-1] == "'"):
+                        newName = DynamicString("_1'", self.name)
                     else:
-                        newName = DynamicString("(_1)'", self.__name)
+                        newName = DynamicString("(_1)'", self.name)
                 
                 ### We create the next derivative with the equation, initial values
                 self.__simple_derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
@@ -3397,11 +3396,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
                 ### Computing the new name
                 newName = None
-                if(not(self.__name is None)):
-                    if(self.__name[-1] == "'"):
-                        newName = DynamicString("_1'", self.__name)
+                if(not(self.name is None)):
+                    if(self.name[-1] == "'"):
+                        newName = DynamicString("_1'", self.name)
                     else:
-                        newName = DynamicString("(_1)'", self.__name)
+                        newName = DynamicString("(_1)'", self.name)
                 
                 ### We create the next derivative with the equation, initial values
                 self.__derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
@@ -3426,11 +3425,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         ### Computing the new name
         newName = None
-        if(not(self.__name is None)):
+        if(not(self.name is None)):
             if(constant == 0 ):
-                newName = DynamicString("int(_1)", self.__name)
+                newName = DynamicString("int(_1)", self.name)
             else:
-                newName = DynamicString("int(_1) + _2", [self.__name, repr(constant)])
+                newName = DynamicString("int(_1) + _2", [self.name, repr(constant)])
         
         return self.parent().element(newOperator, newInit, check_init=False, name=newName)
         
@@ -3534,11 +3533,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Computing the new name
         ######################################
         new_name = None
-        if(not(self.__name is None)):
-            if(isinstance(other, DDFunction) and (not (other.__name is None))):
-                new_name = m_dreplace(self.__name, {"x":other.__name}, True)
+        if(not(self.name is None)):
+            if(isinstance(other, DDFunction) and (not (other.name is None))):
+                new_name = m_dreplace(self.name, {"x":other.name}, True)
             elif(not isinstance(other, DDFunction)):
-                new_name = m_dreplace(self.__name, {"x":repr(other)}, True)
+                new_name = m_dreplace(self.name, {"x":repr(other)}, True)
         
         return destiny_ring.element(new_equation, new_init, name=new_name)
     
@@ -3940,7 +3939,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     #####################################    
     @cached_method
     def to_symbolic(self):
-        evaluation = sage_eval(str(self.__name).replace("'", ".derivative()").replace("^", "**"), locals=globals())
+        evaluation = sage_eval(str(self.name).replace("'", ".derivative()").replace("^", "**"), locals=globals())
         if(isinstance(evaluation, Expression)):
             evaluation = evaluation.simplify_full()
             
@@ -3975,7 +3974,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 else:
                     raise TypeError("1:No optimization found in the simplification")
                 
-                return dR.element([dR.base()(el) for el in coeffs], self.init(self.equation.jp_value()+1, True, True), name=self.__name).to_simpler()
+                return dR.element([dR.base()(el) for el in coeffs], self.init(self.equation.jp_value()+1, True, True), name=self.name).to_simpler()
                         
             elif(is_PolynomialRing(R)):
                 degs = [self[i].degree() - i for i in range(self.order()+1)]
@@ -4127,10 +4126,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     b = a+(other&1 )
                     self.__pows[other] = self.__pow__(a)*self.__pow__(b)
                     newName = None
-                    if(not(self.__name is None)):
-                        newName = DynamicString("(_1)^%d" %(other), self.__name)
+                    if(not(self.name is None)):
+                        newName = DynamicString("(_1)^%d" %(other), self.name)
                     if(isinstance(self.__pows[other], DDFunction)):
-                        self.__pows[other].__name = newName
+                        self.__pows[other].name = newName
                 else:
                     try:
                         inverse = self.inverse
@@ -4176,24 +4175,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     else:
                         name = None
                         if(g.has_name() and f.has_name()):
-                            name = DynamicString("(_1)^(_2)", [f.__name, g.__name])
+                            name = DynamicString("(_1)^(_2)", [f.name, g.name])
                         
                         self.__pows[other] = R.element([-((lf + lf0)*g).derivative(),1],[1],name=name)
                 else:
                     raise NotImplementedError("No path found for this __pow__ computation:\n\t- base: %s\n\t- expo: %s" %(repr(self),repr(other)))
-                #    try:
-                #        newDDRing = DDRing(self.parent())
-                #        other = self.parent().base_ring()(other)
-                #        self.__pows[other] = newDDRing.element([(-other)*f.derivative(),f], [el**other for el in f.init(1, True, True)], check_init=False)
-                #        
-                #        newName = None
-                #        if(not(self.__name is None)):
-                #            newName = DynamicString("(_1)^%s" %(other), self.__name)
-                #        self.__pows[other].__name = newName
-                #    except TypeError:
-                #        raise TypeError("Impossible to compute (%s)^(%s) within the basic field %s" %(f.init(0 ), other, f.parent().base_ring()))
-                #    except ValueError:
-                #        raise NotImplementedError("Powering to an element of %s not implemented" %(other.parent()))
         return self.__pows[other]
            
     ### Magic equality
@@ -4254,7 +4240,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         #if(self.is_constant):
         #    return (self.init(0)).__str__()
             
-        if(detail and (not(self.__name is None))):
+        if(detail and (not(self.name is None))):
             res = "%s %s in %s:\n" %(self.__critical_numbers__(),repr(self),self.parent())
         else:
             res = "%s" %(repr(self))
@@ -4287,7 +4273,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         crit = None
         
         ## Getting the basic elements for the line
-        if(isinstance(element, DDFunction) and (not(element.__name is None))):
+        if(isinstance(element, DDFunction) and (not(element.name is None))):
             crit = element.__critical_numbers__()
         else:
             ind = string.find(")")+1 
@@ -4351,10 +4337,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         if(self.is_constant):
             return str(self.init(0 ))
-        if(self.__name is None):
+        if(self.name is None):
             return "(%s:%s:%s)DD-Function in (%s)" %(self.order(),self.equation.get_jp_fo(),self.size(),self.parent()) 
         else:
-            return str(self.__name)
+            return str(self.name)
             
     def __critical_numbers__(self):
         return "(%d:%d:%d)" %(self.order(),self.equation.get_jp_fo(),self.size())
@@ -4547,10 +4533,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             self.__sequence = {i : data[i] for i in range(n)}
 
     def _to_command_(self):
-        if(self.__name is None):
+        if(self.name is None):
             return "%s.element(%s,%s)" %(command(self.parent()), _command_list(self.equation.coefficients()), self.init(self.order(),True))
         else:
-            return "%s.element(%s,%s,name='%s')" %(command(self.parent()), _command_list(self.equation.coefficients()), self.init(self.order(),True),str(self.__name))
+            return "%s.element(%s,%s,name='%s')" %(command(self.parent()), _command_list(self.equation.coefficients()), self.init(self.order(),True),str(self.name))
         
 #####################################################
 ### Construction Functor for DD-Ring
