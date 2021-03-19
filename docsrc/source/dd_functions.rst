@@ -14,6 +14,7 @@ Modules
 
    dd_functions/ddFunction
    dd_functions/ddExamples
+   dd_functions/symbolic
    dd_functions/toDiffAlgebraic
    dd_functions/exceptions
 
