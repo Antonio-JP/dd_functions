@@ -1497,14 +1497,14 @@ def LegendreD(nu='n', mu = 0, kind=1):
     
     ## Building the final name
     x = parent.variables()[0]
+    if(kind == 1): kind = "P"
+    elif(kind == 2): kind = "Q"
+    else: raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind)
+
     if(m != 0):
-        name = DynamicString("Legendre(_1,_2;_3)", [repr(n), repr(m), repr(x)])
-    elif(kind == 1):
-        name = DynamicString("legendre_P(_1,_2)", [repr(n),repr(x)])
-    elif(kind == 2):
-        name = DynamicString("legendre_Q(_1,_2)", [repr(n),repr(x)])
+        name = DynamicString("gen_legendre_%s(_1,_2,_3)" %kind, [repr(n), repr(m), repr(x)])
     else:
-        raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind)
+        name = DynamicString("legendre_%s(_1,_2)" %kind, [repr(n),repr(x)])
     
     ## Building the initial values
     init = []
@@ -2707,7 +2707,7 @@ def FibonacciD(init=('a','b')):
             sage: Fp == (a + (b-a)*x)/(1-x-x^2)
             True
             sage: FibonacciD(tuple([2*a-3*b])) # just one element tuple
-            F(-3*b + 2*a,c;x)
+            F(2*a - 3*b,c;x)
             sage: FibonacciD(('a','c_1')) # with strings
             F(a,c_1;x)
             sage: FibonacciD(('f',a*2+1,0,0,0)) # with long tuple
@@ -3126,15 +3126,16 @@ def __decide_parent(input, parent = None, depth = 1):
         elif(R is SR):
             parameters = set([str(el) for el in input.variables()])-set(['x'])
             if(len(parameters) > 0 ):
-                dR = ParametrizedDDRing(DDRing(DFinite, depth=depth), parameters)
+                dR = ParametrizedDDRing(DFinite.to_depth(depth), parameters)
             else:
                 dR = DDRing(PolynomialRing(QQ,x), depth=depth)
         elif(is_MPolynomialRing(R) or is_PolynomialRing(R)):
             parameters = [str(gen) for gen in R.gens()[1:]]
+            var = R.gens()[0]
             if(len(parameters) > 0):
-                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base(),R.gens()[0]), depth=depth), parameters)
+                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base_ring(),var), depth=depth), parameters)
             else:
-                dR = DDRing(PolynomialRing(R.base(),R.gens()[0]), depth = depth)
+                dR = DDRing(PolynomialRing(R.base_ring(),var), depth = depth)
         else:
             try:
                 dR = DDRing(R, depth = depth)
