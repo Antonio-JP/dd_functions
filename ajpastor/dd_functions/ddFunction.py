@@ -3829,7 +3829,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         result = []
 
-        if(verbose): printProgressBar(iteration, total)
+        if(verbose): __printProgressBar(iteration, total)
         while(iteration*step < max_depth):
             try:
                 next = iteration*step
@@ -3838,14 +3838,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 if(verbose): print("")
                 break
             iteration+=1
-            if(verbose): printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]))
+            if(verbose): __printProgressBar(iteration, total, suffix="(%s) %s" %(next, result[-1]))
 
         ## Finished loop: returning
         # Checking if the last iteration was made
         if(iteration*step >= max_depth):
             try:
                 result += [comp(self.sequence(max_depth), other.sequence(max_depth))]
-                if(verbose): printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]))
+                if(verbose): __printProgressBar(total, total, suffix="(%s) %s" %(max_depth, result[-1]))
             except KeyboardInterrupt:
                 if(verbose): print("")
                 pass
@@ -4787,7 +4787,31 @@ def _command_list(elements):
     res += "]"
     
     return res
-    
+
+###################################################################################################
+### AUXILIARY METHODS FOR PRINTING PROGRESS BAR
+###################################################################################################
+def __printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '#'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    import sys
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print("\r%s |%s| %s%% %s\r" % (prefix, bar, percent, suffix))
+    # Print New Line on Complete
+    if iteration == total: 
+        print("")
+    sys.stdout.flush()
 ###################################################################################################
 ### STANDARD PACKAGES VARIABLES & GETTERS
 ###################################################################################################
