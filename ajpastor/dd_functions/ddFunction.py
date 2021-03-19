@@ -2590,8 +2590,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
     @name.setter
     def name(self, new_name):
-        if(not (isinstance(new_name, str) or isinstance(new_name, DynamicString))):
-            raise TypeError("The name for this function must be a string or a DynamicString" %self.name)
+        # We do not allow removing a name
+        if(new_name is None):
+            if(not self.name is None):
+                raise TypeError("Removing a name is not allowed")
+        elif(not (isinstance(new_name, str) or isinstance(new_name, DynamicString))):
+            raise TypeError("The name for this function must be a string or a DynamicString")
         self.__name = new_name
         
     def has_name(self):
