@@ -36,5 +36,6 @@ class DebugError(RuntimeError):
 
 class SizeMatrixError(TypeError):
     r'''
-        Exception indicating that the size of the elements for building a matrix are not correct. See method :func:`~ajpastor.misc.matrix.block_matrix`
+        Exception indicating that the size of the elements for building a matrix are not correct. 
+        See method :func:`~ajpastor.misc.matrix.block_matrix`
     '''
