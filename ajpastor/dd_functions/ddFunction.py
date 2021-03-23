@@ -39,7 +39,7 @@ from functools import reduce
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff)
+                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2477,6 +2477,36 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         return self.__sequence[n]
 
+    def isequence(self, n, list=False, incomplete=False):
+        r'''
+            Method to get the `n`-th coefficient of the inverse for a power series.
+
+            A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
+            where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. These power series
+            can be inverted if the constant term is not zero obtaining a new power series.
+
+            This method compute the elements in the sequence for the multiplicative inverse of 
+            the differentially definable function represented by ``self`` (see property :func:`inverse`)
+
+            INPUT:
+
+            * ``n``: index for the coefficient of number of coefficients to compute
+            * ``list``: boolean flag. If ``True``, the method returns a list with the ``n``
+              first coefficients of the sequence. Otherwise, it returns the coefficient
+              `f_n`. By default, this argument is ``False``.
+            * ``incomplete``: boolean flag. If ``False``, the method will raise an error when
+              the coefficients can not be computed. Only valid in the case that ``list`` is 
+              ``True``, the output (instead of an :class:`~ajpastor.dd_functions.exceptions.NoValueError`)
+              will be the list up to the first element we could not compute.
+
+            OUTPUT:
+
+            See method :func:`sequence` for a description of the output.
+
+            TODO: add examples
+        '''
+        return self.inverse.sequence(n, list, incomplete) # pylint: disable=no-member
+
     def __extend_sequence(self, algorithm="default"):
         r'''
             Method to actually extend the list of the computed sequence.
@@ -2497,7 +2527,18 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 raise ValueError("Missing element in the sequence")
         n = self.__computed # last computed element
 
-        if(algorithm in ("direct")):
+        if(self.is_inverse()):
+            ## If a function is the inverse, we use a Newton iteration to quickly
+            ## compute its sequence using the computations for the originalfunction.
+            n = n+1 # number of computed elements
+            f = self.built[1][0] # self == 1/f
+            R = PolynomialRing(self.parent().coeff_field, 'v')
+            f2n = R(f.sequence(2*n, True)); y = R(self.sequence(n, True))
+            Ny = y*(2 - y*f2n)
+            for i in range(n, 2*n):
+                self.__sequence[i] = Ny[i]
+            self.__computed = 2*n-1
+        elif(algorithm in ("direct")):
             ## This is the direct approach. Leads to a quadratic algorithm for extract the
             ## first elements of the sequence. It wars easily in every case.
 
@@ -2549,9 +2590,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ## we need to get the truncated associated system Y' = AY
             ## here A is the companion matrix transposed
             if(self.parent().depth() > 1): # the coefficients are DDFunctions
-                if(not "companion" in self.__chyzak):
-                    self.__chyzak["companion"] = Matrix([[el.raw() for el in row] for row in self.equation.companion().transpose()]) # TODO: problem with infinite recursion
-                A = [Matrix(K, [[el.sequence(k) for el in row] for row in self.__chyzak["companion"]]) for k in range(m)]
+                d = self.equation.order()
+                # building the list of matrices A
+                last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[d].isequence(m,True)) for j in range(d)]
+                A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == 0) else 0 for j in range(d)] for i in range(d-1)] + 
+                                [[last_row[j][k] for j in range(d)]])) for k in range(m)]
             else: # the coefficients are polynomials
                 A = [Matrix(K, (
                     ([[1 if j == i+1 else 0 for j in range(r)] for i in range(r-1)] if k == 0 else (r-1)*[r*[0]] ) + 
@@ -2684,13 +2727,16 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             it was the addition or multiplication of two :class:`DDFunction`, we indicate it
             in this attribute. 
 
-            This always have the following format: [type, data]. we distinguish between two 
+            This always have the following format: [type, data]. we distinguish between three 
             type of constructions:
 
             * ``derivative``: then ``self`` is the derivative of ``data[0]``.
             * ``polynomial``: then ``self`` is a polynomial evaluation. The polynomial can be
               found in ``data[0]`` and the relations between the variables and the actual values
               is found in a dictionary in ``data[1]``.
+            * ``inverse``: then ``self`` is the multiplicative inverse of an element in 
+              ``self.parent().to_depth(self.parent().depth()-1)`` (i.e., from an element 
+              in the previous layer) that can be found in ``data[0]``.
 
             If this was not known, the attribute will take the (default) value ``None``.
         '''
@@ -2718,6 +2764,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             for var in vars_in_pol:
                 if(not str(var) in variables):
                     raise TypeError("The variables in the polynomial does not appear in the given map.\n\t- Polynomial: %s\n\t- Map: %s" %(polynomial, variables))
+        elif(type == "inverse"):
+            ## Check that the other element is in the previous layer of depth
+            if(is_DDFunction(data[0]) and not(data[0] in self.parent().to_depth(self.parent().depth()-1))):
+                raise TypeError("The function must be an element of the previous layer in the hierarchy")
         else:
             raise ValueError("Built format not recognized.")
                             
@@ -2921,9 +2971,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         if(self.init(0) == 0):
             raise ValueError("Can not invert a function with initial value 0 --> That is not a power series")
-        
-        coeffs = self.equation.coefficients()
-        
+                
         ### Computing the new name
         newName = None
         if(not(self.__name is None)):
@@ -2931,10 +2979,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(self.order() == 0 ):
             raise ZeroDivisionError("Impossible to invert the zero function")
         elif(self.order() == 1 ):
+            coeffs = self.equation.coefficients()
             return self.parent().element([-coeffs[0],coeffs[1]], [1 /self.init(0 )], check_init=False, name=newName)
         else:
             newDDRing = DDRing(self.parent())
-            return newDDRing.element([self.derivative(), self], [1 /self.init(0 )], check_init=False, name=newName)
+            inverse = newDDRing.element([self.derivative(), self], [1 /self.init(0 )], check_init=False, name=newName)
+            inverse.built = ("inverse", [self])
+            return inverse
     
     def add(self, other):
         '''
@@ -3765,7 +3816,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                                                 "final ring: %s" %destiny_ring]))
             
     #####################################
-    ### Equality methods
+    ### Property methods
     #####################################  
     @derived_property  
     def is_null(self): 
@@ -3813,6 +3864,16 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Test the difference with the constant term
         #return (self - self(0)) == 0
     
+    def is_inverse(self):
+        r'''
+            Method to check whether a :class:`DDFunction` is an inverse.
+
+            This method checks if the funcion represented by ``self`` was built as the multiplicative
+            inverse of another :class:`DDFunction`. See property :func:`inverse` and :func:`built`
+            for further information.
+        '''
+        return (self.built != None and self.built[0] == "inverse")
+
     @derived_property
     def is_fully_defined(self):
         '''
@@ -3830,6 +3891,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         return max([n for n in self.__sequence], default=-1)
 
+    #####################################
+    ### Equality methods
+    #####################################  
     def equals(self,other): ### TO REVIEW
         '''
             Method that checks if two DDFunctions are equal (as power-series). In orther to do so, we substract one to the other and check if the result is zero.
