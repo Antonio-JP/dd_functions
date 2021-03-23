@@ -33,13 +33,15 @@ AUTHORS:
 
 # Python imports
 import warnings
+import logging
 from functools import reduce
 
 #SAGE imports 
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta)
+                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
+                        LaurentPolynomialRing)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -66,6 +68,7 @@ from ajpastor.operator.fullLazyOperator import FullLazyOperator
 # Private variables for module
 _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
 _Fields = Fields.__classcall__(Fields)
+logger = logging.getLogger(__name__)
 
 #####################################################
 ### Definition of the particular warnings we are interested to raise
@@ -2097,7 +2100,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         * Add examples with inhomogeneous term
     '''
     @staticmethod
-    def __chyzak_dac(A, s, p, v, K, x):
+    def __chyzak_dac(A, s, p, v, o=0, K=QQ, x='x'):
         r'''
             Divide and conquer scheme in Figure 3 of arxiv:`abs/cs/0604101`.
             
@@ -2119,12 +2122,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             INPUT:
             
-            * ``A``: a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=0}^m A_it^i` is 
+            * ``A``: a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=-o}^m A_it^i` is 
             a truncation of the system matrix `A`. We denote the length of his list as `m`.
             * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
             If this is `0`, then a solution for the original system is computed. The length should be again `m`.
             * ``p``: a value on `\mathbb{K}` for the extended equation.
             * ``v``: a vector in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains the value of `Y(0)`.
+            * ``o``: negative order of teh matrix `A`. This value is 0 if the entries are not Laurent polynomials.
             * ``K``: field where we base all computations. It must have characteristic zero.
             * ``x``: variable for the ring of formal power series `\mathbb{K}[[x]]`
             
@@ -2139,36 +2143,61 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Checking te input
         if(not K.is_field() or K.characteristic()!= 0):
             raise TypeError("The input 'K' must be a field of characteristic zero")
+        
+        if(not (o in ZZ) or o < 0):
+            raise ValueError("the order input must be a non-negative integer")
             
-        Kx = PolynomialRing(K, x) # polynomial ring for truncations
+        Kx = LaurentPolynomialRing(K, str(x)) # polynomial ring for truncations
         x = Kx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
             
         A = [a.change_ring(K) for a in A] # checking everything in A is in K
         s = [el.change_ring(K) for el in s] # checking everything in s is in K
         p = K(p) # checking p is in K
-        v = v.change_ring(K) # checking everything in v is in K    
+        v = v.change_ring(Kx) # checking everything in v is in K    
         
         m = len(s); r = len(s[0])
-        if(len(A) < m):
+        if(len(A) < m+o):
             raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
-        A = A[:m] # Removing extra data
+        A = A[:o+m] # Removing extra data
         if(len(v) != r or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
             raise TypeError("The dimensions of the input are not correct")
-            
+
+        if(o > 0): 
+            resA = A[o-1] # this is the coefficients for x^{-1}
+        else:
+            resA = Matrix(K, r*[r*[0]])
+
         ## Base case
         if(m == 1):
+            #logger.debug("Base case in Chyzak's algorithm: %d" %p)
             if(p == 0): return v
-            else: return s[0]/p
+            ## Here the system reads t*y' + (pI - tA)y = s for y,s vector of constants
+            ## the term y' vanishes since y is constant, so we have
+            ## (pI - A[-1])y = s[0]
+            ## If p is an eigenvalue of A[-1], we may need a particular value (there are too many solutions) given by v
+            M = p*identity_matrix(r) - resA
+            #logger.debug("System to solve\n%s\n%s" %(M, s[0]))
+            aux_v = M.solve_right(s[0])
+            if(M.determinant() == 0):
+                if(M*v == s[0]):
+                    return v
+                raise ValueError("The specific solution for Y(0) is not valid")
+            else: # the solution is unique, we use it
+                return aux_v
         
         ## General case
         d = m//2
-        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, K, x) # first recursive cal
-        AA = sum(A[i]*x**i for i in range(m)); ss = sum(s[i]*x**i for i in range(m))
-        R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, o, K, x) # first recursive cal
+        AA = sum(A[i]*x**(i-o) for i in range(m+o)); ss = sum(s[i]*x**i for i in range(m))
+        R = (ss - x*vector(Kx(diff(el)) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
         # transforming R into a valid input of DivideAndConquer
+        #logger.debug("New value for R: %s" %R)
+        if(any(el.valuation() < 0 for el in R)):
+            raise ValueError("We got an unexpected Laurent polynomial")
         R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]
         
-        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, K, x) #second recursive call
+        
+        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, o, K, x) #second recursive call
         solution = y0 + x**d*y1
         
         return solution
@@ -2607,11 +2636,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 R = -x*vector(diff(el) for el in y0) + x*AA*y0
                 # transforming R into a valid input of DivideAndConquer
                 R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
-                y1 = DDFunction.__chyzak_dac(A, R, n, v, K, x)
+                y1 = DDFunction.__chyzak_dac(A, R, n, v, 0, K, x)
 
                 self.__chyzak["last"] = (y0 + x**n*y1, m)
             else:
-                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, m*[vector(K, r*[0])], 0, v, K, x), m)
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, m*[vector(K, r*[0])], 0, v, 0, K, x), m)
                 
             y = self.__chyzak["last"][0][0] 
             for i in range(n,m):
@@ -2695,6 +2724,36 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return [self.init(i) for i in range(n)]
         return self.sequence(n)*factorial(n)
         
+    def truncation(self, bound):
+        r'''
+            Returns the truncation of this function up to the given order.
+
+            Differentially definable functions are, in particular, formal power series. The truncation
+            of a formal power series `f(x) = \sum_{n\geq 0} f_nx^n` up to an order `m \geq 0` is a 
+            polynomial formed by the first coefficients of `f(x)`, namely:
+
+            .. MATH
+            
+                \lceil f(x) \rceil^m = f_0 + f_1x + \ldots + f_{m-1}x^{m-1}
+
+            This method computes the truncation for a given bound.
+
+            INPUT:
+
+            * ``bound``: value for the bound `m` of the truncation.
+
+            OUTPUT:
+
+            A polynomial of degree at most ``bound``.
+
+            TODO: add examples
+        '''
+        if((not bound in ZZ) or (bound < 0)):
+            raise ValueError("The bound for the truncation must b a non-negative integer")
+
+        Px = PolynomialRing(self.parent().coeff_field, self.parent().variables()[0])
+        return Px(self.sequence(bound, True))
+
     @cached_method
     def size(self):
         r'''
