@@ -41,7 +41,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
-                        LaurentPolynomialRing, block_matrix)
+                        LaurentPolynomialRing, LaurentSeriesRing, block_matrix)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2139,6 +2139,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             .. MATH::
             
                 tY' + (pI_r - tA)Y = s\ (mod x^m)        
+
+            TODO: add examples (or move them to the sequence method)
         '''
         ## Checking te input
         if(not K.is_field() or K.characteristic()!= 0):
@@ -2571,7 +2573,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             for i in range(n, 2*n):
                 self.__sequence[i] = Ny[i]
             self.__computed = 2*n-1
-        elif(algorithm in ("direct")):
+        elif(n <= self.equation.get_jp_fo() or algorithm in ("direct")):
             ## This is the direct approach. Leads to a quadratic algorithm for extract the
             ## first elements of the sequence. It wars easily in every case.
 
@@ -2582,7 +2584,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             else:
                 ## Otherwise, we try to get as usual the value
                 d = self.order()
-                i = max(n-d,0 )
+                i = max(n-d,0)
                 rec = self.equation.get_recursion_row(i)
                 while(rec[n] == 0  and i <= self.equation.jp_value()):                   
                     i += 1 
@@ -2604,11 +2606,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             self.__sequence[n] = self.parent().coeff_field(res/rec[n])
             self.__computed += 1
         elif(algorithm in ("default", "chyzak")):
-            ## We heck that the leading coefficient is valid
-            if(self.equation[self.equation.order()](x=0) == 0):
-                self.__extend_sequence("direct")
-                return
-
             ## This is a divide-and-conquer approach. This translates the problem into
             ## a first order linear system and computes the next bunch of coefficients always
             ## doubling the amount of elements in the sequence computed. 
@@ -2617,34 +2614,45 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             K = self.parent().coeff_field
             x = self.parent().variables()[0]
             r = self.equation.order()
-            v = vector(self.init(r, True))
+            init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
+            v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
             Kx = PolynomialRing(K, x); x = Kx(x)
 
             ## we need to get the truncated associated system Y' = AY
             ## here A is the companion matrix transposed
             if(self.parent().depth() > 1): # the coefficients are DDFunctions
-                d = self.equation.order()
+                q = [self.equation[i].ps_order for i in range(r+1)]
+                o = -min(q[i] - q[r] for i in range(r+1))
+                if(o > 0): #singular case
+                    q = [o-q[i]+q[r] for i in range(r+1)]
+                    last_row = [
+                        -x**q[j]*
+                        Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
+                        Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+                else:
+                    last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
                 # building the list of matrices A
-                last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[d].isequence(m,True)) for j in range(d)]
-                A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == 0) else 0 for j in range(d)] for i in range(d-1)] + 
-                                [[last_row[j][k] for j in range(d)]])) for k in range(m)]
+                
             else: # the coefficients are polynomials
-                A = [Matrix(K, (
-                    ([[1 if j == i+1 else 0 for j in range(r)] for i in range(r-1)] if k == 0 else (r-1)*[r*[0]] ) + 
-                    [[diff(-self.equation[j]/self.equation[r], k)(**{str(x): 0})/factorial(k) for j in range(r)]] # TODO: improve this
-                    )) for k in range(m)]
+                LKx = LaurentSeriesRing(K, str(x)) # pylint: disable=too-many-function-args
+                coeffs = [-LKx(self.equation[i])/LKx(self.equation[r]) for i in range(r+1)]
+                o = -min(el.valuation() for el in coeffs)
+                last_row = [LKx('x')**o*coeffs[i] for i in range(r)]
+                    
+            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
+                                [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
 
             if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
                 y0 = self.__chyzak["last"][0]
-                AA = sum(A[i]*x**i for i in range(m))
-                R = -x*vector(diff(el) for el in y0) + x*AA*y0
+                AA = sum(A[i]*x**(i-o) for i in range(o+m))
+                R = -x*vector(el.derivative() for el in y0) + x*AA*y0
                 # transforming R into a valid input of DivideAndConquer
                 R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
-                y1 = DDFunction.__chyzak_dac(A, R, n, v, 0, K, x)
+                y1 = DDFunction.__chyzak_dac(A, R, n, v, o, K, x)
 
                 self.__chyzak["last"] = (y0 + x**n*y1, m)
             else:
-                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, m*[vector(K, r*[0])], 0, v, 0, K, x), m)
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
                 
             y = self.__chyzak["last"][0][0] 
             for i in range(n,m):
