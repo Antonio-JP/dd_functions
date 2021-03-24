@@ -41,7 +41,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
-                        LaurentPolynomialRing)
+                        LaurentPolynomialRing, block_matrix)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2127,7 +2127,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
             If this is `0`, then a solution for the original system is computed. The length should be again `m`.
             * ``p``: a value on `\mathbb{K}` for the extended equation.
-            * ``v``: a vector in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains the value of `Y(0)`.
+            * ``v``: a list of vectors in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains a truncation of Y.
             * ``o``: negative order of teh matrix `A`. This value is 0 if the entries are not Laurent polynomials.
             * ``K``: field where we base all computations. It must have characteristic zero.
             * ``x``: variable for the ring of formal power series `\mathbb{K}[[x]]`
@@ -2153,38 +2153,43 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         A = [a.change_ring(K) for a in A] # checking everything in A is in K
         s = [el.change_ring(K) for el in s] # checking everything in s is in K
         p = K(p) # checking p is in K
-        v = v.change_ring(Kx) # checking everything in v is in K    
+        v = [el.change_ring(K) for el in v] # checking everything in v is in K    
         
         m = len(s); r = len(s[0])
-        if(len(A) < m+o):
+        if(len(A) < p+m+o):
             raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
-        A = A[:o+m] # Removing extra data
-        if(len(v) != r or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
+        A = A[:o+m+p] # Removing extra data
+        if(any(len(v_el) != r for v_el in v) or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
             raise TypeError("The dimensions of the input are not correct")
 
-        if(o > 0): 
-            resA = A[o-1] # this is the coefficients for x^{-1}
-        else:
-            resA = Matrix(K, r*[r*[0]])
-
         ## Base case
-        if(m == 1):
-            #logger.debug("Base case in Chyzak's algorithm: %d" %p)
-            if(p == 0): return v
-            ## Here the system reads t*y' + (pI - tA)y = s for y,s vector of constants
-            ## the term y' vanishes since y is constant, so we have
-            ## (pI - A[-1])y = s[0]
-            ## If p is an eigenvalue of A[-1], we may need a particular value (there are too many solutions) given by v
-            M = p*identity_matrix(r) - resA
-            #logger.debug("System to solve\n%s\n%s" %(M, s[0]))
-            aux_v = M.solve_right(s[0])
-            if(M.determinant() == 0):
-                if(M*v == s[0]):
-                    return v
-                raise ValueError("The specific solution for Y(0) is not valid")
-            else: # the solution is unique, we use it
-                return aux_v
-        
+        if(m == 1): # we check the truncation is a valid solution
+            if(o > 0): # irregular case
+                # we build the linear system
+                fA = [j*[Matrix(r)] + [-A[i+o-1] for i in range(-o+1, p+1-j)] for j in range(p+o+1)]
+                for j in range(p):
+                    fA[j][o-1+j] += (p-j)*identity_matrix(r)
+                fA = block_matrix(fA)
+                fs = vector([el for el in s[0]] + (o+p)*r*[0])
+                ## Here the system reads t*y' + (pI - tA)y = s for s vector of constants and y a vector of polynomial of 
+                ## degree bounded by "o-1"
+                if(p == 0): # base case, we use truncation after checking
+                    fv = vector(sum([list(el) for el in v[o-1::-1]], []))
+                    
+                    if(fA*fv == fs):
+                        return sum(v[i]*x**i for i in range(o))
+                    else:
+                        raise ValueError("The initial truncation is not valid")
+                else: # general p: we solve the system
+                    sol = list(fA.solve_right(fs))
+                    sol = sum([[sol[r*i:r*(i+1)]] for i in range(len(sol)//r)], [])
+                    sol.reverse(); sol = [vector(el) for el in sol]
+
+                    return sum(sol[i+p]*x**(i) for i in range(-p, o))            
+            if(o == 0): # regular case
+                if(p == 0): return v[0]
+                else: return s[0]/p
+
         ## General case
         d = m//2
         y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, o, K, x) # first recursive cal
@@ -2194,8 +2199,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         #logger.debug("New value for R: %s" %R)
         if(any(el.valuation() < 0 for el in R)):
             raise ValueError("We got an unexpected Laurent polynomial")
-        R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]
-        
+        R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
         
         y1 = DDFunction.__chyzak_dac(A, R, p+d, v, o, K, x) #second recursive call
         solution = y0 + x**d*y1
