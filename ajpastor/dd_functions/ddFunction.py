@@ -41,7 +41,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
-                        LaurentPolynomialRing, LaurentSeriesRing, block_matrix)
+                        LaurentPolynomialRing, LaurentSeriesRing, block_matrix, infinity)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2165,7 +2165,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise TypeError("The dimensions of the input are not correct")
 
         ## Base case
-        if(m == 1): # we check the truncation is a valid solution
+        if(m == 1): 
             if(o > 0): # irregular case
                 # we build the linear system
                 fA = [j*[Matrix(r)] + [-A[i+o-1] for i in range(-o+1, p+1-j)] for j in range(p+o+1)]
@@ -2420,10 +2420,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: DFinite.element([-5, x], {5:3}).ps_order
                 5
                 sage: DFinite.element([-1,1],[0]).ps_order
-                -1
+                +Infinity
         '''
         if(self.is_null):
-            return -1 
+            return infinity 
         else:
             i = 0 
             while(self.init(i) == 0):
@@ -2593,7 +2593,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         r = self.equation.order() # order of the equation
 
         # First consideration: self is the inverse of something
-        if(self.is_inverse()):
+        if(self.is_inverse()): # inverse case
             ## If a function is the inverse, we use a Newton iteration to quickly
             ## compute its sequence using the computations for the originalfunction.
             n = n+1 # number of computed elements
@@ -2610,7 +2610,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(m < r): # error: not enough data
                 raise NoValueError(m)
             self.__sequence[m] = (sum(
-                    -self.element(m-r+i)*self.equation.forward(i)(n=m-r) 
+                    -self.sequence(m-r+i)*self.equation.forward(i)(n=m-r) # pylint: disable=invalid-unary-operand-type
                     for i in range(r)
                 ) / self.equation.forward(r)(n=m-r))
             self.__computed = m
@@ -2618,11 +2618,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(self.parent().depth() == 1): # polynomial coefficient case
                 m = n+1 # element to be computed
                 d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
-                r = self.equation.forward_order() # maximal shift appearing in the recurrence
-                polys = [self.equation.backward(i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
+                r = self.equation.forward_order # maximal shift appearing in the recurrence
+                polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
                 lc = self.equation.forward(r)(n=m-r)
-                self.__sequence[m] = -sum(self.element(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
-
+                self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
+                self.__computed = m
             else: # power series coefficient case
                 ## In this case, we use the Divide and Conquer strategy proposed in 
                 m = 2*n # we double the amount of data
@@ -2630,7 +2630,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 x = self.parent().variables()[0]
                 r = self.equation.order()
                 init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
-                v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
                 Kx = PolynomialRing(K, x); x = Kx(x)
 
                 ## we need to get the truncated associated system Y' = AY
@@ -2643,6 +2642,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                         -x**q[j]*
                         Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
                         Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+
+                    Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
                 else:
                     last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
 
@@ -2651,20 +2652,25 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                 if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
                     y0 = self.__chyzak["last"][0]
-                    AA = sum(A[i]*x**(i-o) for i in range(o+m))
-                    R = -x*vector(el.derivative() for el in y0) + x*AA*y0
+                    AA = sum(A[i]*x**(i-o) for i in range(m+o))
+                    R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
                     # transforming R into a valid input of DivideAndConquer
+                    if(any(el.valuation() < 0 for el in R)):
+                        raise ValueError("We got an unexpected Laurent polynomial")
                     R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
-                    y1 = DDFunction.__chyzak_dac(A, R, n, v, o, K, x)
+                    y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
 
                     self.__chyzak["last"] = (y0 + x**n*y1, m)
                 else:
+                    # we will need the initial conditions
+                    v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
                     self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
                     
                 y = self.__chyzak["last"][0][0] 
+                
                 for i in range(n,m):
                     self.__sequence[i] = y[i]
-                self.__computed = m            
+                self.__computed = m          
         else: ## Default case (use when the required element is below the bound)
             n  += 1 # element to be computed
            
@@ -2799,6 +2805,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         Px = PolynomialRing(self.parent().coeff_field, self.parent().variables()[0])
         return Px(self.sequence(bound, True))
+
+    taylor = truncation #: alias of :func:`truncation`. This method returns the Taylor expansion
 
     @cached_method
     def size(self):
