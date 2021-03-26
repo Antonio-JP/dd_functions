@@ -2508,7 +2508,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return [self.sequence(i) for i in range(n)]
         
         while(not n in self.__sequence):
-            self.__extend_sequence()
+            self.extend_sequence()
         
         return self.__sequence[n]
 
