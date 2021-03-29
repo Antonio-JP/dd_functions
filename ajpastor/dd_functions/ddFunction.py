@@ -4842,12 +4842,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             For a proper behavior of this function, only files created with 
             the method ``save_init`` should be used.
             
-            INPUT::
-                * file: an opened file object or a string with the Path to the file.
-                * init: indicates if loading the initial values (``True``) or the sequence. 
-                * bin: a flag indicating if load the object in text mode or binary mode.
-                * check: a flag to check the data is valid for the equation.
-                * bound: number of elements of the sequence to load.
+            INPUT:
+
+            * ``file``: an opened file object or a string with the Path to the file.
+            * ``init``: indicates if loading the initial values (``True``) or the sequence. 
+            * ``bin``: a flag indicating if load the object in text mode or binary mode.
+            * ``check``: a flag to check the data is valid for the equation.
+            * ``bound``: number of elements of the sequence to load.
         '''
         from pickle import load as pload
         
