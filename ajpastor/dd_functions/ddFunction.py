@@ -2585,7 +2585,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             OUTPUT:
 
-            The last element computed with this extension
+            The index of the last element computed with this extension
         '''
         if(self.__computed is None):
             self.__computed = max([i for i in self.__sequence], default=-1)
