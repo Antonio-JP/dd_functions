@@ -2431,6 +2431,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             return i
 
+    valuation = ps_order #: alias for the attribute :func:`ps_order`. Returns the order (as a power series) of ``self``.
+
     def sequence(self, n, list=False, incomplete=False):
         r'''
             Method to get the `n`-th coefficient of the power series.
