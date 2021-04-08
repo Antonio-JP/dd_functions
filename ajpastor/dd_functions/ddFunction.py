@@ -33,13 +33,15 @@ AUTHORS:
 
 # Python imports
 import warnings
+import logging
 from functools import reduce
 
 #SAGE imports 
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator, parent)
+                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
+                        LaurentPolynomialRing, LaurentSeriesRing, block_matrix, infinity)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -65,6 +67,7 @@ from ajpastor.operator.fullLazyOperator import FullLazyOperator
 # Private variables for module
 _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
 _Fields = Fields.__classcall__(Fields)
+logger = logging.getLogger(__name__)
 
 #####################################################
 ### Definition of the particular warnings we are interested to raise
@@ -1522,7 +1525,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         if(as_symbolic):
             return self.__variables
         else:
-            return tuple(self.base()(el) for el in self.__variables)
+            return tuple(self.original_ring()(el) for el in self.__variables)
 
     def parameters(self, as_symbolic = False):
         r'''
@@ -2095,6 +2098,115 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         * Add examples where we use the dict input for ``init``
         * Add examples with inhomogeneous term
     '''
+    @staticmethod
+    def __chyzak_dac(A, s, p, v, o=0, K=QQ, x='x'):
+        r'''
+            Divide and conquer scheme in Figure 3 of arxiv:`abs/cs/0604101`.
+            
+            This method presents the Divide and conquer scheme in the paper by Chyzak et. al. for computing the expansion
+            of a power series solution for a differential system:
+            
+            .. MATH::
+            
+                Y' = AY, Y(0) = v
+                
+            where `Y \in \mathbb{M}_{r\times 1}(\mathbb{K}[[x]])` and `A` is a square matrix with coefficients in
+            `\mathbb{K}[[x]]`. Here, the vector `v \in \mathbb{M}_{r\times 1}(\mathbb{K})`.
+            
+            More precisely, this method solves the truncated system:
+            
+            .. MATH::
+            
+                tY' + (pI_r - tA)Y = s\ (mod x^m).
+            
+            INPUT:
+            
+            * ``A``: a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=-o}^m A_it^i` is 
+            a truncation of the system matrix `A`. We denote the length of his list as `m`.
+            * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
+            If this is `0`, then a solution for the original system is computed. The length should be again `m`.
+            * ``p``: a value on `\mathbb{K}` for the extended equation.
+            * ``v``: a list of vectors in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains a truncation of Y.
+            * ``o``: negative order of teh matrix `A`. This value is 0 if the entries are not Laurent polynomials.
+            * ``K``: field where we base all computations. It must have characteristic zero.
+            * ``x``: variable for the ring of formal power series `\mathbb{K}[[x]]`
+            
+            OUTPUT:
+            
+            A vector `Y \in \mathbb{M}_{r\times 1}(\mathbb{k}[x])` such that 
+            
+            .. MATH::
+            
+                tY' + (pI_r - tA)Y = s\ (mod x^m)        
+
+            TODO: add examples (or move them to the sequence method)
+        '''
+        ## Checking te input
+        if(not K.is_field() or K.characteristic()!= 0):
+            raise TypeError("The input 'K' must be a field of characteristic zero")
+        
+        if(not (o in ZZ) or o < 0):
+            raise ValueError("the order input must be a non-negative integer")
+            
+        Kx = LaurentPolynomialRing(K, str(x)) # polynomial ring for truncations
+        x = Kx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
+            
+        A = [a.change_ring(K) for a in A] # checking everything in A is in K
+        s = [el.change_ring(K) for el in s] # checking everything in s is in K
+        p = K(p) # checking p is in K
+        v = [el.change_ring(K) for el in v] # checking everything in v is in K    
+        
+        m = len(s); r = len(s[0])
+        if(len(A) < p+m+o):
+            raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
+        A = A[:o+m+p] # Removing extra data
+        if(any(len(v_el) != r for v_el in v) or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
+            raise TypeError("The dimensions of the input are not correct")
+
+        ## Base case
+        if(m == 1): 
+            if(o > 0): # irregular case
+                # we build the linear system
+                fA = [j*[Matrix(r)] + [-A[i+o-1] for i in range(-o+1, p+1-j)] for j in range(p+o+1)]
+                for j in range(p):
+                    fA[j][o-1+j] += (p-j)*identity_matrix(r)
+                fA = block_matrix(fA)
+                fs = vector([el for el in s[0]] + (o+p)*r*[0])
+                ## Here the system reads t*y' + (pI - tA)y = s for s vector of constants and y a vector of polynomial of 
+                ## degree bounded by "o-1"
+                if(p == 0): # base case, we use truncation after checking
+                    fv = vector(sum([list(el) for el in v[o-1::-1]], []))
+                    
+                    if(fA*fv == fs):
+                        return sum(v[i]*x**i for i in range(o))
+                    else:
+                        raise ValueError("The initial truncation is not valid")
+                else: # general p: we solve the system
+                    sol = list(fA.solve_right(fs))
+                    sol = sum([[sol[r*i:r*(i+1)]] for i in range(len(sol)//r)], [])
+                    sol.reverse(); sol = [vector(el) for el in sol]
+
+                    return sum(sol[i+p]*x**(i) for i in range(-p, o))            
+            if(o == 0): # regular case
+                if(p == 0): return v[0]
+                else: return s[0]/p
+
+        ## General case
+        d = m//2
+        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, o, K, x) # first recursive cal
+        AA = sum(A[i]*x**(i-o) for i in range(m+o)); ss = sum(s[i]*x**i for i in range(m))
+        R = (ss - x*vector(Kx(diff(el)) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+        # transforming R into a valid input of DivideAndConquer
+        #logger.debug("New value for R: %s" %R)
+        if(any(el.valuation() < 0 for el in R)):
+            raise ValueError("We got an unexpected Laurent polynomial")
+        R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
+        
+        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, o, K, x) #second recursive call
+        solution = y0 + x**d*y1
+        
+        return solution
+
     #####################################
     ### Init and Interface methods
     #####################################
@@ -2156,6 +2268,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         self.__built = None
         self.__zeros = None
         self.__singularities = None
+        self.__computed = None
+        self.__chyzak = {}
         
         ### Assigning the differential operator
         ### We will save the leading coefficient of the equation (lc) to future uses.
@@ -2305,16 +2419,18 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: DFinite.element([-5, x], {5:3}).ps_order
                 5
                 sage: DFinite.element([-1,1],[0]).ps_order
-                -1
+                +Infinity
         '''
         if(self.is_null):
-            return -1 
+            return infinity 
         else:
             i = 0 
             while(self.init(i) == 0):
                 i += 1 
             
             return i
+
+    valuation = ps_order #: alias for the attribute :func:`ps_order`. Returns the order (as a power series) of ``self``.
 
     def sequence(self, n, list=False, incomplete=False):
         r'''
@@ -2392,24 +2508,185 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return result
             return [self.sequence(i) for i in range(n)]
         
-        if(not n in self.__sequence):
-            if(n > self.equation.get_jp_fo()):
-                ## If the required value is "too far" we can get quickly the equation
-                rec = self.equation.get_recursion_row(n-self.equation.forward_order)
-            else:
-                ## Otherwise, we try to get as usual the value
-                d = self.order()
-                i = max(n-d,0 )
+        while(not n in self.__sequence):
+            self.extend_sequence()
+        
+        return self.__sequence[n]
+
+    def isequence(self, n, list=False, incomplete=False):
+        r'''
+            Method to get the `n`-th coefficient of the inverse for a power series.
+
+            A :class:`DDFunction` represents a formal power series in `\mathbb{K}[[x]]` 
+            where `\mathbb{K}` is the field returned by ``self.parent().base_ring()``. These power series
+            can be inverted if the constant term is not zero obtaining a new power series.
+
+            This method compute the elements in the sequence for the multiplicative inverse of 
+            the differentially definable function represented by ``self`` (see property :func:`inverse`)
+
+            INPUT:
+
+            * ``n``: index for the coefficient of number of coefficients to compute
+            * ``list``: boolean flag. If ``True``, the method returns a list with the ``n``
+              first coefficients of the sequence. Otherwise, it returns the coefficient
+              `f_n`. By default, this argument is ``False``.
+            * ``incomplete``: boolean flag. If ``False``, the method will raise an error when
+              the coefficients can not be computed. Only valid in the case that ``list`` is 
+              ``True``, the output (instead of an :class:`~ajpastor.dd_functions.exceptions.NoValueError`)
+              will be the list up to the first element we could not compute.
+
+            OUTPUT:
+
+            See method :func:`sequence` for a description of the output.
+
+            TODO: add examples
+        '''
+        return self.inverse.sequence(n, list, incomplete) # pylint: disable=no-member
+
+    def extend_sequence(self):
+        r'''
+            Method to actually extend the list of the computed sequence.
+
+            This method takes into consideration the current situation of ``self`` 
+            and decides on the best algorithm to extend the sequence. This decision
+            is based on paper :arxiv:`abs/cs/0604101`, which describes the
+            best algorithm depending on the type of the coefficients of the differential equation:
+
+            * *Constant coefficients*: if we look to the sequence, we find out a recurrence of 
+              order exactly the order of the differential equation, that is pretty simple to unroll.
+            * *Polynomial coefficients*: in this case, the recursion is called P-finite. Here,
+              once we computed enough initial data, we can compute the next element by evaluating
+              `r` polynomials (where `r` is the size of the differential equation), performing 
+              `r` multiplications and additions and, then, performing a division.
+            * *Power series coefficients*: in this last case, the recursion is not finite and, hence,
+              not useful for a simple unrolling. Here, the authors of :arxiv:`abs/cs/0604101` proposed
+              a *Divide and Conquer* strategy to improve the performance.
+
+            As we see, each of the cases has a different approach and, in fact, there is one last remaining
+            point to consider. If the leading coefficient of the differential equation vanishes at zero
+            (i.e., the point `x=0` is a singular point for the differential equation) we fall into slightly 
+            different problems:
+
+            * *Constant coefficients*: this never happends
+            * *Polynomial coefficients*: the leading coefficient of the recurrence will have positive integer zeros
+              which mean that coefficient is undefined. We can only apply the recurrence relation after we have passed 
+              that value (i.e., the functions is defined in the sense of function :func:`is_fully_defined`)
+            * *Power series coefficients*: we need to apply a relaxed version of the Divide and Conquer strategy
+              presented in :arxiv:`abs/cs/0604101` where the solutions it computes will be Laurent polynomials
+              instead of simply polynomials with the valuation at most the current degree we are computing and 
+              degree the truncation we want plus the valuation of the differential equation.
+
+            Finally, in order to avoid an infinite recursion loop to compute the multiplicative inverses of 
+            the coefficients, we also consider the case where the function is defined as the multiplicative inverse of
+            another :class:`DDFunction`. In this case, we use a newton scheme for formal power series to compute
+            a truncation of self doubling the current precision. This require two multiplication of polynomials
+            of size of the desired.
+
+            OUTPUT:
+
+            The index of the last element computed with this extension
+        '''
+        if(self.__computed is None):
+            self.__computed = max([i for i in self.__sequence], default=-1)
+            if(any(j not in self.__sequence for j in range(self.__computed))):
+                raise ValueError("Missing element in the sequence")
+        n = self.__computed # last computed element
+        r = self.equation.order() # order of the equation
+
+        # First consideration: self is the inverse of something
+        if(self.is_inverse()): # inverse case
+            ## If a function is the inverse, we use a Newton iteration to quickly
+            ## compute its sequence using the computations for the originalfunction.
+            n = n+1 # number of computed elements
+            f = self.built[1][0] # self == 1/f
+            R = PolynomialRing(self.parent().coeff_field, 'v')
+            f2n = R(f.sequence(2*n, True)); y = R(self.sequence(n, True))
+            Ny = y*(2 - y*f2n)
+            for i in range(n, 2*n):
+                self.__sequence[i] = Ny[i]
+            self.__computed = 2*n-1
+        elif(all(self.equation[i].is_constant() for i in range(r+1))): # constant coefficients
+            m = n+1 # element to be computed
+            
+            if(m < r): # error: not enough data
+                raise NoValueError(m)
+            self.__sequence[m] = (sum(
+                    -self.sequence(m-r+i)*self.equation.forward(i)(n=m-r) # pylint: disable=invalid-unary-operand-type
+                    for i in range(r)
+                ) / self.equation.forward(r)(n=m-r))
+            self.__computed = m
+        elif((n+1) > self.equation.get_jp_fo()): # all the data can be computed
+            if(self.parent().depth() == 1): # polynomial coefficient case
+                m = n+1 # element to be computed
+                d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
+                r = self.equation.forward_order # maximal shift appearing in the recurrence
+                polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
+                lc = self.equation.forward(r)(n=m-r)
+                self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
+                self.__computed = m
+            else: # power series coefficient case
+                ## In this case, we use the Divide and Conquer strategy proposed in 
+                m = 2*n # we double the amount of data
+                K = self.parent().coeff_field
+                x = self.parent().variables()[0]
+                r = self.equation.order()
+                init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
+                Kx = PolynomialRing(K, x); x = Kx(x)
+
+                ## we need to get the truncated associated system Y' = AY
+                ## here A is the companion matrix transposed
+                q = [self.equation[i].ps_order for i in range(r+1)]
+                o = -min(q[i] - q[r] for i in range(r+1))
+                if(o > 0): #singular case
+                    q = [o-q[i]+q[r] for i in range(r+1)]
+                    last_row = [
+                        -x**q[j]*
+                        Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
+                        Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+
+                    Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
+                else:
+                    last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
+
+                A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
+                                    [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
+
+                if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
+                    y0 = self.__chyzak["last"][0]
+                    AA = sum(A[i]*x**(i-o) for i in range(m+o))
+                    R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
+                    # transforming R into a valid input of DivideAndConquer
+                    if(any(el.valuation() < 0 for el in R)):
+                        raise ValueError("We got an unexpected Laurent polynomial")
+                    R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
+                    y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
+
+                    self.__chyzak["last"] = (y0 + x**n*y1, m)
+                else:
+                    # we will need the initial conditions
+                    v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
+                    self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
+                    
+                y = self.__chyzak["last"][0][0] 
+                
+                for i in range(n,m):
+                    self.__sequence[i] = y[i]
+                self.__computed = m          
+        else: ## Default case (use when the required element is below the bound)
+            n  += 1 # element to be computed
+           
+            d = self.order()
+            i = max(n-d,0)
+            rec = self.equation.get_recursion_row(i)
+            while(rec[n] == 0  and i <= self.equation.jp_value()):                   
+                i += 1 
                 rec = self.equation.get_recursion_row(i)
-                while(rec[n] == 0  and i <= self.equation.jp_value()):                   
-                    i += 1 
-                    rec = self.equation.get_recursion_row(i)
-                if(rec[n] == 0 ):
+            if(rec[n] == 0 ):
+                raise NoValueError(n)
+            ## Checking that we only need previous elements
+            for i in range(n+1 , len(rec)):
+                if(not (rec[i] == 0 )):
                     raise NoValueError(n)
-                ## Checking that we only need previous elements
-                for i in range(n+1 , len(rec)):
-                    if(not (rec[i] == 0 )):
-                        raise NoValueError(n)
             
             ## We do this operation in a loop to avoid computing initial values 
             ## if they are not needed
@@ -2419,9 +2696,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     res -= rec[i]*(self.sequence(i))
                     
             self.__sequence[n] = self.parent().coeff_field(res/rec[n])
-            
-        return self.__sequence[n]
-            
+            self.__computed += 1
+        
+        return self.__computed
+
     def init(self, n, list=False, incomplete=False):
         r'''
             Method to get the `n`-th initial value of the power series.
@@ -2499,6 +2777,38 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return [self.init(i) for i in range(n)]
         return self.sequence(n)*factorial(n)
         
+    def truncation(self, bound):
+        r'''
+            Returns the truncation of this function up to the given order.
+
+            Differentially definable functions are, in particular, formal power series. The truncation
+            of a formal power series `f(x) = \sum_{n\geq 0} f_nx^n` up to an order `m \geq 0` is a 
+            polynomial formed by the first coefficients of `f(x)`, namely:
+
+            .. MATH
+            
+                \lceil f(x) \rceil^m = f_0 + f_1x + \ldots + f_{m-1}x^{m-1}
+
+            This method computes the truncation for a given bound.
+
+            INPUT:
+
+            * ``bound``: value for the bound `m` of the truncation.
+
+            OUTPUT:
+
+            A polynomial of degree at most ``bound``.
+
+            TODO: add examples
+        '''
+        if((not bound in ZZ) or (bound < 0)):
+            raise ValueError("The bound for the truncation must b a non-negative integer")
+
+        Px = PolynomialRing(self.parent().coeff_field, self.parent().variables()[0])
+        return Px(self.sequence(bound, True))
+
+    taylor = truncation #: alias of :func:`truncation`. This method returns the Taylor expansion
+
     @cached_method
     def size(self):
         r'''
@@ -2531,13 +2841,16 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             it was the addition or multiplication of two :class:`DDFunction`, we indicate it
             in this attribute. 
 
-            This always have the following format: [type, data]. we distinguish between two 
+            This always have the following format: [type, data]. we distinguish between three 
             type of constructions:
 
             * ``derivative``: then ``self`` is the derivative of ``data[0]``.
             * ``polynomial``: then ``self`` is a polynomial evaluation. The polynomial can be
               found in ``data[0]`` and the relations between the variables and the actual values
               is found in a dictionary in ``data[1]``.
+            * ``inverse``: then ``self`` is the multiplicative inverse of an element in 
+              ``self.parent().to_depth(self.parent().depth()-1)`` (i.e., from an element 
+              in the previous layer) that can be found in ``data[0]``.
 
             If this was not known, the attribute will take the (default) value ``None``.
         '''
@@ -2565,6 +2878,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             for var in vars_in_pol:
                 if(not str(var) in variables):
                     raise TypeError("The variables in the polynomial does not appear in the given map.\n\t- Polynomial: %s\n\t- Map: %s" %(polynomial, variables))
+        elif(type == "inverse"):
+            ## Check that the other element is in the previous layer of depth
+            if(is_DDFunction(data[0]) and not(data[0] in self.parent().to_depth(self.parent().depth()-1))):
+                raise TypeError("The function must be an element of the previous layer in the hierarchy")
         else:
             raise ValueError("Built format not recognized.")
                             
@@ -2772,9 +3089,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         if(self.init(0) == 0):
             raise ValueError("Can not invert a function with initial value 0 --> That is not a power series")
-        
-        coeffs = self.equation.coefficients()
-        
+                
         ### Computing the new name
         newName = None
         if(not(self.name is None)):
@@ -2782,10 +3097,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(self.order() == 0 ):
             raise ZeroDivisionError("Impossible to invert the zero function")
         elif(self.order() == 1 ):
+            coeffs = self.equation.coefficients()
             return self.parent().element([-coeffs[0],coeffs[1]], [1 /self.init(0 )], check_init=False, name=newName)
         else:
             newDDRing = DDRing(self.parent())
-            return newDDRing.element([self.derivative(), self], [1 /self.init(0 )], check_init=False, name=newName)
+            inverse = newDDRing.element([self.derivative(), self], [1 /self.init(0 )], check_init=False, name=newName)
+            inverse.built = ("inverse", [self])
+            return inverse
     
     def add(self, other):
         '''
@@ -2814,20 +3132,20 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
         
         ## We check other simplifications: if the elements are constants
-        if(self.is_constant or other.is_constant):
+        if(self.is_constant() or other.is_constant()):
             result = None
-            if(self.is_constant and other.is_constant):
+            if(self.is_constant() and other.is_constant()):
                 parent = self.parent()
                 newOperator = [0 ,1]
                 newInit = [self(0 )+other(0 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-            elif(other.is_constant):
+            elif(other.is_constant()):
                 parent = self.parent()
                 newOperator = parent.element(self.equation, inhomogeneous=other(0 )*self.equation.coefficient(0 )).equation
                 newInit = [self(0 )+other(0 )] + [self.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
                 result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1+%s" %other(0 )), {'x1':self}))
-            elif(self.is_constant):
+            elif(self.is_constant()):
                 parent = other.parent()
                 newOperator = parent.element(other.equation, inhomogeneous=self(0 )*other.equation.coefficient(0 )).equation
                 newInit = [self(0 )+other(0 )] + [other.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
@@ -2875,20 +3193,20 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             newName = DynamicString("_1-_2", [self.name, other.name])
         
         ## We check other simplifications: if the elements are constants
-        if(self.is_constant or other.is_constant):
+        if(self.is_constant() or other.is_constant()):
             result = None
-            if(self.is_constant and other.is_constant):
+            if(self.is_constant() and other.is_constant()):
                 parent = self.parent()
                 newOperator = [0 ,1]
                 newInit = [self(0 )-other(0 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
-            elif(other.is_constant):
+            elif(other.is_constant()):
                 parent = self.parent()
                 newOperator = parent.element(self.equation, inhomogeneous=other(0 )*self.equation.coefficient(0 )).equation
                 newInit = [self(0 )-other(0 )] + [self.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
                 result = parent.element(newOperator, newInit, check_init = False, name=newName)
                 result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,'x1')("x1-%s" %other(0 )), {'x1':self}))
-            elif(self.is_constant):
+            elif(self.is_constant()):
                 parent = other.parent()
                 newOperator = parent.element(other.equation, inhomogeneous=self(0 )*other.equation.coefficient(0 )).equation
                 newInit = [self(0 )-other(0 )] + [-other.init(i) for i in range(1 ,newOperator.get_jp_fo()+1 )]
@@ -2932,11 +3250,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return other
         elif(other.is_one):
             return self
-        elif(self.is_constant and other.is_constant):
+        elif(self.is_constant() and other.is_constant()):
             return self.init(0 )*other.init(0 )
-        elif(self.is_constant):
+        elif(self.is_constant()):
             return other.scalar(self.init(0 ))
-        elif(other.is_constant):
+        elif(other.is_constant()):
             return self.scalar(other.init(0 ))
             
         ### We build the new operator
@@ -3051,7 +3369,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def divide(self, other):
         if(self.is_null):
             return self.parent().zero()
-        if(other.is_constant):
+        if(other.is_constant()):
             return self.scalar(1 /other.init(0 ))
         if(self == other):
             return self.parent().one()
@@ -3197,11 +3515,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return other
         elif(other.is_one):
             return self
-        elif(self.is_constant and other.is_constant):
+        elif(self.is_constant() and other.is_constant()):
             return self.init(0 )*other.init(0 )
-        elif(self.is_constant):
+        elif(self.is_constant()):
             return other.scalar(self.init(0 ))
-        elif(other.is_constant):
+        elif(other.is_constant()):
             return self.scalar(other.init(0 ))
 
         if(self.parent().depth() > 1):
@@ -3272,7 +3590,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise NotImplementedError("This method is not implemented")
 
         if(self.__simple_derivative is None):
-            if(self.is_constant):
+            if(self.is_constant()):
                 ### Special case: is a constant
                 self.__simple_derivative = self.parent()(0)
             else:
@@ -3387,7 +3705,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return self.derivative(times=times-1).derivative()
                 
         if(self.__derivative is None):
-            if(self.is_constant):
+            if(self.is_constant()):
                 ### Special case: is a constant
                 self.__derivative = self.parent()(0 )
             else:
@@ -3476,7 +3794,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## If we have the basic function we return the same element
         ## Also, if self is a constant, the composition is again the constant
         self_var = self.parent().variables(True)[0]
-        if(self_var == other or self.is_constant):
+        if(self_var == other or self.is_constant()):
             return self
             
         ## Checking that 'other' at zero is zero
@@ -3616,7 +3934,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                                                 "final ring: %s" %destiny_ring]))
             
     #####################################
-    ### Equality methods
+    ### Property methods
     #####################################  
     @derived_property  
     def is_null(self): 
@@ -3634,9 +3952,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             The method used is checking that the element is a constant and its first initial value is one.
         '''
-        return (self.is_constant and self.init(0 ) == 1 )
+        return (self.is_constant() and self.init(0 ) == 1 )
         
-    @derived_property
+    @cached_method
     def is_constant(self):
         '''
             Cached property to check whether self is a constant or not.
@@ -3664,6 +3982,16 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Test the difference with the constant term
         #return (self - self(0)) == 0
     
+    def is_inverse(self):
+        r'''
+            Method to check whether a :class:`DDFunction` is an inverse.
+
+            This method checks if the funcion represented by ``self`` was built as the multiplicative
+            inverse of another :class:`DDFunction`. See property :func:`inverse` and :func:`built`
+            for further information.
+        '''
+        return (self.built != None and self.built[0] == "inverse")
+
     @derived_property
     def is_fully_defined(self):
         '''
@@ -3681,6 +4009,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         return max([n for n in self.__sequence], default=-1)
 
+    #####################################
+    ### Equality methods
+    #####################################  
     def equals(self,other): ### TO REVIEW
         '''
             Method that checks if two DDFunctions are equal (as power-series). In orther to do so, we substract one to the other and check if the result is zero.
@@ -3707,9 +4038,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return False
                 
             ## Special case with constants
-            if(other.is_constant):
-                return self.is_constant and self(0 ) == other(0 )
-            elif(self.is_constant):
+            if(other.is_constant()):
+                return self.is_constant() and self(0 ) == other(0 )
+            elif(self.is_constant()):
                 return False
                 
             if(not (self.is_fully_defined and other.is_fully_defined)):
@@ -3880,7 +4211,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 * Test this method
         '''
         if(self.__zeros is None):
-            if(self.is_constant):
+            if(self.is_constant()):
                 self.__zeros = EmptySet()
             try:
                 poly = self.is_polynomial()
@@ -3953,7 +4284,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def to_simpler(self):
         try:
             R = self.parent().base()
-            if(self.is_constant):
+            if(self.is_constant()):
                 return self.parent().coeff_field(self.init(0))
             elif(is_DDRing(R)):
                 coeffs = [el.to_simpler() for el in self.equation.coefficients()]
@@ -4241,7 +4572,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
             String method for DDFunctions. It prints all information of the DDFunction.
         '''
-        #if(self.is_constant):
+        #if(self.is_constant()):
         #    return (self.init(0)).__str__()
             
         if(detail and (not(self.name is None))):
@@ -4339,7 +4670,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
             Representation method for DDFunctions. It prints basic information of the DDFunction.
         '''
-        if(self.is_constant):
+        if(self.is_constant()):
             return str(self.init(0 ))
         if(self.name is None):
             return "(%s:%s:%s)DD-Function in (%s)" %(self.order(),self.equation.get_jp_fo(),self.size(),self.parent()) 
@@ -4385,7 +4716,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ## Computing the sign and string for the coefficient
             current = coeffs[i]
             
-            if(not simpl[i] and current.is_constant): # Recursive and constant case
+            if(not simpl[i] and current.is_constant()): # Recursive and constant case
                 current = current.init(0) # Reduced to constant case
                 simpl[i] = True
             
@@ -4501,12 +4832,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             For a proper behavior of this function, only files created with 
             the method ``save_init`` should be used.
             
-            INPUT::
-                * file: an opened file object or a string with the Path to the file.
-                * init: indicates if loading the initial values (``True``) or the sequence. 
-                * bin: a flag indicating if load the object in text mode or binary mode.
-                * check: a flag to check the data is valid for the equation.
-                * bound: number of elements of the sequence to load.
+            INPUT:
+
+            * ``file``: an opened file object or a string with the Path to the file.
+            * ``init``: indicates if loading the initial values (``True``) or the sequence. 
+            * ``bin``: a flag indicating if load the object in text mode or binary mode.
+            * ``check``: a flag to check the data is valid for the equation.
+            * ``bound``: number of elements of the sequence to load.
         '''
         from pickle import load as pload
         
@@ -4643,7 +4975,7 @@ class DDSimpleMorphism (Morphism):
                 return self.codomain().element([self.codomain().base()(coeff) for coeff in p.equation.coefficients()], p.init(p.equation.get_jp_fo()+1, True, True))
             except:
                 raise ValueError("Impossible the coercion of element \n%s\n into %s" %(p, self.codomain()))
-        if(p.is_constant):
+        if(p.is_constant()):
             return self.codomain()(p.init(0 ))
         
         raise ValueError("Impossible perform this coercion: non-constant element")

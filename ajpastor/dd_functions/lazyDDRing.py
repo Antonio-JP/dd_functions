@@ -787,9 +787,9 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             raise TypeError("find_linear_relation: The functions are not DDFunctions");
         
         ## Simplest case: some of the functions are constants is a constant
-        if(f.is_constant):
+        if(f.is_constant()):
             return (f.parent().zero(), f(0));
-        elif(g.is_constant):
+        elif(g.is_constant()):
             return None;
         
         try:
