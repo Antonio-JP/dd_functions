@@ -2519,6 +2519,21 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 NoValueError: Impossible to compute recursively the 4-th coefficient
                 sage: DFinite.element([-4, x]).sequence(10, True, True)
                 [0, 0, 0, 0]
+
+            Since :class:`DDFunction` can only represent formal power series, we have fixed that
+            the return for this method whenever `n < 0` is always `0`::
+
+                sage: DFinite.element([-1,1]).sequence(-2)
+                0
+                sage: DFinite.element([1,0,1],[1,0]).sequence(-4)
+                0
+
+            Note that when using the argument ``list``, providing a negative value
+            for `n` retrieves an empty list::
+
+                sage: DFinite.element([1,0,1],[1,0]).sequence(-3, True)
+                []
+
         '''
         if(list):
             if(incomplete):
@@ -2531,6 +2546,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return result
             return [self.sequence(i) for i in range(n)]
         
+        if(n < 0):
+            return 0 # only considering formal power series
+
         while(not n in self.__sequence):
             self.extend_sequence()
         
