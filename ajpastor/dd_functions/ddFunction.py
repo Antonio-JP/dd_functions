@@ -2716,7 +2716,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         else: ## Default case (use when the required element is below the bound)
             n  += 1 # element to be computed
            
-            d = self.order()
+            d = self.equation.forward_order
             i = max(n-d,0)
             rec = self.equation.get_recursion_row(i)
             while(rec[n] == 0  and i <= self.equation.jp_value()):                   
@@ -2725,9 +2725,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(rec[n] == 0 ):
                 raise NoValueError(n)
             ## Checking that we only need previous elements
-            for i in range(n+1 , len(rec)):
-                if(not (rec[i] == 0 )):
-                    raise NoValueError(n)
+            if(any(rec[i] != 0 for i in range(n+1 , len(rec)))):
+                raise NoValueError(n)
             
             ## We do this operation in a loop to avoid computing initial values 
             ## if they are not needed
