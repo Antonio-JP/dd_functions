@@ -1136,6 +1136,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 True
                 sage: DFinite.to_depth(5) == DDFinite.to_depth(5)
                 True 
+                sage: DFinite.to_depth(0)
+                Univariate Polynomial Ring in x over Rational Field
+                sage: DFiniteI.to_depth(0)
+                Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1
 
             We can see that the wrap of ``ore_algebra`` does not hold for deeper cases::
 
@@ -1912,9 +1916,13 @@ class ParametrizedDDRing(DDRing):
                 sage: from ajpastor.dd_functions import *
                 sage: DFiniteP.to_depth(2) is ParametrizedDDRing(DDFinite, 'P')
                 True
+                sage: DFiniteP.to_depth(0)
+                Univariate Polynomial Ring in x over Fraction Field of Univariate Polynomial Ring in P over Rational Field
 
             For further information and examples, see method :func:`DDRing.to_depth`.
         '''
+        if(dest == 0):
+            return self.original_ring()
         return ParametrizedDDRing(self.base_ddRing().to_depth(dest), self.parameters(True))
     
     def extend_base_field(self, new_field):
