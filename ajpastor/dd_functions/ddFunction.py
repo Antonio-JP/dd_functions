@@ -2628,9 +2628,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             The index of the last element computed with this extension
         '''
         if(self.__computed is None):
-            self.__computed = max([i for i in self.__sequence], default=-1)
-            if(any(j not in self.__sequence for j in range(self.__computed))):
-                raise ValueError("Missing element in the sequence")
+            maximal_index = max([i for i in self.__sequence], default=-1)
+            if(any(j not in self.__sequence for j in range(maximal_index))):
+                self.__computed = -1
+                while(self.__computed < maximal_index):
+                    self.extend_sequence()
+            else:
+                self.__computed = maximal_index
+
         n = self.__computed # last computed element
         r = self.equation.order() # order of the equation
 
@@ -2658,11 +2663,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             self.__computed = m
         elif((n+1) > self.equation.get_jp_fo() and self.parent().depth() == 1): # polynomial coefficient case
             m = n+1 # element to be computed
-            d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
-            r = self.equation.forward_order # maximal shift appearing in the recurrence
-            polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
-            lc = self.equation.forward(r)(n=m-r)
-            self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
+            if(not m in self.__sequence):
+                d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
+                r = self.equation.forward_order # maximal shift appearing in the recurrence
+                polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
+                lc = self.equation.forward(r)(n=m-r)
+                self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
             self.__computed = m
         elif((n+1) > self.equation.get_jp_fo() and self.equation[self.order()].sequence(0) != 0): # power series regular case
             ## In this case, we use the Divide and Conquer strategy proposed in 
@@ -2713,29 +2719,30 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 self.__sequence[i] = y[i]
             self.__computed = m          
         else: ## Default case (use when the required element is below the bound)
-            n  += 1 # element to be computed
+            m  = n+1 # element to be computed
            
-            d = self.equation.forward_order
-            i = max(n-d,0)
-            rec = self.equation.get_recursion_row(i)
-            while(rec[n] == 0  and i <= self.equation.jp_value()):                   
-                i += 1 
+            if(not m in self.__sequence):
+                d = self.equation.forward_order
+                i = max(m-d,0)
                 rec = self.equation.get_recursion_row(i)
-            if(rec[n] == 0 ):
-                raise NoValueError(n)
-            ## Checking that we only need previous elements
-            if(any(rec[i] != 0 for i in range(n+1 , len(rec)))):
-                raise NoValueError(n)
-            
-            ## We do this operation in a loop to avoid computing initial values 
-            ## if they are not needed
-            res = self.parent().coeff_field.zero()
-            for i in range(n):
-                if(not (rec[i] == 0 )):
-                    res -= rec[i]*(self.sequence(i))
-                    
-            self.__sequence[n] = self.parent().coeff_field(res/rec[n])
-            self.__computed += 1
+                while(rec[m] == 0  and i <= self.equation.jp_value()):                   
+                    i += 1 
+                    rec = self.equation.get_recursion_row(i)
+                if(rec[m] == 0 ):
+                    raise NoValueError(m)
+                ## Checking that we only need previous elements
+                if(any(rec[i] != 0 for i in range(m+1 , len(rec)))):
+                    raise NoValueError(m)
+                
+                ## We do this operation in a loop to avoid computing initial values 
+                ## if they are not needed
+                res = self.parent().coeff_field.zero()
+                for i in range(m):
+                    if(not (rec[i] == 0 )):
+                        res -= rec[i]*(self.sequence(i))
+                        
+                self.__sequence[m] = self.parent().coeff_field(res/rec[m])
+            self.__computed = m
         
         return self.__computed
 
