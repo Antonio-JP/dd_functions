@@ -61,6 +61,7 @@ from ajpastor.misc.ring_w_sequence import sequence
 from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
 
 from ajpastor.operator.operator import Operator
+from ajpastor.operator.oreOperator import w_OreOperator
 from ajpastor.operator.directStepOperator import DirectStepOperator
 from ajpastor.operator.fullLazyOperator import FullLazyOperator
 
