@@ -1136,13 +1136,27 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 True
                 sage: DFinite.to_depth(5) == DDFinite.to_depth(5)
                 True 
+
+            We can see that the wrap of ``ore_algebra`` does not hold for deeper cases::
+
+                sage: DFinite.to_depth(3).operator_class
+                <class 'ajpastor.operator.fullLazyOperator.FullLazyOperator'>
+                sage: DFinite.operator_class
+                <class 'ajpastor.operator.oreOperator.w_OreOperator'>
         '''
+        if(dest == 0):
+            return self.original_ring()
+        elif(dest > 1 and self.operator_class is w_OreOperator):
+            operator_class = DDRing._Default_Operator
+        else:
+            operator_class = w_OreOperator
+
         return DDRing(self.original_ring(), 
         depth = dest, 
         base_field = self.coeff_field, 
         invertibility = self.__base_invertibility, 
         derivation = self.base_derivation, 
-        default_operator = self.operator_class)
+        default_operator = operator_class)
     
     def extend_base_field(self, new_field):
         r'''
