@@ -4472,7 +4472,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
   
     # Integer powering
     def __pow__(self, other):
-        '''
+        r'''
             Magic method to compute the power of a :class:`DDFunction`.
 
             This method implements all the possibilities for computing the power of a :class:`DDFunction` whenever
@@ -4523,9 +4523,18 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             EXAMPLES::
 
             sage: from ajpastor.dd_functions import *
-            sage: Exp(x)**Sin(x)
-
-            TODO: add examples
+            sage: Exp(x)^(x^2) == Exp(x^3)
+            True
+            sage: f = Exp(x)^(1/2); f^2 == Exp(x)
+            True
+            sage: f = Cos(x)^(3/5); f.parent() is DDFinite
+            True
+            sage: f^5 == Cos(x)^3
+            True
+            sage: f = Exp(x)^Sin(x); f.parent() is DFinite.to_depth(3)
+            True
+            sage: f.init(10, True) == [((exp(x))^(sin(x))).derivative(i)(x=0) for i in range(10)]
+            True
         '''
         if(other not in self.__pows):
             f = self 
@@ -4573,11 +4582,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 n = g.numerator(); d = g.denominator()
                 if(f.order() == 1): # We stay in the same DDRing
                     R = f.parent()
-                    self.__pows[other] = R.element([n*f.equation[0],d*f.equation[1]], [h0], name)
+                    self.__pows[other] = R.element([n*f.equation[0],d*f.equation[1]], [h0], name=name)
                 else: # we go to the next depth
                     R = f.parent().to_depth(f.parent().depth()+1)
                     #qf(x)y'(x) - pf'(x)y(x)
-                    self.__pows[other] = R.element([-n*f.derivative(), d*f], [h0], name)
+                    self.__pows[other] = R.element([-n*f.derivative(), d*f], [h0], name=name)
                     
             else: # Generic case: need extra condition (f(0) != 0, log(f(0)) and f(0)**g(0) are valid elements)
                 if(f0 == 0):
@@ -4591,6 +4600,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     raise NotImplementedError("No path found for this __pow__ computation:\n\t- base: %s\n\t- expo: %s" %(repr(self),repr(other)))
                 elif(not is_DDFunction(g)):
                     g = f.parent()(g)
+
+                if(not(self.name is None) and not(g.name is None)):
+                    name = DynamicString("(_1)^(_2)", [self.name, g.name])
                 
                 g0 = g.sequence(0)
                 if(g0 != 0):
@@ -4598,7 +4610,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 R = f.parent(); S = g.parent()
                 FR = pushout(R,S).to_depth(1+max(R.depth()+1, S.depth()))
                 from ajpastor.dd_functions.ddExamples import Log
-                self.__pows[other] = FR.element([-((lf0+Log(f/f0)*g)).derivative(), 1],[1])
+                self.__pows[other] = FR.element([-((lf0+Log(f/f0)*g)).derivative(), 1],[1],name=name)
 
         return self.__pows[other]
            
