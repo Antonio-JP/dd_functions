@@ -4427,28 +4427,66 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     # Integer powering
     def __pow__(self, other):
         '''
-            Method to compute the power of a DDFunction to other object. The current implementation allow the user to compute the power to:
-                - Integers
-                - Rational numbers (to be done)
-                - Elements in self.parent().coeff_field (to be done)
-                - Other DDFunctions (with some conditions)
-                
-            The method works as follows:
-                1 - Tries to compute integer or rational power.
-                2 - If 'other' is neither in ZZ nor QQ, then try to cast 'other' to a DDFunction.
-                3 - Check if self(0) != 0. If self(0) != 1, check log(self(0)) in self.parent().coeff_field and set f2 = self/self(0).
-                4 - If other(0) != 0, compute g2 = other - other(0) and return self**other(0) * self**g2
-                5 - If other(0) == 0, compute ((log(self(0)) + log(f2))other)', and return the function with initial value 1.
-                
-                
-            The only case that is not included is when self(0) = 0 or self**other(0) is not implemented.
+            Magic method to compute the power of a :class:`DDFunction`.
+
+            This method implements all the possibilities for computing the power of a :class:`DDFunction` whenever
+            it is possible. There are several cases available:
+
+            * If the exponent is an integer: then the new function is in the same ring as ``self``. We can compute 
+              this power using the usual divide and conquer strategy for powering and we store this new power (and all
+              the others we have computed) in the cache for ``self``.
+            * If the exponent is a rational number: then the new function is algebraic over ``self.parent()`` and 
+              we can represent it in one extra depth or (in the case that ``self.order()`` is `1`) in the same :class:`DDRing`.
+
+            .. MATH::
+
+                y(x) = f(x)^{p/q} \Rightarrow qf(x)y'(x) - pf'(x)y(x) = 0.
+
+            * If the exponent is in the field of coefficients (i.e., it is a constant but not rational): the same rule applies
+              than in the rational case. Let `y(x) = f(x)^a` for a constant `a` in the field of coefficients. Since `1/a` is also
+              in the same field, then `y(x)` is algebraic over ``self.parent()``. In fact, que have exactly the same formula
+              for the differential equation as in the rational case.
+
+            .. MATH::
+
+                y(x) = f(x)^a \Rightarrow f(x)y'(x) - af'(x)y(x) = 0.
+
+            * If the exponent is another :class:`DDFunction`: then we can use several properties of the exponential, logarithm 
+              ad powering functions to write
+
+            .. MATH::
+
+                y(x) = f(x)^{g(x)} = e^{\log(f(x))g(x)}
+
+              In order to make sense to this formula, we need that `f(0) = 1` so we can build `\log(f(x))` and then 
+              we need that `g(0) = 0` so we can compute the final composition. This formula shows that the power of ``self`` 
+              by a :class:`DDFunction` is again a :class:`DDFunction`.
+
+            .. MATH::
+
+                f(x) \in D^n(R), g(x) \in D^m(R) \Rightarrow f(x)^{g(x)} \in D^{1+\max(n+1,m)}.
+
+            INPUT:
+
+            * ``other``: exponent to compute
+
+            OUTPUT:
+
+            A new :class:`DDFunction` representing the object ``self**other``.
+
+            EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: Exp(x)**Sin(x)
+
+            TODO: add examples
         '''
         if(other not in self.__pows):
             f = self 
             g = other
-            f0 = f(x=0)
+            f0 = f.sequence(0)
 
-            if(f.is_null or other == 0):
+            if(f.is_null and other == 0): # not defined case
                 raise ValueError("Value 0**0 not well defined")
             if(f.is_null): # Trivial case when f == 0, then f**g = 0.
                 self.__pows[other] = f
@@ -4474,47 +4512,48 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             elif(g in f.parent().coeff_field): # Constant case: need extra condition (f(0) != 0 and f(0)**g is a valid element
                 g = f.parent().coeff_field(g)
                 if(f0 == 0):
-                    raise NotImplementedError("The powers for elements with f(0) == 0 is not implemented")
-                try:
-                    h0 = f0**g
-                    if(not h0 in f.parent().coeff_field):
-                        raise ValueError("The initial value is not in the base field")
-                except Exception as e:
-                    raise ValueError("The power %s^%s could not be computed, hence the initial values can not be properly computed.\n\tReason: %s" %(f0,g,e))
-                R = f.parent().to_depth(f.parent().depth()+1)
+                    raise NotImplementedError("The powers for elements with f(0) == 0 are not formal power series")
+
+                # computing the final name
                 name = None
                 if(f.has_name()):
                     name = DynamicString("(_1)^(%s)" %g, [repr(f)])
-                self.__pows[other] = R.element([-other*f.derivative(), f], [h0])
+                
+                # checking we can compute initial values
+                h0 = f0**g
+                if(not h0 in f.parent().coeff_field):
+                    raise ValueError("The initial value is not in the base field")
+                
+                n = g.numerator(); d = g.denominator()
+                if(f.order() == 1): # We stay in the same DDRing
+                    R = f.parent()
+                    self.__pows[other] = R.element([n*f.equation[0],d*f.equation[1]], [h0], name)
+                else: # we go to the next depth
+                    R = f.parent().to_depth(f.parent().depth()+1)
+                    #qf(x)y'(x) - pf'(x)y(x)
+                    self.__pows[other] = R.element([-n*f.derivative(), d*f], [h0], name)
+                    
             else: # Generic case: need extra condition (f(0) != 0, log(f(0)) and f(0)**g(0) are valid elements)
                 if(f0 == 0):
-                    raise NotImplementedError("The powers for elements with f(0) == 0 is not implemented")
+                    raise NotImplementedError("The powers for elements with f(0) == 0 are not formal power series")
                 lf0 = log(f0)
                 if(log(f0) not in f.parent().coeff_field):
                     raise ValueError("Invalid value for log(f(0)). Need to be an element of %s, but got %s" %(f.parent().coeff_field, log(f0)))
                 lf0 = f.parent().coeff_field(lf0)
-                f = f/f0
                 
-                if(is_DDFunction(g) or g in self.parent()):
-                    from ajpastor.dd_functions.ddExamples import Log
-                    lf = Log(self)
-                    
-                    R = pushout(other.parent(), lf.parent())
-                    g = R(other)
-                    lf = R(lf)
-                    R = R.to_depth(R.depth()+1)
-                    
-                    g0 = g(x=0)
-                    if(g0 != 0):
-                        self.__pows[other] = self**g0 * self**(g-g0)
-                    else:
-                        name = None
-                        if(g.has_name() and f.has_name()):
-                            name = DynamicString("(_1)^(_2)", [f.name, g.name])
-                        
-                        self.__pows[other] = R.element([-((lf + lf0)*g).derivative(),1],[1],name=name)
-                else:
+                if(not is_DDFunction(g) and not g in f.parent()):
                     raise NotImplementedError("No path found for this __pow__ computation:\n\t- base: %s\n\t- expo: %s" %(repr(self),repr(other)))
+                elif(not is_DDFunction(g)):
+                    g = f.parent()(g)
+                
+                g0 = g.sequence(0)
+                if(g0 != 0):
+                    raise ValueError("The exponent has to satisfy g(0) = 0. Got %s" %g0)
+                R = f.parent(); S = g.parent()
+                FR = pushout(R,S).to_depth(1+max(R.depth()+1, S.depth()))
+                from ajpastor.dd_functions.ddExamples import Log
+                self.__pows[other] = FR.element([-((lf0+Log(f/f0)*g)).derivative(), 1],[1])
+
         return self.__pows[other]
            
     ### Magic equality
