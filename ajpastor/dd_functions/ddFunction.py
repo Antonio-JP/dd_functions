@@ -2656,63 +2656,62 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     for i in range(r)
                 ) / self.equation.forward(r)(n=m-r))
             self.__computed = m
-        elif((n+1) > self.equation.get_jp_fo()): # all the data can be computed
-            if(self.parent().depth() == 1): # polynomial coefficient case
-                m = n+1 # element to be computed
-                d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
-                r = self.equation.forward_order # maximal shift appearing in the recurrence
-                polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
-                lc = self.equation.forward(r)(n=m-r)
-                self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
-                self.__computed = m
-            else: # power series coefficient case
-                ## In this case, we use the Divide and Conquer strategy proposed in 
-                m = 2*n # we double the amount of data
-                K = self.parent().coeff_field
-                x = self.parent().variables()[0]
-                r = self.equation.order()
-                init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
-                Kx = PolynomialRing(K, x); x = Kx(x)
+        elif((n+1) > self.equation.get_jp_fo() and self.parent().depth() == 1): # polynomial coefficient case
+            m = n+1 # element to be computed
+            d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
+            r = self.equation.forward_order # maximal shift appearing in the recurrence
+            polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
+            lc = self.equation.forward(r)(n=m-r)
+            self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
+            self.__computed = m
+        elif((n+1) > self.equation.get_jp_fo() and self.equation[self.order()].sequence(0) != 0): # power series regular case
+            ## In this case, we use the Divide and Conquer strategy proposed in 
+            m = 2*n # we double the amount of data
+            K = self.parent().coeff_field
+            x = self.parent().variables()[0]
+            r = self.equation.order()
+            init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
+            Kx = PolynomialRing(K, x); x = Kx(x)
 
-                ## we need to get the truncated associated system Y' = AY
-                ## here A is the companion matrix transposed
-                q = [self.equation[i].ps_order for i in range(r+1)]
-                o = -min(q[i] - q[r] for i in range(r+1))
-                if(o > 0): #singular case
-                    q = [o-q[i]+q[r] for i in range(r+1)]
-                    last_row = [
-                        -x**q[j]*
-                        Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
-                        Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+            ## we need to get the truncated associated system Y' = AY
+            ## here A is the companion matrix transposed
+            q = [self.equation[i].ps_order for i in range(r+1)]
+            o = -min(q[i] - q[r] for i in range(r+1))
+            if(o > 0): #singular case
+                q = [o-q[i]+q[r] for i in range(r+1)]
+                last_row = [
+                    -x**q[j]*
+                    Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
+                    Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
 
-                    Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
-                else:
-                    last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
+                Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
+            else:
+                last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
 
-                A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
-                                    [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
+            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
+                                [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
 
-                if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
-                    y0 = self.__chyzak["last"][0]
-                    AA = sum(A[i]*x**(i-o) for i in range(m+o))
-                    R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
-                    # transforming R into a valid input of DivideAndConquer
-                    if(any(el.valuation() < 0 for el in R)):
-                        raise ValueError("We got an unexpected Laurent polynomial")
-                    R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
-                    y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
+            if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
+                y0 = self.__chyzak["last"][0]
+                AA = sum(A[i]*x**(i-o) for i in range(m+o))
+                R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
+                # transforming R into a valid input of DivideAndConquer
+                if(any(el.valuation() < 0 for el in R)):
+                    raise ValueError("We got an unexpected Laurent polynomial")
+                R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
+                y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
 
-                    self.__chyzak["last"] = (y0 + x**n*y1, m)
-                else:
-                    # we will need the initial conditions
-                    v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
-                    self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
-                    
-                y = self.__chyzak["last"][0][0] 
+                self.__chyzak["last"] = (y0 + x**n*y1, m)
+            else:
+                # we will need the initial conditions
+                v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
                 
-                for i in range(n,m):
-                    self.__sequence[i] = y[i]
-                self.__computed = m          
+            y = self.__chyzak["last"][0][0] 
+            
+            for i in range(n,m):
+                self.__sequence[i] = y[i]
+            self.__computed = m          
         else: ## Default case (use when the required element is below the bound)
             n  += 1 # element to be computed
            
