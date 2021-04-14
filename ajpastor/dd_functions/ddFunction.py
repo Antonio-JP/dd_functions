@@ -5139,14 +5139,7 @@ def __printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1
 ###################################################################################################
 
 # Some global pre-defined DD-Rings
-DFinite = None
-try:
-    from ajpastor.operator.oreOperator import w_OreOperator
-    DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
-except ImportError:
-    ## No ore_algebra package found
-    warnings.warn("Package ore_algebra was not found. It is highly recommended to get this package by M. Kauers and M. Mezzarobba (https://github.com/mkauers/ore_algebra)", NoOreAlgebraWarning)
-    DFinite = DDRing(PolynomialRing(QQ,x))
+DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
 DDFinite = DDRing(DFinite)
 DFiniteP = ParametrizedDDRing(DFinite, [var('P')])
 DFiniteI = DDRing(PolynomialRing(NumberField(x**2+1, 'I'), ['x']),base_field=NumberField(x**2+1, 'I'))
