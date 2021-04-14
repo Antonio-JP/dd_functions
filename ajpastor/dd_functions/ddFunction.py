@@ -61,6 +61,7 @@ from ajpastor.misc.ring_w_sequence import sequence
 from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
 
 from ajpastor.operator.operator import Operator
+from ajpastor.operator.oreOperator import w_OreOperator
 from ajpastor.operator.directStepOperator import DirectStepOperator
 from ajpastor.operator.fullLazyOperator import FullLazyOperator
 
@@ -1135,13 +1136,31 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 True
                 sage: DFinite.to_depth(5) == DDFinite.to_depth(5)
                 True 
+                sage: DFinite.to_depth(0)
+                Univariate Polynomial Ring in x over Rational Field
+                sage: DFiniteI.to_depth(0)
+                Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1
+
+            We can see that the wrap of ``ore_algebra`` does not hold for deeper cases::
+
+                sage: DFinite.to_depth(3).operator_class
+                <class 'ajpastor.operator.fullLazyOperator.FullLazyOperator'>
+                sage: DFinite.operator_class
+                <class 'ajpastor.operator.oreOperator.w_OreOperator'>
         '''
+        if(dest == 0):
+            return self.original_ring()
+        elif(dest > 1 and self.operator_class is w_OreOperator):
+            operator_class = DDRing._Default_Operator
+        else:
+            operator_class = w_OreOperator
+
         return DDRing(self.original_ring(), 
         depth = dest, 
         base_field = self.coeff_field, 
         invertibility = self.__base_invertibility, 
         derivation = self.base_derivation, 
-        default_operator = self.operator_class)
+        default_operator = operator_class)
     
     def extend_base_field(self, new_field):
         r'''
@@ -1897,9 +1916,13 @@ class ParametrizedDDRing(DDRing):
                 sage: from ajpastor.dd_functions import *
                 sage: DFiniteP.to_depth(2) is ParametrizedDDRing(DDFinite, 'P')
                 True
+                sage: DFiniteP.to_depth(0)
+                Univariate Polynomial Ring in x over Fraction Field of Univariate Polynomial Ring in P over Rational Field
 
             For further information and examples, see method :func:`DDRing.to_depth`.
         '''
+        if(dest == 0):
+            return self.original_ring()
         return ParametrizedDDRing(self.base_ddRing().to_depth(dest), self.parameters(True))
     
     def extend_base_field(self, new_field):
@@ -2496,6 +2519,21 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 NoValueError: Impossible to compute recursively the 4-th coefficient
                 sage: DFinite.element([-4, x]).sequence(10, True, True)
                 [0, 0, 0, 0]
+
+            Since :class:`DDFunction` can only represent formal power series, we have fixed that
+            the return for this method whenever `n < 0` is always `0`::
+
+                sage: DFinite.element([-1,1]).sequence(-2)
+                0
+                sage: DFinite.element([1,0,1],[1,0]).sequence(-4)
+                0
+
+            Note that when using the argument ``list``, providing a negative value
+            for `n` retrieves an empty list::
+
+                sage: DFinite.element([1,0,1],[1,0]).sequence(-3, True)
+                []
+
         '''
         if(list):
             if(incomplete):
@@ -2508,6 +2546,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 return result
             return [self.sequence(i) for i in range(n)]
         
+        if(n < 0):
+            return 0 # only considering formal power series
+
         while(not n in self.__sequence):
             self.extend_sequence()
         
@@ -2615,67 +2656,66 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     for i in range(r)
                 ) / self.equation.forward(r)(n=m-r))
             self.__computed = m
-        elif((n+1) > self.equation.get_jp_fo()): # all the data can be computed
-            if(self.parent().depth() == 1): # polynomial coefficient case
-                m = n+1 # element to be computed
-                d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
-                r = self.equation.forward_order # maximal shift appearing in the recurrence
-                polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
-                lc = self.equation.forward(r)(n=m-r)
-                self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
-                self.__computed = m
-            else: # power series coefficient case
-                ## In this case, we use the Divide and Conquer strategy proposed in 
-                m = 2*n # we double the amount of data
-                K = self.parent().coeff_field
-                x = self.parent().variables()[0]
-                r = self.equation.order()
-                init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
-                Kx = PolynomialRing(K, x); x = Kx(x)
+        elif((n+1) > self.equation.get_jp_fo() and self.parent().depth() == 1): # polynomial coefficient case
+            m = n+1 # element to be computed
+            d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
+            r = self.equation.forward_order # maximal shift appearing in the recurrence
+            polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
+            lc = self.equation.forward(r)(n=m-r)
+            self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
+            self.__computed = m
+        elif((n+1) > self.equation.get_jp_fo() and self.equation[self.order()].sequence(0) != 0): # power series regular case
+            ## In this case, we use the Divide and Conquer strategy proposed in 
+            m = 2*n # we double the amount of data
+            K = self.parent().coeff_field
+            x = self.parent().variables()[0]
+            r = self.equation.order()
+            init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
+            Kx = PolynomialRing(K, x); x = Kx(x)
 
-                ## we need to get the truncated associated system Y' = AY
-                ## here A is the companion matrix transposed
-                q = [self.equation[i].ps_order for i in range(r+1)]
-                o = -min(q[i] - q[r] for i in range(r+1))
-                if(o > 0): #singular case
-                    q = [o-q[i]+q[r] for i in range(r+1)]
-                    last_row = [
-                        -x**q[j]*
-                        Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
-                        Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+            ## we need to get the truncated associated system Y' = AY
+            ## here A is the companion matrix transposed
+            q = [self.equation[i].ps_order for i in range(r+1)]
+            o = -min(q[i] - q[r] for i in range(r+1))
+            if(o > 0): #singular case
+                q = [o-q[i]+q[r] for i in range(r+1)]
+                last_row = [
+                    -x**q[j]*
+                    Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
+                    Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
 
-                    Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
-                else:
-                    last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
+                Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
+            else:
+                last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
 
-                A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
-                                    [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
+            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
+                                [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
 
-                if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
-                    y0 = self.__chyzak["last"][0]
-                    AA = sum(A[i]*x**(i-o) for i in range(m+o))
-                    R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
-                    # transforming R into a valid input of DivideAndConquer
-                    if(any(el.valuation() < 0 for el in R)):
-                        raise ValueError("We got an unexpected Laurent polynomial")
-                    R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
-                    y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
+            if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
+                y0 = self.__chyzak["last"][0]
+                AA = sum(A[i]*x**(i-o) for i in range(m+o))
+                R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
+                # transforming R into a valid input of DivideAndConquer
+                if(any(el.valuation() < 0 for el in R)):
+                    raise ValueError("We got an unexpected Laurent polynomial")
+                R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
+                y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
 
-                    self.__chyzak["last"] = (y0 + x**n*y1, m)
-                else:
-                    # we will need the initial conditions
-                    v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
-                    self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
-                    
-                y = self.__chyzak["last"][0][0] 
+                self.__chyzak["last"] = (y0 + x**n*y1, m)
+            else:
+                # we will need the initial conditions
+                v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
                 
-                for i in range(n,m):
-                    self.__sequence[i] = y[i]
-                self.__computed = m          
+            y = self.__chyzak["last"][0][0] 
+            
+            for i in range(n,m):
+                self.__sequence[i] = y[i]
+            self.__computed = m          
         else: ## Default case (use when the required element is below the bound)
             n  += 1 # element to be computed
            
-            d = self.order()
+            d = self.equation.forward_order
             i = max(n-d,0)
             rec = self.equation.get_recursion_row(i)
             while(rec[n] == 0  and i <= self.equation.jp_value()):                   
@@ -2684,9 +2724,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             if(rec[n] == 0 ):
                 raise NoValueError(n)
             ## Checking that we only need previous elements
-            for i in range(n+1 , len(rec)):
-                if(not (rec[i] == 0 )):
-                    raise NoValueError(n)
+            if(any(rec[i] != 0 for i in range(n+1 , len(rec)))):
+                raise NoValueError(n)
             
             ## We do this operation in a loop to avoid computing initial values 
             ## if they are not needed
@@ -5178,14 +5217,7 @@ def __printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1
 ###################################################################################################
 
 # Some global pre-defined DD-Rings
-DFinite = None
-try:
-    from ajpastor.operator.oreOperator import w_OreOperator
-    DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
-except ImportError:
-    ## No ore_algebra package found
-    warnings.warn("Package ore_algebra was not found. It is highly recommended to get this package by M. Kauers and M. Mezzarobba (https://github.com/mkauers/ore_algebra)", NoOreAlgebraWarning)
-    DFinite = DDRing(PolynomialRing(QQ,x))
+DFinite = DDRing(PolynomialRing(QQ,x), default_operator=w_OreOperator)
 DDFinite = DDRing(DFinite)
 DFiniteP = ParametrizedDDRing(DFinite, [var('P')])
 DFiniteI = DDRing(PolynomialRing(NumberField(x**2+1, 'I'), ['x']),base_field=NumberField(x**2+1, 'I'))
