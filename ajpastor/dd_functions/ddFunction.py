@@ -2148,7 +2148,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             a truncation of the system matrix `A`. We denote the length of his list as `m`.
             * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
             If this is `0`, then a solution for the original system is computed. The length should be again `m`.
-            * ``p``: a value on `\mathbb{K}` for the extended equation.
+            * ``p``: a non-negative integer for the extended equation.
             * ``v``: a list of vectors in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains a truncation of Y.
             * ``o``: negative order of teh matrix `A`. This value is 0 if the entries are not Laurent polynomials.
             * ``K``: field where we base all computations. It must have characteristic zero.
@@ -2176,7 +2176,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
         A = [a.change_ring(K) for a in A] # checking everything in A is in K
         s = [el.change_ring(K) for el in s] # checking everything in s is in K
-        p = K(p) # checking p is in K
+        p = ZZ(p) # checking p is a positive integer
+        if(p < 0):
+            raise ValueError("The value for 'p' must be a non-negative integer")
         v = [el.change_ring(K) for el in v] # checking everything in v is in K    
         
         m = len(s); r = len(s[0])
@@ -2211,14 +2213,15 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                     return sum(sol[i+p]*x**(i) for i in range(-p, o))            
             if(o == 0): # regular case
-                if(p == 0): return v[0]
-                else: return s[0]/p
+                if(p == 0): return v[0].change_ring(x.parent())
+                else: return (s[0]/p).change_ring(x.parent())
 
         ## General case
         d = m//2
         y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, o, K, x) # first recursive cal
-        AA = sum(A[i]*x**(i-o) for i in range(m+o)); ss = sum(s[i]*x**i for i in range(m))
-        R = (ss - x*vector(Kx(diff(el)) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+        AA = sum((A[i].change_ring(x.parent()))*x**(i-o) for i in range(m+o))
+        ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
+        R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
         # transforming R into a valid input of DivideAndConquer
         #logger.debug("New value for R: %s" %R)
         if(any(el.valuation() < 0 for el in R)):
@@ -2228,7 +2231,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         y1 = DDFunction.__chyzak_dac(A, R, p+d, v, o, K, x) #second recursive call
         solution = y0 + x**d*y1
         
-        return solution
+        return solution.change_ring(x.parent())
 
     #####################################
     ### Init and Interface methods
@@ -2677,7 +2680,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             x = self.parent().variables()[0]
             r = self.equation.order()
             init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
-            Kx = PolynomialRing(K, x); x = Kx(x)
+            Kx = LaurentPolynomialRing(K, x); x = Kx(x)
 
             ## we need to get the truncated associated system Y' = AY
             ## here A is the companion matrix transposed
@@ -2690,7 +2693,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
                     Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
 
-                Kx = LaurentPolynomialRing(K, str(x)); x = Kx(x)
             else:
                 last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
 
@@ -2699,12 +2701,12 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
                 y0 = self.__chyzak["last"][0]
-                AA = sum(A[i]*x**(i-o) for i in range(m+o))
-                R = -x*vector(Kx(diff(el)) for el in y0) + x*AA*y0
+                AA = sum((A[i].change_ring(Kx))*x**(i-o) for i in range(m+o))
+                R = -x*vector(diff(el) for el in y0) + x*AA*y0
                 # transforming R into a valid input of DivideAndConquer
                 if(any(el.valuation() < 0 for el in R)):
                     raise ValueError("We got an unexpected Laurent polynomial")
-                R = [vector(Kx(el)[i] for el in R) for i in range(n,m)]
+                R = [vector(el[i] for el in R) for i in range(n,m)]
                 y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
 
                 self.__chyzak["last"] = (y0 + x**n*y1, m)
