@@ -107,15 +107,16 @@ from sage.all import (cached_function, factorial, bell_polynomial, NumberField, 
                         ideal)
 from sage.all_cmdline import x
 
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
-
+from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
+from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
+from sage.categories.pushout import pushout, FractionField
 
 # ajpastor imports
 from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DDFinite)
-from ajpastor.dd_functions.exceptions import (ZeroValueRequired, )
+from ajpastor.dd_functions.exceptions import ZeroValueRequired
 from ajpastor.dd_functions.lazyDDRing import LazyDDRing
 from ajpastor.misc.dynamic_string import DynamicString
+from ajpastor.misc.matrix import matrix_of_dMovement as move
 
 ##################################################################################
 ##################################################################################
@@ -1814,9 +1815,7 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     - full: if True, it returns also the function w used to build the solution in a tuple (solution, w)
     - name: name the system will give to the function w. By default this is "w"
     '''
-    ## Considering the three parameters
-    from sage.categories.pushout import pushout
-    
+    ## Considering the three parameters    
     if(is_DDFunction(a)):
         da, dRa = (a.parent().depth(), a.parent())
     else:
@@ -2314,7 +2313,7 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
 ###### HEUN FUNCTIONS
 ### Fuchsian equation
 @cached_function
-def FuchsianD(a = (), q = (), init=()):
+def FuchsianD(a = (), q = (), init=(), parent=QQ):
     r'''
         Representation of Fuchsian differential equations.
 
@@ -2386,21 +2385,27 @@ def FuchsianD(a = (), q = (), init=()):
     if(len(q) == 0):
         raise ValueError("The argument 'q' must be non-empty (at least order 1 for the differential equation")
     
-    k = len(a)
-    parent, new_input = __check_list(list(a)+list(init), [str(el) for el in DFinite.variables()])
-    new_a = new_input[:k]
-    new_init = new_input[k:]
-    
+    k = len(a); li = len(init)
+    input_to_check = list(a)+list(init)
+    if(parent != QQ): input_to_check += list(parent.gens())
+    new_parent, new_input = __check_list(input_to_check, [str(el) for el in DFinite.variables()])
+    new_a = list(set(new_input[:k])) ## Clearing repeated elements
+    new_init = new_input[k:k+li]
+  
     ## Getting the destiny ring
-    if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+    if(new_parent != QQ):
+        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in new_parent.gens()])
     else:
         destiny_ring = DFinite
 
     ## Checking the input for 'q'
-    new_q = [destiny_ring.original_ring()(el) for el in q]
-    if(any(new_q[i].degree() > i*(k-1) for i in range(len(new_q)))):
-        raise ValueError("The coefficients in 'q' must be polynomials of bounded degree 'i*%d'" %(k-1))
+    new_q = []
+    for el in q:
+        if(type(el) in (tuple, list)):
+            new_q += [destiny_ring.original_ring()(list(el))]
+        else:
+            new_q += [destiny_ring.original_ring()(el)]
+    
     N = len(new_q)
 
     ## computing the final coefficients Q_i(x)
@@ -2476,10 +2481,10 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
             sage: from ajpastor.dd_functions.ddExamples import HeunD
             sage: H = HeunD(); H
             Heun(a,b,d,g,e,q)(x)
-            sage: H.change_init_values([0,0])
-            0
+            sage: H.change_init_values([1]).sequence(3, True)
+            [1, 0, q/(2*a + 2*d)]
     '''
-    _, new_all = __check_list([a,beta,delta,gamma,epsilon,q], [str(el) for el in DFinite.variables()])
+    parent, new_all = __check_list([a,beta,delta,gamma,epsilon,q], [str(el) for el in DFinite.variables()])
     ra,rb,rd,rg,re,rq = new_all
         
     if(ra == 0 or ra == 1):
@@ -2490,7 +2495,7 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
     gamma = [rd,rg,re]; q=[-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))]
     to_poly_coeffs = lambda obj: (obj[0],(ra+1)*obj[0] + ra*obj[1]+obj[2], obj[0]+obj[1]+obj[2])
     fuchs_q = (to_poly_coeffs(q), to_poly_coeffs(gamma))
-    f = FuchsianD(a=(0,1,ra),q=fuchs_q)
+    f = FuchsianD(a=(0,1,ra),q=fuchs_q,parent=parent)
     f.name = DynamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"])
     return f
 
@@ -2708,7 +2713,7 @@ def FibonacciD(init=('a','b')):
             sage: Fp == (a + (b-a)*x)/(1-x-x^2)
             True
             sage: f = FibonacciD(tuple([2*a-3*b]));
-            sage: all(f.sequence(i+2) - f.sequence(i+1) - f.sequence(i) == 0 for i in range(20)
+            sage: all(f.sequence(i+2) - f.sequence(i+1) - f.sequence(i) == 0 for i in range(20))
             True
             sage: FibonacciD(('a','c_1')) # with strings
             F(a,c_1;x)
@@ -2908,13 +2913,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
         ERRORS:
     - If the function can not be represented in dR a TypeError will be raised
     - If any error happens with the initial values, a ValueError will be raised
-    '''
-    ## Local imports
-    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
-    from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
-    from sage.categories.pushout import FractionField
-    from ajpastor.misc.matrix import matrix_of_dMovement as move
-    
+    '''    
     ###############################################
     ## Dealing with the polynomial input
     ###############################################
@@ -3066,8 +3065,6 @@ def polynomial_inverse(polynomial):
         
         The polynomial provided must be univariate.
     '''
-    ## Local imports
-    from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
     from ajpastor.misc.sequence_manipulation import inv_lagrangian
     
     ###############################################
@@ -3131,7 +3128,7 @@ def __decide_parent(input, parent = None, depth = 1):
                 dR = ParametrizedDDRing(DFinite.to_depth(depth), parameters)
             else:
                 dR = DDRing(PolynomialRing(QQ,x), depth=depth)
-        elif(is_MPolynomialRing(R) or is_PolynomialRing(R)):
+        elif(isMPolynomial(R) or isPolynomial(R)):
             parameters = [str(gen) for gen in R.gens()[1:]]
             var = R.gens()[0]
             if(len(parameters) > 0):
