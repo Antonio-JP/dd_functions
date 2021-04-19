@@ -65,7 +65,7 @@ The functions available in this module are the following:
     * :func:`CoulombSpheroidalFunctionD`
     * :func:`SpheroidalWaveFunctionD`
 * HEUN'S FUNCTIONS (:dlmf:`31`):
-    * :func:`FuschianD`
+    * :func:`FuchsianD`
     * :func:`HeunD`
 * COULOMB WAVE FUNCTION (:dlmf:`33`):
     * :func:`FCoulombD`  
@@ -2312,109 +2312,107 @@ def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     return destiny_ring.element(coeffs, init, name=DynamicString("SpheroidalWave(_1,_2,_3;_4)(_5)", [repr(ra), repr(rb), repr(rc), repr(init), repr(x)]))
 
 ###### HEUN FUNCTIONS
-### Fuschian equation
+### Fuchsian equation
 @cached_function
-def FuschianD(a = (), gamma = (), q = (), init=()):
+def FuchsianD(a = (), q = (), init=()):
     r'''
-        D-finite implementation of the Fuschian equation
-        
-        References:
-            * https://dlmf.nist.gov/31.14
-            
-        The Fuschian differential equation is defined using three list of parameters 
-        of the same length ``a``, ``gamma`` and ``q`` with the following formula:
+        Representation of Fuchsian differential equations.
+
+        This methdod creates a :class:`ajpastor.dd_functions.ddFunction.DDFunction` representation
+        of a function that satisfies a Fuchsian differential equation. This means that the differential
+        equation has analytic coefficients and the singularities for the linear differential equation 
+        are all regular (see :wiki:`Regular_singular_point` for further information).
+
+        There is more information about these types of linear differential equations in the following
+        reference:
+
+        * :dlmf:`31.14`
+
+        But generally, we can write a Fuchsian differential equation in the form:
 
         .. MATH::
 
-            w''(x) + \left(\sum_{j=1}^N \frac{\gamma_j}{x-a_j}\right)w'(x) + 
-            \left(\sum_{j=1}^N \frac{q_j}{x-a_j}\right)w(x) = 0,
+            f^{(n)}(x) + p_{n-1}(x)f^{(n-1)}(x) + \ldots + p_0(x)f(x) = 0,
 
-        where `\sum_{j=1}^N q_j = 0`.
-        
-        This differential equation has finite singularities at `a_j` of exponent 
-        `\{0,1-\gamma_j\}` and at `\infty` of exponents `\{\alpha, \beta\}` where 
-        they are the solutions to
+        where the coefficients `p_i(x)` can be written as:
 
         .. MATH::
 
-            \left\{\begin{array}{l}
-                \alpha+\beta+1 = \sum_{j=1}^N \gamma_j\\
-                \alpha\beta = \sum_{j=1}^N a_jq_j
-            \end{array}\right.
+            p_i(x) = q_i(x)\prod_{j=1}^k (x - a_j)^{-i}.
 
-        This differential equation is a generalization of the Heun differential 
-        equation (see :func:`HeunD`) when ``len(a) == 3``, and the parameters are 
-        appropriately adapted.
-        
+        Here, the points `a_1,\ldots,a_k` are the singularities of the linear differential equation and 
+        `q_i(x)` are polynomials of degree `\leq i(k-1)`. By clearing denominators, we can write this
+        linear differential equation as follows:
+
+        .. MATH::
+
+            \left(\prod_{j=1}^k (x-a_j)^{n-1}\right)f^{(n)}(x) + Q_{n-1}(x)f^{(n-1)}(x) + \ldots + Q_0(x)f(x) = 0,
+
+            where `Q_i(x) = \left(\prod_{j=1}^k (x-a_j)^{n-1 - i}\right)q_i(x)
+
+
         INPUT:
-            * ``a``: a **tuple** with the values for the singularity parameter. 
-              Each element can be a string to create a variable, any rational 
-              number or any polynomial expression which variables will be 
-              considered as parameters (so ``x`` is not allowed).
-            * ``gamma``: a **tuple** with the exponents values. Each element can 
-              be a string to create a variable, any rational 
-              number or any polynomial expression which variables will be 
-              considered as parameters (so ``x`` is not allowed).
-            * ``q``: a **tuple** with the accessory parameters for the equation. 
-              Each element can be a string to create a variable, any rational 
-              number or any polynomial expression which variables will be 
-              considered as parameters (so ``x`` is not allowed).
-            * ``init``: a **tuple** with the initial values for the function. 
-              Each element can be a string to create a variable, any rational 
-              number or any polynomial expression which variables will be 
-              considered as parameters (so ``x`` is not allowed).
+
+        * ``a``: tuple of singularities of the linear differential equation. We consider internally
+          the set of this tuple, removing repeated elements. In practice, these objects can be symbolic
+          paramters that will be considered as constants of the field of coefficients for the final function.
+        * ``q``: tuple of coefficients `q_i(x)` described above. These must be valid polynomials
+          in the final ring (this depends on the parameters included in ``a``)
+        * ``init``: list of initial values used for specifying the particular solution of the linear differential
+          equation specified by ``a`` and ``q``. This tuple can be empty.
+
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the solution of the Fuchsian differential
+        equation created by ``a`` and ``q`` with initial values specified by ``init``. 
 
         EXAMPLES::
 
-            sage: from ajpastor.dd_functions.ddExamples import FuschianD
-            sage: try:
-            ....:     FuschianD(1,2,1)
-            ....:     print("Error: something non-zero")
-            ....: except:
-            ....:     pass
-            sage: FuschianD(1,2,0,(1,1)) == 1/(1-x)
+            sage: from ajpastor.dd_functions.ddExamples import FuchsianD
+            sage: FuchsianD(1,(0,2),(1,1)) == 1/(1-x)
             True
-            sage: FuschianD(1,2,0,(1,0)) == 1
+            sage: FuchsianD(1,(0,2),(1,0)) == 1
             True
-            sage: FuschianD(1,2,0,(0,1)) == x/(1-x)
+            sage: FuchsianD(1,(0,2),(0,1)) == x/(1-x)
             True
+            
+        TODO: allow `q_i(x)` to be other :class:`~ajpastor.dd_functions.ddFunction.DDFunction`.
     '''
     ## Checking parameters
     if (not (isinstance(a,list) or isinstance(a,set) or isinstance(a,tuple))):
         a = [a]
-    if (not (isinstance(gamma,list) or isinstance(gamma,set) or isinstance(gamma,tuple))):
-        gamma = [gamma]
     if (not (isinstance(q,list) or isinstance(q,set) or isinstance(q,tuple))):
         q = [q]
-    if(len(a) == 0 or len(a) != len(gamma) or len(a) != len(q)):
-        raise ValueError("The three arguments a, gamma and q must be non-empty lists of the same length")
-    N = len(a)
+    if(len(q) == 0):
+        raise ValueError("The argument 'q' must be non-empty (at least order 1 for the differential equation")
     
-    ## Getting the parameters
-    parent, new_all = __check_list(list(a)+list(gamma)+list(q)+list(init), [str(el) for el in DFinite.variables()])
+    k = len(a)
+    parent, new_input = __check_list(list(a)+list(init), [str(el) for el in DFinite.variables()])
+    new_a = new_input[:k]
+    new_init = new_input[k:]
     
-    ra = new_all[:N]
-    rgamma = new_all[N:2*N]
-    rq = new_all[2*N:3*N]
-    rinit = new_all[3*N:]
-    
-    if(sum(rq) != 0):
-        raise ValueError("The q parameters must sum up zero. Got %s" %(sum(rq)))
-    
+    ## Getting the destiny ring
     if(parent != QQ):
         destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
         destiny_ring = DFinite
-        
+
+    ## Checking the input for 'q'
+    new_q = [destiny_ring.original_ring()(el) for el in q]
+    if(any(new_q[i].degree() > i*(k-1) for i in range(len(new_q)))):
+        raise ValueError("The coefficients in 'q' must be polynomials of bounded degree 'i*%d'" %(k-1))
+    N = len(new_q)
+
+    ## computing the final coefficients Q_i(x)
     x = destiny_ring.variables()[0]
-    ## Computing the differential equation
-    P = prod([x-ra[i] for i in range(N)]); R = P.parent()
-    Q = [R(P/(x-ra[i])) for i in range(N)]
-    
-    coeffs = [sum(rq[i]*Q[i] for i in range(N)), sum(rgamma[i]*Q[i] for i in range(N)), P]
+    singular_part = prod((x-pole) for pole in new_a)
+    Q = [new_q[i]*singular_part**(N-1-i) for i in range(N)]
+
+    ## getting the final name for the function
+    name = DynamicString("Fuchsian(_1,_2;%s)(_3)" %(str(new_init)), [repr(new_a), repr(new_q), repr(x)])
     
     ## Returning the solution
-    return destiny_ring.element(coeffs, rinit, name=DynamicString("Fuschian(_1;_2;_3;%s)(_4)" %(str(rinit)), [repr(ra), repr(rgamma), repr(rq), repr(x)]))
+    return destiny_ring.element(Q + [singular_part**(N-1)], new_init, name=name)
 
 ### Heun's function
 def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
@@ -2489,7 +2487,10 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
                            "different than 0 or 1"))
 
     al = rg+rd+re-rb-1
-    f = FuschianD(a=(0,1,ra),gamma=(rd,rg,re),q=(-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))))
+    gamma = [rd,rg,re]; q=[-rq/ra,(rq-al*rb)/(ra-1), (rq/ra)-((rq-al*rb)/(ra-1))]
+    to_poly_coeffs = lambda obj: (obj[0],(ra+1)*obj[0] + ra*obj[1]+obj[2], obj[0]+obj[1]+obj[2])
+    fuchs_q = (to_poly_coeffs(q), to_poly_coeffs(gamma))
+    f = FuchsianD(a=(0,1,ra),q=fuchs_q)
     f.name = DynamicString("Heun(_1,_2,_3,_4,_5,_6)(_7)", [repr(ra),repr(rb),repr(rd),repr(rg),repr(re),repr(rq),"x"])
     return f
 
@@ -2706,8 +2707,9 @@ def FibonacciD(init=('a','b')):
             sage: x = Fp.parent().variables()[0]
             sage: Fp == (a + (b-a)*x)/(1-x-x^2)
             True
-            sage: FibonacciD(tuple([2*a-3*b])) # just one element tuple
-            F(2*a - 3*b,c;x)
+            sage: f = FibonacciD(tuple([2*a-3*b]));
+            sage: all(f.sequence(i+2) - f.sequence(i+1) - f.sequence(i) == 0 for i in range(20)
+            True
             sage: FibonacciD(('a','c_1')) # with strings
             F(a,c_1;x)
             sage: FibonacciD(('f',a*2+1,0,0,0)) # with long tuple
