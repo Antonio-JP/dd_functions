@@ -2667,7 +2667,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         elif((n+1) > self.equation.get_jp_fo() and self.parent().depth() == 1): # polynomial coefficient case
             m = n+1 # element to be computed
             if(not m in self.__sequence):
-                d = max(max([0,self.equation[i].degree() - i]) for i in range(r)) # maximal inverse shifts appearing in the recurrence
+                d = max(max([0,self.equation[i].degree() - i]) for i in range(r+1)) # maximal inverse shifts appearing in the recurrence
                 r = self.equation.forward_order # maximal shift appearing in the recurrence
                 polys = [self.equation.backward(-i)(n=m-r) for i in range(-d,0)] + [self.equation.forward(i)(n=m-r) for i in range(r)]
                 lc = self.equation.forward(r)(n=m-r)
