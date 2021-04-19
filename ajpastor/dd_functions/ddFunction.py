@@ -2122,7 +2122,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         * Add examples with inhomogeneous term
     '''
     @staticmethod
-    def __chyzak_dac(A, s, p, v, o=0, K=QQ, x='x'):
+    def __chyzak_dac(A, s, p, v, K=QQ, x='x'):
         r'''
             Divide and conquer scheme in Figure 3 of arxiv:`abs/cs/0604101`.
             
@@ -2150,7 +2150,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             If this is `0`, then a solution for the original system is computed. The length should be again `m`.
             * ``p``: a non-negative integer for the extended equation.
             * ``v``: a list of vectors in \mathbb{M}_{r\times 1}(\mathbb{K}) that contains a truncation of Y.
-            * ``o``: negative order of teh matrix `A`. This value is 0 if the entries are not Laurent polynomials.
             * ``K``: field where we base all computations. It must have characteristic zero.
             * ``x``: variable for the ring of formal power series `\mathbb{K}[[x]]`
             
@@ -2167,11 +2166,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Checking te input
         if(not K.is_field() or K.characteristic()!= 0):
             raise TypeError("The input 'K' must be a field of characteristic zero")
-        
-        if(not (o in ZZ) or o < 0):
-            raise ValueError("the order input must be a non-negative integer")
-            
-        Kx = LaurentPolynomialRing(K, str(x)) # polynomial ring for truncations
+                    
+        Kx = PolynomialRing(K, str(x)) # polynomial ring for truncations
         x = Kx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
             
         A = [a.change_ring(K) for a in A] # checking everything in A is in K
@@ -2179,56 +2175,30 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         p = ZZ(p) # checking p is a positive integer
         if(p < 0):
             raise ValueError("The value for 'p' must be a non-negative integer")
-        v = [el.change_ring(K) for el in v] # checking everything in v is in K    
+        v = v.change_ring(K) # checking everything in v is in K    
         
         m = len(s); r = len(s[0])
-        if(len(A) < p+m+o):
+        if(len(A) < p+m):
             raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
-        A = A[:o+m+p] # Removing extra data
-        if(any(len(v_el) != r for v_el in v) or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
+        A = A[:m+p] # Removing extra data
+        if(len(v) != r or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
             raise TypeError("The dimensions of the input are not correct")
 
         ## Base case
         if(m == 1): 
-            if(o > 0): # irregular case
-                # we build the linear system
-                fA = [j*[Matrix(r)] + [-A[i+o-1] for i in range(-o+1, p+1-j)] for j in range(p+o+1)]
-                for j in range(p):
-                    fA[j][o-1+j] += (p-j)*identity_matrix(r)
-                fA = block_matrix(fA)
-                fs = vector([el for el in s[0]] + (o+p)*r*[0])
-                ## Here the system reads t*y' + (pI - tA)y = s for s vector of constants and y a vector of polynomial of 
-                ## degree bounded by "o-1"
-                if(p == 0): # base case, we use truncation after checking
-                    fv = vector(sum([list(el) for el in v[o-1::-1]], []))
-                    
-                    if(fA*fv == fs):
-                        return sum(v[i]*x**i for i in range(o))
-                    else:
-                        raise ValueError("The initial truncation is not valid")
-                else: # general p: we solve the system
-                    sol = list(fA.solve_right(fs))
-                    sol = sum([[sol[r*i:r*(i+1)]] for i in range(len(sol)//r)], [])
-                    sol.reverse(); sol = [vector(el) for el in sol]
-
-                    return sum(sol[i+p]*x**(i) for i in range(-p, o))            
-            if(o == 0): # regular case
-                if(p == 0): return v[0].change_ring(x.parent())
-                else: return (s[0]/p).change_ring(x.parent())
+            if(p == 0): return v.change_ring(x.parent())
+            else: return (s[0]/p).change_ring(x.parent())
 
         ## General case
         d = m//2
-        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, o, K, x) # first recursive cal
-        AA = sum((A[i].change_ring(x.parent()))*x**(i-o) for i in range(m+o))
+        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, K, x) # first recursive cal
+        AA = sum((A[i].change_ring(x.parent()))*x**(i) for i in range(m))
         ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
         R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
         # transforming R into a valid input of DivideAndConquer
-        #logger.debug("New value for R: %s" %R)
-        if(any(el.valuation() < 0 for el in R)):
-            raise ValueError("We got an unexpected Laurent polynomial")
         R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
         
-        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, o, K, x) #second recursive call
+        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, K, x) #second recursive call
         solution = y0 + x**d*y1
         
         return solution.change_ring(x.parent())
@@ -2679,41 +2649,27 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             K = self.parent().coeff_field
             x = self.parent().variables()[0]
             r = self.equation.order()
-            init = self.init(self.equation.get_jp_fo()+1, True); jp = len(init)
-            Kx = LaurentPolynomialRing(K, x); x = Kx(x)
+            v = vector(self.init(r, True))
+            Kx = PolynomialRing(K, x); x = Kx(x)
 
             ## we need to get the truncated associated system Y' = AY
             ## here A is the companion matrix transposed
-            q = [self.equation[i].ps_order for i in range(r+1)]
-            o = -min(q[i] - q[r] for i in range(r+1))
-            if(o > 0): #singular case
-                q = [o-q[i]+q[r] for i in range(r+1)]
-                last_row = [
-                    -x**q[j]*
-                    Kx(self.equation[j].zero_extraction[1].sequence(m,True))*
-                    Kx(self.equation[r].zero_extraction[1].isequence(m,True)) for j in range(r)]
+            last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
 
-            else:
-                last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
-
-            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == o) else 0 for j in range(r)] for i in range(r-1)] + 
-                                [[last_row[j][k] for j in range(r)]])) for k in range(m+o)]
+            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == 0) else 0 for j in range(r)] for i in range(r-1)] + 
+                                [[last_row[j][k] for j in range(r)]])) for k in range(m)]
 
             if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
                 y0 = self.__chyzak["last"][0]
-                AA = sum((A[i].change_ring(Kx))*x**(i-o) for i in range(m+o))
+                AA = sum((A[i].change_ring(Kx))*x**(i) for i in range(m))
                 R = -x*vector(diff(el) for el in y0) + x*AA*y0
                 # transforming R into a valid input of DivideAndConquer
-                if(any(el.valuation() < 0 for el in R)):
-                    raise ValueError("We got an unexpected Laurent polynomial")
                 R = [vector(el[i] for el in R) for i in range(n,m)]
-                y1 = DDFunction.__chyzak_dac(A, R, n, [vector(r*[0])], o, K, x)
+                y1 = DDFunction.__chyzak_dac(A, R, n, v, K, x)
 
                 self.__chyzak["last"] = (y0 + x**n*y1, m)
             else:
-                # we will need the initial conditions
-                v = Matrix([[init[i+j]/falling_factorial(j+i,i) for j in range(jp-r+1)] for i in range(r)]).columns()
-                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, o, K, x), m)
+                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, K, x), m)
                 
             y = self.__chyzak["last"][0][0] 
             
