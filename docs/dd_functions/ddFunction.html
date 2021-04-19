@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DDFunctions and DDRings &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <title>Main structures: DDFunction and DDRing. &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
     <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     
@@ -18,8 +18,8 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="DDExamples: built-in functions" href="ddExamples.html" />
-    <link rel="prev" title="Main package (dd_functions)" href="../dd_functions.html" /> 
+    <link rel="next" title="DDExamples: built-in functions and examples" href="ddExamples.html" />
+    <link rel="prev" title="Package dd_functions" href="../dd_functions.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -31,14 +31,14 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ddExamples.html" title="DDExamples: built-in functions"
+          <a href="ddExamples.html" title="DDExamples: built-in functions and examples"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="../dd_functions.html" title="Main package (dd_functions)"
+          <a href="../dd_functions.html" title="Package dd_functions"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Main package (dd_functions)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">DDFunctions and DDRings</a></li> 
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code></a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Main structures: <code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code>.</a></li> 
       </ul>
     </div>  
 
@@ -48,7 +48,7 @@
           <div class="body" role="main">
             
   <div class="section" id="module-ajpastor.dd_functions.ddFunction">
-<span id="ddfunctions-and-ddrings"></span><h1>DDFunctions and DDRings<a class="headerlink" href="#module-ajpastor.dd_functions.ddFunction" title="Permalink to this headline">¶</a></h1>
+<span id="main-structures-ddfunction-and-ddring"></span><h1>Main structures: <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> and <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDRing" title="ajpastor.dd_functions.ddFunction.DDRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code></a>.<a class="headerlink" href="#module-ajpastor.dd_functions.ddFunction" title="Permalink to this headline">¶</a></h1>
 <p>Python file for DD-functions and DD-rings</p>
 <p>This packages provides all the functionality for computing with Differentially Definable Functions (DD-functions) and 
 the rings they form (DD-rings). It allows to create further DD-rings, compare them and add constant parameters to the
@@ -806,6 +806,17 @@ given by the argument <code class="docutils literal notranslate"><span class="pr
 <span class="kc">True</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="n">DDFinite</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 <span class="kc">True</span> 
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFiniteI</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Number</span> <span class="n">Field</span> <span class="ow">in</span> <span class="n">I</span> <span class="k">with</span> <span class="n">defining</span> <span class="n">polynomial</span> <span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>We can see that the wrap of <code class="docutils literal notranslate"><span class="pre">ore_algebra</span></code> does not hold for deeper cases:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sage: DFinite.to_depth(3).operator_class
+&lt;class &#39;ajpastor.operator.fullLazyOperator.FullLazyOperator&#39;&gt;
+sage: DFinite.operator_class
+&lt;class &#39;ajpastor.operator.oreOperator.w_OreOperator&#39;&gt;
 </pre></div>
 </div>
 </dd></dl>
@@ -959,13 +970,16 @@ In fact, this class is not automatically loaded when importing the package
 <p>We save in each <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> the way it was constructed. Namely, if we know
 it was the addition or multiplication of two <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>, we indicate it
 in this attribute.</p>
-<p>This always have the following format: [type, data]. we distinguish between two 
+<p>This always have the following format: [type, data]. we distinguish between three 
 type of constructions:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">derivative</span></code>: then <code class="docutils literal notranslate"><span class="pre">self</span></code> is the derivative of <code class="docutils literal notranslate"><span class="pre">data[0]</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">polynomial</span></code>: then <code class="docutils literal notranslate"><span class="pre">self</span></code> is a polynomial evaluation. The polynomial can be
 found in <code class="docutils literal notranslate"><span class="pre">data[0]</span></code> and the relations between the variables and the actual values
 is found in a dictionary in <code class="docutils literal notranslate"><span class="pre">data[1]</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">inverse</span></code>: then <code class="docutils literal notranslate"><span class="pre">self</span></code> is the multiplicative inverse of an element in 
+<code class="docutils literal notranslate"><span class="pre">self.parent().to_depth(self.parent().depth()-1)</span></code> (i.e., from an element 
+in the previous layer) that can be found in <code class="docutils literal notranslate"><span class="pre">data[0]</span></code>.</p></li>
 </ul>
 <p>If this was not known, the attribute will take the (default) value <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd></dl>
@@ -1123,6 +1137,48 @@ arguments.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.extend_sequence">
+<code class="sig-name descname">extend_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.extend_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to actually extend the list of the computed sequence.</p>
+<p>This method takes into consideration the current situation of <code class="docutils literal notranslate"><span class="pre">self</span></code> 
+and decides on the best algorithm to extend the sequence. This decision
+is based on paper <a class="reference external" href="http://arxiv.org/abs/abs/cs/0604101">Arxiv abs/cs/0604101</a>, which describes the
+best algorithm depending on the type of the coefficients of the differential equation:</p>
+<ul class="simple">
+<li><p><em>Constant coefficients</em>: if we look to the sequence, we find out a recurrence of 
+order exactly the order of the differential equation, that is pretty simple to unroll.</p></li>
+<li><p><em>Polynomial coefficients</em>: in this case, the recursion is called P-finite. Here,
+once we computed enough initial data, we can compute the next element by evaluating
+<span class="math notranslate nohighlight">\(r\)</span> polynomials (where <span class="math notranslate nohighlight">\(r\)</span> is the size of the differential equation), performing 
+<span class="math notranslate nohighlight">\(r\)</span> multiplications and additions and, then, performing a division.</p></li>
+<li><p><em>Power series coefficients</em>: in this last case, the recursion is not finite and, hence,
+not useful for a simple unrolling. Here, the authors of <a class="reference external" href="http://arxiv.org/abs/abs/cs/0604101">Arxiv abs/cs/0604101</a> proposed
+a <em>Divide and Conquer</em> strategy to improve the performance.</p></li>
+</ul>
+<p>As we see, each of the cases has a different approach and, in fact, there is one last remaining
+point to consider. If the leading coefficient of the differential equation vanishes at zero
+(i.e., the point <span class="math notranslate nohighlight">\(x=0\)</span> is a singular point for the differential equation) we fall into slightly 
+different problems:</p>
+<ul class="simple">
+<li><p><em>Constant coefficients</em>: this never happends</p></li>
+<li><p><em>Polynomial coefficients</em>: the leading coefficient of the recurrence will have positive integer zeros
+which mean that coefficient is undefined. We can only apply the recurrence relation after we have passed 
+that value (i.e., the functions is defined in the sense of function <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.is_fully_defined" title="ajpastor.dd_functions.ddFunction.DDFunction.is_fully_defined"><code class="xref py py-func docutils literal notranslate"><span class="pre">is_fully_defined()</span></code></a>)</p></li>
+<li><p><em>Power series coefficients</em>: we need to apply a relaxed version of the Divide and Conquer strategy
+presented in <a class="reference external" href="http://arxiv.org/abs/abs/cs/0604101">Arxiv abs/cs/0604101</a> where the solutions it computes will be Laurent polynomials
+instead of simply polynomials with the valuation at most the current degree we are computing and 
+degree the truncation we want plus the valuation of the differential equation.</p></li>
+</ul>
+<p>Finally, in order to avoid an infinite recursion loop to compute the multiplicative inverses of 
+the coefficients, we also consider the case where the function is defined as the multiplicative inverse of
+another <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>. In this case, we use a newton scheme for formal power series to compute
+a truncation of self doubling the current precision. This require two multiplication of polynomials
+of size of the desired.</p>
+<p>OUTPUT:</p>
+<p>The index of the last element computed with this extension</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="ajpastor.dd_functions.ddFunction.DDFunction.gcd">
 <code class="sig-name descname">gcd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.gcd" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -1219,9 +1275,9 @@ and all the ‘others’ functions.</p>
 <dd><p>Method that compute and return a DD-Function <span class="math notranslate nohighlight">\(f\)</span> such <span class="math notranslate nohighlight">\(f*self == 1\)</span>, i.e. this method computes the multiplicative inverse of <span class="math notranslate nohighlight">\(self\)</span>.</p>
 </dd></dl>
 
-<dl class="py attribute">
+<dl class="py method">
 <dt id="ajpastor.dd_functions.ddFunction.DDFunction.is_constant">
-<code class="sig-name descname">is_constant</code><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.is_constant" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">is_constant</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.is_constant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cached property to check whether self is a constant or not.</p>
 <p>We check enough initial values to know (without computing the derivative) if it is zero or not.</p>
 </dd></dl>
@@ -1231,6 +1287,15 @@ and all the ‘others’ functions.</p>
 <code class="sig-name descname">is_fully_defined</code><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.is_fully_defined" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cached property yo check whether the function is fully defined or not.</p>
 <p>This means that, given some initial values and the differential equation, the solution of such problem is unique (True) or not (False)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.is_inverse">
+<code class="sig-name descname">is_inverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.is_inverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to check whether a <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> is an inverse.</p>
+<p>This method checks if the funcion represented by <code class="docutils literal notranslate"><span class="pre">self</span></code> was built as the multiplicative
+inverse of another <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>. See property <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.inverse" title="ajpastor.dd_functions.ddFunction.DDFunction.inverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">inverse()</span></code></a> and <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.built" title="ajpastor.dd_functions.ddFunction.DDFunction.built"><code class="xref py py-func docutils literal notranslate"><span class="pre">built()</span></code></a>
+for further information.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1248,6 +1313,31 @@ and all the ‘others’ functions.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.isequence">
+<code class="sig-name descname">isequence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">list</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">incomplete</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.isequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the <span class="math notranslate nohighlight">\(n\)</span>-th coefficient of the inverse for a power series.</p>
+<p>A <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> represents a formal power series in <span class="math notranslate nohighlight">\(\mathbb{K}[[x]]\)</span> 
+where <span class="math notranslate nohighlight">\(\mathbb{K}\)</span> is the field returned by <code class="docutils literal notranslate"><span class="pre">self.parent().base_ring()</span></code>. These power series
+can be inverted if the constant term is not zero obtaining a new power series.</p>
+<p>This method compute the elements in the sequence for the multiplicative inverse of 
+the differentially definable function represented by <code class="docutils literal notranslate"><span class="pre">self</span></code> (see property <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.inverse" title="ajpastor.dd_functions.ddFunction.DDFunction.inverse"><code class="xref py py-func docutils literal notranslate"><span class="pre">inverse()</span></code></a>)</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code>: index for the coefficient of number of coefficients to compute</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">list</span></code>: boolean flag. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the method returns a list with the <code class="docutils literal notranslate"><span class="pre">n</span></code>
+first coefficients of the sequence. Otherwise, it returns the coefficient
+<span class="math notranslate nohighlight">\(f_n\)</span>. By default, this argument is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">incomplete</span></code>: boolean flag. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the method will raise an error when
+the coefficients can not be computed. Only valid in the case that <code class="docutils literal notranslate"><span class="pre">list</span></code> is 
+<code class="docutils literal notranslate"><span class="pre">True</span></code>, the output (instead of an <a class="reference internal" href="exceptions.html#ajpastor.dd_functions.exceptions.NoValueError" title="ajpastor.dd_functions.exceptions.NoValueError"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueError</span></code></a>)
+will be the list up to the first element we could not compute.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>See method <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.sequence" title="ajpastor.dd_functions.ddFunction.DDFunction.sequence"><code class="xref py py-func docutils literal notranslate"><span class="pre">sequence()</span></code></a> for a description of the output.</p>
+<p>TODO: add examples</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="ajpastor.dd_functions.ddFunction.DDFunction.load_init">
 <code class="sig-name descname">load_init</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bin</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">check</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">bound</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.load_init" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to load the initial conditions for this function.</p>
@@ -1255,16 +1345,14 @@ and all the ‘others’ functions.</p>
 of <code class="docutils literal notranslate"><span class="pre">self</span></code> using the method load from the package pickle.</p>
 <p>For a proper behavior of this function, only files created with 
 the method <code class="docutils literal notranslate"><span class="pre">save_init</span></code> should be used.</p>
-<dl class="simple">
-<dt>INPUT::</dt><dd><ul class="simple">
-<li><p>file: an opened file object or a string with the Path to the file.</p></li>
-<li><p>init: indicates if loading the initial values (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or the sequence.</p></li>
-<li><p>bin: a flag indicating if load the object in text mode or binary mode.</p></li>
-<li><p>check: a flag to check the data is valid for the equation.</p></li>
-<li><p>bound: number of elements of the sequence to load.</p></li>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">file</span></code>: an opened file object or a string with the Path to the file.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">init</span></code>: indicates if loading the initial values (<code class="docutils literal notranslate"><span class="pre">True</span></code>) or the sequence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bin</span></code>: a flag indicating if load the object in text mode or binary mode.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">check</span></code>: a flag to check the data is valid for the equation.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bound</span></code>: number of elements of the sequence to load.</p></li>
 </ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1413,7 +1501,7 @@ uniquely written as a product of a power of <span class="math notranslate nohigh
 <span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">x</span><span class="p">],</span> <span class="p">{</span><span class="mi">5</span><span class="p">:</span><span class="mi">3</span><span class="p">})</span><span class="o">.</span><span class="n">ps_order</span>
 <span class="mi">5</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">ps_order</span>
-<span class="o">-</span><span class="mi">1</span>
+<span class="o">+</span><span class="n">Infinity</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1594,6 +1682,20 @@ this method can also return (when returning lists) an incomplete list instead of
 <span class="n">NoValueError</span><span class="p">:</span> <span class="n">Impossible</span> <span class="n">to</span> <span class="n">compute</span> <span class="n">recursively</span> <span class="n">the</span> <span class="mi">4</span><span class="o">-</span><span class="n">th</span> <span class="n">coefficient</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="p">])</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Since <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> can only represent formal power series, we have fixed that
+the return for this method whenever <span class="math notranslate nohighlight">\(n &lt; 0\)</span> is always <span class="math notranslate nohighlight">\(0\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+<span class="mi">0</span>
+</pre></div>
+</div>
+<p>Note that when using the argument <code class="docutils literal notranslate"><span class="pre">list</span></code>, providing a negative value
+for <span class="math notranslate nohighlight">\(n\)</span> retrieves an empty list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="n">DFinite</span><span class="o">.</span><span class="n">element</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">sequence</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="p">[]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1795,6 +1897,12 @@ is equal to the sequence of ‘self’.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.taylor">
+<code class="sig-name descname">taylor</code><em class="property"> = &lt;function DDFunction.truncation&gt;</em><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.taylor" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.truncation" title="ajpastor.dd_functions.ddFunction.DDFunction.truncation"><code class="xref py py-func docutils literal notranslate"><span class="pre">truncation()</span></code></a>. This method returns the Taylor expansion</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="ajpastor.dd_functions.ddFunction.DDFunction.to_poly">
 <code class="sig-name descname">to_poly</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.to_poly" title="Permalink to this definition">¶</a></dt>
@@ -1840,6 +1948,29 @@ is equal to the sequence of ‘self’.</p>
 <span class="mi">4</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.truncation">
+<code class="sig-name descname">truncation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bound</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.truncation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the truncation of this function up to the given order.</p>
+<p>Differentially definable functions are, in particular, formal power series. The truncation
+of a formal power series <span class="math notranslate nohighlight">\(f(x) = \sum_{n\geq 0} f_nx^n\)</span> up to an order <span class="math notranslate nohighlight">\(m \geq 0\)</span> is a 
+polynomial formed by the first coefficients of <span class="math notranslate nohighlight">\(f(x)\)</span>, namely:</p>
+<p>This method computes the truncation for a given bound.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bound</span></code>: value for the bound <span class="math notranslate nohighlight">\(m\)</span> of the truncation.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A polynomial of degree at most <code class="docutils literal notranslate"><span class="pre">bound</span></code>.</p>
+<p>TODO: add examples</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="ajpastor.dd_functions.ddFunction.DDFunction.valuation">
+<code class="sig-name descname">valuation</code><a class="headerlink" href="#ajpastor.dd_functions.ddFunction.DDFunction.valuation" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias for the attribute <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDFunction.ps_order" title="ajpastor.dd_functions.ddFunction.DDFunction.ps_order"><code class="xref py py-func docutils literal notranslate"><span class="pre">ps_order()</span></code></a>. Returns the order (as a power series) of <code class="docutils literal notranslate"><span class="pre">self</span></code>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2014,6 +2145,8 @@ of this class to keep that behavior.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
 <span class="n">sage</span><span class="p">:</span> <span class="n">DFiniteP</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ParametrizedDDRing</span><span class="p">(</span><span class="n">DDFinite</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">)</span>
 <span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">DFiniteP</span><span class="o">.</span><span class="n">to_depth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Fraction</span> <span class="n">Field</span> <span class="n">of</span> <span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">P</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span>
 </pre></div>
 </div>
 <p>For further information and examples, see method <a class="reference internal" href="#ajpastor.dd_functions.ddFunction.DDRing.to_depth" title="ajpastor.dd_functions.ddFunction.DDRing.to_depth"><code class="xref py py-func docutils literal notranslate"><span class="pre">DDRing.to_depth()</span></code></a>.</p>
@@ -2042,10 +2175,10 @@ of this class to keep that behavior.</p>
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="../dd_functions.html"
-                        title="previous chapter">Main package (dd_functions)</a></p>
+                        title="previous chapter">Package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code></a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="ddExamples.html"
-                        title="next chapter">DDExamples: built-in functions</a></p>
+                        title="next chapter">DDExamples: built-in functions and examples</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -2077,14 +2210,14 @@ of this class to keep that behavior.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ddExamples.html" title="DDExamples: built-in functions"
+          <a href="ddExamples.html" title="DDExamples: built-in functions and examples"
              >next</a> |</li>
         <li class="right" >
-          <a href="../dd_functions.html" title="Main package (dd_functions)"
+          <a href="../dd_functions.html" title="Package dd_functions"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Main package (dd_functions)</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">DDFunctions and DDRings</a></li> 
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code></a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Main structures: <code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code>.</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DD-finite functions as symbolic expressions &#8212; DD-finite functions in Sage 0.9.20210218.1157 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Differentially algebraic functions as differentially definable functions" href="toDiffAlgebraic.html" />
+    <link rel="prev" title="DDExamples: built-in functions and examples" href="ddExamples.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="toDiffAlgebraic.html" title="Differentially algebraic functions as differentially definable functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions and examples"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" accesskey="U">Package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code></a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">DD-finite functions as symbolic expressions</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ajpastor.dd_functions.symbolic">
+<span id="dd-finite-functions-as-symbolic-expressions"></span><h1>DD-finite functions as symbolic expressions<a class="headerlink" href="#module-ajpastor.dd_functions.symbolic" title="Permalink to this headline">¶</a></h1>
+<p>Python file to work between the Symbolic Ring and Differentially definable functions</p>
+<p>This package provides functionality to interact between the Symbolic Ring in Sage and the 
+rings of Differentially Definable functions (see <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDRing" title="ajpastor.dd_functions.ddFunction.DDRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code></a>). in 
+particular, this module offers several methods to use the simplification of symbolic expressions 
+to simplify the structure for a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>.</p>
+<p>This module is related with <a class="reference internal" href="ddExamples.html#module-ajpastor.dd_functions.ddExamples" title="ajpastor.dd_functions.ddExamples"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ddExamples</span></code></a>, since all the examples we offer in
+that module (when they have a Symbolic equivalent) can be transformed with this module.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">symbolic</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">)))</span> <span class="o">==</span> <span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt>TODO:</dt><dd><ul class="simple">
+<li><p>Check the functionality of the package</p></li>
+</ul>
+</dd>
+</dl>
+<p>AUTHORS:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Antonio Jimenez-Pastor (2016-10-01): initial version</p></li>
+</ul>
+</div></blockquote>
+<dl class="py function">
+<dt id="ajpastor.dd_functions.symbolic.symbolic">
+<code class="sig-prename descclassname">ajpastor.dd_functions.symbolic.</code><code class="sig-name descname">symbolic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.symbolic.symbolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to cast a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> into a symbolic expression.</p>
+<p>This method relies on the method <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction.to_symbolic" title="ajpastor.dd_functions.ddFunction.DDFunction.to_symbolic"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_symbolic()</span></code></a>. 
+If, for any reason, we can not cast the element to a Symbolic expression, we raise an error.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span></code>: a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> to convert to a Symbolic expression.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>An element in the Symbolic Ring of Sage.</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">symbolic</span><span class="p">(</span><span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">e</span><span class="o">^</span><span class="n">x</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">symbolic</span><span class="p">(</span><span class="n">BesselD</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">bessel_J</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">symbolic</span><span class="p">(</span><span class="n">LegendreD</span><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span><span class="s1">&#39;m&#39;</span><span class="p">))</span>
+<span class="n">gen_legendre_P</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.symbolic.from_symbolic">
+<code class="sig-prename descclassname">ajpastor.dd_functions.symbolic.</code><code class="sig-name descname">from_symbolic</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">exp</span></em>, <em class="sig-param"><span class="n">dR</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.symbolic.from_symbolic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to transform a symbolic expression into a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>.</p>
+<p>This method takes a symbolic expression an tries to cast it into a differentially definable function.
+This is closed related with the names that the module <a class="reference internal" href="ddExamples.html#module-ajpastor.dd_functions.ddExamples" title="ajpastor.dd_functions.ddExamples"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ddExamples</span></code></a> gives to 
+the functions.</p>
+<p>This method is the inverse of <a class="reference internal" href="#ajpastor.dd_functions.symbolic.symbolic" title="ajpastor.dd_functions.symbolic.symbolic"><code class="xref py py-func docutils literal notranslate"><span class="pre">symbolic()</span></code></a>, meaning that the output of this method after applying
+<a class="reference internal" href="#ajpastor.dd_functions.symbolic.symbolic" title="ajpastor.dd_functions.symbolic.symbolic"><code class="xref py py-func docutils literal notranslate"><span class="pre">symbolic()</span></code></a> is always an object that is equal to the first input.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">exp</span></code>: symbolic expression or an object that can be casted into one. We also allow lists, tuples and
+sets as possible inputs, applying this method recursively to each of its elements.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dR</span></code>: <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDRing" title="ajpastor.dd_functions.ddFunction.DDRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code></a> in which hierarchy we try to include
+the symbolic expression <code class="docutils literal notranslate"><span class="pre">exp</span></code>. If <code class="docutils literal notranslate"><span class="pre">None</span></code> is given, we compute a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDRing" title="ajpastor.dd_functions.ddFunction.DDRing"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDRing</span></code></a>
+using <span class="math notranslate nohighlight">\(x\)</span> as a variable and all other variables appearing in <code class="docutils literal notranslate"><span class="pre">exp</span></code> considered as parameters.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>A <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> representation of <code class="docutils literal notranslate"><span class="pre">exp</span></code>.</p>
+<p>TODO: add more cases from ddExamples</p>
+<p>EXAMPLES:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sage</span><span class="p">:</span> <span class="kn">from</span> <span class="nn">ajpastor.dd_functions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">Exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">sin_yx</span> <span class="o">=</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">y</span><span class="o">*</span><span class="n">x</span><span class="p">))</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">parent</span><span class="p">(</span><span class="n">sin_yx</span><span class="p">)</span>
+<span class="n">DD</span><span class="o">-</span><span class="n">Ring</span> <span class="n">over</span> <span class="p">(</span><span class="n">Univariate</span> <span class="n">Polynomial</span> <span class="n">Ring</span> <span class="ow">in</span> <span class="n">x</span> <span class="n">over</span> <span class="n">Rational</span> <span class="n">Field</span><span class="p">)</span> <span class="k">with</span> <span class="n">parameter</span> <span class="p">(</span><span class="n">y</span><span class="p">)</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">sin_yx</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">y</span><span class="o">^</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">^</span><span class="mi">5</span><span class="p">]</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">Cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">sinh</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">Sinh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">cosh</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">Cosh</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">Tan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="n">Log</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">bessel_J</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">BesselD</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="n">sage</span><span class="p">:</span> <span class="n">from_symbolic</span><span class="p">(</span><span class="n">hypergeometric</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],[</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span><span class="n">x</span><span class="p">))</span> <span class="o">==</span> <span class="n">GenericHypergeometricFunction</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">),(</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">))</span>
+<span class="kc">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.symbolic.symbolic_simplify">
+<code class="sig-prename descclassname">ajpastor.dd_functions.symbolic.</code><code class="sig-name descname">symbolic_simplify</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.symbolic.symbolic_simplify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to simplify in-place a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>.</p>
+<p>This method uses the conversion between symbolic expressions and <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a>
+to simplify te construction of a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> through the <code class="docutils literal notranslate"><span class="pre">simplify</span></code>
+method of symbolic expressions.</p>
+<p>What this method does is to convert the input to a symbolic expression, run the method <code class="docutils literal notranslate"><span class="pre">simplify_full</span></code> 
+from symbolic expressions, then build a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> from that new expression
+and compare what we obtained with the original. if the size is smaller, we change the equation and the name of the 
+original function using the new information.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span></code>: a <a class="reference internal" href="ddFunction.html#ajpastor.dd_functions.ddFunction.DDFunction" title="ajpastor.dd_functions.ddFunction.DDFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">DDFunction</span></code></a> we want to simplify.</p></li>
+</ul>
+<p>OUTPUT:</p>
+<p>The same object but (in case we get a smaller representation) with the equation and name simplified. Sometimes
+this could even change the depth of the current object since while doing closure properties we did not recognize
+the simplification.</p>
+<p>TODO: add examples and check functionality</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="ajpastor.dd_functions.symbolic.symbolic_simplify_coefficients">
+<code class="sig-prename descclassname">ajpastor.dd_functions.symbolic.</code><code class="sig-name descname">symbolic_simplify_coefficients</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">function</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.symbolic.symbolic_simplify_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ddExamples.html"
+                        title="previous chapter">DDExamples: built-in functions and examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="toDiffAlgebraic.html"
+                        title="next chapter">Differentially algebraic functions as differentially definable functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dd_functions/symbolic.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="toDiffAlgebraic.html" title="Differentially algebraic functions as differentially definable functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ddExamples.html" title="DDExamples: built-in functions and examples"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">dd_functions</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../dd_functions.html" >Package <code class="docutils literal notranslate"><span class="pre">dd_functions</span></code></a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">DD-finite functions as symbolic expressions</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2019.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+  </body>
+</html>

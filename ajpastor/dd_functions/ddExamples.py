@@ -2347,7 +2347,11 @@ def FuchsianD(a = (), q = (), init=(), parent=QQ):
 
             \left(\prod_{j=1}^k (x-a_j)^{n-1}\right)f^{(n)}(x) + Q_{n-1}(x)f^{(n-1)}(x) + \ldots + Q_0(x)f(x) = 0,
 
-            where `Q_i(x) = \left(\prod_{j=1}^k (x-a_j)^{n-1 - i}\right)q_i(x)
+        where 
+        
+        .. MATH::
+        
+            Q_i(x) = \left(\prod_{j=1}^k (x-a_j)^{n-1 - i}\right)q_i(x)
 
 
         INPUT:
