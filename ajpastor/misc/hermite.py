@@ -305,7 +305,8 @@ class HermiteSolver(LinearSystemSolver):
             # We update the index of the equation
             while(r >= 0 and all(self.is_zero(el) for el in A[r])):
                 r-=1
-        return solution, syzygy
+
+        return self.__reduce_solution(solution, syzygy)
     
     #########################################################
     ###
@@ -317,3 +318,20 @@ class HermiteSolver(LinearSystemSolver):
             if(not self.is_zero(A[i][c])):
                 return i
         return None
+
+    def __reduce_solution(self, solution, syzygy):
+        r'''
+            Method to compute the "smallest" solution of the system.
+        '''
+        from sage.rings.polynomial.polynomial_ring import is_PolynomialRing 
+        if(is_PolynomialRing(self.parent()) and syzygy.ncols() == 1):
+            d = max(el.degree() for el in syzygy.column(0))
+            p = max(el.degree() for el in solution)
+            while(p >= d):
+                i = 0
+                while(solution[i].degree() < p): i += 1
+                q,_ = self.__euclidean(solution[i], syzygy[0][i])
+                solution -= syzygy*vector([q])
+                p = max(el.degree() for el in solution)
+
+        return (solution, syzygy)
