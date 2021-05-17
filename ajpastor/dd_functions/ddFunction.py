@@ -40,8 +40,8 @@ from functools import reduce
 from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, BackslashOperator, parent, identity_matrix, diff, kronecker_delta,
-                        LaurentPolynomialRing, LaurentSeriesRing, block_matrix, infinity)
+                        sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
+                        infinity)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -55,9 +55,7 @@ from ajpastor.dd_functions.exceptions import DDFunctionError, ZeroValueRequired,
 from ajpastor.misc.dynamic_string import DynamicString, m_dreplace
 from ajpastor.misc.serializable import SerializableObject
 from ajpastor.misc.cached_property import derived_property
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
-from ajpastor.misc.ring_w_sequence import sequence
+from ajpastor.misc.ring_w_sequence import Ring_w_Sequence, sequence
 from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
 
 from ajpastor.operator.operator import Operator
