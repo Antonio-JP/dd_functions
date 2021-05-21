@@ -531,7 +531,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 * A warning will pop up if we merge rings with the same parameter names.
                 
             ERRORS:
-                * :class:`TypeError`q will be raised if a problem with the algebraic extension is found.
+                * :class:`TypeError` will be raised if a problem with the algebraic extension is found.
 
             EXAMPLES::
 
