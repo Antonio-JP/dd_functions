@@ -221,7 +221,6 @@ class LazyRing(CommutativeRing, UniqueRepresentation):
 
             TODO: add examples and tests
         '''
-        print("_element_constructor_")
         if(parent(element) is self):
             return element
         elif(element in self.ring):
@@ -345,7 +344,6 @@ class LazyRing(CommutativeRing, UniqueRepresentation):
 
             TODO: add examples and tests.
         '''
-        print("Here")
         try:
             if(isinstance(S, LazyRing)):
                 R = pushout(self.ring, S.ring)
