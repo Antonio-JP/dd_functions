@@ -61,6 +61,7 @@ class LazyElement(CommutativeRingElement):
         super().__init__(parent)
         self.__real = real
         self.__polynomial = polynomial
+        self.parent().simplify(self) # we do a simplification of the object using current relations
 
     @property
     def real(self):
@@ -68,7 +69,7 @@ class LazyElement(CommutativeRingElement):
             Attribute for the real element represented by ``self``.
         '''
         if(not self.computed()):
-            self.__real = self.polynomial(**self.parent().map_of_vars)
+            self.__real = self.polynomial(**self.parent().map_of_vars())
         return self.__real
 
     def computed(self):
@@ -81,16 +82,30 @@ class LazyElement(CommutativeRingElement):
 
     ## Arithmetic methods
     def _add_(self, x):
-        return LazyElement(self.parent(), None, self.polynomial + x.polynomial)
+        x = x.polynomial if x.parent() is self.parent() else self.parent().poly_ring(x)
+        return LazyElement(self.parent(), None, self.polynomial + x)
     def _sub_(self, x):
-        return LazyElement(self.parent(), None, self.polynomial - x.polynomial)
+        x = x.polynomial if x.parent() is self.parent() else self.parent().poly_ring(x)
+        return LazyElement(self.parent(), None, self.polynomial - x)
     def _mul_(self, x):
-        print("here")
-        return LazyElement(self.parent(), None, self.polynomial * x.polynomial)
+        x = x.polynomial if x.parent() is self.parent() else self.parent().poly_ring(x)
+        return LazyElement(self.parent(), None, self.polynomial * x)
     def _rmul_(self, x):
-        return LazyElement(self.parent(), None, self.polynomial._rmul_(x.polynomial))
+        x = x.polynomial if x.parent() is self.parent() else self.parent().poly_ring(x)
+        return LazyElement(self.parent(), None, x*self.polynomial)
     def _lmul_(self, x):
-        return LazyElement(self.parent(), None, self.polynomial._lmul_(x.polynomial))
+        x = x.polynomial if x.parent() is self.parent() else self.parent().poly_ring(x)
+        return LazyElement(self.parent(), None, self.polynomial*x)
+    def _div_(self, x):
+        x = self.parent()(x)
+        if x.verify_zero():
+            raise ZeroDivisionError
+        return self/self.parent().fraction_field()(x)
+    def _rdiv_(self, x):
+        x = self.parent()(x)
+        if self.verify_zero():
+            raise ZeroDivisionError
+        return x/self.parent().fraction_field()(self)
     def __pow__(self, n):
         return LazyElement(self.parent(), None, self.polynomial**n)
 
@@ -119,14 +134,61 @@ class LazyElement(CommutativeRingElement):
         '''
         R = self.parent().poly_ring._P # polynomial ring where everything will be contained
 
-        relations = [R(el) for el in relations]# We convert all the element in the relation to R
-        poly = R(self.polynomial) # we convert the polynomial representation of self into R
+        relations = [R(str(el)) for el in relations] # We convert all the element in the relation to R
+        poly = R(str(self.polynomial)) # we convert the polynomial representation of self into R
 
         result = poly.reduce(relations) # reducing via the reduce method for polynomials
         
         self.__polynomial = self.parent().poly_ring(result) # changing the stored value
         return self
 
+    def is_unit(self):
+        r'''
+            Method to check if an object is a unit.
+
+            This method does not perform computations on the real ring, so the output of this 
+            method may change in different executions.
+
+            OUTPUT:
+
+            ``True`` if we know that ``elf`` is a unit in ``self.parent().ring``.
+
+            TODO: add examples and tests
+        '''
+        if(self.computed()):
+            return self.real.is_unit()
+        else:
+            return self.polynomial.is_unit()
+
+    def inverse_of_unit(self):
+        r'''
+            Method that computes the actual inverse of a unit in a ring.
+
+            This method computes the inverse of a unit in ``self.parent()``. This method
+            avoids computation in the real ring as much as possible.
+
+            Moreover, it could happend that a new relation is found.
+        '''
+        poly = None; real = None
+        ## Computing the inverse of the polynomial
+        try:
+            poly = self.polynomial.inverse_of_unit()
+        except (NotImplementedError, ArithmeticError):
+            pass
+
+        if(self.computed()):
+            real = self.real.inverse_of_unit()
+        
+        if(poly is None and real is None):
+            raise ArithmeticError("element is not a unit")
+        elif(real is None):
+            return self(poly)
+        else:
+            inverse = self(real)
+            self.parent().add_relations(inverse*self - 1)
+            if(poly != None):
+                self.parent().add_relations(inverse - self.parent()(poly))
+            return inverse
     ## Other operations
     def gcd(self, other):
         r'''
@@ -299,7 +361,7 @@ class LazyElement(CommutativeRingElement):
         if(not self.computed()):
             return "[%s]" %repr(self.polynomial)
         else:
-            return "(%s [%s])" %(self.real, self.polynomial)
+            return "(%s [%s])" %(repr(self.real), self.polynomial)
 
     def _latex_(self):
         return r"\mathcal{Lazy}(" + (r"%s \rightarrow" %self.real if self.computed() else "") + r"%s" %self.polynomial

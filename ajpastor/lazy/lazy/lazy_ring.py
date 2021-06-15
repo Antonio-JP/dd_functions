@@ -185,6 +185,8 @@ class LazyRing(CommutativeRing, UniqueRepresentation):
             return super().__call__(element)
         ## Cases of fractions
         if(self.ring in _IntegralDomains):
+            if(element.parent() is self.fraction_field()):
+                return element
             if(element in self.ring.fraction_field()):
                 n = self(self.ring(element.numerator()))
                 d = self(self.ring(element.denominator()))
@@ -223,6 +225,8 @@ class LazyRing(CommutativeRing, UniqueRepresentation):
         '''
         if(parent(element) is self):
             return element
+        elif(element in self.base()):
+            return LazyElement(self, self.ring(element), self.poly_ring(element))
         elif(element in self.ring):
             return self._create_from_real(self.ring(element))
         elif(element in self.poly_ring):
@@ -384,14 +388,14 @@ class LazyRing(CommutativeRing, UniqueRepresentation):
         '''
         relations = self.simplify(relations)
         R = self.poly_ring._P # biggest polynomial ring found so far
-        self.__relations = [R(el) for el in self.relations]
+        self.__relations = [R(str(el)) for el in self.relations]
         if(relations in self): # just one relation
             if(relations.polynomial != 0):
-                self.__relations += [R(relations.polynomial.polynomial())]
+                self.__relations += [R(str(relations.polynomial.polynomial()))]
         elif(is_Vector(relations) or type(relations) in (tuple, list, set)):
-            self.__relations += [R(el.polynomial.polynomial()) for el in relations if el.polynomial != 0] 
+            self.__relations += [R(str(el.polynomial.polynomial())) for el in relations if el.polynomial != 0] 
         if(len(self.relations) > 0):
-            self.__relations = ideal(self._relations).groebner_basis()
+            self.__relations = ideal(self.relations).groebner_basis()
 
         return self.relations
 
