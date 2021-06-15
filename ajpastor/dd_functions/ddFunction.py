@@ -2377,6 +2377,64 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         '''
         return self.equation.order()
         
+    @cached_method
+    def companion(self):
+        r'''
+            Returns the companion matrix of the associated operator.
+
+            Any :class:`DDFunction` is defined with a linear differential operator.
+            This method returns the companion matrix associated with such operator
+            relying on the operator structure to its computation.
+
+            It differs from :func:`extracted_companion` in such a way that this method
+            returns the companion matrix without any further computation and the other
+            method returns the companion matrix splitted into an `x` factor (that may be 
+            negative) and a matrix whose order (as formal power series) is zero.
+
+            OUTPUT:
+
+            The companion matrix of the equation defining ``self``. See 
+            :func:`ajpastor.dd_functions.operator.Operator.companion` for further information.
+
+            TODO: add tests and examples
+        '''
+        return self.equation.companion()
+
+    def extracted_companion(self):
+        r'''
+            Returns the companion matrix of the associated operator.
+
+            Any :class:`DDFunction` is defined with a linear differential operator.
+            This method returns the companion matrix associated with such operator
+            in the particular form:
+
+            .. MATH::
+
+            \mathcal{C} = x^o \mathcal{M},
+
+            where `o \in \mathbb{Z}` and `\mathcal{M} \in \mathbb{K}[[x]]` such 
+            that the order of `\mathcal{M}` is exactly 0.
+
+            The representation of the objects inside this matrix `\mathcal{M}` are
+            either polynomials or :class:`DDFunction` in the corresponding ring.
+
+            It differs from :func:`companion` in such a way that this method
+            returns the companion matrix splitted into an `x` factor (that may be 
+            negative) and a matrix whose order (as formal power series) is zero and the other
+            method returns the companion matrix without any further computation.
+
+            OUTPUT:
+
+            The pair `(o, \mathcal{M})` described above.
+
+            TODO: add tests and examples
+        '''
+        ## We distinguish two cases: D-finite and others
+        if(self.parent().depth() == 1): # D-finite case
+            raise NotImplementedError("D-finite case not implemented")
+        else: # other cases
+            raise NotImplementedError("General case not implemented")
+
     @derived_property
     def ps_order(self):
         r'''
