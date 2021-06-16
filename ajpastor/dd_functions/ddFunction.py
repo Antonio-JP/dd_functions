@@ -2386,7 +2386,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             This method returns the companion matrix associated with such operator
             relying on the operator structure to its computation.
 
-            It differs from :func:`extracted_companion` in such a way that this method
+            It differs from :func:`truncated_companion` in such a way that this method
             returns the companion matrix without any further computation and the other
             method returns the companion matrix splitted into an `x` factor (that may be 
             negative) and a matrix whose order (as formal power series) is zero.
@@ -2398,11 +2398,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             TODO: add tests and examples
         '''
-        return self.equation.companion()
+        return self.equation.companion().transpose()
 
-    def extracted_companion(self):
+    def truncated_companion(self, bound):
         r'''
-            Returns the companion matrix of the associated operator.
+            Returns the expansion around `x=0` of the companion matrix of the associated operator.
 
             Any :class:`DDFunction` is defined with a linear differential operator.
             This method returns the companion matrix associated with such operator
@@ -2415,26 +2415,59 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             where `o \in \mathbb{Z}` and `\mathcal{M} \in \mathbb{K}[[x]]` such 
             that the order of `\mathcal{M}` is exactly 0.
 
-            The representation of the objects inside this matrix `\mathcal{M}` are
-            either polynomials or :class:`DDFunction` in the corresponding ring.
+            This method computes the matrix `\mathcal{M}` up to a certain order bound
+            and return the polynomial matrix associated with it, together with the 
+            order `o` of the whole companion matrix.
 
-            It differs from :func:`companion` in such a way that this method
-            returns the companion matrix splitted into an `x` factor (that may be 
-            negative) and a matrix whose order (as formal power series) is zero and the other
-            method returns the companion matrix without any further computation.
+            INPUT:
+
+            * ``bound``: the order bound for the truncated companion matrix.
 
             OUTPUT:
 
-            The pair `(o, \mathcal{M})` described above.
+            A pair `(o, A)` such that `x^o A` coincides with the companion matrix
+            of ``self`` up to the order ``bound`` provided.
 
             TODO: add tests and examples
         '''
-        ## We distinguish two cases: D-finite and others
+        x = self.parent().variables()[0]
+        #@ We first compute the orders of the coefficients
         if(self.parent().depth() == 1): # D-finite case
-            raise NotImplementedError("D-finite case not implemented")
-        else: # other cases
-            raise NotImplementedError("General case not implemented")
+            coeffs = []
+            for coeff in self.equation.coefficients():
+                if coeff == 0:
+                    coeffs += [(0,0)]
+                order = 0; current = coeff
+                while(current%x == 0):
+                    order += 1; current = current//x
+                coeffs += [(order, current)]
+        else: # General case
+            coeffs = [el.zero_extraction for el in self.equation.coefficients()]
 
+        ## Now we compute the order of the last row in the companion matrix
+        diff_orders = [el[0]-coeffs[-1][0] for el in coeffs[:-1]]
+        valuation = min(diff_orders)
+        if(valuation >= 0): # Regular case, we act like order == 0
+            valuation = 0
+            
+        k = self.order(); n = coeffs[-1][0]; N = bound; m = valuation
+        R = self.parent().original_ring()
+        ## We compute now the last row (also depending on the depth)
+        if(self.parent().depth() == 1): # D-finite case
+            ilc = self.parent()(1/coeffs[-1][1])
+            last_row = vector([-R(x**(-n-m)*self.equation[i][:N+n]*ilc.truncation(N-m))[:N]
+                                for i in range(k)])
+        else: # General case
+            ilc = 1/coeffs[-1][1]
+            last_row = vector([-R(x**(-n-m)*self.equation[i].truncation(N+n)*ilc.truncation(N-m))[:N] 
+                                for i in range(k)])
+
+        return m,Matrix(
+            Matrix(
+                [vector((k-1)*[0])] + 
+                ((x**(-m))*identity_matrix(k-1)).columns()).transpose().rows() + 
+                [last_row])
+               
     @derived_property
     def ps_order(self):
         r'''
