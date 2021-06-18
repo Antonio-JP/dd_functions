@@ -41,7 +41,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
-                        infinity)
+                        infinity, LaurentPolynomialRing)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2142,7 +2142,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             
             INPUT:
             
-            * ``A``: a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=-o}^m A_it^i` is 
+            * ``A``: a tuple `(o, A)` with a list of matrices `A_i \in \mathbb{M}_{r\times r}(\mathbb{K})` such that `\sum_{i=-o}^m A_it^i` is 
             a truncation of the system matrix `A`. We denote the length of his list as `m`.
             * ``s``: a list of vectors `s_i \in \mathbb{M}_{r\times 1}(\mathbb{K})` for the inhomogeneous term of the equation.
             If this is `0`, then a solution for the original system is computed. The length should be again `m`.
@@ -2165,41 +2165,54 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(not K.is_field() or K.characteristic()!= 0):
             raise TypeError("The input 'K' must be a field of characteristic zero")
                     
-        Kx = PolynomialRing(K, str(x)) # polynomial ring for truncations
-        x = Kx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
+        o, A = A # extracting the tuple
+        Kx = PolynomialRing(K, str(x)) # polynomial ring for solution
+        # Deciding the inner working space
+        if(o >= 0):  Lx = Kx# polynomial ring for truncations
+        else: Lx = LaurentPolynomialRing(K, str(x)) # Laurent polynomial ring for trunc
+        
+        x = Lx.gens()[0] # casting x to the element inside the polynomial ring (avoiding casting errors)
             
         A = [a.change_ring(K) for a in A] # checking everything in A is in K
         s = [el.change_ring(K) for el in s] # checking everything in s is in K
         p = ZZ(p) # checking p is a positive integer
         if(p < 0):
-            raise ValueError("The value for 'p' must be a non-negative integer")
-        v = v.change_ring(K) # checking everything in v is in K    
+            raise TypeError("The value for 'p' must be a non-negative integer")
+        v = v.change_ring(K) # checking everything in v is in K  
+
+        if(o < -1):
+            raise TypeError("The order of the system is not valid (smaller than -1)")
+        elif(o == -1 and p in A[0].eigenvalues()):
+            raise ValueError("The irregular matrix has an eigenvalue equal to %d" %p)  
         
         m = len(s); r = len(s[0])
-        if(len(A) < p+m):
-            raise ValueError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
-        A = A[:m+p] # Removing extra data
+        if(len(A) < m):
+            raise TypeError("The truncation of the inhomogeneous part must be at least the truncation on the matrix")
+        A = A[:m-o] # Removing extra data
         if(len(v) != r or any(len(el) != r for el in s) or any(a.nrows() != r for a in A)):
             raise TypeError("The dimensions of the input are not correct")
 
         ## Base case
         if(m == 1): 
-            if(p == 0): return v.change_ring(x.parent())
-            else: return (s[0]/p).change_ring(x.parent())
+            if(p == 0): return v.change_ring(Kx)
+            elif(o > -1): return (s[0]/p).change_ring(Kx)
+            else: return (p*identity_matrix(r) - A[0]).solve_right(s[0]).change_ring(Kx)
 
         ## General case
         d = m//2
-        y0 = DDFunction.__chyzak_dac(A, s[:d], p, v, K, x) # first recursive cal
-        AA = sum((A[i].change_ring(x.parent()))*x**(i) for i in range(m))
+        y0 = DDFunction.__chyzak_dac((o,A), s[:d], p, v, K, x) # first recursive cal
+        AA = sum((A[i].change_ring(x.parent()))*x**(i+o) for i in range(o,m))
         ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
         R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+        
+        #if(m > 2): raise RuntimeError
         # transforming R into a valid input of DivideAndConquer
         R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
         
-        y1 = DDFunction.__chyzak_dac(A, R, p+d, v, K, x) #second recursive call
+        y1 = DDFunction.__chyzak_dac((o,A), R, p+d, v, K, x) #second recursive call
         solution = y0 + x**d*y1
         
-        return solution.change_ring(x.parent())
+        return solution.change_ring(Kx) # the solution has polynomial coefficients
 
     #####################################
     ### Init and Interface methods
@@ -2732,66 +2745,93 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 lc = self.equation.forward(r)(n=m-r)
                 self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
             self.__computed = m
-        elif((n+1) > self.equation.get_jp_fo() and self.equation[self.order()].sequence(0) != 0): # power series regular case
+        elif((n+1) > self.equation.get_jp_fo()): # power series case
             ## In this case, we use the Divide and Conquer strategy proposed in 
+            n = n+1
             m = 2*n # we double the amount of data
             K = self.parent().coeff_field
             x = self.parent().variables()[0]
             r = self.equation.order()
             v = vector(self.init(r, True))
-            Kx = PolynomialRing(K, x); x = Kx(x)
+            Kx = PolynomialRing(K, x)
+            Lx = LaurentPolynomialRing(K,x)
 
-            ## we need to get the truncated associated system Y' = AY
-            ## here A is the companion matrix transposed
-            last_row = [-Kx(self.equation[j].sequence(m,True))*Kx(self.equation[r].isequence(m,True)) for j in range(r)]
+            o, AA = self.truncated_companion(m)
+            if(o < 0): x = Lx.gens()[0]
+            else: x = Kx.gens()[0]
 
-            A = [Matrix(K, ([[kronecker_delta(i+1,j) if(k == 0) else 0 for j in range(r)] for i in range(r-1)] + 
-                                [[last_row[j][k] for j in range(r)]])) for k in range(m)]
+            A = [Matrix([[el[i-o] for el in row] for row in AA]) for i in range(o, m)]
+            if(o < 0):
+                AA = (x**o)*AA.change_ring(Lx)
 
-            if("last" in self.__chyzak and self.__chyzak["last"][1] == n): # we can use previous initial values results
-                y0 = self.__chyzak["last"][0]
-                AA = sum((A[i].change_ring(Kx))*x**(i) for i in range(m))
+            try:
+                if(not("last" in self.__chyzak and self.__chyzak["last"][1] == n)):
+                    try:
+                        y0 = DDFunction.__chyzak_dac((o,A), (m)*[vector(K, r*[0])], 0, v, K, x)
+                    except ValueError as e:
+                        if(n > r):
+                            y0 = vector([diff(self.truncation(n-r+i+1), x, i) for i in range(r)])
+                            n = n-r+1
+                            m = 2*n
+                        else:
+                            raise e
+                else: # we can use previous initial values results
+                    y0 = self.__chyzak["last"][0]
+
                 R = -x*vector(diff(el) for el in y0) + x*AA*y0
                 # transforming R into a valid input of DivideAndConquer
                 R = [vector(el[i] for el in R) for i in range(n,m)]
-                y1 = DDFunction.__chyzak_dac(A, R, n, v, K, x)
-
-                self.__chyzak["last"] = (y0 + x**n*y1, m)
-            else:
-                self.__chyzak["last"] = (DDFunction.__chyzak_dac(A, (m)*[vector(K, r*[0])], 0, v, K, x), m)
-                
-            y = self.__chyzak["last"][0][0] 
+                y1 = DDFunction.__chyzak_dac((o,A), R, n, v, K, x)
             
-            for i in range(n,m):
-                self.__sequence[i] = y[i]
-            self.__computed = m          
+                y = y0 + x**n*y1
+                self.__chyzak["last"] = (y, m)
+                # Extracing the coefficients
+                y = self.__chyzak["last"][0][0]
+                for i in range(n,m):
+                    self.__sequence[i] = y[i]
+                self.__computed = m-1          
+            except ValueError as e:
+                self.__default_extend_sequence(n)
         else: ## Default case (use when the required element is below the bound)
-            m  = n+1 # element to be computed
-           
-            if(not m in self.__sequence):
-                d = self.equation.forward_order
-                i = max(m-d,0)
-                rec = self.equation.get_recursion_row(i)
-                while(rec[m] == 0  and i <= self.equation.jp_value()):                   
-                    i += 1 
-                    rec = self.equation.get_recursion_row(i)
-                if(rec[m] == 0 ):
-                    raise NoValueError(m)
-                ## Checking that we only need previous elements
-                if(any(rec[i] != 0 for i in range(m+1 , len(rec)))):
-                    raise NoValueError(m)
-                
-                ## We do this operation in a loop to avoid computing initial values 
-                ## if they are not needed
-                res = self.parent().coeff_field.zero()
-                for i in range(m):
-                    if(not (rec[i] == 0 )):
-                        res -= rec[i]*(self.sequence(i))
-                        
-                self.__sequence[m] = self.parent().coeff_field(res/rec[m])
-            self.__computed = m
+            self.__default_extend_sequence(n+1)
         
         return self.__computed
+
+    def __default_extend_sequence(self, m):
+        r'''
+            Default method to extend the sequence.
+
+            This method is the standard way of extending the sequence. This method works
+            for elements that are too early in the sequence, and the recursion matrix is used.
+            Otherwise, the corresponding equation and previous elements are used to compute the 
+            new element in the sequence.
+
+            INPUT:
+
+            * ``n``: the last computed element in the sequence. The next element will be computed.
+        '''           
+        if(not m in self.__sequence):
+            d = self.equation.forward_order
+            i = max(m-d,0)
+            rec = self.equation.get_recursion_row(i)
+            while(rec[m] == 0  and i <= self.equation.jp_value()):                   
+                i += 1 
+                rec = self.equation.get_recursion_row(i)
+            if(rec[m] == 0 ):
+                raise NoValueError(m)
+            ## Checking that we only need previous elements
+            if(any(rec[i] != 0 for i in range(m+1 , len(rec)))):
+                raise NoValueError(m)
+            
+            ## We do this operation in a loop to avoid computing initial values 
+            ## if they are not needed
+            res = self.parent().coeff_field.zero()
+            for i in range(m):
+                if(not (rec[i] == 0 )):
+                    res -= rec[i]*(self.sequence(i))
+                    
+            self.__sequence[m] = self.parent().coeff_field(res/rec[m])
+        self.__computed = m
 
     def init(self, n, list=False, incomplete=False):
         r'''
