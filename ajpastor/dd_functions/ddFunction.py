@@ -2205,7 +2205,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
         R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
         
-        #if(m > 2): raise RuntimeError
         # transforming R into a valid input of DivideAndConquer
         R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
         
