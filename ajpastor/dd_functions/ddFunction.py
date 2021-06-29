@@ -41,7 +41,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
-                        infinity, LaurentPolynomialRing)
+                        infinity, LaurentPolynomialRing, block_matrix)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
@@ -2180,9 +2180,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise TypeError("The value for 'p' must be a non-negative integer")
         v = v.change_ring(K) # checking everything in v is in K  
 
-        if(o < -1):
-            raise TypeError("The order of the system is not valid (smaller than -1)")
-        elif(o == -1 and p in A[0].eigenvalues()):
+        if(o <0 and p in A[-1-o].eigenvalues()):
             raise ValueError("The irregular matrix has an eigenvalue equal to %d" %p)  
         
         m = len(s); r = len(s[0])
@@ -2193,23 +2191,43 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise TypeError("The dimensions of the input are not correct")
 
         ## Base case
-        if(m == 1): 
-            if(p == 0): return v.change_ring(Kx)
-            elif(o > -1): return (s[0]/p).change_ring(Kx)
-            else: return (p*identity_matrix(r) - A[0]).solve_right(s[0]).change_ring(Kx)
+        AA = None; ss = None
+        if(m == 1):
+            if(o > -1): 
+                if(p == 0): return v.change_ring(Kx)
+                else: return (s[0]/p).change_ring(Kx)
+            elif(o == -1): return (p*identity_matrix(r) - A[0]).solve_right(s[0]).change_ring(Kx)
+            else:
+                system = [[p*identity_matrix(r) - A[-1-o]] + [-el for el in A[-2-o::-1]]]
+                for i in range(r-1):
+                    system += [A[-2-o-i::-1] + (i+1)*[ZZ(0)]]
+                    
+                system = block_matrix(system)
+                inhonom = vector(list(s[0]) + (r*(r-1))*[0])
+                sol = system.solve_right(inhonom)
+                solution = sum(x**i*vector(sol[i*r:(i+1)*r]) for i in range(r))
+        else: ## General case
+            d = m//2
+            y0 = DDFunction.__chyzak_dac((o,A), s[:d], p, v, K, x) # first recursive cal
+            AA = sum((A[i].change_ring(x.parent()))*x**(i+o) for i in range(m-o))
+            ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
+            R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
+            
+            # transforming R into a valid input of DivideAndConquer
+            if(any(el[i] != 0 for el in R for i in range(0,d))):
+                raise RuntimeError("False solution found")
+            R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
+            
+            y1 = DDFunction.__chyzak_dac((o,A), R, p+d, v, K, x) #second recursive call
+            solution = y0 + x**d*y1
 
-        ## General case
-        d = m//2
-        y0 = DDFunction.__chyzak_dac((o,A), s[:d], p, v, K, x) # first recursive cal
-        AA = sum((A[i].change_ring(x.parent()))*x**(i+o) for i in range(o,m))
-        ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
-        R = (ss - x*vector(diff(el) for el in y0) - (p*identity_matrix(r) - x*AA)*y0)
-        
-        # transforming R into a valid input of DivideAndConquer
-        R = [vector(Kx(el)[i] for el in R) for i in range(d,m)]        
-        
-        y1 = DDFunction.__chyzak_dac((o,A), R, p+d, v, K, x) #second recursive call
-        solution = y0 + x**d*y1
+        ## Checking the solution
+        if(AA is None): AA = sum((A[i].change_ring(x.parent()))*x**(i+o) for i in range(m-o))
+        if(ss is None): ss = sum((s[i].change_ring(x.parent()))*x**i for i in range(m))
+
+        to_check = x*vector([diff(el) for el in solution]) + (p*identity_matrix(r) - x*AA)*solution - ss
+        if(any(el[i] != 0 for el in to_check for i in range(m))):
+            raise RuntimeError("Error in a checking")
         
         return solution.change_ring(Kx) # the solution has polynomial coefficients
 
@@ -2747,6 +2765,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         elif((n+1) > self.equation.get_jp_fo()): # power series case
             ## In this case, we use the Divide and Conquer strategy proposed in 
             n = n+1
+            on = n
             m = 2*n # we double the amount of data
             K = self.parent().coeff_field
             x = self.parent().variables()[0]
@@ -2768,9 +2787,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     try:
                         y0 = DDFunction.__chyzak_dac((o,A), (m)*[vector(K, r*[0])], 0, v, K, x)
                     except ValueError as e:
-                        if(n > r):
+                        if(n > r-o):
                             y0 = vector([diff(self.truncation(n-r+i+1), x, i) for i in range(r)])
-                            n = n-r+1
+                            n = n-r+o+1
                             m = 2*n
                         else:
                             raise e
@@ -2781,7 +2800,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 # transforming R into a valid input of DivideAndConquer
                 R = [vector(el[i] for el in R) for i in range(n,m)]
                 y1 = DDFunction.__chyzak_dac((o,A), R, n, v, K, x)
-            
                 y = y0 + x**n*y1
                 self.__chyzak["last"] = (y, m)
                 # Extracing the coefficients
@@ -2790,7 +2808,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     self.__sequence[i] = y[i]
                 self.__computed = m-1          
             except ValueError as e:
-                self.__default_extend_sequence(n)
+                # reverting the change in n
+                self.__default_extend_sequence(on)
         else: ## Default case (use when the required element is below the bound)
             self.__default_extend_sequence(n+1)
         
