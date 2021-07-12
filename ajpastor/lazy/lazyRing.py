@@ -1,7 +1,7 @@
 r"""
 Python file for LazyRing
 
-This module implements all tjhe functionality of a ConversionSystem based on a Ring using
+This module implements all the functionality of a ConversionSystem based on a Ring using
 lazy operations. This means all the arithmetic operations are done in a polynomial ring.
 This structure also increase the number of variables employed in the polynomial ring
 as the suer require to represent more elements of the ring.
@@ -521,7 +521,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         i = 0
         if(len(args) >= 2 ):
             if(not (args[0 ] is self)):
-                raise ValueError("RIOKO: What the .... are you sending to this method?")
+                raise ValueError("The first element in the arguments must be self (%s)" %self)
             i = 1
         X = args[i]
 
