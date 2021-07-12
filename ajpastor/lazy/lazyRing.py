@@ -324,7 +324,8 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__map_of_derivatives = {}
 
         ## Casting and Coercion system
-        self.base().register_conversion(LRSimpleMorphism(self, self.base()))
+        conversion = LRSimpleMorphism(self, self.base())
+        self.base().register_conversion(conversion)
 
         ## Auxiliary data
         self.__var_name = "x"
