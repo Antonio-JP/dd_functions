@@ -42,8 +42,12 @@ from sage.categories.pushout import ConstructionFunctor
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 
-from ajpastor.lazy.conversion import ConversionSystem
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
+
+from .conversion import ConversionSystem
+from .lazyIDElements import LazyDomain
+
+
 
 ####################################################################################################
 ####################################################################################################
