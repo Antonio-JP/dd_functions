@@ -64,17 +64,15 @@ class _LazyElement(IntegralDomainElement):
 
         IntegralDomainElement.__init__(self, parent)
 
-        try:
-        #if(el in parent.poly_ring()):
-            self.__poly = parent.poly_ring()(str(el))
-        except:
-        #elif(el in parent.poly_field()):
-            try:
-                self.__poly = parent.poly_field()(str(el))
-            except:
-        #else:
-                self.__raw = parent.base()(el)
-                self.__poly = self.parent().to_poly(self.__raw)
+        if(el in parent.poly_ring()):
+            self.__poly = parent.poly_ring()(el)
+        elif(el in parent.poly_field()):
+            self.__poly = parent.poly_field()(el)
+        elif(el in parent.base()):
+            self.__raw = parent.base()(el)
+            self.__poly = self.parent().to_poly(self.__raw)
+        else:
+            self.__poly = parent.poly_field()(str(el))
 
         self.simplify()
 
@@ -526,26 +524,24 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
             i = 1
         X = args[i]
 
-        try:
-            if(not isinstance(X, _LazyElement)):
-                ## If the element is not a LazyElement, then we try to create a new element with it
-                return _LazyElement(self, X)
-            elif (X.parent() is self):
-                return X
-            else:
-                ## Otherwise, X.parent() may have different variables
-                other = X.parent()
-                pol = X.poly()
+        
+        if(not isinstance(X, _LazyElement)):
+            ## If the element is not a LazyElement, then we try to create a new element with it
+            return _LazyElement(self, X)
+        elif (X.parent() is self):
+            return X
+        else:
+            ## Otherwise, X.parent() may have different variables
+            other = X.parent()
+            pol = X.poly()
 
-                ## For each variable in X.poly(), we get the new polynomial
-                translate = {}
-                for var in X.variables():
-                    translate[str(var)] = self.to_poly(other.map_of_vars()[str(var)])
+            ## For each variable in X.poly(), we get the new polynomial
+            translate = {}
+            for var in X.variables():
+                translate[str(var)] = self.to_poly(other.map_of_vars()[str(var)])
 
-                ## We now plugin the expressions
-                return _LazyElement(self, pol(**translate))
-        except TypeError:
-            raise TypeError("This element can not be casted to %s" %repr(self))
+            ## We now plugin the expressions
+            return _LazyElement(self, pol(**translate))
 
     def construction(self):
         return (LazyRingFunctor(), self.base())
