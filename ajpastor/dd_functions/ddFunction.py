@@ -84,16 +84,7 @@ class NoOreAlgebraWarning(DDFunctionWarning):
     pass
 
 warnings.simplefilter('always', DDFunctionWarning)
-    
-
-## Auxiliary derivative function
-def _aux_derivation(p):
-    try:
-        R = p.parent()
-        return derivative(p,R(x))
-    except Exception:
-        return 0
-        
+            
 #####################################################
 ### Class for DD-Rings
 #####################################################
