@@ -30,21 +30,21 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-
-from sage.all_cmdline import *   # import sage library
-
-from sage.rings.ring import IntegralDomain
-from sage.structure.element import IntegralDomainElement
-from sage.categories.integral_domains import IntegralDomains
-from sage.categories.fields import Fields
+from sage.all import (QQ, gcd, lcm, UniqueRepresentation, var, PolynomialRing, 
+                        IntegralDomains, Fields, IntegralDomain, IntegralDomainElement)
+from sage.categories.map import Map #pylint: disable=no-name-in-module
 from sage.categories.pushout import ConstructionFunctor
-
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 
-from ajpastor.lazy.conversion import ConversionSystem
-from .lazyIDElements import LazyDomain
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
+
+from .conversion import ConversionSystem
+from .lazyIDElements import LazyDomain
+
+_Fields = Fields.__classcall__(Fields)
+_IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
+
 
 ####################################################################################################
 ####################################################################################################
@@ -131,8 +131,6 @@ class _LazyElement(IntegralDomainElement):
 
         return _LazyElement(self.parent(),sum(map_of_derivatives[key]*self.parent().poly_field()(self.poly()).derivative(key) for key in map_of_derivatives))
 
-        return self.parent().zero()
-
     ################################################################################################
     ### Arithmetics methods
     ################################################################################################
@@ -140,7 +138,7 @@ class _LazyElement(IntegralDomainElement):
         if(isinstance(other, _LazyElement)):
             try:
                 return _LazyElement(self.parent(), self.poly()+self.parent()(other).poly())
-            except NotImplementedError as e:
+            except NotImplementedError:
                 pass
 
         return NotImplemented
@@ -150,7 +148,7 @@ class _LazyElement(IntegralDomainElement):
 
     def _neg_(self):
         try:
-            return _LazyElement(self.parent(), -self.poly())
+            return _LazyElement(self.parent(), -self.poly()) #pylint: disable=invalid-unary-operand-type
         except NotImplementedError:
             pass
 
@@ -160,7 +158,7 @@ class _LazyElement(IntegralDomainElement):
         if(isinstance(other, _LazyElement)):
             try:
                 return _LazyElement(self.parent(), self.poly()*self.parent()(other).poly())
-            except NotImplementedError as e:
+            except NotImplementedError:
                 pass
 
         return NotImplemented
@@ -169,7 +167,7 @@ class _LazyElement(IntegralDomainElement):
         if(isinstance(other, _LazyElement)):
             try:
                 return _LazyElement(self.parent(), self.parent().poly_field()(self.poly())/self.parent().poly_field()(self.parent()(other).poly()))
-            except NotImplementedError as e:
+            except NotImplementedError:
                 pass
 
         return NotImplemented
@@ -299,7 +297,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
 
     def __init__(self, base, constants=QQ, category=None):
         ## Checking the arguments
-        if(not (constants in Fields())):
+        if(not (constants in _Fields)):
             raise TypeError("The argument 'constants' must be a Field")
         if(not (isinstance(base, Ring_w_Sequence))):
             raise TypeError("The argument 'base' must be a Ring with Sequence")
@@ -518,7 +516,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         i = 0
         if(len(args) >= 2 ):
             if(not (args[0 ] is self)):
-                raise ValueError("What the .... are you sending to this method?")
+                raise ValueError("The first element in the arguments must be self (%s)" %self)
             i = 1
         X = args[i]
 
@@ -604,7 +602,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
 ####################################################################################################
 class LazyRingFunctor (ConstructionFunctor):
     def __init__(self):
-        ID = IntegralDomains()
+        ID = _IntegralDomains
         self.rank = 20
         super(LazyRingFunctor, self).__init__(ID,ID)
 
@@ -624,7 +622,7 @@ class LazyRingFunctor (ConstructionFunctor):
 ### General Morphism for return to basic rings
 ####################################################################################################
 ####################################################################################################
-class LRSimpleMorphism (sage.categories.map.Map):
+class LRSimpleMorphism (Map):
     def __init__(self, domain, codomain):
         super(LRSimpleMorphism, self).__init__(domain, codomain)
 
