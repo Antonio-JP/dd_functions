@@ -2277,12 +2277,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         ## Checking the parameter "euler"
         if(euler): # the equation is considered with the euler operator
-            print("Here")
-            print(equation)
             equation = [sum(
                     [equation[j]*DDFunction.euler_coefficient(j,i) for j in range(len(equation))]
                 ) for i in range(len(equation))]
-            print(equation)
         ## Checking the argument ``init``
         if(type(init) in [list, tuple]):
             inits = {i : init[i] for i in range(len(init))}
