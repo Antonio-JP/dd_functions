@@ -1716,14 +1716,18 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     global __CACHED_HYPERGEOMETRIC
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
-        # Lambda method to get the operator in the appropriate operator ring
-        get_op = lambda p : destiny_ring.operator_class(destiny_ring.base(),p,destiny_ring.base_derivation)
+        from .ddFunction import DDFunction
+        auxR = PolynomialRing(destiny_ring.original_ring(), 'theta'); E = auxR.gens()[0]
+        op_num = prod(E + el for el in numerator); op_den = E*prod(E + el - 1 for el in denominator)
+        op_num = [x*sum(
+            op_num[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_num.degree()+1)
+            ) for i in range(op_num.degree()+1)]
+        op_den = [sum(
+            op_den[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_den.degree()+1)
+            ) for i in range(op_den.degree()+1)]
         
-        ## Getting the operator for the numerator and for the denominator
-        op_num = prod((get_op([el,x]) for el in numerator),x)
-        op_den = prod((get_op([el-1,x]) for el in denominator), get_op([0,x]))
-        
-        op = op_num - op_den
+        op = [(op_num[i] if i < len(op_num) else 0) - (op_den[i] if i < len(op_den) else 0)
+                for i in range(max(len(op_num), len(op_den)))]
         
         f = destiny_ring.element(op)
         
