@@ -1281,7 +1281,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
     base_derivation = property(derivation_on_base, None) #: alias for method :func:`~DDRing.derivation_on_base`
     
-    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None):
+    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None, euler=False):
         r'''
             Method to create a :class:`DDFunction` contained in ``self``.
             
@@ -1325,7 +1325,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: g == f
                 True
         '''
-        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name)
+        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name,euler=euler)
         
     def eval(self, element, X=None, **input):
         r'''
@@ -2192,10 +2192,74 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         return solution.change_ring(x.parent())
 
+    
+    __CACHED_EULER = {}
+    @staticmethod
+    def euler_coefficient(n,i):
+        r'''
+            Method to get the `i`-th coefficient for the `n`-th power of the Euler operator.
+
+            The Euler operator `\theta_x = x\partial_x` is a very useful basis to rewrite any differential 
+            operator tht involves the use of `x`. This operator behaves nicely in terms of the 
+            generating sequence underlying a power series and, for some examples, it may be useful
+            to use easier.
+
+            It is clear, however, that the Euler operator can be written in terms of the standard 
+            basis of linear differential operators (namely, the basis `\partial_x^n`):
+
+            .. MATH::
+
+                \theta_x^n = \sum_{i=1}^n a_{n,i}(x)\partial_x
+
+            This method allows to compute the coefficients `a_{n,i}(x)` in a uniform way for all 
+            :class:`DDFunction`.
+
+            INPUT:
+
+            * ``n``: the power of the Euler operator we want to write.
+            * ``i``: the index of the coefficients we want to extract.
+
+            OUTPUT:
+
+            A polynomial in `\mathbb{Z}[x]` with the coefficient `a_{n,i}(x)`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: x = DFinite.element([0,x]).equation.operator.parent().base().gens()[0]
+                sage: D = DFinite.element([0,1]).equation.operator
+                sage: E = x*D
+                sage: DDFunction.euler_coefficient(5, 3)
+                25*x^3
+                sage: DDFunction.euler_coefficient(10,10)
+                x^10
+                sage: all(sum(DDFunction.euler_coefficient(n,i)*D**i for i in range(n+1)) == E^n for n in range(30))
+                True
+        '''
+        R = PolynomialRing(ZZ, 'x')
+        x = R.gens()[0]
+        if(n < 0):
+            raise ValueError("The power `n` must be non-negative")
+
+        if(i < 0):
+            raise ValueError("The coefficient `i` must be non-negative")
+        elif(i == 0 and n == 0):
+            return R.one()
+        elif(i == 0 or i > n):
+            return R.zero()
+        elif(n == 1):
+            return x
+
+        if(not ((n,i) in DDFunction.__CACHED_EULER)):
+            DDFunction.__CACHED_EULER[(n,i)] = x*(DDFunction.euler_coefficient(n-1, i).derivative() + 
+                                                    DDFunction.euler_coefficient(n-1, i-1))
+        
+        return DDFunction.__CACHED_EULER[(n,i)]
+
     #####################################
     ### Init and Interface methods
     #####################################
-    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None):   
+    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None, euler=False):   
         # We check that the argument is a DDRing
         if(not isinstance(parent, DDRing)):
             raise DDFunctionError("A DD-Function must be an element of a DD-Ring")
@@ -2211,6 +2275,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         else:
             equation = input
 
+        ## Checking the parameter "euler"
+        if(euler): # the equation is considered with the euler operator
+            print("Here")
+            print(equation)
+            equation = [sum(
+                    [equation[j]*DDFunction.euler_coefficient(j,i) for j in range(len(equation))]
+                ) for i in range(len(equation))]
+            print(equation)
         ## Checking the argument ``init``
         if(type(init) in [list, tuple]):
             inits = {i : init[i] for i in range(len(init))}
