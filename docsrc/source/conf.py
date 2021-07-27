@@ -127,7 +127,8 @@ extlinks = {
     'mathscinet': ('http://www.ams.org/mathscinet-getitem?mr=%s', 'MathSciNet '),
     'dlmf': ('https://dlmf.nist.gov/%s', 'DLMF Chapter '),
     'wolf': ('https://mathworld.wolfram.com/%s.html', 'Wolfram MathWorld: '),
-    'sageref': ('https://doc.sagemath.org/html/en/reference/%s', 'Sage doc: ')
+    'sageref': ('https://doc.sagemath.org/html/en/reference/%s', 'Sage doc: '),
+    'fungrim': ('https://fungrim.org/entry/%s', 'Fungrim: ')
     }
 
 # -- Options for HTML output ----------------------------------------------
