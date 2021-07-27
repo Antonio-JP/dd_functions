@@ -1301,6 +1301,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                   equation.
                 * ``check_init``: boolean value to check that initial conditions are valid or not.
                 * ``name``: optional argument for providing a name to the new built function.
+                * ``euler``: optional argument to whether use the canonical differential basis `\partial_x`
+                  or the Euler differential operator `\theta_x = x\partial_x`.
 
             OUTPUT:
 
@@ -2081,6 +2083,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
           such as when applying closure properties.
         * ``name``: in order to make objects easier to print and read, we can set a fixed name
           for a function that will be used when the method :func:`repr` is called.
+        * ``euler``: whether the coefficients in ``input`` are considered in the canonical 
+          basis `\partial_x` or the euler differential basis `\theta_x = x\partial_x`.
 
         WARNING: 
         
@@ -2103,12 +2107,109 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ...
             InitValueError: There is no such function satisfying ...
 
+        The user do not need to declare all initial values for a new :class:`DDFunction`, but the error 
+        :class:`NoValueError` is raised when trying to get a new value::
+
+            sage: f = DFinite.element([x,1])
+            sage: f
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            sage: print(f)
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    []
+            -------------------------------------------------
+            sage: f.sequence(2)
+            Traceback (most recent call last):
+            ...
+            NoValueError: Impossible to compute ...
+
+        These initial values can be stablish later with the method :func:`~DDFunction.change_init_values`::
+
+            sage: print(f.change_init_values([1]))
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    [1, 0]
+            -------------------------------------------------
+
+        Providing the inhomogeneous term will change the defining equation to compute
+        a new homogeneous differential equation for the desired function. This inhomogeneous
+        part can be any function on the same ring as ``self``::
+
+            sage: g = DFinite.element([1,1],[1]) # exponential
+            sage: f = DFinite.element([1,0,x],[1],inhomogeneous=g)
+            sage: print(f)
+            (3:3:9)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  
+                            +   D(f) 
+                            + D^2(f) * (x + 1)
+                            + D^3(f) * (x)
+                            = 0 
+                    -- Initial values:
+                    [1, -2, 1, 0]
+            -------------------------------------------------
+            sage: h = DDFinite.element([-g,1],[1]) # double exponential
+            sage: f = DDFinite.element([1,0,g],[1], inhomogeneous=h)
+            sage: print(f)
+            (3:3:16)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (1:1:3)               f  * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:2)         +   D(f) 
+            (2:2:5)         + D^2(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:3)         + D^3(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 0, 0]
+            -------------------------------------------------
+
+        Finally, the user can create functions using the Euler differential operator instead of the standard 
+        derivation. This is specially useful to create particular combinatorial examples. In this case, the 
+        equation is transformed (as in the inhomogeneous case) to a usual differential equation in the standard
+        basis::
+
+            sage: DFinite.element([0,0,1], euler=True).equation.operator
+            x*D^2 + D
+            sage: DFinite.element([1,0,1], euler=True).equation.operator
+            x^2*D^2 + x*D + 1
+            sage: DFinite.element([1,-1,1], euler=True).equation.operator
+            x^2*D^2 + 1
+
+        All can be used together::
+
+            sage: a = FactorialD()-1; b = FactorialD()-1; c = FactorialD()-2
+            sage: f = DDFinite.element([c,b,a],inhomogeneous=-1,euler=True)
+            sage: print(f)
+            (3:3:82)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (2:2:8)               f  * ((Fa(x)-2)')
+            (5:5:20)        +   D(f) * (((Fa(x)-1)*(x)+(Fa(x)-1)*(x))'+Fa(x)-2)
+            (5:5:34)        + D^2(f) * (((Fa(x)-1)*(x^2))'+(Fa(x)-1)*(x)+(Fa(x)-1)*(x))
+            (3:3:17)        + D^3(f) * ((Fa(x)-1)*(x^2))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 10, 282]
+            -------------------------------------------------
+            sage: f.sequence(10,True)
+            [1, 1, 5, 47, 723, 16807, 556969, 25108863, 1482748979, 111262210379]
+
+
         TODO:
 
-        * Add examples of incomplete DDFunctions
         * Add examples of DDFunctions that does not require the first coefficients
         * Add examples where we use the dict input for ``init``
-        * Add examples with inhomogeneous term
     '''
     @staticmethod
     def __chyzak_dac(A, s, p, v, K=QQ, x='x'):
