@@ -1655,34 +1655,114 @@ def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     return GenericHypergeometricFunction([a,b],[c],init)
 
 def GenericHypergeometricFunction(num=[],den=[],init=1):
-    '''
-        D-finite implementation of the Generalized Hypergeometric Functions qFp(a_1,...,a_q;b_1,...,b_m;x)
-        
-        References:
-    - https://dlmf.nist.gov/16
-    - https://en.wikipedia.org/wiki/Generalized_hypergeometric_function
-    - http://mathworld.wolfram.com/GeneralizedHypergeometricFunction.html
+    r'''
+        D-finite implementation of the generalized hypergeometric function 
+        (`_pF_q\left(\begin{array}{c}a_1,\ldots,a_p\\b_1,\ldots,b_q\end{array};x\right)`).
+
+        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a hypergeometric function. For more
+        information about these functions, consult the following references:
             
-        The Generic Hypergeometric function is a special function denoted by qFp(a_1,...,a_p;b_1,...,b_q;x) represented 
-        by the hypergeometric series
-            f_n = ((a_1)_n * ... * (a_p)_n)/(n!*(b_1)_n * ... * (b_q)_n)
-        where (a)_n = a*(a+1)*...*(a+n-1).
-        
-        This hypergeometric functions satisfies a linear differential equation of order max(p,q) that can be represented
-        using the gauss differential operator D(f) = xf':
-            (D(D+b_1-1)...(D+b_q-1) - x(D+a_1)...(D+a_p))(f) = 0
-                
+        * :dlmf:`16`
+        * :wolf:`GeneralizedHypergeometricFunction`
+        * :wiki:`Generalized_hypergeometric_function`
+
+        The Generalized Hypergeometric function is a special function denoted by 
+        `_pF_q\left(\begin{array}{c}a_1,\ldots,a_p\\b_1,\ldots,b_q\end{array};x\right)` which represents
+        the formal power series whose coefficients are
+
+        .. MATH::
+
+            f_n = \frac{(a_1)_n \cdots (a_p)_n}{n! (b_1)_n\cdots (b_q)_n}
+
+        where `(a)_n = a(a+1)\cdots(a+n-1)` is the Pochhammer symbol. 
+
+        The hypergeometric functions satisfy a linear differential equation of order `\max(p,q)` that can be represented
+        using the Euler differential operator `\theta_x = x\partial_x`:
+
+        .. MATH::
+
+            (\theta_x(\theta_x+b_1-1)\cdots(\theta_x+b_q-1) - x(\theta_x+a_1)\cdots(\theta_x+a_p)) \cdot f = 0.
+
+        We can see from the coefficient formula that
+        if, for some `i \in \{1,\ldots, p\}` and `j \in \{1,\ldots, q\}` we have `a_i = b_j`, then 
+        the `_pF_q` function is identical to a `_{p-1}F_{q-1}` function. This method removes these extra 
+        coefficients before computing the differential equation.
+
+        The particular case of a `_2F_1` function is called gaussian hypergeometric function and can be obtained directly
+        with the method :func:`HypergeometricFunction`.
+
+        For particular cases of the hypergeometric function, use the following alias:
+
+        * :func:`Fpq`: equivalent to this method
+        * :func:`F00`: the case where no parameter is given. This is equal to `e^x`.
+        * :func:`F01`: only one extra parameter on the denominator is given. Also called 
+          *confluent hypergeometric limit function*.
+        * :func:`F11`: one parameter for the numerator and another for the denominator. This 
+          function is also called *Kummer confluent hypergeometric function*.
+        * :func:`F21`: the gaussian hypergeometric function.
+
         INPUT:
-    - num: a list with the parameters "a_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-    - den: a list with the parameters "b_i". It also can be just one element that will be consider as a list with that element. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
-    - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+
+        * ``num``: list of coefficients `a_i`. These elements may be any valid input from 
+          the following options:
+            * A constant in `\mathbb{Q}`. 
+            * A string that will be considered the name for a parameter.
+        * ``den``: list of coefficients `b_j`. These elements may be of the same types as
+          those in ``num``.
+        * ``init``: initial value at `x=0` of this function. By default it takes the value `1`,
+          but it can be any value valid for the input ``num``.
+            
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in ring of D-finite functions.
+                
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: f = Fpq([1,4],[3,2])
+            sage: f.init(5,True)
+            [1, 2/3, 5/9, 1/2, 7/15]
+            sage: f.equation.operator
+            -x^2*D^3 + (x^2 - 6*x)*D^2 + (6*x - 6)*D + 4
+            sage: Fpq([1,2],[1]) == Fpq([2],[])
+            True
+            sage: f = Fpq(['a',1],[2])
+            sage: f.sequence(5)
+            1/120*a^4 + 1/20*a^3 + 11/120*a^2 + 1/20*a
+            sage: f = Fpq(['a','b','c'],['d','e'])
+            sage: f.init(2)
+            (2*a^2*c^2*b^2 + 2*a^2*c^2*b + 2*a^2*c*b^2 + 2*a*c^2*b^2 + 2*a^2*c*b + 2*a*c^2*b + 2*a*c*b^2 + 2*a*c*b)/(2*e^2*d^2 + 2*e^2*d + 2*e*d^2 + 2*e*d)
+
+        We can use this function to prove some known identities. For example, we can prove 
+        identities :fungrim:`651a4a`, :fungrim:`b25089` and :fungrim:`504717`::
+
+            sage: R = F21().parent(); c,b,a = R.parameters()
+            sage: factor_651a4a = R.element([c-a-b, (1-x)],[1]) # (1-x)^(c-a-b)
+            sage: F21(a,b,c) == factor_651a4a*F21(c-a,c-b,c)
+            True
+            sage: factor_b25089 = R.element([-a, (1-x)], [1]) # (1-x)^(-a)
+            sage: lhs = F21(a,b,c); rhs = factor_b25089*F21(a,c-b,c)(DFinite(x/(x-1)))
+            sage: lhs.init(20, True) == rhs.init(20, True)
+            True
+            sage: factor_504717 = R.element([-b, (1-x)], [1]) # (1-x)^(-b)
+            sage: lhs = F21(a,b,c); rhs = factor_504717*F21(c-a,b,c)(DFinite(x/(x-1)))
+            sage: lhs.init(20, True) == rhs.init(20, True)
+            True
+
+        We can also prove the Kummer transformation for the confluent hypergeometric function 
+        (see :fungrim:`be533c`)::
+
+            sage: F11(a,b) == Exp(x)*F11(b-a,b)(-x)
+            True
     '''
     ## Checking arguments: num
-    if (not (isinstance(num,list) or isinstance(num,set) or isinstance(num,tuple))):
+    if (not (type(num) in (list, tuple, set))):
         num = [num]
     else:
         num = list(num)
-    if (not (isinstance(den,list) or isinstance(den,set) or isinstance(den,tuple))):
+    if (not (type(den) in (list, tuple, set))):
         den = [den]
     else:
         den = list(den)
@@ -1716,14 +1796,18 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     global __CACHED_HYPERGEOMETRIC
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
-        # Lambda method to get the operator in the appropriate operator ring
-        get_op = lambda p : destiny_ring.operator_class(destiny_ring.base(),p,destiny_ring.base_derivation)
+        from .ddFunction import DDFunction
+        auxR = PolynomialRing(destiny_ring.original_ring(), 'theta'); E = auxR.gens()[0]
+        op_num = prod(E + el for el in numerator); op_den = E*prod(E + el - 1 for el in denominator)
+        op_num = [x*sum(
+            op_num[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_num.degree()+1)
+            ) for i in range(op_num.degree()+1)]
+        op_den = [sum(
+            op_den[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_den.degree()+1)
+            ) for i in range(op_den.degree()+1)]
         
-        ## Getting the operator for the numerator and for the denominator
-        op_num = prod((get_op([el,x]) for el in numerator),x)
-        op_den = prod((get_op([el-1,x]) for el in denominator), get_op([0,x]))
-        
-        op = op_num - op_den
+        op = [(op_num[i] if i < len(op_num) else 0) - (op_den[i] if i < len(op_den) else 0)
+                for i in range(max(len(op_num), len(op_den)))]
         
         f = destiny_ring.element(op)
         
@@ -1735,24 +1819,40 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     ## Return the cached element
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)]
 
-@cached_function
+def Fpq(a, b):
+    r'''
+        Alias for :func:`GenericHypergeometricFunction`.
+    '''
+    return GenericHypergeometricFunction(a,b)
+
 def F00():
+    r'''
+        Alias for a `(0,0)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((),())
 
-@cached_function
 def F10(a='a'):
+    r'''
+        Alias for a `(1,0)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((a),())
 
-@cached_function
 def F01(b='b'):
+    r'''
+        Alias for a `(0,1)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((),(b))
 
-@cached_function
 def F11(a='a',b='b'):
+    r'''
+        Alias for a `(1,1)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((a),(b))
 
-@cached_function
 def F21(a='a',b='b',c='c'):
+    r'''
+        Alias for a `(2,1)`-hypergeometric function. See also method :func:`HypergeometricFunction`.
+    '''
     return HypergeometricFunction(a,b,c)
     
 @cached_function

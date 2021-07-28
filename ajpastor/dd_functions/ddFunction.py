@@ -1281,7 +1281,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
     base_derivation = property(derivation_on_base, None) #: alias for method :func:`~DDRing.derivation_on_base`
     
-    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None):
+    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None, euler=False):
         r'''
             Method to create a :class:`DDFunction` contained in ``self``.
             
@@ -1301,6 +1301,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                   equation.
                 * ``check_init``: boolean value to check that initial conditions are valid or not.
                 * ``name``: optional argument for providing a name to the new built function.
+                * ``euler``: optional argument to whether use the canonical differential basis `\partial_x`
+                  or the Euler differential operator `\theta_x = x\partial_x`.
 
             OUTPUT:
 
@@ -1325,7 +1327,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: g == f
                 True
         '''
-        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name)
+        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name,euler=euler)
         
     def eval(self, element, X=None, **input):
         r'''
@@ -2081,6 +2083,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
           such as when applying closure properties.
         * ``name``: in order to make objects easier to print and read, we can set a fixed name
           for a function that will be used when the method :func:`repr` is called.
+        * ``euler``: whether the coefficients in ``input`` are considered in the canonical 
+          basis `\partial_x` or the euler differential basis `\theta_x = x\partial_x`.
 
         WARNING: 
         
@@ -2103,12 +2107,109 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ...
             InitValueError: There is no such function satisfying ...
 
+        The user do not need to declare all initial values for a new :class:`DDFunction`, but the error 
+        :class:`NoValueError` is raised when trying to get a new value::
+
+            sage: f = DFinite.element([x,1])
+            sage: f
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            sage: print(f)
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    []
+            -------------------------------------------------
+            sage: f.sequence(2)
+            Traceback (most recent call last):
+            ...
+            NoValueError: Impossible to compute ...
+
+        These initial values can be stablish later with the method :func:`~DDFunction.change_init_values`::
+
+            sage: print(f.change_init_values([1]))
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    [1, 0]
+            -------------------------------------------------
+
+        Providing the inhomogeneous term will change the defining equation to compute
+        a new homogeneous differential equation for the desired function. This inhomogeneous
+        part can be any function on the same ring as ``self``::
+
+            sage: g = DFinite.element([1,1],[1]) # exponential
+            sage: f = DFinite.element([1,0,x],[1],inhomogeneous=g)
+            sage: print(f)
+            (3:3:9)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  
+                            +   D(f) 
+                            + D^2(f) * (x + 1)
+                            + D^3(f) * (x)
+                            = 0 
+                    -- Initial values:
+                    [1, -2, 1, 0]
+            -------------------------------------------------
+            sage: h = DDFinite.element([-g,1],[1]) # double exponential
+            sage: f = DDFinite.element([1,0,g],[1], inhomogeneous=h)
+            sage: print(f)
+            (3:3:16)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (1:1:3)               f  * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:2)         +   D(f) 
+            (2:2:5)         + D^2(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:3)         + D^3(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 0, 0]
+            -------------------------------------------------
+
+        Finally, the user can create functions using the Euler differential operator instead of the standard 
+        derivation. This is specially useful to create particular combinatorial examples. In this case, the 
+        equation is transformed (as in the inhomogeneous case) to a usual differential equation in the standard
+        basis::
+
+            sage: DFinite.element([0,0,1], euler=True).equation.operator
+            x*D^2 + D
+            sage: DFinite.element([1,0,1], euler=True).equation.operator
+            x^2*D^2 + x*D + 1
+            sage: DFinite.element([1,-1,1], euler=True).equation.operator
+            x^2*D^2 + 1
+
+        All can be used together::
+
+            sage: a = FactorialD()-1; b = FactorialD()-1; c = FactorialD()-2
+            sage: f = DDFinite.element([c,b,a],inhomogeneous=-1,euler=True)
+            sage: print(f)
+            (3:3:82)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (2:2:8)               f  * ((Fa(x)-2)')
+            (5:5:20)        +   D(f) * (((Fa(x)-1)*(x)+(Fa(x)-1)*(x))'+Fa(x)-2)
+            (5:5:34)        + D^2(f) * (((Fa(x)-1)*(x^2))'+(Fa(x)-1)*(x)+(Fa(x)-1)*(x))
+            (3:3:17)        + D^3(f) * ((Fa(x)-1)*(x^2))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 10, 282]
+            -------------------------------------------------
+            sage: f.sequence(10,True)
+            [1, 1, 5, 47, 723, 16807, 556969, 25108863, 1482748979, 111262210379]
+
+
         TODO:
 
-        * Add examples of incomplete DDFunctions
         * Add examples of DDFunctions that does not require the first coefficients
         * Add examples where we use the dict input for ``init``
-        * Add examples with inhomogeneous term
     '''
     @staticmethod
     def __chyzak_dac(A, s, p, v, K=QQ, x='x'):
@@ -2192,10 +2293,74 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         return solution.change_ring(x.parent())
 
+    
+    __CACHED_EULER = {}
+    @staticmethod
+    def euler_coefficient(n,i):
+        r'''
+            Method to get the `i`-th coefficient for the `n`-th power of the Euler operator.
+
+            The Euler operator `\theta_x = x\partial_x` is a very useful basis to rewrite any differential 
+            operator that involves the use of `x`. This operator behaves nicely in terms of the 
+            generating sequence underlying a power series and, for some examples, it may be useful
+            to use easier.
+
+            It is clear, however, that the Euler operator can be written in terms of the standard 
+            basis of linear differential operators (namely, the basis `\partial_x^n`):
+
+            .. MATH::
+
+                \theta_x^n = \sum_{i=1}^n a_{n,i}(x)\partial_x^i
+
+            This method allows to compute the coefficients `a_{n,i}(x)` in a static and cached way for all 
+            :class:`DDFunction`.
+
+            INPUT:
+
+            * ``n``: the power of the Euler operator we want to write.
+            * ``i``: the index of the coefficients we want to extract.
+
+            OUTPUT:
+
+            A polynomial in `\mathbb{Z}[x]` with the coefficient `a_{n,i}(x)`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: x = DFinite.element([0,x]).equation.operator.parent().base().gens()[0]
+                sage: D = DFinite.element([0,1]).equation.operator
+                sage: E = x*D
+                sage: DDFunction.euler_coefficient(5, 3)
+                25*x^3
+                sage: DDFunction.euler_coefficient(10,10)
+                x^10
+                sage: all(sum(DDFunction.euler_coefficient(n,i)*D**i for i in range(n+1)) == E^n for n in range(30))
+                True
+        '''
+        R = PolynomialRing(ZZ, 'x')
+        x = R.gens()[0]
+        if(n < 0):
+            raise ValueError("The power `n` must be non-negative")
+
+        if(i < 0):
+            raise ValueError("The coefficient `i` must be non-negative")
+        elif(i == 0 and n == 0):
+            return R.one()
+        elif(i == 0 or i > n):
+            return R.zero()
+        elif(n == 1):
+            return x
+
+        if(not ((n,i) in DDFunction.__CACHED_EULER)):
+            DDFunction.__CACHED_EULER[(n,i)] = x*(DDFunction.euler_coefficient(n-1, i).derivative() + 
+                                                    DDFunction.euler_coefficient(n-1, i-1))
+        
+        return DDFunction.__CACHED_EULER[(n,i)]
+
     #####################################
     ### Init and Interface methods
     #####################################
-    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None):   
+    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None, euler=False):   
         # We check that the argument is a DDRing
         if(not isinstance(parent, DDRing)):
             raise DDFunctionError("A DD-Function must be an element of a DD-Ring")
@@ -2211,6 +2376,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         else:
             equation = input
 
+        ## Checking the parameter "euler"
+        if(euler): # the equation is considered with the euler operator
+            equation = [sum(
+                    [equation[j]*DDFunction.euler_coefficient(j,i) for j in range(len(equation))]
+                ) for i in range(len(equation))]
         ## Checking the argument ``init``
         if(type(init) in [list, tuple]):
             inits = {i : init[i] for i in range(len(init))}
