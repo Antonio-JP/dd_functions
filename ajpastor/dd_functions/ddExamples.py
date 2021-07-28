@@ -1689,7 +1689,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         the `_pF_q` function is identical to a `_{p-1}F_{q-1}` function. This method removes these extra 
         coefficients before computing the differential equation.
 
-        The particular case of a `_2F_1` function are called gaussian hypergeometric function and can be obtained directly
+        The particular case of a `_2F_1` function is called gaussian hypergeometric function and can be obtained directly
         with the method :func:`HypergeometricFunction`.
 
         For particular cases of the hypergeometric function, use the following alias:
@@ -1697,9 +1697,9 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         * :func:`Fpq`: equivalent to this method
         * :func:`F00`: the case where no parameter is given. This is equal to `e^x`.
         * :func:`F01`: only one extra parameter on the denominator is given. Also called 
-          _confluent hypergeometric limit function_.
+          *confluent hypergeometric limit function*.
         * :func:`F11`: one parameter for the numerator and another for the denominator. This 
-          function is also called _Kummer confluent hypergeometric function_.
+          function is also called *Kummer confluent hypergeometric function*.
         * :func:`F21`: the gaussian hypergeometric function.
 
         INPUT:
@@ -1820,21 +1820,39 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     return __CACHED_HYPERGEOMETRIC[(numerator,denominator,initial)]
 
 def Fpq(a, b):
+    r'''
+        Alias for :func:`GenericHypergeometricFunction`.
+    '''
     return GenericHypergeometricFunction(a,b)
 
 def F00():
+    r'''
+        Alias for a `(0,0)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((),())
 
 def F10(a='a'):
+    r'''
+        Alias for a `(1,0)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((a),())
 
 def F01(b='b'):
+    r'''
+        Alias for a `(0,1)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((),(b))
 
 def F11(a='a',b='b'):
+    r'''
+        Alias for a `(1,1)`-hypergeometric function. See :func:`GenericHypergeometricFunction` for further information.
+    '''
     return GenericHypergeometricFunction((a),(b))
 
 def F21(a='a',b='b',c='c'):
+    r'''
+        Alias for a `(2,1)`-hypergeometric function. See also method :func:`HypergeometricFunction`.
+    '''
     return HypergeometricFunction(a,b,c)
     
 @cached_function
