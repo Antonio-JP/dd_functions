@@ -2301,7 +2301,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Method to get the `i`-th coefficient for the `n`-th power of the Euler operator.
 
             The Euler operator `\theta_x = x\partial_x` is a very useful basis to rewrite any differential 
-            operator tht involves the use of `x`. This operator behaves nicely in terms of the 
+            operator that involves the use of `x`. This operator behaves nicely in terms of the 
             generating sequence underlying a power series and, for some examples, it may be useful
             to use easier.
 
@@ -2310,9 +2310,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             .. MATH::
 
-                \theta_x^n = \sum_{i=1}^n a_{n,i}(x)\partial_x
+                \theta_x^n = \sum_{i=1}^n a_{n,i}(x)\partial_x^i
 
-            This method allows to compute the coefficients `a_{n,i}(x)` in a uniform way for all 
+            This method allows to compute the coefficients `a_{n,i}(x)` in a static and cached way for all 
             :class:`DDFunction`.
 
             INPUT:
