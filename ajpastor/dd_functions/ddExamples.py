@@ -2615,7 +2615,7 @@ def FCoulombD(m='m', l=-1):
         information about this function, consult the following references:
 
         * :dlmf:`33.2`
-        * :fungrim:`Coulomb_wave_functions`
+        * :fungrimT:`Coulomb_wave_functions`
         * :wiki:`Coulomb_wave_function`
 
         The regular Coulomb wave function is a function `w_{\nu,l}(x)` defined with the differential
@@ -2657,8 +2657,17 @@ def FCoulombD(m='m', l=-1):
             sage: for l in range(-1,10): # checking with m parameter
             ....:     F = FCoulombD('m',l)
             ....:     m = F.parent().parameter('m')
-            ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
-            ....:         print(l)
+            ....:     assert x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0, "ERROR:%d" %l
+
+        We can check with this function the Kummer function (see :fungrim:`d280c5`). Remark that 
+        our Coulomb function is such that the first non-zero initial condition is 1, so we have
+        to scale the identity accordingly::
+
+            sage: for l in range(-1, 10):
+            ....:     for w in (-1,1):
+            ....:         lhs = FCoulomb(m, l)
+            ....:         rhs = x^(l+1)*Exp(SR(x))(w*i*x)*F11(1+l+w*i*m, 2*l+2)(-2*w*i*x)
+            ....:         assert factorial(l+1)*lhs == rhs, "ERROR: %d-%d" %(l,w)
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()])
     rm, rl = new_all
