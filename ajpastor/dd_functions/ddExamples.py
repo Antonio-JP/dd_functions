@@ -1776,6 +1776,8 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
         destiny_ring = DFinite
+    destiny_ring = pushout(destiny_ring, parent)
+    x = destiny_ring.variable('x')
         
     ## Cleaning repeated values 
     i = 0
@@ -2604,33 +2606,47 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
     return f
 
 ###### COULOMB FUNCTIONS
-def FCoulombD(m='m', l='l'):
+def FCoulombD(m='m', l=-1):
     r'''
         D-finite implementation of the regular Coulomb wave function `F_{l,\mu}(x)`.
         
-        References:
-            * https://dlmf.nist.gov/33.2
-            * http://fungrim.org/topic/Coulomb_wave_functions/
-            * https://en.wikipedia.org/wiki/Coulomb_wave_function
-            
-        The Coulomb Wave function is the solution to the differential equation
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a regular Coulomb wave function. For more
+        information about this function, consult the following references:
+
+        * :dlmf:`33.2`
+        * :fungrim:`Coulomb_wave_functions`
+        * :wiki:`Coulomb_wave_function`
+
+        The regular Coulomb wave function is a function `w_{\nu,l}(x)` defined with the differential
+        equation
+
+        .. MATH::
         
+            \frac{d^2w}{dx^2} + \left(1-\frac{2\nu}{x} - \frac{l(l+1)}{x^2}\right)w = 0.
+
+        This equation falls naturally in the realm of D-finite functions, and can be written
+        as follows:
+
         .. MATH::
 
-            f''(x) + \left(1-\frac{2m}{x} - \frac{l(l+1)}{x^2}\right)f(x) = 0
-            
-        If `l` is integer, there is a power series solution of order `l+1`, and 
-        this function return that solution with first sequence element `1`.
-        
+            x^2 w_{\nu,l}''(x) + (x^2 - 2\nu x - l(l+1))w_{\nu,l}(x) = 0.
+
+        This equation has a singularity at zero, so it will only have 1 regular solution at this
+        point that is the function defined via this method.
+
         INPUT:
-            * ``m``: the parameter `m` on the differential equation. If not provided, 
-              it takes the value ``'m'`` by default. This argument can be any 
-              rational number or any polynomial expression, which variables will 
-              be considered as parameters (so ``x`` is not allowed).
-            * ``l``: the parameter `l` on the differential equation. If not provided, 
-              it takes the value ``'l'`` by default. This argument can be any 
-              rational number or any polynomial expression, which variables will 
-              be considered as parameters (so ``x`` is not allowed).
+
+        * ``m``: value of the parameter `\nu`. It can be a numerical value or a string. In the 
+          latter case, it will be used to create a new parameter with such name.
+        * ``l``: value of the parameter `l`. It has to be an integer greater or equal to `-1`.
+          Then the equation has a unique power series solution of order `l+1`. If this
+          is not an integer value, an error is raised.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
               
         EXAMPLE::
 
@@ -2638,12 +2654,11 @@ def FCoulombD(m='m', l='l'):
             sage: F = FCoulombD(1/2,2); 
             sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
             0
-            sage: #for l in range(-1,10): # checking with m parameter
-            ....: #    F = FCoulombD('m',l)
-            ....: #    m = F.parent().parameter('m')
-            ....: #    if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
-            ....: #        print(l)
-            ....: # TODO: Improve these tests
+            sage: for l in range(-1,10): # checking with m parameter
+            ....:     F = FCoulombD('m',l)
+            ....:     m = F.parent().parameter('m')
+            ....:     if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
+            ....:         print(l)
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()])
     rm, rl = new_all
@@ -2655,11 +2670,17 @@ def FCoulombD(m='m', l='l'):
     x = destiny_ring.variables()[0]
     init = []
     
-    if(rl in ZZ): ## Power series solution
-        if(rl in [-1,0]): ## Special cases
-            init = [0,1]
-        elif(rl > 0):
-            init = [0 for i in range(rl+1)] + [1]
+    ## Checking the `l` argument
+    if(not (rl in ZZ)):
+        raise TypeError("The parameter `l` has to be an integer")
+    rl = ZZ(rl)
+    if(rl < -1): 
+        raise ValueError("The parameter `l` has to be an integer greater or equal than -1")
+    
+    if(rl in [-1,0]): ## Special cases
+        init = [0,1]
+    elif(rl > 0):
+        init = [0 for i in range(rl+1)] + [1]
             
     return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DynamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]))
 
@@ -3279,15 +3300,15 @@ def __check_list(list_of_elements, invalid_vars=[]):
                 all_vars += [str(v) for v in el.denominator().variables()]
             else:
                 all_vars += [str(v) for v in el.variables()]
+            parent = pushout(parent, el.parent().base_ring())
             list_of_elements[i] = str(el)
     
     if(any(el in all_vars for el in invalid_vars)):
         raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars))
     
-    parent = QQ
     if(len(all_vars) > 0):
         all_vars = list(set(all_vars))
-        parent = PolynomialRing(QQ, all_vars).fraction_field()
+        parent = PolynomialRing(parent, all_vars).fraction_field()
         list_of_elements = [parent(el) for el in list_of_elements]
     
     return (parent, list_of_elements)
