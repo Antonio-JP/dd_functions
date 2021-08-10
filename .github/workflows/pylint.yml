@@ -19,7 +19,7 @@ jobs:
         $CONDA/bin/conda init
         $CONDA/bin/conda activate base
     - name: Install package
-      run: 
+      run: |
         $CODNA/bin/sage -pip install --upgrade .
     - name: Install dependencies
       run: |
