@@ -16,7 +16,8 @@ jobs:
     - name: Install sage
       run: |
         $CONDA/bin/conda env update --file .github/environments/sage_conda_env.yml --name base
-        make install
+        $CONDA/bin/conda activate base
+        $CODNA/bin/sage -pip install --upgrade .
     - name: Install dependencies
       run: |
         $CONDA/bin/python -m pip install --upgrade pip
