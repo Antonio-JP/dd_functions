@@ -1,6 +1,6 @@
 name: Pylint
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
     - name: Install sage
       run: |
         ls -a
-        $CONDA/bin/conda env update --file .github/environments/environment.yml --name base
+        $CONDA/bin/conda env update --file .github/environments/environment.yml
     - name: Install dependencies
       run: |
         $CONDA/bin/python -m pip install --upgrade pip
