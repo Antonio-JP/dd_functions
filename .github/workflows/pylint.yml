@@ -14,7 +14,6 @@ jobs:
       with:
         python-version: 3.9
     - name: Install sage
-      uses: actions/cache@v2
       run: |
         $CONDA/bin/conda env update --file .github/environments/sage_conda_env.yml --name base
         $CONDA/bin/conda init
