@@ -20,6 +20,3 @@ dependencies:
   - boost-cpp      # For installing PyNormaliz
   - mathjax
   - pip
-  - pip:
-    - pynormaliz==2.8
-    - sage-package
