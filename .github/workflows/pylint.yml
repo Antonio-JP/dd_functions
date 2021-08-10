@@ -17,6 +17,7 @@ jobs:
       run: |
         $CONDA/bin/conda env update --file .github/environments/sage_conda_env.yml --name base
         $CONDA/bin/conda init bash
+        exec bash
         $CONDA/bin/conda activate base
     - name: Install package
       run: |
