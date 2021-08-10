@@ -15,7 +15,6 @@ jobs:
         python-version: 3.9
     - name: Install sage
       run: |
-        ls -a
         $CONDA/bin/conda env update --file .github/environments/environment.yml
     - name: Install dependencies
       run: |
