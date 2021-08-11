@@ -115,7 +115,7 @@ class TwoStepsOperator(ListOperator):
                         i+=1
                     if(not element.is_unit()):
                         raise ValueError("The set %s does not cover the minimal elements for this simple operation")
-                ring[2] = S
+                ring = (ring[0],ring[1],S)
             else:
                 raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
 
