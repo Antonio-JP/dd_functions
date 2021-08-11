@@ -190,6 +190,15 @@ class Operator(object):
             return self.coefficients()[i]
         else:
             return 0
+
+    def lc(self):
+        r'''
+            Method to get the leading coefficient of a differential operator.
+
+            The leading coefficient is the coefficient that multiplies the 
+            highest order derivation with a non-zero coefficient.
+        '''
+        return self.coefficients()[self.order()]
         
     @cached_method
     def companion(self):
