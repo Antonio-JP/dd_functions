@@ -207,6 +207,7 @@ class HermiteSolver(LinearSystemSolver):
                     p *= aux_den; q *= aux_den
                     if(p.denominator() == 1 and q.denominator() == 1):
                         g,P,Q = xgcd(p.numerator(),q.numerator())
+                        aux_den = parent(aux_den)
                         return g, aux_den*parent(P), aux_den*parent(Q)
                     m,r = new_euclidean(p,q)
                     if(self.is_zero(r)):
