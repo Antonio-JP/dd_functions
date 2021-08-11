@@ -120,7 +120,7 @@ class TwoStepsOperator(ListOperator):
                 raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
 
         ## Performing the computations
-        order = self.order()+other.order(); i = 0
+        order = self.order()+other.order()-1; i = 0
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_addition(other, order+i, True)
