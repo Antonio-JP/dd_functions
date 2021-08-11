@@ -99,9 +99,28 @@ class TwoStepsOperator(ListOperator):
     ####################################################### 
     ### SOLUTION SIMPLE ARITHMETHIC METHODS (ABSTRACT)
     ####################################################### 
-    def _compute_simple_add_solution(self, other, bound=5):
-        order = self.order()+other.order(); i = 0
+    def _compute_simple_add_solution(self, other, S=None, bound=5):
+        ## Checking the set S
         ring = self.noetherian_ring(other)
+        S_aux = ring[2]
+        if(not S is None): ## Checking that the required denominators are in S
+            if(type(S) in (list, tuple, set)):
+                S = [ring[0](el) for el in S]
+                S = [el for el in S if (not el.is_unit())] # removing units (we can divide already)
+                for el in S_aux:
+                    element = el; i = 0
+                    while(not element.is_unit()):
+                        while(S[i].divides(element)):
+                            element = element // S[i]
+                        i+=1
+                    if(not element.is_unit()):
+                        raise ValueError("The set %s does not cover the minimal elements for this simple operation")
+                ring[2] = S
+            else:
+                raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
+
+        ## Performing the computations
+        order = self.order()+other.order(); i = 0
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_addition(other, order+i, True)
@@ -114,9 +133,28 @@ class TwoStepsOperator(ListOperator):
                 
         return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
-    def _compute_simple_mult_solution(self, other, bound = 5):
-        order = self.order()+other.order(); i = 0
+    def _compute_simple_mult_solution(self, other, S=None, bound = 5):
+        ## Checking the set S
         ring = self.noetherian_ring(other)
+        S_aux = ring[2]
+        if(not S is None): ## Checking that the required denominators are in S
+            if(type(S) in (list, tuple, set)):
+                S = [ring[0](el) for el in S]
+                S = [el for el in S if (not el.is_unit())] # removing units (we can divide already)
+                for el in S_aux:
+                    element = el; i = 0
+                    while(not element.is_unit()):
+                        while(S[i].divides(element)):
+                            element = element // S[i]
+                        i+=1
+                    if(not element.is_unit()):
+                        raise ValueError("The set %s does not cover the minimal elements for this simple operation")
+                ring[2] = S
+            else:
+                raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
+
+        ## Performing the computations
+        order = self.order()+other.order(); i = 0
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_product(other, order+i, True)
@@ -129,9 +167,28 @@ class TwoStepsOperator(ListOperator):
                 
         return self.__class__(self.base(), solution + [den_lcm], self.derivate())
         
-    def _compute_simple_derivative_solution(self, bound = 5):
-        order = self.order(); i = 0
+    def _compute_simple_derivative_solution(self, S=None, bound = 5):
+        ## Checking the set S
         ring = self.noetherian_ring()
+        S_aux = ring[2]
+        if(not S is None): ## Checking that the required denominators are in S
+            if(type(S) in (list, tuple, set)):
+                S = [ring[0](el) for el in S]
+                S = [el for el in S if (not el.is_unit())] # removing units (we can divide already)
+                for el in S_aux:
+                    element = el; i = 0
+                    while(not element.is_unit()):
+                        while(S[i].divides(element)):
+                            element = element // S[i]
+                        i+=1
+                    if(not element.is_unit()):
+                        raise ValueError("The set %s does not cover the minimal elements for this simple operation")
+                ring[2] = S
+            else:
+                raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
+
+        ## Performing the computations
+        order = self.order(); i = 0
         solution = None
         while((solution is None) and (i < bound)):
             A,b = self._get_system_derivative(order+i, True)
