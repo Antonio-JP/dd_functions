@@ -109,12 +109,12 @@ class TwoStepsOperator(ListOperator):
                 S = [el for el in S if (not el.is_unit())] # removing units (we can divide already)
                 for el in S_aux:
                     element = el; i = 0
-                    while(not element.is_unit()):
+                    while(not element.is_unit() and i<len(S)):
                         while(S[i].divides(element)):
                             element = element // S[i]
                         i+=1
                     if(not element.is_unit()):
-                        raise ValueError("The set %s does not cover the minimal elements for this simple operation")
+                        raise ValueError("The set %s does not cover the minimal elements for this simple operation %s" %(str(S), str(S_aux)))
                 ring = (ring[0],ring[1],S)
             else:
                 raise NotImplementedError("Multiplicative closed set defined via %s is not implemented" %type(S))
