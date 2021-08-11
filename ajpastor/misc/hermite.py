@@ -195,6 +195,8 @@ class HermiteSolver(LinearSystemSolver):
             if(len(d) > 0):
                 parent = base.localization(tuple(d))
                 def factor_d(p):
+                    if(p == 0): return p.parent().zero(),p.parent().one()
+
                     p = base(p)
                     factor = 1
                     for gen in d:
