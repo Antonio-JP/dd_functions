@@ -194,11 +194,20 @@ class HermiteSolver(LinearSystemSolver):
                 raise TypeError("The base ring for Hermite must not have generators")
             if(len(d) > 0):
                 parent = base.localization(tuple(d))
+                def factor_d(p):
+                    p = base(p)
+                    factor = 1
+                    for gen in d:
+                        gen = base(gen)
+                        while(gen.divides(p)): 
+                            p = p//gen
+                            factor *= gen
+                    return p,factor
                 def new_euclidean(p,q):
-                    pn = p.numerator(); pd = p.denominator()
-                    qn = q.numerator(); qd = q.denominator()
-                    d, r = euclidean(pn, qn)
-                    return (parent((d*qd)/pd), parent(r/pd))
+                    a,s1 = factor_d(p.numerator()); t1 = p.denominator()
+                    b,s2 = factor_d(q.numerator()); t2 = q.denominator()
+                    d, r = euclidean(a, b)
+                    return (parent((d*s1*t2)/(t1*s2)), parent((r*s1)/t1))
                 
                 def new_xgcd(p,q):
                     if(q == 0):
