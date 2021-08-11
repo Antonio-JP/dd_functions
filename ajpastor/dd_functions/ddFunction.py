@@ -3579,7 +3579,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Simple computations
     ###
     #####################################
-    def simple_add(self, other):
+    def simple_add(self, other, S=None):
         r'''
             Method to compute the simple addition of two DDFunctions.
 
@@ -3591,7 +3591,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Currently, this method only works with D-finite functions.
 
             INPUT:
-                * ``other``: the other :class:`DDFunction` that will be added to ``self``.
+        
+            * ``other``: the other :class:`DDFunction` that will be added to ``self``.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3609,6 +3616,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             TODO:
                 * Improve the tests
+                * Add test for specifying the set S
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return the other
         if(self.is_null):
@@ -3627,7 +3635,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             else:
                 newName = DynamicString("_1+_2", [self.name, other.name])
 
-        newOperator = self.equation.simple_add_solution(other.equation)
+        newOperator = self.equation.simple_add_solution(other.equation, S)
         needed_initial = newOperator.get_jp_fo()+1
         
         ### Getting as many initial values as possible until the new order
@@ -3640,7 +3648,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         return result
 
-    def simple_mult(self, other):
+    def simple_mult(self, other, S=None):
         r'''
             Method to compute the simple product of two DDFunctions.
 
@@ -3652,7 +3660,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Currently, this method only works with D-finite functions.
 
             INPUT:
-                * ``other``: the other :class:`DDFunction` that will be multiplied to ``self``.
+
+            * ``other``: the other :class:`DDFunction` that will be multiplied to ``self``.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3670,6 +3685,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             TODO:
                 * Improve the tests
+                * Add test for specifying the set S
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return directly 0
         if ((other.is_null) or (self.is_null)):
@@ -3689,7 +3705,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise NotImplementedError("This method is not implemented")
             
         ### We build the new operator
-        newOperator = self.equation.simple_mult_solution(other.equation)
+        newOperator = self.equation.simple_mult_solution(other.equation, S)
         
         ### Getting the needed initial values for the solution
         needed_initial = newOperator.get_jp_fo()+1 
@@ -3708,7 +3724,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
         return result
 
-    def simple_derivative(self):
+    def simple_derivative(self, S=None):
         r'''
             Method to compute the simple derivative of a DDFunction.
 
@@ -3718,6 +3734,15 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             returned have the same apparent singularities.
 
             Currently, this method only works with D-finite functions.
+
+            INPUT:
+
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3748,6 +3773,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
             TODO:
                 * Improve the tests
+                * Add test for specifying the set S
         '''
         if(self.parent().depth() > 1):
             raise NotImplementedError("This method is not implemented")
@@ -3758,7 +3784,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 self.__simple_derivative = self.parent()(0)
             else:
                 ### We get the new operator
-                newOperator = self.equation.simple_derivative_solution()
+                newOperator = self.equation.simple_derivative_solution(S)
             
                 ### We get the required initial values (depending of the order of the next derivative)
                 initList = self.init(newOperator.get_jp_fo()+2, True, True)
