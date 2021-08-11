@@ -3610,7 +3610,6 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
                 sage: h = f.simple_add(g)
-                sage: # h.singularities()
                 sage: h.equation.lc() in h.parent().coeff_field
                 True
 
@@ -3618,11 +3617,40 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             operation can be performed in such structure, the result is given. This may 
             provide different results than the "simplest" computations::
 
-                sage: 
+                sage: (f+g).equation.lc().factor()
+                (x + 1)^2
+                sage: f.simple_add(g).order()
+                5
+                sage: f.simple_add(g, [x+1]).order()
+                4
+                sage: f.simple_add(g, [x+1]).equation == (f+g).equation
+                True
 
-            TODO:
-                * Improve the tests
-                * Add test for specifying the set S
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f = Sin(x); g = Log(x+1)
+                sage: (f+g).equation.lc().factor()
+                (x + 1) * (x^2 + 2*x + 3)
+                sage: f.simple_add(g).equation.lc().factor()
+                (4) * (x + 1)^2
+                sage: f.simple_add(g, [x+2])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 2] does not cover the minimal elements for this simple operation [x + 1]
+
+            Since the middle computations may require all the possible factors of the leading coefficient, 
+            the same error will show up if the factor put there is too big::
+
+                sage: f.simple_add(g, [(x + 1) * (x^2 + 2*x + 3)])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x^3 + 3*x^2 + 5*x + 3] does not cover the minimal elements for this simple operation [x + 1]
+
+            However, putting irreducible factors will always work as intended::
+
+                sage: f.simple_add(g, [(x + 1), (x^2 + 2*x + 3)]).equation == (f+g).equation
+                True
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return the other
         if(self.is_null):
@@ -3685,13 +3713,47 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
                 sage: h = f.simple_mult(g)
-                sage: # h.singularities()
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
 
-            TODO:
-                * Improve the tests
-                * Add test for specifying the set S
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: (f*g).equation.lc().factor()
+                x + 1
+                sage: f.simple_mult(g).order()
+                5
+                sage: f.simple_mult(g, [x+1]).order()
+                4
+                sage: f.simple_mult(g, [x+1]).equation == (f*g).equation
+                True
+
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f = BesselD(1); g = Log(x+1)
+                sage: (f*g).equation.lc().factor()
+                (-4) * x^2 * (x + 1)^2 * (x^4 + 2*x^3 - 3/2*x - 3/4)
+                sage: f.simple_mult(g).equation.lc().factor()
+                (9) * x^3 * (x + 1)^3
+                sage: f.simple_mult(g, [x+1])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 1] does not cover the minimal elements for this simple operation [x^2, x + 1]
+
+            Since the middle computations may require all the possible factors of the leading coefficient, 
+            the same error will show up if the factor put there is too big::
+
+                sage: f.simple_mult(g, [x*(x+1)])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x^2 + x] does not cover the minimal elements for this simple operation [x^2, x + 1]
+
+            However, putting irreducible factors will always work as intended::
+
+                sage: f.simple_mult(g, [(x + 1), x]).equation == f.simple_mult(g).equation
+                True
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return directly 0
         if ((other.is_null) or (self.is_null)):
@@ -3762,32 +3824,57 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation.lc() in h.parent().coeff_field
-                True
+                sage: h.equation.lc()
+                1
                 sage: f = Exp(x)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation.lc() in h.parent().coeff_field
-                True
+                sage: h.equation.lc()
+                1
                 sage: f = BesselD(2)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation.lc()%h.parent().base()(x) == 0 and len(h.equation.lc().factor()) == 1
+                sage: h.equation.lc()
+                8*x^3
+
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: f = BesselD(2); f.derivative().equation.lc().factor()
+                (-1) * (x - 2) * (x + 2) * x^2
+                sage: f.derivative().order()
+                2
+                sage: f.simple_derivative([x]).order()
+                3
+                sage: f.simple_derivative([x,x+1]).equation == f.simple_derivative([x]).equation
                 True
 
-            TODO:
-                * Improve the tests
-                * Add test for specifying the set S
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f.simple_derivative([x+1])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 1] does not cover the minimal elements for this simple operation [x^2]
         '''
         if(self.parent().depth() > 1):
             raise NotImplementedError("This method is not implemented")
 
         if(self.__simple_derivative is None):
+            self.__simple_derivative = {}
+
+        ## creating the cache key
+        if(S is None): cache = []
+        else: cache = S
+        cache = list(cache); cache.sort(); cache = tuple(cache)
+
+        if(not cache in self.__simple_derivative):
             if(self.is_constant()):
                 ### Special case: is a constant
-                self.__simple_derivative = self.parent()(0)
+                self.__simple_derivative[cache] = self.parent()(0)
             else:
                 ### We get the new operator
                 newOperator = self.equation.simple_derivative_solution(S)
@@ -3805,11 +3892,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                         newName = DynamicString("(_1)'", self.name)
                 
                 ### We create the next derivative with the equation, initial values
-                self.__simple_derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-                self.__simple_derivative.built = ("derivative",tuple([self]))
+                self.__simple_derivative[cache] = self.parent().element(newOperator, newInit, check_init=False, name=newName)
+                self.__simple_derivative[cache].built = ("derivative",tuple([self]))
                 
-            
-        return self.__simple_derivative
+        return self.__simple_derivative[cache]
 
     #####################################
     ### Sequence methods
