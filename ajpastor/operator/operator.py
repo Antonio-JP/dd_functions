@@ -254,8 +254,8 @@ class Operator(object):
         if(is_DDRing(self.base())):
             raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-        c = [self.coefficients()[-1]]
-        if(not (other is None)): c += [other.coefficients()[-1]]
+        c = [self.lc()]
+        if(not (other is None)): c += [other.lc()]
         final_dens = []
         for el in c:
             if((not el in self.base()) or (not self.base()(el).is_unit())):

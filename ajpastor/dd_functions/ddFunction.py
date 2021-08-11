@@ -2802,7 +2802,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 lc = self.equation.forward(r)(n=m-r)
                 self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
             self.__computed = m
-        elif((n+1) > self.equation.get_jp_fo() and self.equation[self.order()].sequence(0) != 0): # power series regular case
+        elif((n+1) > self.equation.get_jp_fo() and self.equation.lc().sequence(0) != 0): # power series regular case
             ## In this case, we use the Divide and Conquer strategy proposed in 
             m = 2*n # we double the amount of data
             K = self.parent().coeff_field
@@ -3611,8 +3611,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: f = AiryD(); g = Sin(x)
                 sage: h = f.simple_add(g)
                 sage: # h.singularities()
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
+
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: 
 
             TODO:
                 * Improve the tests
@@ -3756,19 +3762,19 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
                 sage: f = Exp(x)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
                 sage: f = BesselD(2)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()]%h.parent().base()(x) == 0 and len(h.equation[h.order()].factor()) == 1
+                sage: h.equation.lc()%h.parent().base()(x) == 0 and len(h.equation.lc().factor()) == 1
                 True
 
             TODO:
@@ -4281,7 +4287,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def numerical_solution(self, value, delta=1e-10, max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
-            if(self.equation.coefficients()[-1](0 ) != 0 ):
+            if(self.equation.lc()(0) != 0 ):
                 sol = self.equation.operator.numerical_solution(self.sequence(self.order(), True), [0 ,value],delta)
                 return sol.center(), sol.diameter()
             else:
@@ -4446,7 +4452,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     eq = self.equation.operator.desingularize()
                     lc = eq[eq.order()]
                 except AttributeError:
-                    lc = self.equation[self.equation.order()]
+                    lc = self.equation.lc()
                  
                 # only the zeros of the leading coefficient
                 self.__singularities = FiniteEnumeratedSet([root[0][0] for root in lc.roots()])
