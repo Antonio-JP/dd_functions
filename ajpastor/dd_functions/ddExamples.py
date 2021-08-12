@@ -107,6 +107,7 @@ from sage.all import (cached_function, factorial, bell_polynomial, NumberField, 
                         ideal)
 from sage.all_cmdline import x
 
+from sage.rings.fraction_field import is_FractionField
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 from sage.categories.pushout import pushout, FractionField
@@ -3241,50 +3242,110 @@ def polynomial_inverse(polynomial):
 ##################################################################################
 ##################################################################################    
 def __decide_parent(input, parent = None, depth = 1):
-    '''            
+    r'''      
+        Method to decide the parent from a given input.
+
         This method is an auxiliary method that decides the parent associated
         with an input given some basic possible parent and depth.
         
-        This method converst the input to the parent base or, in case that parent
-        is not provided, computes the appropriate DDRing where the input can be consider
-        as the coefficient of a differential equation.
-        
-        If 'parent' is None, then several considerations are made:
-    - If 'input' is a Symbolic Expression, we take the variables of it, consider 
-            everyone but 'x' as parameters and create the corresponding ParametrizedDDRing 
-            of the depth given. The argument 'input' MUST be a polynomial in 'x' and a 
-            rational function in any other variable.
-    - If 'input' is a polynomial, then the first generator will be consider as the 
-            variable of a DDRing and the others as parameters. Then we create the corresponding
-            ParametrizedDDRing with the depth given.
-    - Otherwise, we create the DDRing of the parent of 'input' of the given depth 
-            and try to work with that ring.
+        This method will compute a :class:`~ajpastor.dd_functions.ddFunction.DDRing` such that
+        the element in ``input`` is can be used as a coefficient in the defining differential 
+        equations of its elements and it contains (at least) the depth ``depth`` of the 
+        :class:`~ajpastor.dd_functions.ddFunction.DDRing` given by ``parent``.
+
+        If ``parent`` is ``None``, then a minimal :class:`~ajpastor.dd_functions.ddFunction.DDRing`
+        is computed such that ``input``  can be used as coefficient. 
+
+        The treatment of ``input`` depends on its type:
+            * If it is a Symbolic Expression, we will consider `x` as a main variable and 
+              all other variables in the expression as parameters. Then the minimal 
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed with that information.
+              This only works if ``input`` is a polynomial in `x` and a rational function on the 
+              other variables.
+            * If it is a polynomial, the first variable will be used as the main variable and the 
+              other as parameters. The the same procedure as for the Symbolic Expression will 
+              happen.
+
+        INPUT:
+
+        * ``input``: the input from which we start.
+        * ``parent``: a possible :class:`~ajpastor.dd_functions.ddFunction.DDRing` that has to be included
+          in the output.
+        * ``depth``: desired depth of the final :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        OUTPUT:
+
+        A tuple containing:
+            * The element in ``input`` casted to the base ring of the final parent ring.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDRing` that can represent objects over the ``input``
+              that also includes the ``parent`` and has depth ``depth``.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: from ajpastor.dd_functions.ddExamples import __decide_parent as decide
+            sage: decide(x)
+            (x, DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            sage: decide(x)[0] in decide(x)[1].base()
+            True
+            sage: decide(x, depth=3)[0].parent() is decide(x, depth=3)[1].base()
+            True
+            sage: i = DFiniteI.base().base().gens()[0]; X = DFiniteI.variable('x')
+            sage: decide(i*X)
+            (I*x, DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1)))
+            sage: decide(Exp(x), DFiniteI)
+            (exp(x), DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Number Field 
+            in I with defining polynomial x^2 + 1)))
+
+        This method detects some of the parameters included in the parent of the input, putthing them appropriately 
+        into the system::
+
+            sage: ParametrizedDDRing(DFiniteI, 'm').variable('x')
+            sage: x.parent()
+            Univariate Polynomial Ring in x over Fraction Field of Univariate Polynomial Ring 
+            in m over Number Field in I with defining polynomial x^2 + 1
+            sage: decide(x)
+            (x, DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1) with parameter (m))
     '''
-    dR = parent
-    if(dR is None):
-        R = input.parent()
-        if(input in QQ):
-            dR = DFinite.to_depth(depth)
-        elif(R is SR):
-            parameters = set([str(el) for el in input.variables()])-set(['x'])
-            if(len(parameters) > 0 ):
-                dR = ParametrizedDDRing(DFinite.to_depth(depth), parameters)
-            else:
-                dR = DDRing(PolynomialRing(QQ,x), depth=depth)
-        elif(isMPolynomial(R) or isPolynomial(R)):
-            parameters = [str(gen) for gen in R.gens()[1:]]
-            var = R.gens()[0]
-            if(len(parameters) > 0):
-                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base_ring(),var), depth=depth), parameters)
-            else:
-                dR = DDRing(PolynomialRing(R.base_ring(),var), depth = depth)
+    ## Treating the input
+    input_parent = input.parent()
+    if(input in QQ):
+        input_parent = DFinite
+    elif(input_parent is SR):
+        parameters = set([str(el) for el in input.variables()])-set(['x'])
+        if(len(parameters) > 0 ):
+            input_parent = ParametrizedDDRing(DFinite, parameters)
         else:
-            try:
-                dR = DDRing(R, depth = depth)
-            except Exception as e:
-                raise TypeError("The object provided is not in a valid Parent", e)
-    
-    return dR.base()(input), dR
+            input_parent = DDRing(PolynomialRing(QQ,x))
+    elif(isMPolynomial(input_parent) or isPolynomial(input_parent)):
+        parameters = [str(gen) for gen in input_parent.gens()[1:]]
+        var = input_parent.gens()[0]
+
+        current = input_parent.base()
+        while((is_FractionField(current) or isMPolynomial(current) or isPolynomial(current)) and (current.gens() != (1))):
+            parameters += [str(gen) for gen in current.gens() if str(gen) != '1']
+            current = current.base()
+        parameters = list(set(parameters))
+
+        if(len(parameters) > 0):
+            input_parent = ParametrizedDDRing(DDRing(PolynomialRing(current,var)), parameters)
+        else:
+            input_parent = DDRing(PolynomialRing(input_parent.base_ring(),var))
+    else:
+        try:
+            input_parent = DDRing(input_parent)
+        except Exception as e:
+            raise TypeError("The object provided is not in a valid Parent", e)
+    input = input_parent.base()(input)
+
+    ## Computing the common parent
+    if(parent is None):
+        parent = input_parent.to_depth(depth)
+    elif(is_DDRing(parent)):
+        parent = parent.to_depth(depth)
+
+    final_parent = pushout(input_parent, parent)
+    return final_parent.base()(input), final_parent
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
