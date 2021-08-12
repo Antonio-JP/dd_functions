@@ -190,6 +190,15 @@ class Operator(object):
             return self.coefficients()[i]
         else:
             return 0
+
+    def lc(self):
+        r'''
+            Method to get the leading coefficient of a differential operator.
+
+            The leading coefficient is the coefficient that multiplies the 
+            highest order derivation with a non-zero coefficient.
+        '''
+        return self.coefficients()[self.order()]
         
     @cached_method
     def companion(self):
@@ -245,8 +254,8 @@ class Operator(object):
         if(is_DDRing(self.base())):
             raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-        c = [self.coefficients()[-1]]
-        if(not (other is None)): c += [other.coefficients()[-1]]
+        c = [self.lc()]
+        if(not (other is None)): c += [other.lc()]
         final_dens = []
         for el in c:
             if((not el in self.base()) or (not self.base()(el).is_unit())):
@@ -526,16 +535,26 @@ class Operator(object):
     ####################################################### 
     ### SIMPLE ARITHMETHIC METHODS
     ####################################################### 
-    def simple_add_solution(self, other):
+    def simple_add_solution(self, other, S=None):
         r'''
             Method to compute the annihilator of the addition of solutions to two operators.
 
             This method computes a new operator `A` that annihilates all the functions that 
             are the addition of the solutions of ``self`` and ``other``.
-            This method takes care that the singularities of the new equation are the same 
-            as the singularities of the input. 
+            This method takes care that the singularities of the new equation are included in 
+            the zeros of elements in the set `S`.
             
             Currently this only work if the coefficients are univariate polynomials.
+
+            INPUT:
+
+            * ``other``: the operator to compute the addition of solutions.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
         '''
         ## If the input is not an operator, trying the casting
         if(not isinstance(other, Operator)):
@@ -547,18 +566,28 @@ class Operator(object):
                 return other.add_solution(self)
             other = self.__class__(self.base(), other, self.derivate())
             
-        return self._compute_simple_add_solution(other)
+        return self._compute_simple_add_solution(other, S)
 
-    def simple_mult_solution(self, other):
+    def simple_mult_solution(self, other, S=None):
         r'''
             Method to compute the annihilator of the product of solutions to two operators.
 
             This method computes a new operator `A` that annihilates all the functions that 
             are the product of the solutions of ``self`` and ``other``.
-            This method takes care that the singularities of the new equation are the same 
-            as the singularities of the input. 
+            This method takes care that the singularities of the new equation are included in 
+            the zeros of elements in the set `S`.
             
             Currently this only work if the coefficients are univariate polynomials.
+
+            INPUT:
+
+            * ``other``: the operator to compute the product of solutions.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
         '''
         ## If the input is not an operator, trying the casting
         if(not isinstance(other, Operator)):
@@ -570,28 +599,37 @@ class Operator(object):
                 return other.mult_solution(self)
             other = self.__class__(self.base(), other, self.derivate())
             
-        return self._compute_simple_mult_solution(other)
+        return self._compute_simple_mult_solution(other, S)
 
-    def simple_derivative_solution(self):
+    def simple_derivative_solution(self, S=None):
         r'''
             Method to compute the annihilator of the derivative of solutions to ``self``.
 
             This method computes a new operator `A` that annihilates all the functions that 
             are the derivative of the solutions of ``self``.
-            This method takes care that the singularities of the new equation are the same 
-            as the singularities of the input. 
+            This method takes care that the singularities of the new equation are included in 
+            the zeros of elements in the set `S`.
             
             Currently this only work if the coefficients are univariate polynomials.
+
+            INPUT:
+
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
         '''
-        return self._compute_simple_derivative_solution()
+        return self._compute_simple_derivative_solution(S)
 
-    def _compute_simple_add_solution(self, other, bound=5):
+    def _compute_simple_add_solution(self, other, S=None, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-    def _compute_simple_mult_solution(self, other, bound=5):
+    def _compute_simple_mult_solution(self, other, S=None, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
-    def _compute_simple_derivative_solution(self, bound=5):
+    def _compute_simple_derivative_solution(self, S=None, bound=5):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 
     ####################################################### 
