@@ -1793,6 +1793,13 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     
     ## Casting to tuples to have hash  
     numerator = tuple(numerator); denominator = tuple(denominator)
+
+    ## Checking trivial cases
+    if(any(el in ZZ and ZZ(el) <= 0 for el in denominator)):
+        raise ValueError("Parameters in the denominator for a hypergeometric function can not be non-positive integers")
+
+    if(0 in numerator):
+        return initial
     
     ## Checking the function is cached
     global __CACHED_HYPERGEOMETRIC
@@ -2650,8 +2657,8 @@ def FCoulombD(m='m', l=-1):
               
         EXAMPLE::
 
-            sage: from ajpastor.dd_functions.ddExamples import FCoulombD
-            sage: F = FCoulombD(1/2,2); 
+            sage: from ajpastor.dd_functions import *
+            sage: F = FCoulombD(1/2,2)
             sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
             0
             sage: for l in range(-1,10): # checking with m parameter
@@ -2663,10 +2670,12 @@ def FCoulombD(m='m', l=-1):
         our Coulomb function is such that the first non-zero initial condition is 1, so we have
         to scale the identity accordingly::
 
-            sage: for l in range(-1, 10):
+            sage: R = ParametrizedDDRing(DFiniteI, 'm')
+            sage: i = R.base().base().base().base().gens()[0]; x = R.variable('x'); m = R.parameter('m')
+            sage: for l in range(0, 10):
             ....:     for w in (-1,1):
-            ....:         lhs = FCoulomb(m, l)
-            ....:         rhs = x^(l+1)*Exp(SR(x))(w*i*x)*F11(1+l+w*i*m, 2*l+2)(-2*w*i*x)
+            ....:         lhs = FCoulombD(m, l)
+            ....:         rhs = x^(l+1)*Exp(SR('x'))(w*i*x)*F11(1+l+w*i*m, 2*l+2)(-2*w*i*x)
             ....:         assert factorial(l+1)*lhs == rhs, "ERROR: %d-%d" %(l,w)
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()])
