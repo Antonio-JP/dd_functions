@@ -107,6 +107,7 @@ from sage.all import (cached_function, factorial, bell_polynomial, NumberField, 
                         ideal)
 from sage.all_cmdline import x
 
+from sage.rings.fraction_field import is_FractionField
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 from sage.categories.pushout import pushout, FractionField
@@ -1049,7 +1050,7 @@ def Arctan(input, ddR = None):
 @cached_function 
 def Arcsinh(input, ddR = None):
     '''
-        TODO: GO on here
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
         
         References:
@@ -1099,6 +1100,7 @@ def Arcsinh(input, ddR = None):
 @cached_function
 def Arccosh(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arccosine function (arccosh(x)).
         
         References:
@@ -1150,6 +1152,7 @@ def Arccosh(input, ddR = None):
 @cached_function 
 def Arctanh(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arctangent function (arctanh(x)).
         
         References:
@@ -1206,6 +1209,7 @@ def Arctanh(input, ddR = None):
 @cached_function  
 def Log(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Logarithm function (ln(x)).
         
         References:
@@ -1239,6 +1243,7 @@ def Log(input, ddR = None):
 @cached_function 
 def Log1(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the shifted Logarithm function (ln(x+1)). It is equivalent to Log(input+1).
         
         References:
@@ -1274,6 +1279,7 @@ def Log1(input, ddR = None):
 @cached_function 
 def Exp(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Exponential function (exp(x)).
         
         References:
@@ -1313,6 +1319,7 @@ def Exp(input, ddR = None):
 @cached_function 
 def BesselD(input = 'P', kind = 1):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Bessel functions (J_n(x), Y_n(x)).
         
         References:
@@ -1359,6 +1366,7 @@ def BesselD(input = 'P', kind = 1):
 @cached_function
 def StruveD(mu='P',kind=1):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Struve functions (J_n(x), Y_n(x)).
         
         References:
@@ -1438,6 +1446,7 @@ def __first_derivative_associated_legendre(n,m,kind):
 @cached_function 
 def LegendreD(nu='n', mu = 0, kind=1):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
         
         References:
@@ -1529,6 +1538,7 @@ def LegendreD(nu='n', mu = 0, kind=1):
 @cached_function    
 def ChebyshevD(input='n', kind = 1, poly=True):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
         References:
@@ -1627,6 +1637,7 @@ __CACHED_HYPERGEOMETRIC = {}
 @cached_function
 def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     '''
+        TODO: Review this documentation
         D-finite implementation of the Gauss Hypergeometric function
         
         References:
@@ -1776,6 +1787,8 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
     else:
         destiny_ring = DFinite
+    destiny_ring = pushout(destiny_ring, parent)
+    x = destiny_ring.variable('x')
         
     ## Cleaning repeated values 
     i = 0
@@ -1791,6 +1804,13 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
     
     ## Casting to tuples to have hash  
     numerator = tuple(numerator); denominator = tuple(denominator)
+
+    ## Checking trivial cases
+    if(any(el in ZZ and ZZ(el) <= 0 for el in denominator)):
+        raise ValueError("Parameters in the denominator for a hypergeometric function can not be non-positive integers")
+
+    if(0 in numerator):
+        return initial
     
     ## Checking the function is cached
     global __CACHED_HYPERGEOMETRIC
@@ -1798,7 +1818,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         ## Building differential operator
         from .ddFunction import DDFunction
         auxR = PolynomialRing(destiny_ring.original_ring(), 'theta'); E = auxR.gens()[0]
-        op_num = prod(E + el for el in numerator); op_den = E*prod(E + el - 1 for el in denominator)
+        op_num = prod([E + el for el in numerator], auxR.one()); op_den = E*prod([E + el - 1 for el in denominator], auxR.one())
         op_num = [x*sum(
             op_num[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_num.degree()+1)
             ) for i in range(op_num.degree()+1)]
@@ -1858,6 +1878,7 @@ def F21(a='a',b='b',c='c'):
 @cached_function
 def PolylogarithmD(s=1):
     '''
+        TODO: Review this documentation
         Implementation using DDFunctions of the Polylogarithms
 
         References:
@@ -1891,6 +1912,7 @@ def PolylogarithmD(s=1):
 @cached_function
 def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     '''
+        TODO: Review this documentation
         Implementation using DDFunctions of the solutions for the Riccati differential equation.
         
         References:
@@ -1942,13 +1964,12 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
         return solution,w
     return solution
     
-    
-    
 ###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
 def MathieuD(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu function
         
         References:
@@ -1984,6 +2005,7 @@ def MathieuD(a='a',q='q',init=()):
 @cached_function
 def MathieuSin(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu Sine function.
         
         References:
@@ -1999,6 +2021,7 @@ def MathieuSin(a='a',q='q'):
 @cached_function
 def MathieuCos(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu Cosine function.
         
         References:
@@ -2015,6 +2038,7 @@ def MathieuCos(a='a',q='q'):
 @cached_function
 def MathieuH(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2049,6 +2073,7 @@ def MathieuH(a='a',q='q',init=()):
 @cached_function
 def MathieuSinh(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2063,6 +2088,7 @@ def MathieuSinh(a='a',q='q'):
 @cached_function
 def MathieuCosh(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2078,6 +2104,7 @@ def MathieuCosh(a='a',q='q'):
 @cached_function
 def HillD(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Hill equation.
         
         References:
@@ -2161,9 +2188,9 @@ def AiryD(init=('a','b')):
         Airy's differential equation with some particular initial values.
 
         For further references, the user can look into the following references:
-            * `DLMF Chapter 9.2 <https://dlmf.nist.gov/9.2>`_
-            * `Wikipedia: Airy functions <https://en.wikipedia.org/wiki/Airy_function>`_
-            * `Mathworld: Airy functions <http://mathworld.wolfram.com/AiryFunctions.html>`_
+            * :dlmf:`9.2`
+            * :wiki:`Airy_function`
+            * :wolf:`AiryFunctions`
                 
         INPUT:
 
@@ -2189,9 +2216,12 @@ def AiryD(init=('a','b')):
             [a, b, 0, a, 2*b, 0, 4*a, 10*b, 0, 28*a]
             sage: for n in range(3,10):
             ....:     Ai_n = [Ai.derivative(times=n-i) for i in range(4)]
-            ....:     if(Ai_n[0] != x*Ai_n[2] + (n-2)*Ai_n[3]):
-            ....:         print(n)
+            ....:     assert Ai_n[0] == x*Ai_n[2] + (n-2)*Ai_n[3], "ERROR AiryD -- [%d]" %n
             sage: a = Ai(0); b = Ai.derivative()(0)
+
+        We can check with this code that the Airy function can be written as as 
+        combination of Hypergeometric functions::
+
             sage: Ai == a*F01(2/3)(x^3/9) + b*F01(4/3)(x^3/9)*x # hyperg. representation
             True
     '''
@@ -2235,6 +2265,7 @@ def AiryD(init=('a','b')):
 @cached_function
 def ParabolicCylinderD(a='a',b='b',c='c', init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of Parabolic Cylinder functions.
         
         References:
@@ -2266,6 +2297,7 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
 ## Legendre elliptic integrals
 def EllipticLegendreD(kind,var='phi'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Legendre elliptic integrals (F(phi,k), E(phi,k), D(phi,k)
         
         References:
@@ -2330,6 +2362,7 @@ def EllipticLegendreD(kind,var='phi'):
 @cached_function
 def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of the Coulomb spheroidal function 
         
         References:
@@ -2376,6 +2409,7 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
 @cached_function
 def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of the spheroidal wave function.
         
         References:
@@ -2526,6 +2560,7 @@ def FuchsianD(a = (), q = (), init=(), parent=QQ):
 ### Heun's function
 def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Heun's functions.
         
         References:
@@ -2604,46 +2639,70 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
     return f
 
 ###### COULOMB FUNCTIONS
-def FCoulombD(m='m', l='l'):
+def FCoulombD(m='m', l=-1):
     r'''
         D-finite implementation of the regular Coulomb wave function `F_{l,\mu}(x)`.
         
-        References:
-            * https://dlmf.nist.gov/33.2
-            * http://fungrim.org/topic/Coulomb_wave_functions/
-            * https://en.wikipedia.org/wiki/Coulomb_wave_function
-            
-        The Coulomb Wave function is the solution to the differential equation
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a regular Coulomb wave function. For more
+        information about this function, consult the following references:
+
+        * :dlmf:`33.2`
+        * :fungrimT:`Coulomb_wave_functions`
+        * :wiki:`Coulomb_wave_function`
+
+        The regular Coulomb wave function is a function `w_{\nu,l}(x)` defined with the differential
+        equation
+
+        .. MATH::
         
+            \frac{d^2w}{dx^2} + \left(1-\frac{2\nu}{x} - \frac{l(l+1)}{x^2}\right)w = 0.
+
+        This equation falls naturally in the realm of D-finite functions, and can be written
+        as follows:
+
         .. MATH::
 
-            f''(x) + \left(1-\frac{2m}{x} - \frac{l(l+1)}{x^2}\right)f(x) = 0
-            
-        If `l` is integer, there is a power series solution of order `l+1`, and 
-        this function return that solution with first sequence element `1`.
-        
+            x^2 w_{\nu,l}''(x) + (x^2 - 2\nu x - l(l+1))w_{\nu,l}(x) = 0.
+
+        This equation has a singularity at zero, so it will only have 1 regular solution at this
+        point that is the function defined via this method.
+
         INPUT:
-            * ``m``: the parameter `m` on the differential equation. If not provided, 
-              it takes the value ``'m'`` by default. This argument can be any 
-              rational number or any polynomial expression, which variables will 
-              be considered as parameters (so ``x`` is not allowed).
-            * ``l``: the parameter `l` on the differential equation. If not provided, 
-              it takes the value ``'l'`` by default. This argument can be any 
-              rational number or any polynomial expression, which variables will 
-              be considered as parameters (so ``x`` is not allowed).
+
+        * ``m``: value of the parameter `\nu`. It can be a numerical value or a string. In the 
+          latter case, it will be used to create a new parameter with such name.
+        * ``l``: value of the parameter `l`. It has to be an integer greater or equal to `-1`.
+          Then the equation has a unique power series solution of order `l+1`. If this
+          is not an integer value, an error is raised.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
               
         EXAMPLE::
 
-            sage: from ajpastor.dd_functions.ddExamples import FCoulombD
-            sage: F = FCoulombD(1/2,2); 
+            sage: from ajpastor.dd_functions import *
+            sage: F = FCoulombD(1/2,2)
             sage: x^2*F.derivative(times=2) + (x^2-x-6)*F
             0
-            sage: #for l in range(-1,10): # checking with m parameter
-            ....: #    F = FCoulombD('m',l)
-            ....: #    m = F.parent().parameter('m')
-            ....: #    if(not x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0):
-            ....: #        print(l)
-            ....: # TODO: Improve these tests
+            sage: for l in range(-1,10): # checking with m parameter
+            ....:     F = FCoulombD('m',l)
+            ....:     m = F.parent().parameter('m')
+            ....:     assert x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0, "ERROR:%d" %l
+
+        We can check with this function the Kummer function (see :fungrim:`d280c5`). Remark that 
+        our Coulomb function is such that the first non-zero initial condition is 1, so we have
+        to scale the identity accordingly::
+
+            sage: R = ParametrizedDDRing(DFiniteI, 'm')
+            sage: i = R.base().base().base().base().gens()[0]; x = R.variable('x'); m = R.parameter('m')
+            sage: for l in range(0, 10):
+            ....:     for w in (-1,1):
+            ....:         lhs = FCoulombD(m, l)
+            ....:         rhs = x^(l+1)*Exp(SR('x'))(w*i*x)*F11(1+l+w*i*m, 2*l+2)(-2*w*i*x)
+            ....:         assert factorial(l+1)*lhs == rhs, "ERROR: %d-%d" %(l,w)
     '''
     parent, new_all = __check_list([m,l], [str(el) for el in DFinite.variables()])
     rm, rl = new_all
@@ -2655,11 +2714,17 @@ def FCoulombD(m='m', l='l'):
     x = destiny_ring.variables()[0]
     init = []
     
-    if(rl in ZZ): ## Power series solution
-        if(rl in [-1,0]): ## Special cases
-            init = [0,1]
-        elif(rl > 0):
-            init = [0 for i in range(rl+1)] + [1]
+    ## Checking the `l` argument
+    if(not (rl in ZZ)):
+        raise TypeError("The parameter `l` has to be an integer")
+    rl = ZZ(rl)
+    if(rl < -1): 
+        raise ValueError("The parameter `l` has to be an integer greater or equal than -1")
+    
+    if(rl in [-1,0]): ## Special cases
+        init = [0,1]
+    elif(rl > 0):
+        init = [0 for i in range(rl+1)] + [1]
             
     return destiny_ring.element([x**2-2*rm*x-rl*(rl+1), 0, x**2], init=init, name=DynamicString("CoulombF(_1;_2)(_3)", [repr(rm), repr(rl), "x"]))
 
@@ -2712,8 +2777,9 @@ def CatalanD():
         DDFunction of the generating function for the Catalan numbers.
 
         References:
-            * http://oeis.org/A000108
-            * https://en.wikipedia.org/wiki/Catalan_number
+
+        * :oeis:`A000108`
+        * :wiki:`Catalan_number`
 
         The Catalan sequence is defined with a closed formula 
         `c_n = \binom{2n}{n}/(n+1)`. It has been widely studied 
@@ -2729,11 +2795,12 @@ def CatalanD():
 
             C(x) = 1+ xC(x)^2,
             
-        where `C(x)` is the ordinary generating function for the sequence `(c_n)`. 
+        where `C(x)` is the ordinary generating function for the sequence `(c_n)_n`. 
         This algebraic equation implies that `C(x)` is D-finite with 
         differential equation:
         
         .. MATH::
+
             (4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.
             
         This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction`
@@ -2854,9 +2921,10 @@ def BellD():
         DDFunction of the exponential generating function for the Bell numbers.
 
         References:
-            * https://en.wikipedia.org/wiki/Bell_number
-            * http://oeis.org/A000110
-            * http://mathworld.wolfram.com/BellNumber.html
+
+        * :wiki:`Bell_number`
+        * :oeis:`A000110`
+        * :wolf:`BellNumber`
 
         The Bell numbers are a sequence `B_n` that counts the amount of possible
         partitions of a set with `n` element. This sequence is well known to be
@@ -2895,10 +2963,11 @@ def BernoulliD():
         DDFunction of the exponential generating function for the Bernoulli numbers.
 
         References:
-            * https://en.wikipedia.org/wiki/Bernoulli_number
-            * https://oeis.org/A027641
-            * https://oeis.org/A027642
-            * http://mathworld.wolfram.com/BernoulliNumber.html
+
+        * :wiki:`Bernoulli_number`
+        * Numerator sequence: :oeis:`A027641`
+        * Denominator sequence: :oeis:`A027642`
+        * :wolf:`BernoulliNumber`
 
         The Bernoulli numbers are a sequence `B_n` that arise in the series 
         expansions of trigonometric functions, and are extremely important 
@@ -2940,6 +3009,7 @@ def BernoulliD():
 ##################################################################################
 def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
     r'''
+        TODO: Review this documentation
         Method that create the ring of diff. definable elements over the `\wp`-Weierstrass
         function.
 
@@ -2985,9 +3055,7 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
             return final_base_ring(v*p.derivative(u) + (3/2*u**2 - g3)*p.derivative(v))
     
     return DDRing(final_base_ring, 1, parent, derivation=inner_derivation)
-
-
-            
+          
 ##################################################################################
 ##################################################################################
 ###
@@ -2997,6 +3065,7 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
 ################################################################################## 
 def DAlgebraic(polynomial, init=[], dR=None):
     '''
+        TODO: Review this documentation
         Method that transform an algebraic function to a DD-Function.
                 
         INPUT:
@@ -3164,6 +3233,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     
 def polynomial_inverse(polynomial):
     '''
+        TODO: Review this documentation
         Method that computes the functional inverse for a polynomial. As the functional
         inverse of a polynomial is an algebraic series, then it is D-finite.
         
@@ -3202,53 +3272,114 @@ def polynomial_inverse(polynomial):
 ##################################################################################
 ##################################################################################    
 def __decide_parent(input, parent = None, depth = 1):
-    '''            
+    r'''      
+        Method to decide the parent from a given input.
+
         This method is an auxiliary method that decides the parent associated
         with an input given some basic possible parent and depth.
         
-        This method converst the input to the parent base or, in case that parent
-        is not provided, computes the appropriate DDRing where the input can be consider
-        as the coefficient of a differential equation.
-        
-        If 'parent' is None, then several considerations are made:
-    - If 'input' is a Symbolic Expression, we take the variables of it, consider 
-            everyone but 'x' as parameters and create the corresponding ParametrizedDDRing 
-            of the depth given. The argument 'input' MUST be a polynomial in 'x' and a 
-            rational function in any other variable.
-    - If 'input' is a polynomial, then the first generator will be consider as the 
-            variable of a DDRing and the others as parameters. Then we create the corresponding
-            ParametrizedDDRing with the depth given.
-    - Otherwise, we create the DDRing of the parent of 'input' of the given depth 
-            and try to work with that ring.
+        This method will compute a :class:`~ajpastor.dd_functions.ddFunction.DDRing` such that
+        the element in ``input`` is can be used as a coefficient in the defining differential 
+        equations of its elements and it contains (at least) the depth ``depth`` of the 
+        :class:`~ajpastor.dd_functions.ddFunction.DDRing` given by ``parent``.
+
+        If ``parent`` is ``None``, then a minimal :class:`~ajpastor.dd_functions.ddFunction.DDRing`
+        is computed such that ``input``  can be used as coefficient. 
+
+        The treatment of ``input`` depends on its type:
+            * If it is a Symbolic Expression, we will consider `x` as a main variable and 
+              all other variables in the expression as parameters. Then the minimal 
+              :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed with that information.
+              This only works if ``input`` is a polynomial in `x` and a rational function on the 
+              other variables.
+            * If it is a polynomial, the first variable will be used as the main variable and the 
+              other as parameters. The the same procedure as for the Symbolic Expression will 
+              happen.
+
+        INPUT:
+
+        * ``input``: the input from which we start.
+        * ``parent``: a possible :class:`~ajpastor.dd_functions.ddFunction.DDRing` that has to be included
+          in the output.
+        * ``depth``: desired depth of the final :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        OUTPUT:
+
+        A tuple containing:
+            * The element in ``input`` casted to the base ring of the final parent ring.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDRing` that can represent objects over the ``input``
+              that also includes the ``parent`` and has depth ``depth``.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: from ajpastor.dd_functions.ddExamples import __decide_parent as decide
+            sage: decide(x)
+            (x, DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            sage: decide(x)[0] in decide(x)[1].base()
+            True
+            sage: decide(x, depth=3)[0].parent() is decide(x, depth=3)[1].base()
+            True
+            sage: i = DFiniteI.base().base().gens()[0]; X = DFiniteI.variable('x')
+            sage: decide(i*X)
+            (I*x, DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1)))
+            sage: decide(Exp(x), DFiniteI)
+            (exp(x), DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Number Field 
+            in I with defining polynomial x^2 + 1)))
+
+        This method detects some of the parameters included in the parent of the input, putthing them appropriately 
+        into the system::
+
+            sage: ParametrizedDDRing(DFiniteI, 'm').variable('x')
+            sage: x.parent()
+            Univariate Polynomial Ring in x over Fraction Field of Univariate Polynomial Ring 
+            in m over Number Field in I with defining polynomial x^2 + 1
+            sage: decide(x)
+            (x, DD-Ring over (Univariate Polynomial Ring in x over Number Field in I with defining polynomial x^2 + 1) with parameter (m))
     '''
-    dR = parent
-    if(dR is None):
-        R = input.parent()
-        if(input in QQ):
-            dR = DFinite.to_depth(depth)
-        elif(R is SR):
-            parameters = set([str(el) for el in input.variables()])-set(['x'])
-            if(len(parameters) > 0 ):
-                dR = ParametrizedDDRing(DFinite.to_depth(depth), parameters)
-            else:
-                dR = DDRing(PolynomialRing(QQ,x), depth=depth)
-        elif(isMPolynomial(R) or isPolynomial(R)):
-            parameters = [str(gen) for gen in R.gens()[1:]]
-            var = R.gens()[0]
-            if(len(parameters) > 0):
-                dR = ParametrizedDDRing(DDRing(PolynomialRing(R.base_ring(),var), depth=depth), parameters)
-            else:
-                dR = DDRing(PolynomialRing(R.base_ring(),var), depth = depth)
+    ## Treating the input
+    input_parent = input.parent()
+    if(input in QQ):
+        input_parent = DFinite
+    elif(input_parent is SR):
+        parameters = set([str(el) for el in input.variables()])-set(['x'])
+        if(len(parameters) > 0 ):
+            input_parent = ParametrizedDDRing(DFinite, parameters)
         else:
-            try:
-                dR = DDRing(R, depth = depth)
-            except Exception as e:
-                raise TypeError("The object provided is not in a valid Parent", e)
-    
-    return dR.base()(input), dR
+            input_parent = DDRing(PolynomialRing(QQ,x))
+    elif(isMPolynomial(input_parent) or isPolynomial(input_parent)):
+        parameters = [str(gen) for gen in input_parent.gens()[1:]]
+        var = input_parent.gens()[0]
+
+        current = input_parent.base()
+        while((is_FractionField(current) or isMPolynomial(current) or isPolynomial(current)) and (current.gens() != (1))):
+            parameters += [str(gen) for gen in current.gens() if str(gen) != '1']
+            current = current.base()
+        parameters = list(set(parameters))
+
+        if(len(parameters) > 0):
+            input_parent = ParametrizedDDRing(DDRing(PolynomialRing(current,var)), parameters)
+        else:
+            input_parent = DDRing(PolynomialRing(input_parent.base_ring(),var))
+    else:
+        try:
+            input_parent = DDRing(input_parent)
+        except Exception as e:
+            raise TypeError("The object provided is not in a valid Parent", e)
+    input = input_parent.base()(input)
+
+    ## Computing the common parent
+    if(parent is None):
+        parent = input_parent.to_depth(depth)
+    elif(is_DDRing(parent)):
+        parent = parent.to_depth(depth)
+
+    final_parent = pushout(input_parent, parent)
+    return final_parent.base()(input), final_parent
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
+        TODO: Review this documentation
         This method computes a field of rational functions in several variables given a list of 
         elements, where all the elements can be casted into. This method also allows to ban some variables
         to appear in the elements, raising an error if that happens.
@@ -3279,15 +3410,15 @@ def __check_list(list_of_elements, invalid_vars=[]):
                 all_vars += [str(v) for v in el.denominator().variables()]
             else:
                 all_vars += [str(v) for v in el.variables()]
+            parent = pushout(parent, el.parent().base_ring())
             list_of_elements[i] = str(el)
     
     if(any(el in all_vars for el in invalid_vars)):
         raise ValueError("An invalid variable detected in the list.\n\t- Got: %s\n\t- Invalid: %s" %(list_of_elements, invalid_vars))
     
-    parent = QQ
     if(len(all_vars) > 0):
         all_vars = list(set(all_vars))
-        parent = PolynomialRing(QQ, all_vars).fraction_field()
+        parent = PolynomialRing(parent, all_vars).fraction_field()
         list_of_elements = [parent(el) for el in list_of_elements]
     
     return (parent, list_of_elements)
