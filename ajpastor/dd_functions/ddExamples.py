@@ -1050,7 +1050,7 @@ def Arctan(input, ddR = None):
 @cached_function 
 def Arcsinh(input, ddR = None):
     '''
-        TODO: GO on here
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
         
         References:
@@ -1100,6 +1100,7 @@ def Arcsinh(input, ddR = None):
 @cached_function
 def Arccosh(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arccosine function (arccosh(x)).
         
         References:
@@ -1151,6 +1152,7 @@ def Arccosh(input, ddR = None):
 @cached_function 
 def Arctanh(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the hyperbolic Arctangent function (arctanh(x)).
         
         References:
@@ -1207,6 +1209,7 @@ def Arctanh(input, ddR = None):
 @cached_function  
 def Log(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Logarithm function (ln(x)).
         
         References:
@@ -1240,6 +1243,7 @@ def Log(input, ddR = None):
 @cached_function 
 def Log1(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the shifted Logarithm function (ln(x+1)). It is equivalent to Log(input+1).
         
         References:
@@ -1275,6 +1279,7 @@ def Log1(input, ddR = None):
 @cached_function 
 def Exp(input, ddR = None):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Exponential function (exp(x)).
         
         References:
@@ -1314,6 +1319,7 @@ def Exp(input, ddR = None):
 @cached_function 
 def BesselD(input = 'P', kind = 1):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Bessel functions (J_n(x), Y_n(x)).
         
         References:
@@ -1360,6 +1366,7 @@ def BesselD(input = 'P', kind = 1):
 @cached_function
 def StruveD(mu='P',kind=1):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Struve functions (J_n(x), Y_n(x)).
         
         References:
@@ -1439,6 +1446,7 @@ def __first_derivative_associated_legendre(n,m,kind):
 @cached_function 
 def LegendreD(nu='n', mu = 0, kind=1):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
         
         References:
@@ -1530,6 +1538,7 @@ def LegendreD(nu='n', mu = 0, kind=1):
 @cached_function    
 def ChebyshevD(input='n', kind = 1, poly=True):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Chebyshev polynomials (T_n(x), U_n(x))
         
         References:
@@ -1628,6 +1637,7 @@ __CACHED_HYPERGEOMETRIC = {}
 @cached_function
 def HypergeometricFunction(a='a',b='b',c='c', init = 1):
     '''
+        TODO: Review this documentation
         D-finite implementation of the Gauss Hypergeometric function
         
         References:
@@ -1808,7 +1818,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         ## Building differential operator
         from .ddFunction import DDFunction
         auxR = PolynomialRing(destiny_ring.original_ring(), 'theta'); E = auxR.gens()[0]
-        op_num = prod(E + el for el in numerator); op_den = E*prod(E + el - 1 for el in denominator)
+        op_num = prod([E + el for el in numerator], auxR.one()); op_den = E*prod([E + el - 1 for el in denominator], auxR.one())
         op_num = [x*sum(
             op_num[j]*DDFunction.euler_coefficient(j,i) for j in range(i,op_num.degree()+1)
             ) for i in range(op_num.degree()+1)]
@@ -1868,6 +1878,7 @@ def F21(a='a',b='b',c='c'):
 @cached_function
 def PolylogarithmD(s=1):
     '''
+        TODO: Review this documentation
         Implementation using DDFunctions of the Polylogarithms
 
         References:
@@ -1901,6 +1912,7 @@ def PolylogarithmD(s=1):
 @cached_function
 def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
     '''
+        TODO: Review this documentation
         Implementation using DDFunctions of the solutions for the Riccati differential equation.
         
         References:
@@ -1952,13 +1964,12 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
         return solution,w
     return solution
     
-    
-    
 ###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
 def MathieuD(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu function
         
         References:
@@ -1994,6 +2005,7 @@ def MathieuD(a='a',q='q',init=()):
 @cached_function
 def MathieuSin(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu Sine function.
         
         References:
@@ -2009,6 +2021,7 @@ def MathieuSin(a='a',q='q'):
 @cached_function
 def MathieuCos(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Mathieu Cosine function.
         
         References:
@@ -2025,6 +2038,7 @@ def MathieuCos(a='a',q='q'):
 @cached_function
 def MathieuH(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2059,6 +2073,7 @@ def MathieuH(a='a',q='q',init=()):
 @cached_function
 def MathieuSinh(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2073,6 +2088,7 @@ def MathieuSinh(a='a',q='q'):
 @cached_function
 def MathieuCosh(a='a',q='q'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Modified Mathieu functions.
         
         References:
@@ -2088,6 +2104,7 @@ def MathieuCosh(a='a',q='q'):
 @cached_function
 def HillD(a='a',q='q',init=()):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Hill equation.
         
         References:
@@ -2171,9 +2188,9 @@ def AiryD(init=('a','b')):
         Airy's differential equation with some particular initial values.
 
         For further references, the user can look into the following references:
-            * `DLMF Chapter 9.2 <https://dlmf.nist.gov/9.2>`_
-            * `Wikipedia: Airy functions <https://en.wikipedia.org/wiki/Airy_function>`_
-            * `Mathworld: Airy functions <http://mathworld.wolfram.com/AiryFunctions.html>`_
+            * :dlmf:`9.2`
+            * :wiki:`Airy_function`
+            * :wolf:`AiryFunctions`
                 
         INPUT:
 
@@ -2199,9 +2216,12 @@ def AiryD(init=('a','b')):
             [a, b, 0, a, 2*b, 0, 4*a, 10*b, 0, 28*a]
             sage: for n in range(3,10):
             ....:     Ai_n = [Ai.derivative(times=n-i) for i in range(4)]
-            ....:     if(Ai_n[0] != x*Ai_n[2] + (n-2)*Ai_n[3]):
-            ....:         print(n)
+            ....:     assert Ai_n[0] == x*Ai_n[2] + (n-2)*Ai_n[3], "ERROR AiryD -- [%d]" %n
             sage: a = Ai(0); b = Ai.derivative()(0)
+
+        We can check with this code that the Airy function can be written as as 
+        combination of Hypergeometric functions::
+
             sage: Ai == a*F01(2/3)(x^3/9) + b*F01(4/3)(x^3/9)*x # hyperg. representation
             True
     '''
@@ -2245,6 +2265,7 @@ def AiryD(init=('a','b')):
 @cached_function
 def ParabolicCylinderD(a='a',b='b',c='c', init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of Parabolic Cylinder functions.
         
         References:
@@ -2276,6 +2297,7 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
 ## Legendre elliptic integrals
 def EllipticLegendreD(kind,var='phi'):
     '''
+        TODO: Review this documentation
         DD-finite implementation of the Legendre elliptic integrals (F(phi,k), E(phi,k), D(phi,k)
         
         References:
@@ -2340,6 +2362,7 @@ def EllipticLegendreD(kind,var='phi'):
 @cached_function
 def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of the Coulomb spheroidal function 
         
         References:
@@ -2386,6 +2409,7 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
 @cached_function
 def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
     '''
+        TODO: Review this documentation
         D-finite implementation of the spheroidal wave function.
         
         References:
@@ -2536,6 +2560,7 @@ def FuchsianD(a = (), q = (), init=(), parent=QQ):
 ### Heun's function
 def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
     r'''
+        TODO: Review this documentation
         D-finite implementation of the Heun's functions.
         
         References:
@@ -2752,8 +2777,9 @@ def CatalanD():
         DDFunction of the generating function for the Catalan numbers.
 
         References:
-            * http://oeis.org/A000108
-            * https://en.wikipedia.org/wiki/Catalan_number
+
+        * :oeis:`A000108`
+        * :wiki:`Catalan_number`
 
         The Catalan sequence is defined with a closed formula 
         `c_n = \binom{2n}{n}/(n+1)`. It has been widely studied 
@@ -2769,11 +2795,12 @@ def CatalanD():
 
             C(x) = 1+ xC(x)^2,
             
-        where `C(x)` is the ordinary generating function for the sequence `(c_n)`. 
+        where `C(x)` is the ordinary generating function for the sequence `(c_n)_n`. 
         This algebraic equation implies that `C(x)` is D-finite with 
         differential equation:
         
         .. MATH::
+
             (4x^2-x)C''(x) + (10x - 2)C'(x) + 2C(x) = 0.
             
         This method returns the :class:`~ajpastor.dd_functions.ddFunction.DDFunction`
@@ -2894,9 +2921,10 @@ def BellD():
         DDFunction of the exponential generating function for the Bell numbers.
 
         References:
-            * https://en.wikipedia.org/wiki/Bell_number
-            * http://oeis.org/A000110
-            * http://mathworld.wolfram.com/BellNumber.html
+
+        * :wiki:`Bell_number`
+        * :oeis:`A000110`
+        * :wolf:`BellNumber`
 
         The Bell numbers are a sequence `B_n` that counts the amount of possible
         partitions of a set with `n` element. This sequence is well known to be
@@ -2935,10 +2963,11 @@ def BernoulliD():
         DDFunction of the exponential generating function for the Bernoulli numbers.
 
         References:
-            * https://en.wikipedia.org/wiki/Bernoulli_number
-            * https://oeis.org/A027641
-            * https://oeis.org/A027642
-            * http://mathworld.wolfram.com/BernoulliNumber.html
+
+        * :wiki:`Bernoulli_number`
+        * Numerator sequence: :oeis:`A027641`
+        * Denominator sequence: :oeis:`A027642`
+        * :wolf:`BernoulliNumber`
 
         The Bernoulli numbers are a sequence `B_n` that arise in the series 
         expansions of trigonometric functions, and are extremely important 
@@ -2980,6 +3009,7 @@ def BernoulliD():
 ##################################################################################
 def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
     r'''
+        TODO: Review this documentation
         Method that create the ring of diff. definable elements over the `\wp`-Weierstrass
         function.
 
@@ -3025,9 +3055,7 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
             return final_base_ring(v*p.derivative(u) + (3/2*u**2 - g3)*p.derivative(v))
     
     return DDRing(final_base_ring, 1, parent, derivation=inner_derivation)
-
-
-            
+          
 ##################################################################################
 ##################################################################################
 ###
@@ -3037,6 +3065,7 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
 ################################################################################## 
 def DAlgebraic(polynomial, init=[], dR=None):
     '''
+        TODO: Review this documentation
         Method that transform an algebraic function to a DD-Function.
                 
         INPUT:
@@ -3204,6 +3233,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     
 def polynomial_inverse(polynomial):
     '''
+        TODO: Review this documentation
         Method that computes the functional inverse for a polynomial. As the functional
         inverse of a polynomial is an algebraic series, then it is D-finite.
         
@@ -3349,6 +3379,7 @@ def __decide_parent(input, parent = None, depth = 1):
 
 def __check_list(list_of_elements, invalid_vars=[]):
     '''
+        TODO: Review this documentation
         This method computes a field of rational functions in several variables given a list of 
         elements, where all the elements can be casted into. This method also allows to ban some variables
         to appear in the elements, raising an error if that happens.
