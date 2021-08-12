@@ -205,7 +205,7 @@ class ListOperator(Operator):
         newCoeffs = [self.derivate()(self.coefficient(0))]
         for j in range(1,self.order()+1):
             newCoeffs += [self.derivate()(self.coefficient(j)) + self.coefficient(j-1)]
-        newCoeffs += [self.coefficient(self.order())]
+        newCoeffs += [self.lc()]
         
         return self.__class__(self.base(), newCoeffs, self.derivate())
     ####################################################### 
