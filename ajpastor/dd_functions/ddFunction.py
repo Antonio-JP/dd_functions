@@ -184,13 +184,33 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
     @staticmethod
     def __algebraic_equivalent__(R,S):
         r'''
-            Method that checks if two :class:`~sage.rings.number_field.number_field.NumberField` extensions are equivalent in SAGE. 
+            Method to check equality of Algebraic extensions.
+
+            This method decides whether two :class:`~sage.rings.number_field.number_field.NumberField` 
+            extensions are equivalent, meaning that the defining polynomials are the same. For doing
+            so, we check that the names of the added elements are the same and their defining polynomial
+            are also the same.
+
+            This method is based on equality of the polynomial class below.
+
+            If the input fields are not :class:`~sage.rings.number_field.number_field.NumberField`,
+            then this method returns the equality of `R` and `S`.
             
-            We say that `R\sim S` if they have the same polynomials defining their elements
-            and they have exactly the same name.
-            
-            If `R` or `S` are not an algebraic extension then the method returns simply ``R==S``.
+            INPUT:
+
+            * ``R``: one of the fields to be compared.
+            * ``S``: the second of the fields to be compared.
+
+            OUTPUT:
+
+            ``True`` if the two fields are essentially the same extension (with the same names
+            and defining polynomials) or if they are the same object. ``False`` otherwise.
+
+            TODO: add examples and tests
         '''
+        if(R == S):
+            return True
+
         from sage.categories.pushout import AlgebraicExtensionFunctor as algebraic
         const_S = S.construction()
         const_R = R.construction()
