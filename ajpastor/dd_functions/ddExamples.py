@@ -113,7 +113,7 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as is
 from sage.categories.pushout import pushout, FractionField
 
 # ajpastor imports
-from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DDFinite)
+from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DFiniteI, DDFinite)
 from ajpastor.dd_functions.exceptions import ZeroValueRequired
 from ajpastor.dd_functions.lazyDDRing import LazyDDRing
 from ajpastor.misc.dynamic_string import DynamicString
@@ -1049,20 +1049,59 @@ def Arctan(input, ddR = None):
 
 @cached_function 
 def Arcsinh(input, ddR = None):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the hyperbolic Arcsine function (arcsinh(x)).
+    r'''
+        D-finite implementation of the inverse hyperbolic sine function (`arcsinh(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseHyperbolicSine.html
-    - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
-            
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a hyperbolic arcsine-type function. For more
+        information about the inverse hyperbolic sine function, consult the following references:
+
+        * :wolf:`InverseHyperbolicSine`
+        * :wiki:`Inverse_hyperbolic_functions`
+
         This function can be converted into symbolic expressions.
+
+        INPUT:
+
+        * ``input``: a valid input for the inverse hyperbolic sine function. Namely:
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the main 
+              variable.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDFunction`: the composition 
+              will be computed. The DDFunction must have initial value 0.
+        * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+          embed the output. If this is not enough for representing the function, a bigger
+          :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: arcsinh = Arcsinh(x); arcsinh
+            arcsinh(x)
+            sage: arcsinh[0]
+            0
+            sage: arcsinh[1]
+            x
+            sage: arcsinh[2]
+            x^2 + 1
+            sage: arcsinh.init(10, True)
+            [0, 1, 0, -1, 0, 9, 0, -225, 0, 11025]
+            sage: # cheking identities with logarithmic function
+            sage: g = DAlgebraic(QQ[x]['y']('y^2 - x^2-1'), [1,0]) # g = sqrt(x^2+1)
+            sage: h.init(100,True) == arcsinh.init(100,True)
+            True
+            sage: arcsinh == Log(x+g) # long time (> 1 min)
+            True
+            sage: arcsinh.derivative()^2*(1+x^2) == 1 
+            True
     '''
     if(is_DDFunction(input)):
         return Arcsinh(x)(input)
@@ -1099,25 +1138,64 @@ def Arcsinh(input, ddR = None):
 
 @cached_function
 def Arccosh(input, ddR = None):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the hyperbolic Arccosine function (arccosh(x)).
+    r'''
+        D-finite implementation of the inverse hyperbolic cosine function (`arccosh(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseHyperbolicCosine.html
-    - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
-            
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a hyperbolic arccosine-type function. For more
+        information about the inverse hyperbolic cosine function, consult the following references:
+
+        * :wolf:`InverseHyperbolicCosine`
+        * :wiki:`Inverse_hyperbolic_functions`
+
         This function can be converted into symbolic expressions.
+
+        INPUT:
+
+        * ``input``: a valid input for the inverse hyperbolic cosine function. Namely:
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the main 
+              variable.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDFunction`: the composition 
+              will be computed. The DDFunction must have initial value 0.
+        * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+          embed the output. If this is not enough for representing the function, a bigger
+          :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: arccosh = Arccosh(x); arccosh
+            arccosh(x)
+            sage: arccosh[0]
+            0
+            sage: arccosh[1]
+            x
+            sage: arccosh[2]
+            x^2 - 1
+            sage: arccosh.init(10, True)
+            [1/2*I*pi, -I, 0, -I, 0, -9*I, 0, -225*I, 0, -11025*I]
+            sage: arccosh.derivative()^2*(x^2-1) == 1 
+            True
     '''
     if(is_DDFunction(input)):
         return Arccosh(x)(input)
+
+    # Forcing "I" to exists in the final ring
+    if(ddR is None): ddR = DFiniteI
+    else: ddR = pushout(ddR, DFiniteI)
     g, dR = __decide_parent(input, ddR)
-    dR = dR.extend_base_field(NumberField(x**2+1, name='I')); I = dR.coeff_field.gens()[0]
+    I = DFiniteI.coeff_field.gens()[0]
+
+    # Adding "pi" as a parameter
     dR = ParametrizedDDRing(dR, 'pi'); pi = dR.parameter('pi')
         
     evaluate = lambda p : dR.sequence(p,0)
