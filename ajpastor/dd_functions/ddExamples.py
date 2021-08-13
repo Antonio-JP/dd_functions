@@ -14,7 +14,7 @@ the usual implementation of those functions in Sage, (see the module :mod:`~ajpa
 for further information).
 
 This module includes lots of examples and test that should be always checked to run completely. The identities
-checked in these tests can all be found in the literature of `here <https://funent.org/>`_.
+checked in these tests can all be found in the literature of `here <https://fungrim.org/>`_.
         
 The functions available in this module are the following:
 
@@ -143,7 +143,7 @@ def Sin(input, ddR = None):
         INPUT:
             
         * ``input``: a valid input for the sine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -275,7 +275,7 @@ def Cos(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the cosine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -379,8 +379,8 @@ def Cos(input, ddR = None):
     
 @cached_function
 def Tan(input, ddR = None):
-    '''
-        DD-finite implementation of the Tangent function (`tan(x)`).
+    r'''
+        DD-finite implementation of the Tangent function (`\tan(x)`).
 
         Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a tangent-type function. For more
@@ -394,7 +394,7 @@ def Tan(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the tangent function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -499,7 +499,7 @@ def Sinh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the hyperbolic sine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -589,7 +589,7 @@ def Cosh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the hyperbolic cosine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -679,7 +679,7 @@ def Tanh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the hyperbolic tangent function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -776,7 +776,7 @@ def Arcsin(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse sine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -879,7 +879,7 @@ def Arccos(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse cosine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -971,7 +971,7 @@ def Arctan(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse tangent function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -1064,7 +1064,7 @@ def Arcsinh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse hyperbolic sine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -1153,7 +1153,7 @@ def Arccosh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse hyperbolic cosine function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -1244,7 +1244,7 @@ def Arctanh(input, ddR = None):
         INPUT:
 
         * ``input``: a valid input for the inverse hyperbolic tangent function. Namely:
-            * A symbolic expression: all variables but ``x`` will be considered as 
+            * A symbolic expression: all variables but `x` will be considered as 
               parameters. Must be a polynomial expression with `x` as a factor.
             * A polynomial: the first generator of the polynomial ring will be 
               considered the variable to compute derivatives and the rest will be 
@@ -1324,20 +1324,69 @@ def Arctanh(input, ddR = None):
 ##################################################################################   
 @cached_function  
 def Log(input, ddR = None):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Logarithm function (ln(x)).
-        
-        References:
-    - http://mathworld.wolfram.com/Logarithm.html
-    - https://en.wikipedia.org/wiki/Logarithm
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 1.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 1 when the main variable is 0.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 1.
+    r'''
+        DD-finite implementation of the logarithm function (`\log(x+1)`).
+
+        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a logarithm-type function. For more
+        information about the logarithm function, consult the following references:
+
+        * :wolf:`Logarithm`
+        * :wiki:`Logarithm`
+        * :funtop:`Natural_logarithm`
             
         This function can be converted into symbolic expressions.
+
+        INPUT:
+
+        * ``input``: a valid input for the logarithm function. Namely:
+            * A symbolic expression: all variables but `x` will be considered as 
+              parameters. Must be a polynomial expression evaluating to `1` when `x=0`.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must evaluate to `1` when
+              the main variable is `0`.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDFunction`: the composition will 
+              be computed. The function must have initial value 1.
+        * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+          embed the output. If this is not enough for representing the function, a bigger
+          :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: log = Log(x+1)
+            sage: log.init(10, True)
+            [0, 1, -1, 2, -6, 24, -120, 720, -5040, 40320]
+            sage: log[0]
+            0
+            sage: log[1]
+            1
+            sage: log[2]
+            x + 1
+            sage: (x+1)*log.derivative() == 1
+            True
+
+        This package allows to check that `log(x)` is the functional inverse of 
+        the exponential function (see :func:`Exp`)::
+
+            sage: Exp(log) == x+1
+            True
+            sage: log(Exp(x)-1) == x
+            True
+
+        We can also check some basic properties from the Logarithm::
+
+            sage: log + log == Log((x+1)^2)
+            True
+            sage: Log(x^3 + 4*x^2 + 4*x + 1) - Log(x+1) == Log(x^2 + 3*x + 1)
+            True
+            sage: log == -Log(DFinite(1/(x+1)))
     '''
     if(is_DDFunction(input)):
         return Log(x+1)(input-1)
@@ -1358,56 +1407,91 @@ def Log(input, ddR = None):
     
 @cached_function 
 def Log1(input, ddR = None):
+    r'''
+        Alias or ``Log(input + 1, ddR)``. See method :func:`Log` for further information.
     '''
-        TODO: Review this documentation
-        DD-finite implementation of the shifted Logarithm function (ln(x+1)). It is equivalent to Log(input+1).
-        
-        References:
-    - http://mathworld.wolfram.com/Logarithm.html
-    - https://en.wikipedia.org/wiki/Logarithm
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
-            
-        This function can be converted into symbolic expressions.
-    '''
-    if(is_DDFunction(input)):
-        return Log1(x)(input)
-    f,dR = __decide_parent(input, ddR)
-    
-    evaluate = lambda p : dR.sequence(p,0)
-    if(evaluate(f) != 0):
-        raise ValueError("Impossible to compute cos(f) with f(0) != 0")
-    
-    df = dR.base_derivation(f)
-    df2 = dR.base_derivation(df)
-    
-    f1 = f+1
-    
-    newName = repr(f)
-    if(hasattr(f, "_DDFunction__name") and (not(f._DDFunction__name is None))):
-        newName = f._DDFunction__name
-    
-    return dR.element([0,df**2 -df2*f1,df*f1],[0,evaluate(df), evaluate(df2)-evaluate(df)**2 ], name=DynamicString("log(_1+1)", newName))
+    return Log(input+1, ddR)
     
 @cached_function 
 def Exp(input, ddR = None):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Exponential function (exp(x)).
-        
-        References:
-    - http://mathworld.wolfram.com/ExponentialFunction.html
-    - https://en.wikipedia.org/wiki/Exponential_function
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression such the evaluation x=0 gives 0.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must evaluate to 0 when the main variable is 0.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
+    r'''
+        DD-finite implementation of the exponential function (`e^x`).
+
+        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a exponential-type function. For more
+        information about the exponential function, consult the following references:
+
+        * :wolf:`ExponentialFunction`
+        * :wiki:`Exponential_function`
+        * :funtop:`Exponential_function`
             
         This function can be converted into symbolic expressions.
+
+        INPUT:
+
+        * ``input``: a valid input for the exponential function. Namely:
+            * A symbolic expression: all variables but `x` will be considered as 
+              parameters. Must be a polynomial expression evaluating to `1` when `x=0`.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must evaluate to `1` when
+              the main variable is `0`.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDFunction`: the composition will 
+              be computed. The function must have initial value 1.
+        * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+          embed the output. If this is not enough for representing the function, a bigger
+          :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: exp = Exp(x)
+            sage: exp.init(10, True)
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+            sage: exp[0]
+            -1
+            sage: exp[1]
+            1
+            sage: exp.derivative() == exp
+            True
+
+        We can check that the `log(x+1)` is the functional inverse of `e^x` (see :func:`Log`)::
+
+            sage: Log(x+1)(exp(x)-1) == x
+            True
+            sage: exp(Log(x+1)) == x+1
+            True
+
+        Also, we can check the multiplicative properties of the exponential with some examples::
+
+            sage: exp^2 == Exp(2*x)
+            True
+            sage: Exp(x+1) * Exp(x+2) == Exp(2*x+3)
+            True
+        
+        The exponential function is closely related with the trigonometric functions (see
+        :func:`Sin`, :func:`Cos`, :func:`Tan`, :func:`Sinh`, :func:`Cosh`, :func:`Tanh`)::
+
+            sage: i = DFiniteI.coeff_field.gens()[0]; x = DFiniteI.variable('x')
+            sage: Exp(x) == Cosh(x) + Sinh(x)
+            True
+            sage: Exp(i*x) == Cos(x) + i*Sin(x)
+            True
+            sage: 2*Sin(x) == i*(Exp(-i*x) - Exp(i*x))
+            True
+            sage: 2*Cos(x) == (Exp(-i*x) + Exp(i*x))
+            True
+
+        The exponential function can also be seen as a hypergeometric function, more precisely,
+        the exponential is the `_0F_0(x)` function::
+
+            sage: Exp(x) == F00()
+            True
     '''
     if(is_DDFunction(input)):
         return Exp(x)(input)
