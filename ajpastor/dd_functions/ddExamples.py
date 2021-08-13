@@ -1793,8 +1793,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
 
         INPUT:
 
-        * ``num``: list of coefficients `a_i`. These elements may be any valid input from 
-          the following options:
+        * ``num``: list of coefficients `a_i`. These elements may be any valid input from the following options:
             * A constant in `\mathbb{Q}`. 
             * A string that will be considered the name for a parameter.
         * ``den``: list of coefficients `b_j`. These elements may be of the same types as
