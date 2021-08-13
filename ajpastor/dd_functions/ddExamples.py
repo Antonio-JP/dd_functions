@@ -14,7 +14,7 @@ the usual implementation of those functions in Sage, (see the module :mod:`~ajpa
 for further information).
 
 This module includes lots of examples and test that should be always checked to run completely. The identities
-checked in these tests can all be found in the literature of `here <https://fungrim.org/>`_.
+checked in these tests can all be found in the literature of `here <https://funent.org/>`_.
         
 The functions available in this module are the following:
 
@@ -1824,7 +1824,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
             (2*a^2*c^2*b^2 + 2*a^2*c^2*b + 2*a^2*c*b^2 + 2*a*c^2*b^2 + 2*a^2*c*b + 2*a*c^2*b + 2*a*c*b^2 + 2*a*c*b)/(2*e^2*d^2 + 2*e^2*d + 2*e*d^2 + 2*e*d)
 
         We can use this function to prove some known identities. For example, we can prove 
-        identities :fungrim:`651a4a`, :fungrim:`b25089` and :fungrim:`504717`::
+        identities :funent:`651a4a`, :funent:`b25089` and :funent:`504717`::
 
             sage: R = F21().parent(); c,b,a = R.parameters()
             sage: factor_651a4a = R.element([c-a-b, (1-x)],[1]) # (1-x)^(c-a-b)
@@ -1840,7 +1840,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
             True
 
         We can also prove the Kummer transformation for the confluent hypergeometric function 
-        (see :fungrim:`be533c`)::
+        (see :funent:`be533c`)::
 
             sage: F11(a,b) == Exp(x)*F11(b-a,b)(-x)
             True
@@ -2725,7 +2725,7 @@ def FCoulombD(m='m', l=-1):
         information about this function, consult the following references:
 
         * :dlmf:`33.2`
-        * :fungrimT:`Coulomb_wave_functions`
+        * :funtop:`Coulomb_wave_functions`
         * :wiki:`Coulomb_wave_function`
 
         The regular Coulomb wave function is a function `w_{\nu,l}(x)` defined with the differential
@@ -2769,7 +2769,7 @@ def FCoulombD(m='m', l=-1):
             ....:     m = F.parent().parameter('m')
             ....:     assert x^2*F.derivative(times=2) + (x^2-2*m*x-l*(l+1))*F == 0, "ERROR:%d" %l
 
-        We can check with this function the Kummer function (see :fungrim:`d280c5`). Remark that 
+        We can check with this function the Kummer function (see :funent:`d280c5`). Remark that 
         our Coulomb function is such that the first non-zero initial condition is 1, so we have
         to scale the identity accordingly::
 
