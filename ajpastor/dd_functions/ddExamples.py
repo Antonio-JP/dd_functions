@@ -1229,20 +1229,58 @@ def Arccosh(input, ddR = None):
 
 @cached_function 
 def Arctanh(input, ddR = None):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the hyperbolic Arctangent function (arctanh(x)).
+    r'''
+        D-finite implementation of the inverse hyperbolic tangent function (`arctanh(x)`).
         
-        References:
-    - http://mathworld.wolfram.com/InverseHyperbolicTangent.html
-    - https://en.wikipedia.org/wiki/Inverse_hyperbolic_functions
-            
-        This functions allows the user to fix the argument. The argument can be:
-    - A symbolic expression: all variables but "x" will be considered as parameters. Must be a polynomial expression with x as a factor.
-    - A polynomial: the first generator of the polynomial ring will be considered the variable to compute derivatives and the rest will be considered as parameters. The polynomial must be divisible by the main variable.
-    - A DDFunction: the composition will be computed. The DDFunction must have initial value 0.
-            
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a hyperbolic arctangent-type function. For more
+        information about the inverse hyperbolic tangent function, consult the following references:
+
+        * :wolf:`InverseHyperbolicTangent`
+        * :wiki:`Inverse_hyperbolic_functions`
+
         This function can be converted into symbolic expressions.
+
+        INPUT:
+
+        * ``input``: a valid input for the inverse hyperbolic tangent function. Namely:
+            * A symbolic expression: all variables but ``x`` will be considered as 
+              parameters. Must be a polynomial expression with `x` as a factor.
+            * A polynomial: the first generator of the polynomial ring will be 
+              considered the variable to compute derivatives and the rest will be 
+              considered as parameters. The polynomial must be divisible by the main 
+              variable.
+            * A :class:`~ajpastor.dd_functions.ddFunction.DDFunction`: the composition 
+              will be computed. The DDFunction must have initial value 0.
+        * ``ddR``: a :class:`~ajpastor.dd_functions.ddFunction.DDRing` where we want to 
+          embed the output. If this is not enough for representing the function, a bigger
+          :class:`~ajpastor.dd_functions.ddFunction.DDRing` is computed.
+              
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the corresponding
+        power series in the appropriate :class:`~ajpastor.dd_functions.ddFunction.DDRing`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: arctanh = Arctanh(x); arctanh
+            arctanh(x)
+            sage: arctanh[0]
+            0
+            sage: arctanh[1]
+            -2*x
+            sage: arctanh[2]
+            -x^2 + 1
+            sage: arctanh.init(10, True)
+            [0, 1, 0, 2, 0, 24, 0, 720, 0, 40320]
+            sage: arctanh.derivative()*(1-x^2) == 1 
+            True
+            sage: 2*arctanh == Log(DFinite((1+x)/(1-x)))
+            True
+            sage: i = DFiniteI.coeff_field.gens()[0]; x = DFiniteI.variable('x')
+            sage: Arctan(i*x) == i*arctanh
+            True
     '''
     if(is_DDFunction(input)):
         return Arctanh(x)(input)
