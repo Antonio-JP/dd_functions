@@ -1139,10 +1139,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         if(dest == 0):
             return self.original_ring()
-        elif(dest > 1 and self.operator_class is w_OreOperator):
-            operator_class = DDRing._Default_Operator
-        else:
+        elif(dest == 1 and self.operator_class is w_OreOperator):
             operator_class = w_OreOperator
+        else:
+            operator_class = DDRing._Default_Operator
 
         return DDRing(self.original_ring(), 
         depth = dest, 
