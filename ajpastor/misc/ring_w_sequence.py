@@ -63,6 +63,10 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
         ## Avoiding infinite recursion
         if(name == "base"):
             return super().__getattribute__(name)
+
+        ## allowing overriding
+        if(name in Wrap_w_Sequence_Ring.__dict__.keys()):
+            return super().__getattribute__(name)
         
         ## Now that base is not the attribute
         try:
@@ -77,8 +81,13 @@ class Wrap_w_Sequence_Ring (Ring_w_Sequence):
             if(attr is None):
                 raise AttributeError
             return attr
-            
-        raise AttributeError("'%s' object has no attribute '%s'" %(self.__class__, name))
+
+    def register_conversion(self, mor):
+        # added this method to avoid error in the registering of conversions
+        if(mor.codomain() is not self):
+            raise ValueError("Error in the codomain")
+        return super().register_conversion(mor)
+        
         
     def __repr__(self):
         return "(SR)" + repr(self.base())

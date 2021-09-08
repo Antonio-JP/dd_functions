@@ -84,16 +84,7 @@ class NoOreAlgebraWarning(DDFunctionWarning):
     pass
 
 warnings.simplefilter('always', DDFunctionWarning)
-    
-
-## Auxiliary derivative function
-def _aux_derivation(p):
-    try:
-        R = p.parent()
-        return derivative(p,R(x))
-    except Exception:
-        return 0
-        
+            
 #####################################################
 ### Class for DD-Rings
 #####################################################
@@ -1148,10 +1139,10 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         if(dest == 0):
             return self.original_ring()
-        elif(dest > 1 and self.operator_class is w_OreOperator):
-            operator_class = DDRing._Default_Operator
-        else:
+        elif(dest == 1 and self.operator_class is w_OreOperator):
             operator_class = w_OreOperator
+        else:
+            operator_class = DDRing._Default_Operator
 
         return DDRing(self.original_ring(), 
         depth = dest, 
@@ -1290,7 +1281,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
     base_derivation = property(derivation_on_base, None) #: alias for method :func:`~DDRing.derivation_on_base`
     
-    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None):
+    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None, euler=False):
         r'''
             Method to create a :class:`DDFunction` contained in ``self``.
             
@@ -1310,6 +1301,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                   equation.
                 * ``check_init``: boolean value to check that initial conditions are valid or not.
                 * ``name``: optional argument for providing a name to the new built function.
+                * ``euler``: optional argument to whether use the canonical differential basis `\partial_x`
+                  or the Euler differential operator `\theta_x = x\partial_x`.
 
             OUTPUT:
 
@@ -1334,7 +1327,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: g == f
                 True
         '''
-        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name)
+        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name,euler=euler)
         
     def eval(self, element, X=None, **input):
         r'''
@@ -2090,6 +2083,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
           such as when applying closure properties.
         * ``name``: in order to make objects easier to print and read, we can set a fixed name
           for a function that will be used when the method :func:`repr` is called.
+        * ``euler``: whether the coefficients in ``input`` are considered in the canonical 
+          basis `\partial_x` or the euler differential basis `\theta_x = x\partial_x`.
 
         WARNING: 
         
@@ -2112,12 +2107,109 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             ...
             InitValueError: There is no such function satisfying ...
 
+        The user do not need to declare all initial values for a new :class:`DDFunction`, but the error 
+        :class:`NoValueError` is raised when trying to get a new value::
+
+            sage: f = DFinite.element([x,1])
+            sage: f
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))
+            sage: print(f)
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    []
+            -------------------------------------------------
+            sage: f.sequence(2)
+            Traceback (most recent call last):
+            ...
+            NoValueError: Impossible to compute ...
+
+        These initial values can be stablish later with the method :func:`~DDFunction.change_init_values`::
+
+            sage: print(f.change_init_values([1]))
+            (1:1:4)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  * (x)
+                            +   D(f) 
+                            = 0 
+                    -- Initial values:
+                    [1, 0]
+            -------------------------------------------------
+
+        Providing the inhomogeneous term will change the defining equation to compute
+        a new homogeneous differential equation for the desired function. This inhomogeneous
+        part can be any function on the same ring as ``self``::
+
+            sage: g = DFinite.element([1,1],[1]) # exponential
+            sage: f = DFinite.element([1,0,x],[1],inhomogeneous=g)
+            sage: print(f)
+            (3:3:9)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                f  
+                            +   D(f) 
+                            + D^2(f) * (x + 1)
+                            + D^3(f) * (x)
+                            = 0 
+                    -- Initial values:
+                    [1, -2, 1, 0]
+            -------------------------------------------------
+            sage: h = DDFinite.element([-g,1],[1]) # double exponential
+            sage: f = DDFinite.element([1,0,g],[1], inhomogeneous=h)
+            sage: print(f)
+            (3:3:16)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (1:1:3)               f  * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:2)         +   D(f) 
+            (2:2:5)         + D^2(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+            (1:1:3)         + D^3(f) * (DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 0, 0]
+            -------------------------------------------------
+
+        Finally, the user can create functions using the Euler differential operator instead of the standard 
+        derivation. This is specially useful to create particular combinatorial examples. In this case, the 
+        equation is transformed (as in the inhomogeneous case) to a usual differential equation in the standard
+        basis::
+
+            sage: DFinite.element([0,0,1], euler=True).equation.operator
+            x*D^2 + D
+            sage: DFinite.element([1,0,1], euler=True).equation.operator
+            x^2*D^2 + x*D + 1
+            sage: DFinite.element([1,-1,1], euler=True).equation.operator
+            x^2*D^2 + 1
+
+        All can be used together::
+
+            sage: a = FactorialD()-1; b = FactorialD()-1; c = FactorialD()-2
+            sage: f = DDFinite.element([c,b,a],inhomogeneous=-1,euler=True)
+            sage: print(f)
+            (3:3:82)DD-Function in (DD-Ring over (DD-Ring over (Univariate Polynomial Ring in x over Rational Field))):
+            -------------------------------------------------
+                    -- Equation (self = f):
+            (2:2:8)               f  * ((Fa(x)-2)')
+            (5:5:20)        +   D(f) * (((Fa(x)-1)*(x)+(Fa(x)-1)*(x))'+Fa(x)-2)
+            (5:5:34)        + D^2(f) * (((Fa(x)-1)*(x^2))'+(Fa(x)-1)*(x)+(Fa(x)-1)*(x))
+            (3:3:17)        + D^3(f) * ((Fa(x)-1)*(x^2))
+                            = 0 
+                    -- Initial values:
+                    [1, 1, 10, 282]
+            -------------------------------------------------
+            sage: f.sequence(10,True)
+            [1, 1, 5, 47, 723, 16807, 556969, 25108863, 1482748979, 111262210379]
+
+
         TODO:
 
-        * Add examples of incomplete DDFunctions
         * Add examples of DDFunctions that does not require the first coefficients
         * Add examples where we use the dict input for ``init``
-        * Add examples with inhomogeneous term
     '''
     @staticmethod
     def __chyzak_dac(A, s, p, v, K=QQ, x='x'):
@@ -2231,10 +2323,74 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
         return solution.change_ring(Kx) # the solution has polynomial coefficients
 
+    
+    __CACHED_EULER = {}
+    @staticmethod
+    def euler_coefficient(n,i):
+        r'''
+            Method to get the `i`-th coefficient for the `n`-th power of the Euler operator.
+
+            The Euler operator `\theta_x = x\partial_x` is a very useful basis to rewrite any differential 
+            operator that involves the use of `x`. This operator behaves nicely in terms of the 
+            generating sequence underlying a power series and, for some examples, it may be useful
+            to use easier.
+
+            It is clear, however, that the Euler operator can be written in terms of the standard 
+            basis of linear differential operators (namely, the basis `\partial_x^n`):
+
+            .. MATH::
+
+                \theta_x^n = \sum_{i=1}^n a_{n,i}(x)\partial_x^i
+
+            This method allows to compute the coefficients `a_{n,i}(x)` in a static and cached way for all 
+            :class:`DDFunction`.
+
+            INPUT:
+
+            * ``n``: the power of the Euler operator we want to write.
+            * ``i``: the index of the coefficients we want to extract.
+
+            OUTPUT:
+
+            A polynomial in `\mathbb{Z}[x]` with the coefficient `a_{n,i}(x)`.
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: x = DFinite.element([0,x]).equation.operator.parent().base().gens()[0]
+                sage: D = DFinite.element([0,1]).equation.operator
+                sage: E = x*D
+                sage: DDFunction.euler_coefficient(5, 3)
+                25*x^3
+                sage: DDFunction.euler_coefficient(10,10)
+                x^10
+                sage: all(sum(DDFunction.euler_coefficient(n,i)*D**i for i in range(n+1)) == E^n for n in range(30))
+                True
+        '''
+        R = PolynomialRing(ZZ, 'x')
+        x = R.gens()[0]
+        if(n < 0):
+            raise ValueError("The power `n` must be non-negative")
+
+        if(i < 0):
+            raise ValueError("The coefficient `i` must be non-negative")
+        elif(i == 0 and n == 0):
+            return R.one()
+        elif(i == 0 or i > n):
+            return R.zero()
+        elif(n == 1):
+            return x
+
+        if(not ((n,i) in DDFunction.__CACHED_EULER)):
+            DDFunction.__CACHED_EULER[(n,i)] = x*(DDFunction.euler_coefficient(n-1, i).derivative() + 
+                                                    DDFunction.euler_coefficient(n-1, i-1))
+        
+        return DDFunction.__CACHED_EULER[(n,i)]
+
     #####################################
     ### Init and Interface methods
     #####################################
-    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None):   
+    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None, euler=False):   
         # We check that the argument is a DDRing
         if(not isinstance(parent, DDRing)):
             raise DDFunctionError("A DD-Function must be an element of a DD-Ring")
@@ -2250,6 +2406,11 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         else:
             equation = input
 
+        ## Checking the parameter "euler"
+        if(euler): # the equation is considered with the euler operator
+            equation = [sum(
+                    [equation[j]*DDFunction.euler_coefficient(j,i) for j in range(len(equation))]
+                ) for i in range(len(equation))]
         ## Checking the argument ``init``
         if(type(init) in [list, tuple]):
             inits = {i : init[i] for i in range(len(init))}
@@ -2762,7 +2923,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 lc = self.equation.forward(r)(n=m-r)
                 self.__sequence[m] = -sum(self.sequence(m-i)*polys[-i] for i in range(1,len(polys)+1))/lc
             self.__computed = m
-        elif((n+1) > self.equation.get_jp_fo()): # power series case
+        elif((n+1) > self.equation.get_jp_fo() and self.equation.lc().sequence(0) != 0): # power series regular case
             ## In this case, we use the Divide and Conquer strategy proposed in 
             n = n+1
             on = n
@@ -3567,7 +3728,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Simple computations
     ###
     #####################################
-    def simple_add(self, other):
+    def simple_add(self, other, S=None):
         r'''
             Method to compute the simple addition of two DDFunctions.
 
@@ -3579,7 +3740,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Currently, this method only works with D-finite functions.
 
             INPUT:
-                * ``other``: the other :class:`DDFunction` that will be added to ``self``.
+        
+            * ``other``: the other :class:`DDFunction` that will be added to ``self``.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3591,12 +3759,47 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
                 sage: h = f.simple_add(g)
-                sage: # h.singularities()
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
 
-            TODO:
-                * Improve the tests
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: (f+g).equation.lc().factor()
+                (x + 1)^2
+                sage: f.simple_add(g).order()
+                5
+                sage: f.simple_add(g, [x+1]).order()
+                4
+                sage: f.simple_add(g, [x+1]).equation == (f+g).equation
+                True
+
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f = Sin(x); g = Log(x+1)
+                sage: (f+g).equation.lc().factor()
+                (x + 1) * (x^2 + 2*x + 3)
+                sage: f.simple_add(g).equation.lc().factor()
+                (4) * (x + 1)^2
+                sage: f.simple_add(g, [x+2])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 2] does not cover the minimal elements for this simple operation [x + 1]
+
+            Since the middle computations may require all the possible factors of the leading coefficient, 
+            the same error will show up if the factor put there is too big::
+
+                sage: f.simple_add(g, [(x + 1) * (x^2 + 2*x + 3)])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x^3 + 3*x^2 + 5*x + 3] does not cover the minimal elements for this simple operation [x + 1]
+
+            However, putting irreducible factors will always work as intended::
+
+                sage: f.simple_add(g, [(x + 1), (x^2 + 2*x + 3)]).equation == (f+g).equation
+                True
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return the other
         if(self.is_null):
@@ -3615,7 +3818,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             else:
                 newName = DynamicString("_1+_2", [self.name, other.name])
 
-        newOperator = self.equation.simple_add_solution(other.equation)
+        newOperator = self.equation.simple_add_solution(other.equation, S)
         needed_initial = newOperator.get_jp_fo()+1
         
         ### Getting as many initial values as possible until the new order
@@ -3628,7 +3831,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
         return result
 
-    def simple_mult(self, other):
+    def simple_mult(self, other, S=None):
         r'''
             Method to compute the simple product of two DDFunctions.
 
@@ -3640,7 +3843,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Currently, this method only works with D-finite functions.
 
             INPUT:
-                * ``other``: the other :class:`DDFunction` that will be multiplied to ``self``.
+
+            * ``other``: the other :class:`DDFunction` that will be multiplied to ``self``.
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3652,12 +3862,47 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: from ajpastor.dd_functions import *
                 sage: f = AiryD(); g = Sin(x)
                 sage: h = f.simple_mult(g)
-                sage: # h.singularities()
-                sage: h.equation[h.order()] in h.parent().coeff_field
+                sage: h.equation.lc() in h.parent().coeff_field
                 True
 
-            TODO:
-                * Improve the tests
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: (f*g).equation.lc().factor()
+                x + 1
+                sage: f.simple_mult(g).order()
+                5
+                sage: f.simple_mult(g, [x+1]).order()
+                4
+                sage: f.simple_mult(g, [x+1]).equation == (f*g).equation
+                True
+
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f = BesselD(1); g = Log(x+1)
+                sage: (f*g).equation.lc().factor()
+                (-4) * x^2 * (x + 1)^2 * (x^4 + 2*x^3 - 3/2*x - 3/4)
+                sage: f.simple_mult(g).equation.lc().factor()
+                (9) * x^3 * (x + 1)^3
+                sage: f.simple_mult(g, [x+1])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 1] does not cover the minimal elements for this simple operation [x^2, x + 1]
+
+            Since the middle computations may require all the possible factors of the leading coefficient, 
+            the same error will show up if the factor put there is too big::
+
+                sage: f.simple_mult(g, [x*(x+1)])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x^2 + x] does not cover the minimal elements for this simple operation [x^2, x + 1]
+
+            However, putting irreducible factors will always work as intended::
+
+                sage: f.simple_mult(g, [(x + 1), x]).equation == f.simple_mult(g).equation
+                True
         '''
         ### We check some simplifications: if one of the functions is zero, then we can return directly 0
         if ((other.is_null) or (self.is_null)):
@@ -3677,7 +3922,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             raise NotImplementedError("This method is not implemented")
             
         ### We build the new operator
-        newOperator = self.equation.simple_mult_solution(other.equation)
+        newOperator = self.equation.simple_mult_solution(other.equation, S)
         
         ### Getting the needed initial values for the solution
         needed_initial = newOperator.get_jp_fo()+1 
@@ -3696,7 +3941,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         result.built = ("polynomial", (PolynomialRing(self.parent().coeff_field,['x1','x2'])('x1*x2'), {'x1':self, 'x2': other}))
         return result
 
-    def simple_derivative(self):
+    def simple_derivative(self, S=None):
         r'''
             Method to compute the simple derivative of a DDFunction.
 
@@ -3706,6 +3951,15 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             returned have the same apparent singularities.
 
             Currently, this method only works with D-finite functions.
+
+            INPUT:
+
+            * ``S``: (optional) a set for considering the leading coefficients as 
+                simple elements. This set must be either a list of generators in ``self.parent().base()``
+                (from which we consider then the smallest multiplicatively close set) or 
+                a structure where the ``in`` python command can detect if elements in 
+                ``self.parent().base()`` are contained in them. If ``None`` is given, 
+                a default minimal set is computed for this particular operation.
 
             OUTPUT:
             
@@ -3719,34 +3973,60 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()] in h.parent().coeff_field
-                True
+                sage: h.equation.lc()
+                1
                 sage: f = Exp(x)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()] in h.parent().coeff_field
-                True
+                sage: h.equation.lc()
+                1
                 sage: f = BesselD(2)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
-                sage: h.equation[h.order()]%h.parent().base()(x) == 0 and len(h.equation[h.order()].factor()) == 1
+                sage: h.equation.lc()
+                8*x^3
+
+            The user can also specify the set of singularities to be considered. Then, if the 
+            operation can be performed in such structure, the result is given. This may 
+            provide different results than the "simplest" computations::
+
+                sage: f = BesselD(2); f.derivative().equation.lc().factor()
+                (-1) * (x - 2) * (x + 2) * x^2
+                sage: f.derivative().order()
+                2
+                sage: f.simple_derivative([x]).order()
+                3
+                sage: f.simple_derivative([x,x+1]).equation == f.simple_derivative([x]).equation
                 True
 
-            TODO:
-                * Improve the tests
+            Sometimes the set `S` provided is not enough to cover the operation by itself. 
+            Then an error is raised::
+
+                sage: f.simple_derivative([x+1])
+                Traceback (most recent call last):
+                ...
+                ValueError: The set [x + 1] does not cover the minimal elements for this simple operation [x^2]
         '''
         if(self.parent().depth() > 1):
             raise NotImplementedError("This method is not implemented")
 
         if(self.__simple_derivative is None):
+            self.__simple_derivative = {}
+
+        ## creating the cache key
+        if(S is None): cache = []
+        else: cache = S
+        cache = list(cache); cache.sort(); cache = tuple(cache)
+
+        if(not cache in self.__simple_derivative):
             if(self.is_constant()):
                 ### Special case: is a constant
-                self.__simple_derivative = self.parent()(0)
+                self.__simple_derivative[cache] = self.parent()(0)
             else:
                 ### We get the new operator
-                newOperator = self.equation.simple_derivative_solution()
+                newOperator = self.equation.simple_derivative_solution(S)
             
                 ### We get the required initial values (depending of the order of the next derivative)
                 initList = self.init(newOperator.get_jp_fo()+2, True, True)
@@ -3761,11 +4041,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                         newName = DynamicString("(_1)'", self.name)
                 
                 ### We create the next derivative with the equation, initial values
-                self.__simple_derivative = self.parent().element(newOperator, newInit, check_init=False, name=newName)
-                self.__simple_derivative.built = ("derivative",tuple([self]))
+                self.__simple_derivative[cache] = self.parent().element(newOperator, newInit, check_init=False, name=newName)
+                self.__simple_derivative[cache].built = ("derivative",tuple([self]))
                 
-            
-        return self.__simple_derivative
+        return self.__simple_derivative[cache]
 
     #####################################
     ### Sequence methods
@@ -4243,7 +4522,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     def numerical_solution(self, value, delta=1e-10, max_depth=100 ):
         try:
             ## We try to delegate the computation to the operator (in case of OreOperators)
-            if(self.equation.coefficients()[-1](0 ) != 0 ):
+            if(self.equation.lc()(0) != 0 ):
                 sol = self.equation.operator.numerical_solution(self.sequence(self.order(), True), [0 ,value],delta)
                 return sol.center(), sol.diameter()
             else:
@@ -4408,7 +4687,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     eq = self.equation.operator.desingularize()
                     lc = eq[eq.order()]
                 except AttributeError:
-                    lc = self.equation[self.equation.order()]
+                    lc = self.equation.lc()
                  
                 # only the zeros of the leading coefficient
                 self.__singularities = FiniteEnumeratedSet([root[0][0] for root in lc.roots()])
