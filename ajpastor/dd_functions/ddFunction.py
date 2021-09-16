@@ -4100,9 +4100,20 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Second, compute the final depth of the DDRing
         if(not isinstance(push, DDRing)):
             raise TypeError("A non DDRing obtained for the composition: that is impossible -- review method _pushout_ of DDRing class")
+
         if(isinstance(op, DDRing)):
             destiny_ring = push.to_depth(op.depth()+sp.depth())
         else:
+            ## checking if the composition could be simpler
+            if(other/push.variables()[0] in push.coeff_field): # other = a*x
+                a = push.coeff_field(other/push.variables()[0])
+                d = self.order()
+                # the new equation has as coefficients self[i](other)*a^(d-i)
+                new_equation = push.element([a**(d-i)*self[i](other) for i in range(d+1)]).equation
+                # the new initial values are self.init(i)*a^i
+                needed_initial = new_equation.get_jp_fo() + 1
+                return push.element(new_equation, [a**i*self.init(i) for i in range(needed_initial+1)])
+            ## If it is not a simple composition, we compute as usual
             destiny_ring = push.to_depth(sp.depth())
             
         if(destiny_ring.depth() >= 3 ):
