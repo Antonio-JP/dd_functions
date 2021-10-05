@@ -24,9 +24,9 @@ jobs:
         sage -pip install pylint
     - name: Checking areas
       run: |
-        ls -a /
+        ls -a /home/sage/sage/local/bin
         echo "------------------------------------------------"
-        ls -a /home/sage
+        ls -a /home/sage/sage
     - name: Checking the PATH
       run: |
         echo $PATH
