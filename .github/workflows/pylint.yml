@@ -6,11 +6,12 @@ jobs:
   build:
     
     runs-on: ubuntu-latest
-    container: sagemath/sagemath:latest
+    container: 
+      image: sagemath/sagemath:latest
+      options: --user root
     steps:
     - uses: actions/checkout@v1
     - name: Installing git and dependencies
-      user: --user root
       run: |
         apt-get -qq update \
         && apt-get -qq install -y --no-install-recommends git apt-transport-https ca-certificates \
