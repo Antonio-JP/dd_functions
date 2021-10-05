@@ -22,9 +22,11 @@ jobs:
     - name: Install pylint
       run: |
         sage -pip install pylint
-    - name: Checking the previous
+    - name: Checking areas
       run: |
-        ls -a ..
+        ls -a /
+        echo "------------------------------------------------"
+        ls -a /home/sage
     - name: Checking the PATH
       run: |
         echo $PATH
