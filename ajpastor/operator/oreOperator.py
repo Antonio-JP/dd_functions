@@ -71,7 +71,6 @@ from sage.all_cmdline import x
 
 # General imports
 from ore_algebra import OreAlgebra
-from ore_algebra.ore_operator import OreOperator
 
 # Local imports
 from .operator import Operator

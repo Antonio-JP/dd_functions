@@ -515,7 +515,7 @@ class TwoStepsOperator(ListOperator):
         
         return self._post_proc(move(self._pre_proc(full_companion), self._pre_proc(init_vector), self.derivate(), full_companion.ncols()+1))
         
-    def _mix_matrices(self, other, Mf, Mg):
+    def _mix_matrices(self, other, Mf, Mg): #pylint: disable=unused-argument
         return Mf, Mg, Mf.parent().base()
         
     def _compose_companion(self,Mf,g):

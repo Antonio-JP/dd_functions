@@ -122,7 +122,7 @@ class Operator(object):
     #######################################################
     ### INIT METHOD AND GETTERS
     #######################################################
-    def __init__(self, base, input, derivate = foo_derivative):
+    def __init__(self, base, input, derivate = foo_derivative): #pylint: disable=unused-argument
         '''
         This method allows the user to instantiate a new object of type Operator. 
         

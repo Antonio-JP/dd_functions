@@ -63,9 +63,6 @@ AUTHORS:
 # Local imports
 from .operator import Operator
 from .operator import foo_derivative
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
-
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
 
 class ListOperator(Operator):
     ### Static parameters
