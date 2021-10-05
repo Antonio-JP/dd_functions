@@ -9,10 +9,15 @@ jobs:
     container: sagemath/sagemath:latest
     steps:
     - uses: actions/checkout@v1
+    - name: Installing git and dependencies
+      run: |
+        apt-get -qq update \
+        && apt-get -qq install -y --no-install-recommends git apt-transport-https ca-certificates \
+        && apt-get -qq clean
     - name: Install package
       run: |
         sage -pip install --upgrade .
-    - name: Install dependencies
+    - name: Install pylint
       run: |
         sage -pip install pylint
     - name: Analysing the code with pylint
