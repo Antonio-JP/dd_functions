@@ -29,18 +29,15 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
+from sage.all import (IntegralDomain, IntegralDomainElement, gcd, UniqueRepresentation, ZZ)
 
-from sage.all_cmdline import *   # import sage library
-
-_sage_const_2 = Integer(2); _sage_const_1 = Integer(1); _sage_const_10 = Integer(10); _sage_const_0 = Integer(0); _sage_const_20 = Integer(20)
-
-# Some needed imports
-from sage.rings.ring import IntegralDomain
-from sage.structure.element import IntegralDomainElement
 from sage.categories.integral_domains import IntegralDomains
+from sage.categories.map import Map #pylint: disable=no-name-in-module
 from sage.categories.pushout import ConstructionFunctor
 
-_MAX_INTEGER = Integer(_sage_const_2 **_sage_const_10 -_sage_const_1 )
+_MAX_INTEGER = 2**10-1
+
+_IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
 
 #####################################################
 ### Class for Lazy Integral Domain Elements
@@ -90,17 +87,17 @@ class LazyIDElement(IntegralDomainElement):
         Method that computes a lazyElement such every element of input and self are divisors
         '''
         ## Checking the arguments
-        if(len(input) == _sage_const_1  and type(input[_sage_const_0 ]) == list):
-            input = input[_sage_const_0 ]
+        if(len(input) == 1 and type(input[0]) == list):
+            input = input[0]
 
-        if(len(input) == _sage_const_0 ):
+        if(len(input) == 0):
             return self
 
-        smallLcm = (self*input[_sage_const_0 ]).divide(self.gcd(input[_sage_const_0 ]))
-        if(len(input) == _sage_const_1 ):
+        smallLcm = (self*input[0]).divide(self.gcd(input[0]))
+        if(len(input) == 1):
             return smallLcm
 
-        return smallLcm.lcm(input[_sage_const_1 :])
+        return smallLcm.lcm(input[1:])
 
     def is_multiple_of(self,element):
         '''
@@ -162,7 +159,7 @@ class LazyIDElement(IntegralDomainElement):
                 return self
             try:
                 return self.__inner_add__(other)
-            except NotImplementedError as e:
+            except NotImplementedError:
                 pass
 
         return NotImplemented
@@ -306,24 +303,24 @@ class SimpleLIDElement(LazyIDElement):
     def __compute_division__(self, element):
         if(isinstance(element, SimpleLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, ProductLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, SumLIDElement)):
-            inner = element.__struct__().keys()[_sage_const_0 ]
+            inner = element.__struct__().keys()[0]
             number = element.__struct__()[inner]
 
-        if(number == _sage_const_1 ):
+        if(number == 1):
             if(inner == self.parent().one()):
                 return self
             else:
                 return self.parent().one()
-        elif(number == -_sage_const_1 ):
+        elif(number == -1):
             if(inner == self.parent().one()):
-                return -self
+                return self._neg_()
             else:
-                return -self.parent().one()
+                return self.parent().one()._neg_()
         raise ValueError("Impossible Exception: can not perform division")
 
     def __inner_add__(self, other):
@@ -333,7 +330,7 @@ class SimpleLIDElement(LazyIDElement):
             return SumLIDElement(self.parent(), self, other)
 
     def __inner_neg__(self):
-        return SumLIDElement(self.parent(), {self:-_sage_const_1 })
+        return SumLIDElement(self.parent(), {self:-1})
 
     def __inner_mul__(self, other):
         if(isinstance(other, SumLIDElement)):
@@ -388,11 +385,11 @@ class ProductLIDElement(LazyIDElement):
         self.__simplified = False
         #self.simplify()
 
-    def __add_element(self, el, n=_sage_const_1 ):
+    def __add_element(self, el, n=1):
         ## Checking the n argument
-        if(n == _sage_const_0 ):
+        if(n == 0):
             return
-        elif(n < _sage_const_0 ):
+        elif(n < 0):
             raise ValueError("Impossible have a negative exponent")
 
         ## If we are zero, we do nothing
@@ -410,10 +407,10 @@ class ProductLIDElement(LazyIDElement):
                 self.__add_element(aux,el[aux])
         ## Checking if the element is zero 9simplify operations
         elif(isinstance(el,LazyIDElement) and zero == el):
-            self.__factors = {zero : _sage_const_1 }
+            self.__factors = {zero : 1}
             return
         elif((not isinstance(el, LazyIDElement)) and zero.raw() == el):
-            self.__factors = {zero : _sage_const_1 }
+            self.__factors = {zero : 1}
             return
         ## We do nothing if we are adding +1
         elif(isinstance(el,LazyIDElement) and one == el):
@@ -424,7 +421,7 @@ class ProductLIDElement(LazyIDElement):
         elif(self._is_pure_in_base(el)):
             self.__add_element(SimpleLIDElement(self.parent(),el),n)
         elif(isinstance(el,SimpleLIDElement)):
-            self.__factors[el] = self.__factors.get(el,_sage_const_0 )+n
+            self.__factors[el] = self.__factors.get(el,0)+n
         else:
             raise Exception("Impossible to put a %s in a Product Lazy Element" %type(el))
 
@@ -442,18 +439,18 @@ class ProductLIDElement(LazyIDElement):
                 current = current_dic[key]
                 s_key = key.simplify()
                 if(s_key.is_zero()):
-                    self.__factors = {self.parent().zero():_sage_const_1 }
+                    self.__factors = {self.parent().zero():1}
                     return self.parent().zero()
-                if((not (s_key.is_one())) and (current > _sage_const_0 )):
-                    new_dic[s_key] = new_dic.get(s_key, _sage_const_0 ) + current_dic[key]
+                if((not (s_key.is_one())) and (current > 0)):
+                    new_dic[s_key] = new_dic.get(s_key, 0) + current_dic[key]
 
             mone = SimpleLIDElement(self.parent(),-self.base().one())
             if(mone in new_dic):
-                new_dic[mone] = new_dic[mone]%_sage_const_2 
+                new_dic[mone] = new_dic[mone]%2
 
             self.__factors = new_dic
 
-        if(len(self.__factors) == _sage_const_0 ):
+        if(len(self.__factors) == 0):
             return self.parent().one()
 
         return self
@@ -473,14 +470,14 @@ class ProductLIDElement(LazyIDElement):
         for key in current_dic:
             # Creating the new element to the sum
             der = key.derivative(*input)
-            aux_dic[key] = max(_sage_const_0 ,aux_dic[key]-_sage_const_1 )
-            aux_dic[der] = aux_dic.get(der, _sage_const_0 )+_sage_const_1 
+            aux_dic[key] = max(0,aux_dic[key]-1)
+            aux_dic[der] = aux_dic.get(der, 0)+1
             resList += [{ProductLIDElement(self.parent(), aux_dic) : current_dic[key]}]
 
             #Restoring the aux_dic
             aux_dic[key] = current_dic[key]
             if(der in current_dic):
-                aux_dic[der] = aux_dic[der]-_sage_const_1 
+                aux_dic[der] = aux_dic[der]-1
             else:
                 del aux_dic[der]
 
@@ -535,9 +532,9 @@ class ProductLIDElement(LazyIDElement):
                 return self.gcd(element) == element
             elif(isinstance(element, SumLIDElement)):
                 el_dic = element.__struct__()
-                if(len(el_dic) == _sage_const_1 ):
-                    key = el_dic.keys()[_sage_const_0 ]
-                    if(el_dic[key] == _sage_const_1 ):
+                if(len(el_dic) == 1):
+                    key = el_dic.keys()[0]
+                    if(el_dic[key] == 1):
                         return self.is_multiple_of(key)
 
         return False
@@ -548,15 +545,15 @@ class ProductLIDElement(LazyIDElement):
 
         if(isinstance(element, SimpleLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, ProductLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, SumLIDElement)):
-            inner = element.__struct__().keys()[_sage_const_0 ]
+            inner = element.__struct__().keys()[0]
             number = element.__struct__()[inner]
 
-        if(number != _sage_const_1  and number != -_sage_const_1 ):
+        if(number != 1 and number != -1):
             raise ValueError("Impossible Exception: can not perform division")
 
         new_dic = {}
@@ -564,21 +561,21 @@ class ProductLIDElement(LazyIDElement):
         if(isinstance(inner, SimpleLIDElement)):
             for key in current_dic:
                 new_dic[key] = current_dic[key]
-            new_dic[inner] = new_dic.get(inner,_sage_const_0 )-_sage_const_1 
-            if(new_dic[inner] == _sage_const_0 ):
+            new_dic[inner] = new_dic.get(inner,0)-1
+            if(new_dic[inner] == 0):
                 del new_dic[inner]
         elif(isinstance(inner, ProductLIDElement)):
             for key in current_dic:
-                value = current_dic[key]-inner.__struct__().get(key,_sage_const_0 )
-                if(value != _sage_const_0 ):
+                value = current_dic[key]-inner.__struct__().get(key,0)
+                if(value != 0):
                     new_dic[key] = value
         else:
             raise TypeError("Error with types wile dividing in a Product Lazy Element (%s)" %type(element))
 
-        if(number == _sage_const_1 ):
+        if(number == 1):
             return ProductLIDElement(self.parent(), new_dic).simplify()
         else: ## number == -1
-            return (-ProductLIDElement(self.parent(), new_dic)).simplify()
+            return (ProductLIDElement(self.parent(), new_dic))._neg_().simplify()
 
     def __inner_is_zero__(self):
         zero = self.parent().zero()
@@ -586,7 +583,7 @@ class ProductLIDElement(LazyIDElement):
 
     def __inner_is_one__(self):
         self.simplify()
-        return (len(self.__struct__()) == _sage_const_0 )
+        return (len(self.__struct__()) == 0)
 
 
     def __inner_add__(self, other):
@@ -596,7 +593,7 @@ class ProductLIDElement(LazyIDElement):
             return SumLIDElement(self.parent(), self, other)
 
     def __inner_neg__(self):
-        return SumLIDElement(self.parent(), {self:-_sage_const_1 })
+        return SumLIDElement(self.parent(), {self:-1})
         #return self*(-self.parent().one())
 
     def __inner_mul__(self, other):
@@ -628,16 +625,16 @@ class ProductLIDElement(LazyIDElement):
             other = self.parent()(other)
 
         current_dic = self.__struct__()
-        if(len(current_dic) == _sage_const_0 ):
-            return other == _sage_const_1 
+        if(len(current_dic) == 0):
+            return other == 1
         if(isinstance(other, LazyIDElement)):
             if(isinstance(other, SimpleLIDElement)):
-                return (len(current_dic) == _sage_const_1  and current_dic.get(other,_sage_const_0 ) == _sage_const_1 )
+                return (len(current_dic) == 1 and current_dic.get(other,0) == 1)
             elif(isinstance(other, ProductLIDElement)):
                 other_dir = other.__struct__()
                 if(len(other_dir) == len(current_dic)):
                     for key in current_dic:
-                        if(not(current_dic[key] == other_dir.get(key,_sage_const_0 ))):
+                        if(not(current_dic[key] == other_dir.get(key,0))):
                             return False
                     return True
             elif(isinstance(other, SumLIDElement)):
@@ -646,7 +643,7 @@ class ProductLIDElement(LazyIDElement):
         return False
 
     def __hash__(self):
-        res = _sage_const_1 
+        res = 1
         current_dic = self.__struct__()
 
         for key in current_dic:
@@ -659,7 +656,7 @@ class ProductLIDElement(LazyIDElement):
     def __inner_printing__(self, method):
         res = "ProductOf("
         current_dic = self.__struct__()
-        if(len(current_dic) != _sage_const_0 ):
+        if(len(current_dic) != 0):
             first = True
             for key in current_dic:
                 if(not first):
@@ -684,9 +681,9 @@ class SumLIDElement(LazyIDElement):
             self.__add_element(el)
         #self.simplify()
 
-    def __add_element(self, el, n=_sage_const_1 ):
+    def __add_element(self, el, n=1):
         ## Checking the n argument
-        if(n == _sage_const_0 ):
+        if(n == 0):
             return
 
         zero = self.parent().zero()
@@ -707,7 +704,7 @@ class SumLIDElement(LazyIDElement):
         elif(self._is_pure_in_base(el)):
             self.__add_element(SimpleLIDElement(self.parent(),el),n)
         elif(isinstance(el,SimpleLIDElement) or isinstance(el, ProductLIDElement)):
-            self.__summands[el] = self.__summands.get(el,_sage_const_0 )+n
+            self.__summands[el] = self.__summands.get(el,0)+n
         elif(isinstance(el, SumLIDElement)):
             self.__add_element(el.__struct__(),n)
         else:
@@ -727,8 +724,8 @@ class SumLIDElement(LazyIDElement):
             else:
                 raise TypeError("Impossible compute gcd with %s" %(type(el)))
 
-        myProd = self.__struct__().keys()[_sage_const_0 ]
-        products = [el.__struct__().keys()[_sage_const_0 ] for el in max_divisors]
+        myProd = self.__struct__().keys()[0]
+        products = [el.__struct__().keys()[0] for el in max_divisors]
         vals = [self.__struct__()[myProd]] + [max_divisors[i].__struct__()[products[i]] for i in range(len(products))]
         val_gcd = gcd(vals)
 
@@ -737,10 +734,10 @@ class SumLIDElement(LazyIDElement):
         for key in current_dic:
             minimum = current_dic[key]
             for el in products:
-                minimum = min(minimum, el.__struct__().get(key,_sage_const_0 ))
-                if(minimum == _sage_const_0 ):
+                minimum = min(minimum, el.__struct__().get(key,0))
+                if(minimum == 0):
                     break
-            if(minimum > _sage_const_0 ):
+            if(minimum > 0):
                 new_dic[key] = minimum
         return SumLIDElement(self.parent(), {ProductLIDElement(self.parent(),new_dic) : val_gcd})
 
@@ -754,12 +751,12 @@ class SumLIDElement(LazyIDElement):
             for key in current_dic:
                 current = current_dic[key]
                 s_key = key.simplify()
-                if((not (s_key.is_zero())) and (not(current == _sage_const_0 ))):
-                    new_dic[s_key] = new_dic.get(s_key,_sage_const_0 ) + current
+                if((not (s_key.is_zero())) and (not(current == 0))):
+                    new_dic[s_key] = new_dic.get(s_key,0) + current
 
             self.__summands = new_dic
 
-        if(len(self.__summands) == _sage_const_0 ):
+        if(len(self.__summands) == 0):
             return self.parent().zero()
 
         return self
@@ -770,7 +767,7 @@ class SumLIDElement(LazyIDElement):
 
         for key in current_dic:
             der = key.derivative(*input)
-            new_dic[der] = new_dic.get(der,_sage_const_0 )+current_dic[key]
+            new_dic[der] = new_dic.get(der,0)+current_dic[key]
 
         return SumLIDElement(self.parent(), new_dic)
 
@@ -808,8 +805,8 @@ class SumLIDElement(LazyIDElement):
         current_dic = self.__struct__()
         max_divisors = [SumLIDElement(self.parent(), {key.max_divisor() : current_dic[key]}) for key in current_dic]
 
-        if(len(max_divisors) > _sage_const_0 ):
-            return max_divisors[_sage_const_0 ].gcd(*max_divisors[_sage_const_1 :])
+        if(len(max_divisors) > 0):
+            return max_divisors[0].gcd(*max_divisors[1:])
 
         return SumLIDElement(self.parent(), ProductLIDElement(self.parent()))
 
@@ -818,37 +815,37 @@ class SumLIDElement(LazyIDElement):
 
     def __inner_is_multiple__(self, element):
         max_divisor = self.max_divisor()
-        inner = max_divisor.__struct__().keys()[_sage_const_0 ]
+        inner = max_divisor.__struct__().keys()[0]
         if(isinstance(element, SimpleLIDElement)):
             return inner.is_multiple_of(element)
         elif(isinstance(element, ProductLIDElement)):
             return inner.is_multiple_of(element)
         elif(isinstance(element, SumLIDElement)):
-            if(len(element.__struct__()) == _sage_const_1 ):
+            if(len(element.__struct__()) == 1):
                 number = max_divisor.__struct__()[inner]
-                other_inner = element.__struct__().keys()[_sage_const_0 ]
+                other_inner = element.__struct__().keys()[0]
                 other_number = element.__struct__()[other_inner]
 
-                return (Integer(other_number).divides(number)) and (inner.is_multiple_of(other_inner))
+                return (ZZ(other_number).divides(number)) and (inner.is_multiple_of(other_inner))
 
         return False
 
     def __compute_division__(self, element):
         if(isinstance(element, SimpleLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, ProductLIDElement)):
             inner = element
-            number = _sage_const_1 
+            number = 1
         elif(isinstance(element, SumLIDElement)):
-            inner = element.__struct__().keys()[_sage_const_0 ]
+            inner = element.__struct__().keys()[0]
             number = element.__struct__()[inner]
 
         new_dic = {}
         current_dic = self.__struct__()
         try:
             for key in current_dic:
-                new_dic[key.__compute_division__(inner)] = Integer(current_dic[key]/number)
+                new_dic[key.__compute_division__(inner)] = ZZ(current_dic[key]/number)
 
             return SumLIDElement(self.parent(), new_dic)
         except TypeError:
@@ -856,7 +853,7 @@ class SumLIDElement(LazyIDElement):
 
     def __inner_is_zero__(self):
         self.simplify()
-        return (len(self.__struct__()) == _sage_const_0 )
+        return (len(self.__struct__()) == 0)
 
     def __inner_is_one__(self):
         self.simplify()
@@ -884,7 +881,7 @@ class SumLIDElement(LazyIDElement):
             for key_current in current_dic:
                 for key_other in other_dic:
                     el = key_current*key_other
-                    new_dic[el] = new_dic.get(el,_sage_const_0 )+current_dic[key_current]*other_dic[key_other]
+                    new_dic[el] = new_dic.get(el,0)+current_dic[key_current]*other_dic[key_other]
 
             return SumLIDElement(self.parent(), new_dic)
         else:
@@ -897,7 +894,7 @@ class SumLIDElement(LazyIDElement):
 
     def __inner_pow__(self, other):
         aux = self.parent().one()
-        for i in range(other):
+        for _ in range(other):
             aux = aux*self
         return aux
 
@@ -909,23 +906,23 @@ class SumLIDElement(LazyIDElement):
             other = self.parent()(other)
 
         current_dic = self.__struct__()
-        if(len(current_dic) == _sage_const_0 ):
-            return other == _sage_const_0 
-        elif(len(current_dic) == _sage_const_1  and (not isinstance(other, SumLIDElement))):
-            key = current_dic.keys()[_sage_const_0 ]
-            return (current_dic[key] == _sage_const_1 ) and (key == other)
+        if(len(current_dic) == 0):
+            return other == 0
+        elif(len(current_dic) == 1 and (not isinstance(other, SumLIDElement))):
+            key = current_dic.keys()[0]
+            return (current_dic[key] == 1) and (key == other)
         elif(isinstance(other, SumLIDElement)):
             other_dir = other.__struct__()
             if(len(other_dir) == len(current_dic)):
                 for key in current_dic:
-                    if(not(current_dic[key] == other_dir.get(key,_sage_const_0 ))):
+                    if(not(current_dic[key] == other_dir.get(key,0))):
                         return False
                 return True
 
         return False
 
     def __hash__(self):
-        res = _sage_const_0 
+        res = 0
         current_dic = self.__struct__()
 
         for key in current_dic:
@@ -938,7 +935,7 @@ class SumLIDElement(LazyIDElement):
     def __inner_printing__(self, method):
         res = "SumOf("
         current_dic = self.__struct__()
-        if(len(current_dic) != _sage_const_0 ):
+        if(len(current_dic) != 0):
             first = True
             for key in current_dic:
                 if(not first):
@@ -958,9 +955,9 @@ class LazyIntegralDomain(UniqueRepresentation, IntegralDomain):
     Fraction_Field = None
 
     def __init__(self, base):
-        if base not in IntegralDomains():
+        if base not in _IntegralDomains:
             raise ValueError("%s is no integral domain" % base)
-        IntegralDomain.__init__(self, base, category=IntegralDomains())
+        IntegralDomain.__init__(self, base, category=_IntegralDomains)
 
         self._zero_element = SimpleLIDElement(self, base.zero())
         self._one_element = SimpleLIDElement(self, base.one())
@@ -970,7 +967,7 @@ class LazyIntegralDomain(UniqueRepresentation, IntegralDomain):
 
     def fraction_field(self):
         if(not(LazyIntegralDomain.Fraction_Field is None)):
-            return LazyIntegralDomain.Fraction_Field(self)
+            return LazyIntegralDomain.Fraction_Field(self) #pylint: disable=not-callable
         return super(LazyIntegralDomain, self).fraction_field()
 
 
@@ -993,24 +990,26 @@ class LazyIntegralDomain(UniqueRepresentation, IntegralDomain):
         return (not(coer is False) and not(coer is None))
 
     def _element_constructor_(self, *args, **kwds):
-        if(len(args) < _sage_const_1 ):
+        if(len(kwds) > 1):
+            raise TypeError("Unexpected argument for _element_constructor_")
+        if(len(args) < 1):
             print(str(args))
             raise ValueError("Impossible to build a lazy element without arguments")
 
-        i = _sage_const_0 
-        if(len(args) >= _sage_const_2 ):
-            if(not (args[_sage_const_0 ] is self)):
+        i = 0
+        if(len(args) >= 2):
+            if(not (args[0] is self)):
                 raise ValueError("What the .... are you sending to this method?")
-            i = _sage_const_1 
+            i = 1
         X = args[i]
 
         try:
             if(not isinstance(X, LazyIDElement)):
                 X_is_int = (X in ZZ) or (type(X) == int)
                 if((X_is_int) and (not (self.base() is ZZ))):
-                    if(X == _sage_const_0 ):
+                    if(X == 0):
                         return self.zero()
-                    elif(X == _sage_const_1 ):
+                    elif(X == 1):
                         return self.one()
                     else:
                         return SumLIDElement(self, {self.base().one() : ZZ(X)})
@@ -1073,8 +1072,8 @@ class LazyIntegralDomain(UniqueRepresentation, IntegralDomain):
 #####################################################
 class LazyIntegralDomainFunctor (ConstructionFunctor):
     def __init__(self):
-        ID = IntegralDomains()
-        self.rank = _sage_const_20 
+        ID = _IntegralDomains
+        self.rank = 20
         super(LazyIntegralDomainFunctor, self).__init__(ID,ID)
 
     ### Methods to implement
@@ -1091,7 +1090,7 @@ class LazyIntegralDomainFunctor (ConstructionFunctor):
 #####################################################
 ### General Morphism for return to basic rings
 #####################################################
-class LIDSimpleMorphism (sage.categories.map.Map):
+class LIDSimpleMorphism (Map):
     def __init__(self, domain, codomain):
         super(LIDSimpleMorphism, self).__init__(domain, codomain)
 
@@ -1103,7 +1102,6 @@ class LIDSimpleMorphism (sage.categories.map.Map):
 #####################################################
 __MAP_TO_LAZY_DOMAINS = {}
 def LazyDomain(X):
-    global  __MAP_TO_LAZY_DOMAINS
     if(not X in __MAP_TO_LAZY_DOMAINS):
         __MAP_TO_LAZY_DOMAINS[X] = LazyIntegralDomain(X)
 

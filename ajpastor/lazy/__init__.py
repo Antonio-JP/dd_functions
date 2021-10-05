@@ -27,7 +27,7 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from .lazyToPoly import LazyToPoly;
+from .lazyToPoly import LazyToPoly
 
-from pkgutil import extend_path;
-__path__ = extend_path(__path__, __name__);
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)

@@ -117,7 +117,7 @@ class _LazyElement(IntegralDomainElement):
                 return tuple(set(var_n+var_d))
         return tuple()
 
-    def derivative(self, *args):
+    def derivative(self, *args): #pylint: disable=unused-argument
         '''
         Method that computes the derivative of an element in the laziest way possible.
 
@@ -509,6 +509,8 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return (not(coer is False) and not(coer is None))
 
     def _element_constructor_(self, *args, **kwds):
+        if(len(kwds) > 1):
+            raise TypeError("Unexpected argument in _element_constructor_")
         if(len(args) < 1 ):
             print(str(args))
             raise ValueError("Impossible to build an element without arguments")
