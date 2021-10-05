@@ -271,7 +271,7 @@ def diffalg_reduction(poly, infinite=False, debug=False):
         r_method = fromInfinityPolynomial_toFinitePolynomial
         
     ### Preprocessing the input poly
-    _, poly, dR = __check_input(poly, debug)
+    _, poly, dR = __check_input(poly)
     
     if(not is_DDRing(dR)):
         raise TypeError("diffalg_reduction: polynomial is not over a DDRing")
@@ -292,7 +292,7 @@ def diffalg_reduction(poly, infinite=False, debug=False):
     ## Step 2: simplification of coefficients
     __dprint("-- Starting step 2", debug)
     graph = __simplify_coefficients(R, coeffs, l_of_derivatives, debug)
-    maximal_elements = __digraph_roots(graph, debug)
+    maximal_elements = __digraph_roots(graph)
     
     ## Detecting case: all coefficients are already simpler
     if(len(maximal_elements) == 1 and maximal_elements[0] == -1 and len(graph.outgoing_edges(-1)) == len(graph.edges())):
@@ -342,7 +342,7 @@ def diffalg_reduction(poly, infinite=False, debug=False):
 ################################################################################
 ################################################################################
 
-def __check_input(poly, debug=False):
+def __check_input(poly):
     '''
     Method that check and cast the polynomial input accordingly to our standards.
     
@@ -429,7 +429,7 @@ def __simplify_coefficients(base, coeffs, derivatives, debug=False):
     __dprint("Edges: %s" %graph.edges(), debug)
     
     # Deleting spurious relations and returning
-    return __min_span_tree(graph, debug)
+    return __min_span_tree(graph)
 
 def __simplify_derivatives(derivatives, debug=False):
     '''
@@ -505,13 +505,13 @@ def __find_linear_relation(f,g):
     
     return None
     
-def __min_span_tree(digraph, debug=False):
+def __min_span_tree(digraph):
     '''
     Method that computes a forest from a directed graph containing all vertices and having the minimal depth.
     
     It is computed with a breadth first search.
     '''
-    to_search = __digraph_roots(digraph, debug)
+    to_search = __digraph_roots(digraph)
     i = 0
     done = []
     edges = []
@@ -526,7 +526,7 @@ def __min_span_tree(digraph, debug=False):
         i += 1
     return DiGraph([digraph.vertices(),edges])
 
-def __digraph_roots(digraph, debug=False):
+def __digraph_roots(digraph):
     '''
     Method that computes the roots of a directed graph. We consider a vertex v to be a root if there
     are not edges (v,w) in the graph.

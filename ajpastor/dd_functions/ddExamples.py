@@ -102,7 +102,7 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (cached_function, factorial, bell_polynomial, NumberField, QQ, ZZ, pi,
+from sage.all import (cached_function, factorial, bell_polynomial, QQ, ZZ, pi,
                         sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR,
                         ideal)
 from sage.all_cmdline import x
@@ -2012,7 +2012,6 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         return initial
     
     ## Checking the function is cached
-    global __CACHED_HYPERGEOMETRIC
     if(not((numerator,denominator,initial) in __CACHED_HYPERGEOMETRIC)):
         ## Building differential operator
         from .ddFunction import DDFunction

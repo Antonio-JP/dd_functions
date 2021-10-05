@@ -37,7 +37,7 @@ import logging
 from functools import reduce
 
 #SAGE imports 
-from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
+from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
@@ -640,6 +640,8 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
             This method describes how to interpret the arguments that a :class:`DDRing` can received to cast one element to a 
             :class:`DDFunction` in ``self``.
         '''
+        if(len(kwds) > 0): 
+            raise TypeError("Unexpected arguments to _element_constructor_")
         if(len(args) < 1 ):
             raise ValueError("Impossible to build a lazy element without arguments")
         
@@ -1205,7 +1207,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         derivation = self.base_derivation, 
         default_operator = self.operator_class)
         
-    def is_field(self, **kwds):
+    def is_field(self):
         r'''
             Generic method for checking if ``self`` is a field.
 
@@ -1225,7 +1227,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return False
         
-    def is_finite(self, **kwds):
+    def is_finite(self):
         r'''
             Generic method for checking if ``self`` is finite.
 
@@ -1244,7 +1246,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return self.base().is_zero()
         
-    def is_noetherian(self, **kwds):
+    def is_noetherian(self):
         r'''
             Generic method for checking if ``self`` is Noetherian.
 
@@ -1433,7 +1435,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         else:
             return element
                 
-    def _parametric_evaluation(self, element, **input):
+    def _parametric_evaluation(self, element, **input): # pylint: disable=unused-argument
         r'''
             Computes an evaluation of the parameters on an element of ``self``.
 
@@ -1557,7 +1559,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         else:
             return tuple(self.original_ring()(el) for el in self.__variables)
 
-    def parameters(self, as_symbolic = False):
+    def parameters(self, as_symbolic = False): # pylint: disable=unused-argument
         r'''
             Method that returns all the parameters for ``self``.
 
@@ -3889,7 +3891,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## creating the cache key
         if(S is None): cache = []
         else: cache = S
-        cache = list(cache); cache.sort(); cache = tuple(cache)
+        cache = list(cache)
+        cache.sort()
+        cache = tuple(cache)
 
         if(not cache in self.__simple_derivative):
             if(self.is_constant()):
@@ -4089,7 +4093,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(other.parent() is SR):
             try:
                 other = self.parent().original_ring()(str(other))
-            except Exception as e:
+            except Exception:
                 raise TypeError("Impossible to perform a composition with a symbolic element. Try to cast (%s) to some field, polynomial ring or some DDRing" %(other))
             
         ## If we have the basic function we return the same element
@@ -4232,7 +4236,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         raise NotImplementedError("\n\t- ".join(["Method 'compose_algebraic' is not yet implemented. Current variables", 
                                                 "coefficients: %s" %F, 
                                                 "minimal polynomial: %s" %poly, 
-                                                "final ring: %s" %destiny_ring]))
+                                                "final ring: %s" %destiny_ring,
+                                                "init: %s" %init]))
             
     #####################################
     ### Property methods
