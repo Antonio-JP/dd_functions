@@ -21,18 +21,13 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (Matrix, Permutations, ideal, gcd, cached_method, vector, lcm, prod,
+from sage.all import (Matrix, gcd, vector, lcm, prod,
                         identity_matrix, diagonal_matrix)
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 
 # ajpastor imports
 from ajpastor.misc.linear_solver import LinearSystemSolver
-from ajpastor.misc.matrix import swap_rows
-from ajpastor.misc.matrix import swap_cols
-
-# Private variables for this module
-_Permutations = Permutations()
 
 # Main class of the file
 class BareissAlgorithm(LinearSystemSolver):

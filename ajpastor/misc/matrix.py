@@ -21,11 +21,10 @@ AUTHORS:
 
 # from sage.all import *   # import sage library
 #Python imports
-import sys
 from functools import reduce
 
 # Sage imports
-from sage.all import (Matrix, MatrixSpace, vector, kronecker_delta, ZZ, floor, random, identity_matrix, randint)
+from sage.all import (Matrix, MatrixSpace, vector, kronecker_delta, identity_matrix)
 
 # Local imports
 from .exceptions import SizeMatrixError
@@ -349,7 +348,7 @@ def vandermonde_matrix(parent, *args, **kwds):
     rows = [[pow(casted[i], j) for j in range(ncols)] for i in range(len(casted))]
     return Matrix(parent, rows)
     
-def random_matrix(parent, nrows, ncols = None, *args, **kwds):
+def random_matrix(parent, nrows, ncols = None, **kwds):
     r'''
         Method to create a random matrix in a particular parent structure.
 
