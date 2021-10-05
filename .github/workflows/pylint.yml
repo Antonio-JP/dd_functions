@@ -25,9 +25,9 @@ jobs:
     - name: Checking the previous
       run: |
         ls -a ..
-    - name: Checking the home
+    - name: Checking the PATH
       run: |
-        ls -a ~
+        echo $PATH
     - name: Analysing the code with pylint
       run: |
         ./sage/local/bin/pylint ./ajpastor  --disable=all --enable=F,unreachable,duplicate-key,unnecessary-semicolon,\
