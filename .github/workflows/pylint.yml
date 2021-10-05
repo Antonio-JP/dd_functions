@@ -22,9 +22,12 @@ jobs:
     - name: Install pylint
       run: |
         sage -pip install pylint
-    - name: Checking the space
+    - name: Checking the previous
       run: |
-        ls -a
+        ls -a ..
+    - name: Checking the home
+      run: |
+        ls -a ~
     - name: Analysing the code with pylint
       run: |
         ./sage/local/bin/pylint ./ajpastor  --disable=all --enable=F,unreachable,duplicate-key,unnecessary-semicolon,\
