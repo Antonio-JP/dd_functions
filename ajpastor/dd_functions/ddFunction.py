@@ -3754,7 +3754,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             Sometimes the set `S` provided is not enough to cover the operation by itself. 
             Then an error is raised::
 
-                sage: f = BesselD(1); g = Log(x+1)
+                sage: f = BesselJ(1); g = Log(x+1)
                 sage: (f*g).equation.lc().factor()
                 (-4) * x^2 * (x + 1)^2 * (x^4 + 2*x^3 - 3/2*x - 3/4)
                 sage: f.simple_mult(g).equation.lc().factor()
@@ -3854,7 +3854,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 True
                 sage: h.equation.lc()
                 1
-                sage: f = BesselD(2)
+                sage: f = BesselJ(2)
                 sage: h = f.simple_derivative()
                 sage: h == f.derivative()
                 True
@@ -3865,7 +3865,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             operation can be performed in such structure, the result is given. This may 
             provide different results than the "simplest" computations::
 
-                sage: f = BesselD(2); f.derivative().equation.lc().factor()
+                sage: f = BesselJ(2); f.derivative().equation.lc().factor()
                 (-1) * (x - 2) * (x + 2) * x^2
                 sage: f.derivative().order()
                 2

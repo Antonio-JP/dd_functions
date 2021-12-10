@@ -36,7 +36,8 @@ The functions available in this module are the following:
     * :func:`Log`
     * :func:`Log1`
 * BESSEL TYPE FUNCTIONS (:dlmf:`10` and :dlmf:`11`):
-    * :func:`BesselD`
+    * :func:`BesselJ`
+    * :func:`BesselI`
     * :func:`StruveD`
 * ORTHOGONAL POLYNOMIALS:
     * :func:`LegendreD` (:dlmf:`14`)
@@ -131,7 +132,7 @@ def Sin(input, ddR = None):
     r'''
         D-finite implementation of the Sine function (`\sin(x)`).
 
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a sine-type function. For more
         information about the sine function, consult the following references:
             
@@ -264,7 +265,7 @@ def Cos(input, ddR = None):
     r'''
         D-finite implementation of the Cosine function (`\cos(x)`).
         
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` instance 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` instance 
         of a cosine-type function. For more information about the cosine function, consult the following references:
 
         * :wolf:`Cosine`
@@ -382,7 +383,7 @@ def Tan(input, ddR = None):
     r'''
         DD-finite implementation of the Tangent function (`\tan(x)`).
 
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a tangent-type function. For more
         information about the tangent function, consult the following references:
 
@@ -487,7 +488,7 @@ def Sinh(input, ddR = None):
     r'''
         D-finite implementation of the Hyperbolic Sine function (`\sinh(x)`).
         
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a hyperbolic sine-type function. For more
         information about the hyperbolic sine, consult the following references:
 
@@ -577,7 +578,7 @@ def Cosh(input, ddR = None):
     r'''
         D-finite implementation of the Hyperbolic Cosine function (`\cosh(x)`).
         
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a hyperbolic cosine-type function. For more
         information about the hyperbolic cosine, consult the following references:
 
@@ -1327,7 +1328,7 @@ def Log(input, ddR = None):
     r'''
         DD-finite implementation of the logarithm function (`\log(x+1)`).
 
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a logarithm-type function. For more
         information about the logarithm function, consult the following references:
 
@@ -1417,7 +1418,7 @@ def Exp(input, ddR = None):
     r'''
         DD-finite implementation of the exponential function (`e^x`).
 
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a exponential-type function. For more
         information about the exponential function, consult the following references:
 
@@ -1517,48 +1518,188 @@ def Exp(input, ddR = None):
 ##### BESSEL TYPE FUNCTIONS
 ### Bessel Functions
 @cached_function 
-def BesselD(input = 'P', kind = 1):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Bessel functions (J_n(x), Y_n(x)).
-        
-        References:
-    - https://dlmf.nist.gov/10.2
-    - https://en.wikipedia.org/wiki/Bessel_function
-    - http://mathworld.wolfram.com/BesselFunction.html
+def BesselJ(n = 'n'):
+    r'''
+        DD-finite implementation of the first kind Bessel function (`J_n(x)`).
+
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a bessel function of the first kind. For more
+        information about the exponential function, consult the following references:
+
+        * :wolf:`BesselFunctionoftheFirstKind`
+        * :wiki:`Bessel_function`
+        * :funtop:`Bessel_functions`
             
-        This method returns a function in the appropriate DD-Ring satisfying the differential equation
-            x^2 f'' + xf' + (x^2-P^2)f = 0
-        where 'x' is the variable and 'P' is a constant parameter (i.e. P' = 0).
-        
+        This function can be converted into symbolic expressions.
+
+        The Bessel functions are those satisfying the following differential equation:
+
+        .. MATH::
+
+            x^2 f''(x) + xf'(x) + (x^2 - n^2)f(x) = 0,
+
+        where `n` is a constant parameter. Since the base of this package is to 
+        work with formal power series, we can not represent any bessel function
+        of second kind (i.e., singular at `x=0`) nor a bessel function with fractional 
+        parameter.
+
+        However, we allow the parameter to be a string (name for the parameter)
+        instead of an integer to manipulate the generic operator.
+
         INPUT:
-    - input: the parameter 'n' for the Bessel differential equation. Currently, only non-negative integer are allowed. If no value is given, then the symbolic Bessel function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
-    - kind: the kind of bessel function the user want to get (default 1). It can take tha values 1 or 2. Currently, only the first kind is fully implemented.
         
-        WARNING:
-    - For power series solution this function only have non-zero solutions when the argument 'input' is a non-negative integer. Hence, initial values will also be computed for the parameter values that have power series solutions.
-    - The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
-    - When evaluating parameters, the initial values will not update and must be set by hand.
+        - `n`: a non-negative integer or a string (that will be taken as name 
+          of a parameter).
+
+        OUTPUT:
+
+        The :class:`~ajpastor.dd_function.DDFunction` representing the corresponding
+        bessel function of the first kind.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: BesselJ(3)
+            bessel_J(3, x)
+            sage: BesselJ(3).init(3, True)
+            [0, 0, 0]
+
+        Bessel functions satisfies several identities when varying the parameters
+        (see :funent:`d56914`)::
+
+            sage: all(
+            ....: BesselJ(n) == (x/(2*n))*(BesselJ(n-1) + BesselJ(n+1))
+            ....: for n in range(1,20,3))
+            True
+
+        Bessel functions of first kind also have a representation using a 
+        hypergeometric function (see :funent:`ecd36f`). Remark than this
+        identity uses the *regularized hypergeometric function*, meaning 
+        that we have to divide by the factorials of the low-rank arguments
+        of the hypergeometric function::
+
+            sage: all(
+            ....: BesselJ(n) == (x/2)**n*(F01(n+1)(-(x**2)/4)/factorial(n))
+            ....: for n in range(20))
+            True
     '''
-    parent, par = __check_list([input], DFinite.variables())
-    par = par[0]
+    parent, n = __check_list([n], DFinite.variables())
+    n = n[0]
         
     if(parent is QQ):
         parent = DFinite
     else:
         parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
-        par = parent.base()(par)
+        n = parent.base()(n)
     x = parent.variables()[0]
         
-    if(kind == 1):
-        func = parent.element([x**2-par**2, x, x**2], name=DynamicString("bessel_J(_1,_2)", [repr(par),"x"]))
-        if(par in ZZ):
-            alpha = ZZ(par)
-            func = func.change_init_values([0 for i in range(alpha)] + [ZZ(1)/ZZ(2) **alpha, 0, -((alpha+ZZ(2))/(ZZ(2) **(alpha+2)))], name = func._DDFunction__name)
-    elif(kind == 2 ):
-        func = parent.element([x**2-par**2, x, x**2], name=DynamicString("bessel_Y(_1,_2)", [repr(par),"x"]))
+    func = parent.element([x**2-n**2, x, x**2], name=DynamicString("bessel_J(_1,_2)", [repr(n),"x"]))
+    if(n in ZZ):
+        alpha = ZZ(n)
+        func = func.change_init_values([0 for i in range(alpha)] + [1/ZZ(2) **alpha, 0, -((alpha+2)/(2**(alpha+2)))], name = func._DDFunction__name)
+    
+    return func
+
+@cached_function 
+def BesselI(n = 'n'):
+    r'''
+        DD-finite implementation of the modified first kind Bessel function (`I_n(x)`).
+
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a modified bessel function of the first kind. For more
+        information about the exponential function, consult the following references:
+
+        * :wolf:`ModifiedBesselFunctionoftheFirstKind`
+        * :wiki:`Bessel_function`
+        * :funtop:`Bessel_functions`
+            
+        This function can be converted into symbolic expressions.
+
+        The modified Bessel functions are those satisfying the following differential equation:
+
+        .. MATH::
+
+            x^2 f''(x) + xf'(x) - (x^2 + n^2)f(x) = 0,
+
+        where `n` is a constant parameter. Since the base of this package is to 
+        work with formal power series, we can not represent any bessel function
+        of second kind (i.e., singular at `x=0`) nor a bessel function with fractional 
+        parameter.
+
+        However, we allow the parameter to be a string (name for the parameter)
+        instead of an integer to manipulate the generic operator.
+
+        The modified Bessel function is a simple transform with complex numbers to the 
+        usual Bessel function of the first kind, obtaining a formal power series
+        anytime the original Bessel function was a formal power series. Namely:
+
+        .. MATH::
+
+            I_n(x) = i^{-n}J_n(ix).
+
+        INPUT:
+        
+        - `n`: a non-negative integer or a string (that will be taken as name 
+          of a parameter).
+
+        OUTPUT:
+
+        The :class:`~ajpastor.dd_function.DDFunction` representing the corresponding
+        modified bessel function of the first kind.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: BesselI(3)
+            bessel_I(3, x)
+            sage: BesselI(3).init(3, True)
+            [0, 0, 0]
+            sage: BesselI(5).init(10, True) == [bessel_I(5,x).derivative(i)(x=0) for i in range(10)]
+            True
+
+        We can check for different parameters values its relation with the usual 
+        Bessel function (see :func:`BesselJ`)::
+
+            sage: I = DFiniteI.coeff_field('I')
+            sage: X = DFiniteI.variable('x')
+            sage: all(
+            ....: BesselI(n) == (I**(-n)*BesselJ(n)(I*X))
+            ....: for n in range(20))
+            True
+
+        Bessel functions satisfies several identities when varying the parameters
+        (see :funent:`d56914`)::
+
+            sage: all(
+            ....: BesselI(n) == (x/(2*n))*(BesselI(n-1) - BesselI(n+1))
+            ....: for n in range(1,20,3))
+            True
+
+        Modified Bessel functions of first kind also have a representation using a 
+        hypergeometric function (see :funent:`ecd36f`). Remark than this
+        identity uses the *regularized hypergeometric function*, meaning 
+        that we have to divide by the factorials of the low-rank arguments
+        of the hypergeometric function::
+
+            sage: all(
+            ....: BesselI(n) == (x/2)**n*(F01(n+1)(x**2/4)/factorial(n))
+            ....: for n in range(20))
+            True
+    '''
+    parent, n = __check_list([n], DFinite.variables())
+    n = n[0]
+        
+    if(parent is QQ):
+        parent = DFinite
     else:
-        raise ValueError("Impossible to manage Bessel functions of %sth kind" %(kind))
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+        n = parent.base()(n)
+    x = parent.variables()[0]
+        
+    func = parent.element([-(x**2+n**2), x, x**2], name=DynamicString("bessel_I(_1,_2)", [repr(n),"x"]))
+    if(n in ZZ):
+        alpha = ZZ(n)
+        func = func.change_init_values([0 for i in range(alpha)] + [1/ZZ(2) **alpha, 0, ((alpha+2)/(2**(alpha+2)))], name = func._DDFunction__name)
     
     return func
     
@@ -1870,7 +2011,7 @@ def GenericHypergeometricFunction(num=[],den=[],init=1):
         D-finite implementation of the generalized hypergeometric function 
         (`_pF_q\left(\begin{array}{c}a_1,\ldots,a_p\\b_1,\ldots,b_q\end{array};x\right)`).
 
-        Method to crete a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a hypergeometric function. For more
         information about these functions, consult the following references:
             

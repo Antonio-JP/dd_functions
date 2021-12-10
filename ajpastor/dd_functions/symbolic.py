@@ -40,7 +40,7 @@ from sage.all import SR, prod, ZZ, QQ, PolynomialRing
 
 from ajpastor.dd_functions.ddFunction import is_DDFunction, DFinite, ParametrizedDDRing
 from ajpastor.dd_functions.ddExamples import (Sin, Cos, Sinh, Cosh, Tan, Log, Exp, 
-                                                BesselD, LegendreD, ChebyshevD,
+                                                BesselJ, BesselI, LegendreD, ChebyshevD,
                                                 GenericHypergeometricFunction, DAlgebraic)
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def symbolic(function):
             sage: from ajpastor.dd_functions import *
             sage: symbolic(Exp(x))
             e^x
-            sage: symbolic(BesselD(2))
+            sage: symbolic(BesselJ(2))
             bessel_J(2, x)
             sage: symbolic(LegendreD('n','m'))
             gen_legendre_P(n, m, x)
@@ -133,7 +133,9 @@ def from_symbolic(exp, dR = None):
             True
             sage: from_symbolic(log(x + 1)) == Log(x+1)
             True
-            sage: from_symbolic(bessel_J(4, x)) == BesselD(4)
+            sage: from_symbolic(bessel_J(4, x)) == BesselJ(4)
+            True
+            sage: from_symbolic(bessel_I(20, x)) == BesselI(20)
             True
             sage: from_symbolic(hypergeometric([1,2,3],[5,6,7],x)) == GenericHypergeometricFunction((1,2,3),(5,6,7))
             True
@@ -246,7 +248,12 @@ def from_symbolic(exp, dR = None):
         logger.debug("Found an Bessel function of first kind")
         if(not (operands[0] in ZZ and operands[0] >= 0)):
             raise ValueError("The Bessel has to have a non-negative integer index")
-        return BesselD(ZZ(operands[0]))(from_symbolic(operands[1],dR))
+        return BesselJ(ZZ(operands[0]))(from_symbolic(operands[1],dR))
+    elif(name == "bessel_I"):
+        logger.debug("Found a modified Bessel function of first kind")
+        if(not (operands[0] in ZZ and operands[0] >= 0)):
+            raise ValueError("The modified Bessel has to have a non-negative integer index")
+        return BesselI(ZZ(operands[0]))(from_symbolic(operands[1],dR))
     elif(name == "legendre_P"):
         logger.debug("Found an Legendre function of first kind")
         return LegendreD(operands[0], 0, 1)(from_symbolic(operands[1],dR))
