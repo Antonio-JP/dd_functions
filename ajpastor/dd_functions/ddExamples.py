@@ -38,7 +38,8 @@ The functions available in this module are the following:
 * BESSEL TYPE FUNCTIONS (:dlmf:`10` and :dlmf:`11`):
     * :func:`BesselJ`
     * :func:`BesselI`
-    * :func:`StruveD`
+    * :func:`StruveH`
+    * :func:`StruveL`
 * ORTHOGONAL POLYNOMIALS:
     * :func:`LegendreD` (:dlmf:`14`)
     * :func:`ChebyshevD` (:dlmf:`18`)
@@ -1524,7 +1525,7 @@ def BesselJ(n = 'n'):
 
         Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a bessel function of the first kind. For more
-        information about the exponential function, consult the following references:
+        information about the Bessel function, consult the following references:
 
         * :wolf:`BesselFunctionoftheFirstKind`
         * :wiki:`Bessel_function`
@@ -1607,7 +1608,7 @@ def BesselI(n = 'n'):
 
         Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a modified bessel function of the first kind. For more
-        information about the exponential function, consult the following references:
+        information about the Bessel function, consult the following references:
 
         * :wolf:`ModifiedBesselFunctionoftheFirstKind`
         * :wiki:`Bessel_function`
@@ -1705,55 +1706,175 @@ def BesselI(n = 'n'):
     
 ### Struve's functions
 @cached_function
-def StruveD(mu='P',kind=1):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Struve functions (J_n(x), Y_n(x)).
+def StruveH(n='n'):
+    r"""
+        DD-finite implementation of the Struve function of first kind (`H_n(x)`).
+
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a Struve function of the first kind. For more
+        information about the Struve functions, consult the following references:
+
+        * :dlmf:`11.2`
+        * :wolf:`StruveFunction`
+        * :wiki:`Struve_function`
         
-        References:
-            * https://dlmf.nist.gov/11.2
-            * https://en.wikipedia.org/wiki/Struve_function
-            * http://mathworld.wolfram.com/StruveFunction.html
-            
-        Struve functions are the solutions for the inhomogeneous Bessel differential equation
-        and have also a parameter 'P' involved:
-            x^2 f'' + xf' + (x^2-P^2)f = (1/sqrt(pi)*gamma(P+1/2))*(x/2)^(P-1)
-            
-        This equation can be write as an homogeneous differential equation of order 3:
-        (1-P)*x**2+P**2*(P+1),x*(x**2-P**2-P),(2-P)*x**2,x**3
-            x^3f^(3) + (2-P)x^2f'' + x(x^2-P^2-P)f' + ((1-P)x^2 + P^3+ P^2)f = 0.
-            
-        Following the definition that we can find in the references above, we have that the Struve
-        function only have power series solutions for integers parameters greater than -1. Then the first 
-        non-zero value of the power series has a factor of 'pi'. To avoid adding the element 'pi' to the
-        coefficients, we work with the function f_mu(x) = pi*H_mu(x).
-        
+        The Struve functions are those satisfying the following inhomogeneous differential equation:
+
+        .. MATH::
+
+            x^2 H_n''(x) + xH_n'(x) + (x^2 - n^2)H_n(x) = \frac{(2x)^{n+1}n!}{(2n)!\pi},
+
+        where `n` is a constant parameter. Since the base of this package is to 
+        work with formal power series, we can not represent any Struve function
+        of second kind (i.e., singular at `x=0`) nor a Struve function with fractional 
+        parameter.
+
+        To avoid the use of `\pi` as a parameter in these functions, we instead create the 
+        standardized Struve function `h_n(x) = \piH_n(x)`.
+
+        We allow the parameter to be a string (name for the parameter)
+        instead of an integer to manipulate the generic operator.
+
+        This inhomogeneous equation can be easily transformed into a homogeneous equation
+        more fitting for the content of this package. The resulting differential equation is:
+
+        .. MATH::
+
+            x^3 h_n'''(x) + (2-n)x^2h_n''(x) + x(x^2 - n(n+1))h_n'(x) + ((1-n)x^2 + n^2(n+1))h_n(x) = 0.
+
+        Then the first nonzero initial value for each of these functions (when `n` is a non-negative
+        integer) is the `(n+1)`-th element with the formula:
+
+        .. MATH::
+
+            h_n^{(n+1)}(0) = \frac{2^{n+1}n!(n+1)!}{(2n+1)!}
+
         INPUT:
-    - input: the parameter 'mu' for the Struve differential equation. Currently, only integers greater than -2 are allowed. If 'None' is given, then the symbolic Struve function (only with an equation) is returned with parameter "P". The input can also be a string with a name for the parameter or a polynomial expression involving parameters.
-    - kind: the kind of Struve function the user want to get (default 1). It can take the values 1 or 2. Currently, only the first kind is fully implemented.
         
-        WARNING:
-    - Initial values will also be computed for the parameter values that have power series solutions.
-    - The implementation will say that the symbolic Bessel function is the zero function for non-negative values of the parameter. In any case, the method 'to_symbolic' will return the appropriate SAGE function.
-    - When evaluating parameters, the initial values will not update and must be set by hand.
-        
-    '''
-    parent, par = __check_list([mu], DFinite.variables())
-    par = par[0]
-    
-    if(kind != 1):
-        raise TypeError("Only struve_H functions are implemented")
+        - `n`: a non-negative integer or a string (that will be taken as name 
+          of a parameter).
+
+        OUTPUT:
+
+        The :class:`~ajpastor.dd_function.DDFunction` representing the corresponding
+        Struve function of the first kind.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: StruveH(3)
+            pi*struve_H(3, x)
+            sage: StruveH(3).init(5, True)
+            [0, 0, 0, 0, 16/35]
+
+        Similarly to the Bessel functions (see :func:`BesselJ`), the Struve functions of
+        first kind satisfy some relations when considering `\pm 1` elements::
+
+            sage: all(
+            ....: StruveH(n-1) + StruveH(n+1) == 2*n*StruveH(n)/x + (x^n * 2^(n+1) * factorial(n))/factorial(2*n+1)
+            ....: for n in range(1,20))
+            True
+            sage: all(
+            ....: StruveH(n-1) - StruveH(n+1) == 2*StruveH(n).derivative() - (x^n * 2^(n+1) * factorial(n))/factorial(2*n+1)
+            ....: for n in range(1,20))
+    """
+    parent, n = __check_list([n], DFinite.variables())
+    n = n[0]
         
     if(parent is QQ):
         parent = DFinite
     else:
         parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
-    f = parent.element([(1-par)*x**2+par**2*(par+1),x*(x**2-par**2-par),(2-par)*x**2,x**3], name=DynamicString("pi*struve_H(_1,_2)", [repr(par),"x"]))
-    if(par in ZZ and par >= 0):
-        num = factorial(par+1)*pi*(ZZ(1)/ZZ(2))**(par+1)
-        den = gamma(ZZ(3)/ZZ(2))*gamma(par+ZZ(3)/ZZ(2))
-        val = QQ(num/den)
-        f = f.change_init_values([0 for i in range(par+1)] + [val], name=f._DDFunction__name)
+    f = parent.element([(1-n)*x**2+n**2*(n+1),x*(x**2-n**2-n),(2-n)*x**2,x**3], name=DynamicString("pi*struve_H(_1,_2)", [repr(n),"x"]))
+    if(n in ZZ and n >= 0):
+        val = 2**(n+1)*(factorial(n)*factorial(n+1))/ZZ(factorial(2*n+1))
+        f = f.change_init_values([0 for _ in range(n+1)] + [val], name=f._DDFunction__name)
+    
+    return f
+
+@cached_function
+def StruveL(n='n'):
+    r"""
+        DD-finite implementation of the modified Struve function of first kind (`L_n(x)`).
+
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a modified Struve function of the first kind. For more
+        information about the Struve functions, consult the following references:
+
+        * :dlmf:`11.2`
+        * :wolf:`StruveFunction`
+        * :wiki:`Struve_function`
+        
+        The modified Struve functions are those satisfying the following inhomogeneous differential equation:
+
+        .. MATH::
+
+            x^2 L_n''(x) + xL_n'(x) - (x^2 + n^2)L_n(x) = \frac{(2x)^{n+1}n!}{(2n)!\pi},
+
+        where `n` is a constant parameter. Since the base of this package is to 
+        work with formal power series, we can not represent any Struve function
+        of second kind (i.e., singular at `x=0`) nor a Struve function with fractional 
+        parameter.
+
+        To avoid the use of `\pi` as a parameter in these functions, we instead create the 
+        standardized Struve function `l_n(x) = \pi L_n(x)`.
+
+        We allow the parameter to be a string (name for the parameter)
+        instead of an integer to manipulate the generic operator.
+
+        This inhomogeneous equation can be easily transformed into a homogeneous equation
+        more fitting for the content of this package. The resulting differential equation is:
+
+        .. MATH::
+
+            x^3 l_n'''(x) + (2-n)x^2l_n''(x) - x(x^2 + n(n+1))l_n'(x) + ((n-1)x^2 + n^2(n+1))l_n(x) = 0.
+
+        Then the first nonzero initial value for each of these functions (when `n` is a non-negative
+        integer) is the `(n+1)`-th element with the formula:
+
+        .. MATH::
+
+            h_n^{(n+1)}(0) = \frac{2^{n+1}n!(n+1)!}{(2n+1)!}
+
+        INPUT:
+        
+        - `n`: a non-negative integer or a string (that will be taken as name 
+          of a parameter).
+
+        OUTPUT:
+
+        The :class:`~ajpastor.dd_function.DDFunction` representing the corresponding
+        modified Struve function of the first kind.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: StruveL(3)
+            pi*struve_L(3, x)
+            sage: StruveL(3).init(5, True)
+            [0, 0, 0, 0, 16/35]
+
+        We can check the relation between the Struve function and its modified version
+        (see :func:`StruveH`)::
+
+            sage: I = DFiniteI.coeff_field('I')
+            sage: X = DFiniteI.variable('x')
+            sage: all(
+            ....: StruveL(n) == I**(-n-1)*StruveH(n)(I*X)
+            ....: for n in range(20))
+            True
+    """
+    parent, n = __check_list([n], DFinite.variables())
+    n = n[0]
+        
+    if(parent is QQ):
+        parent = DFinite
+    else:
+        parent = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+    f = parent.element([(n - 1)*x**2 + n**3 + n**2,-x**3 + (-n**2 - n)*x,(-n + 2)*x**2,x**3], name=DynamicString("pi*struve_L(_1,_2)", [repr(n),"x"]))
+    if(n in ZZ and n >= 0):
+        val = 2**(n+1)*(factorial(n)*factorial(n+1))/ZZ(factorial(2*n+1))
+        f = f.change_init_values([0 for _ in range(n+1)] + [val], name=f._DDFunction__name)
     
     return f
 
