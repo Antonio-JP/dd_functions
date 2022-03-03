@@ -129,7 +129,8 @@ extlinks = {
     'wolf': ('https://mathworld.wolfram.com/%s.html', 'Wolfram MathWorld: '),
     'sageref': ('https://doc.sagemath.org/html/en/reference/%s', 'Sage_doc:'),
     'fungrim': ('https://fungrim.org/entry/%s', 'Fungrim:'),
-    'fungrimT': ('https://fungrim.org/topic/%s', 'Fungrim:')
+    'fungrimT': ('https://fungrim.org/topic/%s', 'Fungrim:'),
+    'issue': ('https://github.com/Antonio-JP/dd_functions/issues/%s', 'GitHub/Issue:#')
     }
 
 # -- Options for HTML output ----------------------------------------------
