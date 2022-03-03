@@ -21,7 +21,7 @@ jobs:
         sudo sage -pip install --upgrade .
     - name: Install pylint
       run: |
-        sudo sage -pip install pylint
+        /home/sage/sage/sage -sh -c "pip install pylint"
     - name: Linting code for repository
       run: |
         find -O3 -L /home/sage/sage/ -name "pylint"
