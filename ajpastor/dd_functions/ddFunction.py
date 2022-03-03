@@ -4070,8 +4070,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
             ERRORS:
 
-            * ``ValueError``: if the evaluation of ``other`` at 0 does not vanish.
-            * ``TypeError``: if the computation of the final :class:`DDRing` fails.
+            * :class:`~ajpastor.dd_functions.exceptions.ZeroValueRequired`: if the evaluation of ``other`` at 0 does not vanish.
+            * :class:`TypeError`: if the computation of the final :class:`DDRing` fails.
             * Any error from :func:`ajpastor.operator.Operator.compose_solution`.
                 
             WARNINGS:
@@ -4082,6 +4082,42 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
                 sage: from ajpastor.dd_functions import *
                 sage: f = Exp(x); g = BesselD(3)
+                sage: f.compose(f-1) == Exp(Exp(x)-1)
+                True
+                sage: h = f.compose(g)
+                sage: h in DDFinite
+                True
+                sage: h[0] == -16*BesselD(3).derivative()
+                True
+                sage: h[1] == 16
+                True
+                sage: h.init(10,True)
+                [1, 0, 0, 1/8, 0, -5/32, 5/32, 21/128, -35/32, 49/128]
+
+                
+            As mentioned, when the inner function does not evaluate to zero, we raise a 
+            :class:`~ajpastor.dd_functions.exceptions.ZeroValueRequired`::
+
+                sage: f.compose(f)
+                Traceback (most recent call last):
+                ...
+                ZeroValueRequired: required a zero value for ...
+                sage: g.compose(f)
+                Traceback (most recent call last):
+                ...
+                ZeroValueRequired: required a zero value for ...
+                
+            We can see the depth in the simplest case (when `g(x) = \alpha x`) never changes::
+
+                sage: DDFiniteI = DFiniteI.to_depth(2)
+                sage: I = DDFiniteI.coeff_field.gens()[0]; x = DDFiniteI.variable('x')
+                sage: a = DDFiniteI(x*I)
+                sage: g(a) == g(I*x)
+                True
+                sage: g(a).parent().depth() == 1 # used to be 3
+                True
+                sage: [g(a)[0], g(a)[1], g(a)[2]] == [x^2+9, -x, -x^2]
+                True
         '''
         ######################################
         ## Initial checking and considerations
@@ -4122,19 +4158,27 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(not isinstance(push, DDRing)):
             raise TypeError("A non DDRing obtained for the composition: that is impossible -- review method _pushout_ of DDRing class")
 
+        ## Simple case where `other == a*x`
+        if (is_DDRing(op) and other.derivative().is_constant()) or (not is_DDRing(op) and other/push.variables()[0] in push.coeff_field):
+            push = push.to_depth(sp.depth())
+            a = push.coeff_field(other.sequence(1) if is_DDRing(op) else other/push.variables()[0]) 
+            other = a*push.variables()[0]
+            d = self.order()
+            # the new equation has as coefficients self[i](other)*a^(d-i)
+            new_equation = push.element([a**(d-i)*self[i](other) for i in range(d+1)]).equation
+            # the new initial values are self.init(i)*a^i
+            needed_initial = new_equation.get_jp_fo() + 1
+            ## Computing the new name
+            if(self.name is None):
+                new_name = None
+            else:
+                new_name = m_dreplace(self.name, {"x" : f"{a}*x"}, True)
+            return push.element(new_equation, [a**i*self.init(i) for i in range(needed_initial+1)], name=new_name)
+        
+        ## checking if the composition could be simpler
         if(isinstance(op, DDRing)):
             destiny_ring = push.to_depth(op.depth()+sp.depth())
         else:
-            ## checking if the composition could be simpler
-            if(other/push.variables()[0] in push.coeff_field): # other = a*x
-                a = push.coeff_field(other/push.variables()[0])
-                d = self.order()
-                # the new equation has as coefficients self[i](other)*a^(d-i)
-                new_equation = push.element([a**(d-i)*self[i](other) for i in range(d+1)]).equation
-                # the new initial values are self.init(i)*a^i
-                needed_initial = new_equation.get_jp_fo() + 1
-                return push.element(new_equation, [a**i*self.init(i) for i in range(needed_initial+1)])
-            ## If it is not a simple composition, we compute as usual
             destiny_ring = push.to_depth(sp.depth())
             
         if(destiny_ring.depth() >= 3 ):
