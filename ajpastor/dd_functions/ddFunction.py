@@ -37,7 +37,7 @@ import logging
 from functools import reduce
 
 #SAGE imports 
-from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields, derivative,
+from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields,
                         QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
                         cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
                         sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
@@ -613,7 +613,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         coer =  self._coerce_map_from_(S)
         return (not(coer is False) and not(coer is None))
         
-    def _element_constructor_(self, *args, **kwds):
+    def _element_constructor_(self, *args, **_):
         r'''
             Implementation of ``_element_constructor_``.
 
@@ -1185,7 +1185,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         derivation = self.base_derivation, 
         default_operator = self.operator_class)
         
-    def is_field(self, **kwds):
+    def is_field(self, **_):
         r'''
             Generic method for checking if ``self`` is a field.
 
@@ -1205,7 +1205,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return False
         
-    def is_finite(self, **kwds):
+    def is_finite(self, **_):
         r'''
             Generic method for checking if ``self`` is finite.
 
@@ -1224,7 +1224,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return self.base().is_zero()
         
-    def is_noetherian(self, **kwds):
+    def is_noetherian(self, **_):
         r'''
             Generic method for checking if ``self`` is Noetherian.
 
@@ -1413,7 +1413,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         else:
             return element
                 
-    def _parametric_evaluation(self, element, **input):
+    def _parametric_evaluation(self, element, **input): #pylint: disable=unused-argument
         r'''
             Computes an evaluation of the parameters on an element of ``self``.
 
@@ -1537,7 +1537,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         else:
             return tuple(self.original_ring()(el) for el in self.__variables)
 
-    def parameters(self, as_symbolic = False):
+    def parameters(self, as_symbolic = False): #pylint: disable=unused-argument
         r'''
             Method that returns all the parameters for ``self``.
 
@@ -3869,7 +3869,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## creating the cache key
         if(S is None): cache = []
         else: cache = S
-        cache = list(cache); cache.sort(); cache = tuple(cache)
+        cache = list(cache); cache.sort(); cache = tuple(cache) #pylint: disable=no-member
 
         if(not cache in self.__simple_derivative):
             if(self.is_constant()):
@@ -4040,27 +4040,48 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Compositional methods
     #####################################
     def compose(self, other):
-        '''
-            Method to compute the composition of 'self' with 'other' (if possible).
-            
-            The method first compute the new ring where the composition will belong and then relies on the method 'compose_solution' of the Operator class.
-            
-            Then, it computes the new initial values using the Faa di Bruno's formula.
-            
+        r'''
+            Method to compute the composition of ``self`` with ``other``.
+
+            Composing two formal power series is always possible when the inner power series has order
+            at least 1 (see :func:`ps_order`). Moreover, when the two of the formal power series are 
+            :class:`DDFunction` or are in the same chain of :class:`DDRing`, then the composition
+            satisfies another differential equation.
+
+            More precisely, assume ``self`` represent a formal power series `f(x)` and ``other``
+            represent another formal power series `g(x)`. Assume also that, for some ring `R` we know that
+            `f(x) \in \text{D}^n(R)` and `g(x) \in \text{D}^m(R)`. Then it was proven in :doi:`10.1016/j.aam.2020.102027`
+            that if `g(0) = 0` then `f(g(x)) \in \text{D}^{n+m}(R)`.
+
+            This method computes the corresponding representation of `f(g(x))`. Several special cases are taken 
+            into consideration:
+
+            * When ``other == a*x`` for a constant `a`: since in this case `ax \in \text{D}^0(R)` for any ring `R` with `x \in R`, 
+              then the composition will be in the same ring of `f(x)` and its equation and initial conditions can be easily computed. 
+              This was added in :issue:`18`.
+
             INPUT:
-                - 'self': a DDFunction
-                - 'other': an element of SAGE
+
+            * ``other``: the representation of a formal power series `g(x)`. ITs order must be at least 1.
             
             OUTPUT:
-                - A new DDFunction 'f' in the corresponding ring such f == self(other)
+            
+            A new :class:`DDFunction` in the corresponding :class:`DDRing` representing `f(g(x))`.
                 
             ERRORS:
-                - ValueError: if other(0) != 0
-                - TypeError: if we can not compute a destination ring
-                - Any error from Operator.compose_solution
+
+            * ``ValueError``: if the evaluation of ``other`` at 0 does not vanish.
+            * ``TypeError``: if the computation of the final :class:`DDRing` fails.
+            * Any error from :func:`ajpastor.operator.Operator.compose_solution`.
                 
             WARNINGS:
-                - If the depth of the resulting DDFunction is greater than 3, a warning will pop-up
+
+            * If the depth of the destiny :class:`DDRing` is greater than 3, a warning will pop-up
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = Exp(x); g = BesselD(3)
         '''
         ######################################
         ## Initial checking and considerations
@@ -4069,7 +4090,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         if(other.parent() is SR):
             try:
                 other = self.parent().original_ring()(str(other))
-            except Exception as e:
+            except Exception:
                 raise TypeError("Impossible to perform a composition with a symbolic element. Try to cast (%s) to some field, polynomial ring or some DDRing" %(other))
             
         ## If we have the basic function we return the same element
@@ -4223,7 +4244,8 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         raise NotImplementedError("\n\t- ".join(["Method 'compose_algebraic' is not yet implemented. Current variables", 
                                                 "coefficients: %s" %F, 
                                                 "minimal polynomial: %s" %poly, 
-                                                "final ring: %s" %destiny_ring]))
+                                                "final ring: %s" %destiny_ring,
+                                                "initial values: %s" %init]))
             
     #####################################
     ### Property methods
