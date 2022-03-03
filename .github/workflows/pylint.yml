@@ -24,7 +24,7 @@ jobs:
         sudo sage -pip install pylint
     - name: Linting code for repository
       run: |
-        ls /home/sage/sage/local/bin -a
+        find -O3 -L /home/sage/sage/ -name "pylint"
         /home/sage/sage/local/bin/pylint ./ajpastor  --disable=all --enable=F,unreachable,duplicate-key,unnecessary-semicolon,\
         global-variable-not-assigned,unused-variable,unused-wildcard-import,binary-op-exception,\
         bad-format-string,anomalous-backslash-in-string,bad-open-mode,E0001,E0011,E0012,E0100,\
