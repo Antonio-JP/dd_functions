@@ -18,10 +18,10 @@ jobs:
         && apt-get -qq clean
     - name: Install package
       run: |
-        sage -pip install --upgrade .
+        sudo sage -pip install --upgrade .
     - name: Install pylint
       run: |
-        sage -pip install pylint
+        sudo sage -pip install pylint
     - name: Linting code for repository
       run: |
         ls /home/sage/sage/local/bin -a
