@@ -24,8 +24,7 @@ jobs:
         /home/sage/sage/sage -sh -c "pip install pylint"
     - name: Linting code for repository
       run: |
-        find -O3 -L /home/sage/sage/ -name "pylint"
-        /home/sage/sage/local/bin/pylint ./ajpastor  --disable=all --enable=F,unreachable,duplicate-key,unnecessary-semicolon,\
+        /home/sage/sage/local/var/lib/sage/venv-python3.9.9/lib/python3.9/site-packages/pylint ./ajpastor  --disable=all --enable=F,unreachable,duplicate-key,unnecessary-semicolon,\
         global-variable-not-assigned,unused-variable,unused-wildcard-import,binary-op-exception,\
         bad-format-string,anomalous-backslash-in-string,bad-open-mode,E0001,E0011,E0012,E0100,\
         E0101,E0102,E0103,E0104,E0105,E0107,E0108,E0110,E0111,E0112,E0113,E0114,E0115,E0116,E0117,\
