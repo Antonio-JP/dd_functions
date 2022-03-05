@@ -2340,36 +2340,91 @@ def F21(a='a',b='b',c='c'):
     return HypergeometricFunction(a,b,c)
     
 @cached_function
-def PolylogarithmD(s=1):
-    '''
-        TODO: Review this documentation
-        Implementation using DDFunctions of the Polylogarithms
+def Polylogarithm(s=1):
+    r'''
+        D-finite implementation of the polylogarithm function `Li_s(x)`.
 
-        References:
-    - https://en.wikipedia.org/wiki/Polylogarithm
-    - http://mathworld.wolfram.com/Polylogarithm.html
-    - https://dlmf.nist.gov/25.12
+        The polylogarithm is a generalization of the logarithm function (see :func:`Log`) defined
+        from its power series definition as follows:
 
-        The s-Polylogarithm is the power series defined with the sequence (1/n^s) for n >= 0. It can be computed
-        recursively using and integral formula using the (s-1)-Polylogarithm.
+        .. MATH::
 
+            Li_s(x) = \sum_{n \geq 1} \frac{x^n}{n^s}.
+
+        This formal power series has as its defining sequence the sequence `li_{s,n} = \left(1/n^s\right)` 
+        for a fixed value of `s`. Whenever this argument `s` is an integer, this definition leads 
+        to the following identity:
+
+        .. MATH::
+
+            x Li_s'(x) = \sum_{n\geq 1} n\frac{x^{n-1}}{n^s} = Li_{s-1}(x).
+
+        Moreover, we can compute the particular case for `s = 0`:
+
+        .. MATH::
+
+            Li_0(x) = \sum_{n\geq 1} x^n = \frac{1}{1-x} - 1 = \frac{x}{1-x}\in \mathbb{Q}(x).
+
+        Hence, for all `s\in \mathbb{Z}` the corresponding polylogarithm is D-finite. More precisely,
+        for `s \leq 0` it is a rational function and for `s > 0` we have:
+
+        .. MATH::
+
+            (1-x) (x\partial)^s \cdot Li_s(x) = x.
+        
         INPUT:
-    - s: Integer and positive value. All other possible powers are not accepted so far.
+        
+        * ``s``: integer for the parameter of `Li_s(x)`.
+
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the function `Li_s(x)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: Li3 = Polylogarithm(3)
+            sage: Li3.sequence(10, True) == [0] + [1/i^3 for i in range(1,10)]
+            True
+            sage: Polylogarithm(1) == -Log(1-x)
+            True
+            sage: Polylogarithm(0)*(1-x) == x 
+            True
+            sage: Polylogarithm(-1)*(1-x)^2 == x 
+            True
+            sage: Polylogarithm(-2)*(1-x)^3 == x*(x+1) 
+            True
+
+        Polylogarithm has several properties such as the duplication formula::
+
+            sage: all(Li(s)(-x) + Li(s)(x) == 2^(1-s)*Li(s)(x^2) for s in range(-10,10))
+            True
+
+        And also the natural behavior of the derivative when composed by an exponential function::
+
+            sage: all(
+            ....:     Li(s)(Exp(x)-1).derivative() == Li(s-1)(Exp(x)-1) + Li(s).derivative()(Exp(x)-1)
+            ....:     for s in range(-5, 3)
+            ....: )
+            True
     '''
-    if((not (s in ZZ)) or s < 1):
-        raise ValueError("The parameter 's' must be a positive integer. Got %d" %s)
+    if(not s in ZZ):
+        raise ValueError(f"The parameter 's' must be an integer. Got {s}")
     
-    destiny_ring = DFinite
+    name = DynamicString(f"Li({s})(_1)", ["x"])
+
+    if(s <= 0):
+        f = DFinite.element([1-x], inhomogeneous=x)
+        for _ in range(-s): f = x*f.derivative()
+        f.name=name
+        return f
+    else:
+        f = DFinite.element(s*[0] + [1-x], inhomogeneous=x, name=name, euler=True)
+        return f
     
-    get_op = lambda p : destiny_ring.operator_class(destiny_ring.base(),p,destiny_ring.base_derivation)
-    pos_part = prod((get_op([1,x]) for i in range(1,s+2)), get_op([1]))
-    neg_part = prod((get_op([1,x]) for i in range(1,s+1)), get_op([1])).derivative()
-    
-    final_eq = pos_part-neg_part
-    Li_x = DFinite.element(final_eq, [ZZ(1)/(n**s) *factorial(n-1) for n in range(1,s+1)])
-    result = Li_x*x
-    result._DDFunction__name = DynamicString("Li(_1;_2)", [str(s), "x"])
-    return result
+def Li(s):
+    r'''Alias for the function :func:`Polylogarithm`'''
+    return Polylogarithm(s)
     
 ###### RICCATI DIFFERENTIAL EQUATION
 ### Basic Riccati differential equation
