@@ -2096,34 +2096,38 @@ def ChebyshevD(input='n', kind = 1, poly=True):
 ###### HYPERGEOMETRIC FUNCTIONS
 ### Hypergeometric Functions
 __CACHED_HYPERGEOMETRIC = {}
-@cached_function
+
 def HypergeometricFunction(a='a',b='b',c='c', init = 1):
-    '''
-        TODO: Review this documentation
+    r'''
         D-finite implementation of the Gauss Hypergeometric function
+        `_2F_1\left(\begin{array}{cc}a, b\\c\end{array}; x\right)`.
+
+        Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
+        instance of a gaussian hypergeometric function. For more
+        information about these functions, consult the following references:
         
-        References:
-    - https://dlmf.nist.gov/15
-    - https://en.wikipedia.org/wiki/Hypergeometric_function
-    - http://mathworld.wolfram.com/HypergeometricFunction.html
+        * :dlmf:`15`.
+        * :wiki:`Hypergeometric_function`.
+        * :wolf:`HypergeometricFunction`.
             
-        The Gauss Hypergeometric function is a special function represented by the hypergeometric 
-        series, that includes many other special functions as specific or limiting cases. It is a 
-        solution of the second-order differential equation
-            x(1-x)f'' + (c-(a+b+1)x)f' - abf = 0
-            
+        The Gaussian hypergeometric function is a special case of the 
+        generalized hypergeometric function (see :func:`GenericHypergeometricFunction`).            
         The associated sequence to this functions have the following expression:
-            f_n = ((a)_n * (b)_n)/(n!*(c)_n)
-        where (a)_n = a*(a+1)*...*(a+n-1). Hence, if a or b is a negative integer this is a polynomial.
+
+        .. MATH::
+            f_n = \frac{(a)_n  (b)_n}{n!(c)_n},
+
+        where `(a)_n = a(a+1)...(a+n-1)` is the raising factorial notation. Hence, 
+        if `a` or `b` is a negative integer this is a polynomial.
         
-        This is a particular case of the Generic Hypergeometric Function, 2F1(a,b;c;x), being equivalent
-        to GenericHypergeometricFunction([a,b],[c],init).
+        TThis method is also equivalent to the alias :func:`F21`.
         
         INPUT:
-    - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - b: the parameter 'b' on the differential equation. If not provided, it takes the value 'b' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - c: the parameter 'c' on the differential equation. If not provided, it takes the value 'c' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - init: the initial value of the hypergeometric function. It is the first value of the hypergeometric sequence. If not provided, it takes the value 1 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
+
+        * ``a``: the parameter `a` for the hypergeometric equation. If not provided, a parameter ``"a"`` will be used instead.
+        * ``b``: the parameter `b` for the hypergeometric equation. If not provided, a parameter ``"b"`` will be used instead.
+        * ``c``: the parameter `c` for the hypergeometric equation. If not provided, a parameter ``"c"`` will be used instead.
+        * ``init``: the initial value for the hypergeometric function. By default it takes the value 1.
     '''
     return GenericHypergeometricFunction([a,b],[c],init)
 
