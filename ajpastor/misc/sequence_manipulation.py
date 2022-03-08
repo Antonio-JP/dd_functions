@@ -31,7 +31,7 @@ AUTHORS:
 # ****************************************************************************
 
 #Sage imports
-from sage.all import (factorial, bell_polynomial, falling_factorial, cached_function)
+from sage.all import (factorial, bell_polynomial, falling_factorial, cached_function, ZZ)
 
 ################################################################################
 ################################################################################
@@ -74,7 +74,7 @@ def egf_ogf(f):
         
         Then h(n) = f(n)/factorial(n)
     '''
-    return lambda n: f(n)/factorial(n)
+    return lambda n: f(n)/ZZ(factorial(n))
 
 def ogf_egf(f):       
     '''
