@@ -3750,16 +3750,148 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ##################################################
     return destiny_ring.element(equation, init)
     
-def polynomial_inverse(polynomial):
-    '''
-        TODO: Review this documentation
-        Method that computes the functional inverse for a polynomial. As the functional
-        inverse of a polynomial is an algebraic series, then it is D-finite.
+def DAlgebraicInverse(polynomial, init=[], dR=None):
+    r'''
+        Method to compute the D-finite representation of the functional inverse of a polynomial.
+
+        It is well known that the functional inverse of an algebraic function is 
+        again algebraic. In fact, computing an annihilating polynomial for that inverse is
+        a straighforward computation. 
         
-        The polynomial provided must be univariate.
+        Assume that the algebraic function `a(x)` is annihilated by the polynomial
+        `P(x,y)` (i.e., `P(x,a(x)) = 0`). Then `Q(x,y) = P(y,x)` is a polynomial
+        that satisfies
+
+        .. MATH::
+
+            Q(x, a^{-1}(x))  = P(a^{-1}(x), x) = P(x, a(x)) \circ a^{-1}(x) = 0 \circ a^{-1}(x) = 0.
+
+        Hence, using :func:`DAlgebraic` we can always compute a D-finite representation for these
+        functional inverses.
+        
+        INPUT:
+
+        * ``polynomial``: the polynomial `P(x,y)` that defines the algebraic function `a(x)`.
+        * ``init``: list of initial values to define the algebraic function `a(x)`. It has to start with a zero.
+        * ``dR``: minimal :class:`~ajpastor.dd_functions.ddFunction.DDRing` in which the output will be.
+
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFuntion` with a D-finite representation for the 
+        functional inverse of the algebraic function `a(x)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: R = DFinite.base(); x = R.gens()[0]
+            sage: S.<y> = R[]
+            sage: polynomial = y^2 + 2*y - x # min poly for [sqrt(x+1) - 1]
+            sage: init = [0, 1/2, -1/4] # initial values for [sqrt(x+1) - 1]
+            sage: f = DAlgebraic(polynomial, init)
+            sage: g = DAlgebraicInverse(polynomial, init)
+            sage: g(f) == x
+            True
+            sage: f(g) == x
+            True
+            sage: print(g)
+            x^2 + 2*x
     '''
+    y = polynomial.parent().gens()[0]
+    x = polynomial.parent().base().gens()[0]
+
+    polynomial = polynomial(**{str(y): x, str(x): y})
+
+    if(polynomial.parent().is_field()): # we move to the ring
+        polynomial = polynomial.numerator()
+    if(polynomial.parent().base().is_field()): # we have fractions as coefficients
+        lcm_denoms = lcm([coeff.denominator() for coeff in polynomial.coefficients()])
+        polynomial *= lcm_denoms
+        polynomial = polynomial.change_ring(polynomial.parent().base().base())
+
     from ajpastor.misc.sequence_manipulation import inv_lagrangian
-    
+    ## Building the initial conditions
+    if(len(init) < 1 or init[0] != 0):
+        raise ValueError("The functional inverse is not a formal power series")
+    inv = inv_lagrangian(lambda n : init[n]/factorial(n))
+    init = [inv(i)*factorial(i) for i in range(len(init))]
+
+    return DAlgebraic(polynomial, init, dR)
+
+def PolynomialInverse(polynomial):
+    r'''
+        Method to compute the D-finite representation of the functional inverse of a polynomial.
+
+        It is well known that the functional inverse of an algebraic function is 
+        again algebraic. In fact, computing an annihilating polynomial for that inverse is
+        a straighforward computation. 
+        
+        Assume that the algebraic function `a(x)` is annihilated by the polynomial
+        `P(x,y)` (i.e., `P(x,a(x)) = 0`). Then `Q(x,y) = P(y,x)` is a polynomial
+        that satisfies
+
+        .. MATH::
+
+            Q(x, a^{-1}(x))  = P(a^{-1}(x), x) = P(x, a(x)) \circ a^{-1}(x) = 0 \circ a^{-1}(x) = 0.
+
+        See the method :func:`DAlgebraicInverse` for further information.
+        
+        In the particular case of a polynomial, all polynomials are algebraic functions 
+        with minimal polynomial of degree 1. For any polynomial `p(x) \in \mathbb{K}[x]`:
+
+        .. MATH::
+
+            P(x, y) = y - p(x)
+
+        Hence, the minimal polynomial for the inverse function `p^{-1}(x)` is:
+
+        .. MATH::
+
+            Q(x, y) = P(y, x) = x - p(y).
+
+        This method returns the D-finite representation of the functional inverse
+        of a univariate polynomial. It is based on :func:`DAlgebraicInverse`.
+        
+        INPUT:
+
+        * ``polynomial``: the polynomial this method will invert. This must be a 
+          univariate polynomial that vanishes at 0.
+
+        OUTPUT:
+        
+        A :class:`~ajpastor.dd_function.ddFunction.DDFunction` representing the 
+        functional inverse of ``polynomial``.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: R = DFinite.base(); x = R.gens()[0]
+            sage: p = x^2 - 3*x
+            sage: f = PolynomialInverse(p); print(f)
+            (2:2:5)DD-Function in (DD-Ring over (Univariate Polynomial Ring in x over Rational Field)):
+            -------------------------------------------------
+                    -- Equation (self = f):
+                                D(f) * (2)
+                            + D^2(f) * (4*x + 9)
+                             = 0 
+                    -- Initial values:
+                    [0, -1/3, 2/27]
+            -------------------------------------------------
+            sage: f(p) == x
+            True
+            sage: p(f) == x
+            True
+            
+        We can even check the return of this method is the inverse of a polynomial with a random
+        input::
+
+            sage: p = R.random_element(3)
+            sage: if p(0) != 0: p -= p(0) # make sure the polynomial vanishes at zero
+            sage: f = PolynomialInverse(p)
+            sage: p(f) == x
+            True
+            sage: f(p) == x
+            True
+    '''
     ###############################################
     ## Dealing with the polynomial input
     ###############################################
@@ -3775,13 +3907,10 @@ def polynomial_inverse(polynomial):
     y = str(x)+"_y"
     R = PolynomialRing(parent.fraction_field(), [y])
     y = R.gens()[0]
-    
-    ## Building the initial conditions
+
     coeffs = polynomial.coefficients(False)
-    inv = inv_lagrangian(lambda n : factorial(n)*coeffs[n])
-    init = [inv(i) for i in range(len(coeffs))]
-    
-    return DAlgebraic(polynomial(**{str(x):y})-x, init)
+
+    return DAlgebraicInverse(polynomial - y, [factorial(n)*coeffs[n] for n in range(len(coeffs))])
   
 ##################################################################################
 ##################################################################################
