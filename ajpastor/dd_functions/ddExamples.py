@@ -50,12 +50,12 @@ The functions available in this module are the following:
 * RICCATI EQUATION (:wiki:`Riccati_equation`):
     * :func:`RiccatiD`
 * MATHIEU TYPE FUNCTIONS (:dlmf:`28`):
-    * :func:`MathieuD`
+    * :func:`Mathieu`
     * :func:`MathieuSin`
     * :func:`MathieuCos`
     * :func:`MathieuH`
-    * :func:`MathieuSinh`
-    * :func:`MathieuCosh`
+    * :func:`MathieuHSin`
+    * :func:`MathieuHCos`
     * :func:`HillD`
 * AIRY'S FUNCTIONS:
     * :func:`AiryD`
@@ -2486,29 +2486,77 @@ def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
 ###### MATHIEU TYPE FUNCTIONS
 ### Mathieu's Functions
 @cached_function
-def MathieuD(a='a',q='q',init=()):
-    '''
-        TODO: Review this documentation
+def Mathieu(a='a',q='q',init=()):
+    r'''
         DD-finite implementation of the Mathieu function
-        
-        References:
-    - https://dlmf.nist.gov/28.2
-    - https://en.wikipedia.org/wiki/Mathieu_function
-    - http://mathworld.wolfram.com/MathieuFunction.html
-            
-        The Mathieu functions are the solutions to the DD-finite differential equation
+    
+        The Mathieu functions are the solutions to the linear differential equation
 
         .. MATH::
 
-            f'' + (a - 2 q cos(2x))f = 0.
-            
-        This is a generalization of the differential equation of the trigonometric functions
-        sine and cosine (for q=0, a=1), and have several physical applications.
-        
+            w''(x) + \left(a - 2q\cos(2x)\right)w(x) = 0,
+
+        where `a` and `q` are constant parameters and `\cos(x)` is the cosine function
+        (see :func:`Cos`). These functions are a generalization of the sine and cosine 
+        functions. Namely, when `a=1` and `q=0`, we obtain exactly the same
+        differential equation.
+    
+        For further information, you can check the following references:
+
+        * :dlmf:`28.2`.
+        * :wiki:`Mathieu_function`
+        * :wolf:`MathieuFunction`
+
+        This method is cached, meaning that for a given set of inputs, the object return 
+        is always the same. That is why the input ``init`` must be a tuple and not a list.
+
         INPUT:
-    - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+
+        * ``a``: the value for the parameter `a`. It can be any expression that does not 
+          contain the main variable `x`. By defalt, it creates a parameter called `a` that
+          can be later fixed.
+        * ``q``: the value for the parameter `q`. It can be any expression that does not 
+          contain the main variable `x`. By defalt, it creates a parameter called `q` that
+          can be later fixed.
+        * ``init``: a *tuple* for the first two initial values of the Mathieu function. Once the 
+          parameters are fixed, the first two initial conditions define a specific solution.
+          The user can set any value for the initial conditions: values containing the 
+          parameters `a` and `q`, or even create new parameters.
+
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the Mathieu function
+        `w(x)` defined with the given `a`, `q` and initial values.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: f = Mathieu(); f
+            Mathieu(a,q;[])(x)
+            sage: a,q  = f.parent().parameters()
+            sage: f[0] == (a - 2*q*Cos(2*x))
+            True
+            sage: f[1] == 0
+            True
+            sage: f[2] ==  1
+            True
+            sage: Mathieu(init=(1,1)).init(5, True)
+            [1, 1, -a + 2*q, -a + 2*q, a^2 - 4*a*q + 4*q^2 - 8*q]
+            sage: Mathieu(q=a, init=(a,a)).init(5, True)
+            [a, a, a^2, a^2, a^3 - 8*a^2]
+
+        The Mathieu function generalizes both the sine (:func:`Sin`) and cosine (:func:`Cos`)::
+
+            sage: Mathieu(a=1, q=0, init=(0,1)) == Sin(x)
+            True
+            sage: Mathieu(a=1, q=0, init=(1,0)) == Cos(x)
+            True
+
+        The Mathieu two fundamental solutions satisfies the classic wronskian constant condition::
+
+            sage: w1 = Mathieu(init=(1,0)); w2 = Mathieu(init=(0,1))
+            sage: w1*w2.derivative() - w2*w1.derivative()
+            1
     '''
     parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()])
     ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:]
@@ -2523,99 +2571,162 @@ def MathieuD(a='a',q='q',init=()):
 
 @cached_function
 def MathieuSin(a='a',q='q'):
+    r'''
+        Alias for the Mathieu sine function (see :func:`Mathieu`).
+
+        The Mathieu sine function is any Mathieu function with initial conditions `(0,1)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: MathieuSin(a=1, q=0) == Sin(x)
+            True
+            sage: MathieuSin().init(5, True)
+            [0, 1, 0, -a + 2*q, 0]
     '''
-        TODO: Review this documentation
-        DD-finite implementation of the Mathieu Sine function.
-        
-        References:
-    - https://dlmf.nist.gov/28.2
-    - https://en.wikipedia.org/wiki/Mathieu_function
-    - http://mathworld.wolfram.com/MathieuFunction.html
-            
-        This is the sine function with the Mathieu equation (i.e., with initial values
-        0 an 1). It is equivalent to MathieuD(a,q,(0,1)).
-    '''
-    return MathieuD(a,q,(0,1))
+    return Mathieu(a,q,(0,1))
     
 @cached_function
 def MathieuCos(a='a',q='q'):
+    r'''
+        Alias for the Mathieu cosine function (see :func:`Mathieu`).
+
+        The Mathieu cosine function is any Mathieu function with initial conditions `(1,0)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: MathieuCos(a=1, q=0) == Cos(x)
+            True
+            sage: MathieuCos().init(5, True)
+            [1, 0, -a + 2*q, 0, a^2 - 4*a*q + 4*q^2 - 8*q]
     '''
-        TODO: Review this documentation
-        DD-finite implementation of the Mathieu Cosine function.
-        
-        References:
-    - https://dlmf.nist.gov/28.2
-    - https://en.wikipedia.org/wiki/Mathieu_function
-    - http://mathworld.wolfram.com/MathieuFunction.html
-            
-        This is the cosine function with the Mathieu equation (i.e., with initial values
-        1 an 0). It is equivalent to MathieuD(a,q,(1,0)).
-    '''
-    return MathieuD(a,q,(1,0))
+    return Mathieu(a,q,(1,0))
 
 ### Modified Mathieu's Functions
 @cached_function
 def MathieuH(a='a',q='q',init=()):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Modified Mathieu functions.
-        
-        References:
-    - https://dlmf.nist.gov/28.20
-    - https://en.wikipedia.org/wiki/Mathieu_function
-            
-        The Modified Mathieu functions are the solutions to the DD-finite differential equation
+    r'''
+        DD-finite implementation of the modified Mathieu function
+    
+        The Mathieu modified functions are the solutions to the linear differential equation
 
         .. MATH::
 
-            f'' - (a - 2 q cosh(2x))f = 0.
-            
-        This is a generalization of the differential equation of the hyperbolic trigonometric functions
-        sinh and cosh (for q=0, a=1), and have several physical applications.
-        
+            w''(x) - \left(a - 2q\cosh(2x)\right)w(x) = 0,
+
+        where `a` and `q` are constant parameters and `\cosh(x)` is the hyperbolic cosine function
+        (see :func:`Cosh`). These functions are a generalization of the hyperbolic sine and cosine 
+        functions. Namely, when `a=1` and `q=0`, we obtain exactly the same
+        differential equation.
+    
+        For further information, you can check the following references:
+
+        * :dlmf:`28.20`.
+        * :wiki:`Mathieu_function#Modified_Mathieu_functions`
+
+        This method is cached, meaning that for a given set of inputs, the object return 
+        is always the same. That is why the input ``init`` must be a tuple and not a list.
+
         INPUT:
-    - a: the parameter 'a' on the differential equation. If not provided, it takes the value 'a' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - q: the parameter 'q' on the differential equation. If not provided, it takes the value 'q' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - init: a TUPLE with the initial values for the function. Each element can be a string to create a variable, any rational number or any polynomial expression which variables will be considered as parameters (so 'x' is not allowed).
+
+        * ``a``: the value for the parameter `a`. It can be any expression that does not 
+          contain the main variable `x`. By defalt, it creates a parameter called `a` that
+          can be later fixed.
+        * ``q``: the value for the parameter `q`. It can be any expression that does not 
+          contain the main variable `x`. By defalt, it creates a parameter called `q` that
+          can be later fixed.
+        * ``init``: a *tuple* for the first two initial values of the Mathieu function. Once the 
+          parameters are fixed, the first two initial conditions define a specific solution.
+          The user can set any value for the initial conditions: values containing the 
+          parameters `a` and `q`, or even create new parameters.
+
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the modified Mathieu 
+        function `w(x)` defined with the given `a`, `q` and initial values.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: f = MathieuH(); f
+            MathieuH(a,q;[])(x)
+            sage: a,q  = f.parent().parameters()
+            sage: f[0] == -(a - 2*q*Cosh(2*x))
+            True
+            sage: f[1] == 0
+            True
+            sage: f[2] ==  1
+            True
+            sage: MathieuH(init=(1,1)).init(5, True)
+            [1, 1, a - 2*q, a - 2*q, a^2 - 4*a*q + 4*q^2 - 8*q]
+            sage: MathieuH(q=a, init=(a,a)).init(5, True)
+            [a, a, -a^2, -a^2, a^3 - 8*a^2]
+
+        The Mathieu function generalizes both the hyperbolic sine (:func:`Sinh`) and cosine (:func:`Cosh`)::
+
+            sage: MathieuH(a=1, q=0, init=(0,1)) == Sinh(x)
+            True
+            sage: MathieuH(a=1, q=0, init=(1,0)) == Cosh(x)
+            True
+
+        The Mathieu two fundamental solutions satisfies the classic wronskian constant condition::
+
+            sage: w1 = MathieuH(init=(1,0)); w2 = MathieuH(init=(0,1))
+            sage: w1*w2.derivative() - w2*w1.derivative()
+            1
+
+        There is a functional relation between the Mathieu functions (see :func:`Mathieu`) and 
+        their modified counterparts (similar to the trigonometric functions)::
+
+            sage: R = ParametrizedDDRing(DFiniteI, ['a','b','c','q]).to_depth(2)
+            sage: a,b,c,q = [R.parameter(p) for p in ['a','b','c','q']]
+            sage: I = DFiniteI.coef_field.gens()[0]; x = R.base().base().gens()[0]
+            sage: Mathieu(a=a,q=q,init=(b,c))(I*x) == MatiheuH(a=a,q=q,init=(b,c))
+            True
     '''
     parent, new_all = __check_list([a,q] + list(init), [str(el) for el in DFinite.variables()])
     ra = new_all[0]; rq = new_all[1]; rinit = new_all[2:]
     
     if(parent != QQ):
-        destiny_ring = ParametrizedDDRing(DFinite, [str(v) for v in parent.gens()])
+        destiny_ring = ParametrizedDDRing(DDFinite, [str(v) for v in parent.gens()])
     else:
         destiny_ring = DDFinite
     x = destiny_ring.variables()[0]
     
-    return destiny_ring.element([-ra-2 *rq*Cosh(2 *x), 0, 1], rinit, name=DynamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
+    return destiny_ring.element([-ra+2 *rq*Cosh(2 *x), 0, 1], rinit, name=DynamicString("MathieuH(_1,_2;_3)(_4)", [repr(ra),repr(rq),str(rinit[:2 ]),repr(x)]))
 
 @cached_function
-def MathieuSinh(a='a',q='q'):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Modified Mathieu functions.
-        
-        References:
-    - https://dlmf.nist.gov/28.20
-    - https://en.wikipedia.org/wiki/Mathieu_function
-            
-        This is the hyperbolic sine function with the Mathieu equation (i.e., with initial values
-        0 an 1). It is equivalent to MathieuH(a,q,(0,1)).
+def MathieuHSin(a='a',q='q'):
+    r'''
+        Alias for the Mathieu modified sine function (see :func:`MathieuH`).
+
+        The Mathieu modified sine function is any modified Mathieu function with initial conditions `(0,1)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: MathieuHSin(a=1, q=0) == Sinh(x)
+            True
+            sage: MathieuHSin().init(5, True)
+            [0, 1, 0, a - 2*q, 0]
     '''
     return MathieuH(a,q,(0,1))
     
 @cached_function
-def MathieuCosh(a='a',q='q'):
-    '''
-        TODO: Review this documentation
-        DD-finite implementation of the Modified Mathieu functions.
-        
-        References:
-    - https://dlmf.nist.gov/28.20
-    - https://en.wikipedia.org/wiki/Mathieu_function
-            
-        This is the hyperbolic cosine function with the Mathieu equation (i.e., with initial values
-        1 an 0). It is equivalent to MathieuH(a,q,(1,0)).
+def MathieuHCos(a='a',q='q'):
+    r'''
+        Alias for the Mathieu modified cosine function (see :func:`MathieuH`).
+
+        The Mathieu modified cosine function is any modified Mathieu function with initial conditions `(1,0)`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: MathieuHCos(a=1, q=0) == Cosh(x)
+            True
+            sage: MathieuHCos().init(5, True)
+            [1, 0, a - 2*q, 0, a^2 - 4*a*q + 4*q^2 - 8*q]
     '''
     return MathieuH(a,q,(1,0))
 
@@ -3104,35 +3215,37 @@ def HeunD(a='a',beta='b',delta='d',gamma='g',epsilon='e',q='q'):
         and `q` is called the *accessory parameter*.
         
         INPUT:
-            * ``a``: the parameter `a` on the differential equation. If not provided, 
-              it takes the value ``'a'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
-            * ``beta``: the parameter `\beta` on the differential equation. If not provided, 
-              it takes the value ``'b'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
-            * ``delta``: the parameter `\delta` on the differential equation. If not provided, 
-              it takes the value ``'d'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
-            * ``gamma``: the parameter `\gamma` on the differential equation. If not provided, 
-              it takes the value ``'g'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
-            - ``epsilon``: the parameter `\epsilon` on the differential equation. If not provided, 
-              it takes the value ``'e'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
-            - ``q``: the parameter `q` on the differential equation. If not provided, 
-              it takes the value ``'q'`` by default. This argument can be any rational 
-              number or any polynomial expression, which variables will be considered 
-              as parameters (so ``x`` is not allowed).
+
+        * ``a``: the parameter `a` on the differential equation. If not provided, 
+          it takes the value ``'a'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
+        * ``beta``: the parameter `\beta` on the differential equation. If not provided, 
+          it takes the value ``'b'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
+        * ``delta``: the parameter `\delta` on the differential equation. If not provided, 
+          it takes the value ``'d'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
+        * ``gamma``: the parameter `\gamma` on the differential equation. If not provided, 
+          it takes the value ``'g'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
+        * ``epsilon``: the parameter `\epsilon` on the differential equation. If not provided, 
+          it takes the value ``'e'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
+        * ``q``: the parameter `q` on the differential equation. If not provided, 
+          it takes the value ``'q'`` by default. This argument can be any rational 
+          number or any polynomial expression, which variables will be considered 
+          as parameters (so ``x`` is not allowed).
             
         WARNING:
-            * This method does not compute initial values for the solution of this 
-              differential equation since no power series solution is guaranteed 
-              due to the singularity at 0.
+
+        * This method does not compute initial values for the solution of this 
+          differential equation since no power series solution is guaranteed 
+          due to the singularity at 0.
 
         EXAMPLES::
 
