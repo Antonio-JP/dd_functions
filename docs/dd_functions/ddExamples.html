@@ -124,12 +124,12 @@ checked in these tests can all be found in the literature of <a class="reference
 </li>
 <li><dl class="simple">
 <dt>MATHIEU TYPE FUNCTIONS (<a class="reference external" href="https://dlmf.nist.gov/28">DLMF Chapter 28</a>):</dt><dd><ul>
-<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuD" title="ajpastor.dd_functions.ddExamples.MathieuD"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuD()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.Mathieu" title="ajpastor.dd_functions.ddExamples.Mathieu"><code class="xref py py-func docutils literal notranslate"><span class="pre">Mathieu()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuSin" title="ajpastor.dd_functions.ddExamples.MathieuSin"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuSin()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuCos" title="ajpastor.dd_functions.ddExamples.MathieuCos"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuCos()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuH" title="ajpastor.dd_functions.ddExamples.MathieuH"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuH()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuSinh" title="ajpastor.dd_functions.ddExamples.MathieuSinh"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuSinh()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuCosh" title="ajpastor.dd_functions.ddExamples.MathieuCosh"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuCosh()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuHSin" title="ajpastor.dd_functions.ddExamples.MathieuHSin"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuHSin()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.MathieuHCos" title="ajpastor.dd_functions.ddExamples.MathieuHCos"><code class="xref py py-func docutils literal notranslate"><span class="pre">MathieuHCos()</span></code></a></p></li>
 <li><p><a class="reference internal" href="#ajpastor.dd_functions.ddExamples.HillD" title="ajpastor.dd_functions.ddExamples.HillD"><code class="xref py py-func docutils literal notranslate"><span class="pre">HillD()</span></code></a></p></li>
 </ul>
 </dd>
@@ -1462,8 +1462,8 @@ of a D(n+1)-finite function (w), and hence, it is D(n+2)-finite. More precisely:
 </dd></dl>
 
 <dl class="py function">
-<dt id="ajpastor.dd_functions.ddExamples.MathieuD">
-<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">MathieuD</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em>, <em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">()</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.MathieuD" title="Permalink to this definition">¶</a></dt>
+<dt id="ajpastor.dd_functions.ddExamples.Mathieu">
+<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">Mathieu</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em>, <em class="sig-param"><span class="n">init</span><span class="o">=</span><span class="default_value">()</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.Mathieu" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div><p>DD-finite implementation of the Mathieu function</p>
 <p>References:</p>
@@ -1500,7 +1500,7 @@ sine and cosine (for q=0, a=1), and have several physical applications.</p>
 <li><p><a class="reference external" href="http://mathworld.wolfram.com/MathieuFunction.html">http://mathworld.wolfram.com/MathieuFunction.html</a></p>
 <blockquote>
 <div><p>This is the sine function with the Mathieu equation (i.e., with initial values
-0 an 1). It is equivalent to MathieuD(a,q,(0,1)).</p>
+0 an 1). It is equivalent to Mathieu(a,q,(0,1)).</p>
 </div></blockquote>
 </li>
 </ul>
@@ -1519,7 +1519,7 @@ sine and cosine (for q=0, a=1), and have several physical applications.</p>
 <li><p><a class="reference external" href="http://mathworld.wolfram.com/MathieuFunction.html">http://mathworld.wolfram.com/MathieuFunction.html</a></p>
 <blockquote>
 <div><p>This is the cosine function with the Mathieu equation (i.e., with initial values
-1 an 0). It is equivalent to MathieuD(a,q,(1,0)).</p>
+1 an 0). It is equivalent to Mathieu(a,q,(1,0)).</p>
 </div></blockquote>
 </li>
 </ul>
@@ -1551,8 +1551,8 @@ sinh and cosh (for q=0, a=1), and have several physical applications.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="ajpastor.dd_functions.ddExamples.MathieuSinh">
-<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">MathieuSinh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.MathieuSinh" title="Permalink to this definition">¶</a></dt>
+<dt id="ajpastor.dd_functions.ddExamples.MathieuHSin">
+<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">MathieuHSin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.MathieuHSin" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div><p>DD-finite implementation of the Modified Mathieu functions.</p>
 <p>References:</p>
@@ -1569,8 +1569,8 @@ sinh and cosh (for q=0, a=1), and have several physical applications.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="ajpastor.dd_functions.ddExamples.MathieuCosh">
-<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">MathieuCosh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.MathieuCosh" title="Permalink to this definition">¶</a></dt>
+<dt id="ajpastor.dd_functions.ddExamples.MathieuHCos">
+<code class="sig-prename descclassname">ajpastor.dd_functions.ddExamples.</code><code class="sig-name descname">MathieuHCos</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">'a'</span></em>, <em class="sig-param"><span class="n">q</span><span class="o">=</span><span class="default_value">'q'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#ajpastor.dd_functions.ddExamples.MathieuHCos" title="Permalink to this definition">¶</a></dt>
 <dd><blockquote>
 <div><p>DD-finite implementation of the Modified Mathieu functions.</p>
 <p>References:</p>
