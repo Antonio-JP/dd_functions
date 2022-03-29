@@ -41,7 +41,8 @@ The functions available in this module are the following:
     * :func:`StruveH`
     * :func:`StruveL`
 * ORTHOGONAL POLYNOMIALS:
-    * :func:`LegendreD` (:dlmf:`14`)
+    * :func:`LegendreP` (:dlmf:`14`)
+    * :func:`LegendreQ` (:dlmf:`14`)
     * :func:`ChebyshevD` (:dlmf:`18`)
 * HYPERGEOMETRIC FUNCTIONS (:dlmf:`15` and :dlmf:`16`):
     * :func:`HypergeometricFunction`
@@ -104,6 +105,7 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
+from functools import lru_cache
 from sage.all import (cached_function, factorial, bell_polynomial, QQ, ZZ, pi,
                         sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR,
                         ideal)
@@ -1521,7 +1523,7 @@ def Exp(input, ddR = None):
 @cached_function 
 def BesselJ(n = 'n'):
     r'''
-        DD-finite implementation of the first kind Bessel function (`J_n(x)`).
+        D-finite implementation of the first kind Bessel function (`J_n(x)`).
 
         Method to create a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` 
         instance of a bessel function of the first kind. For more
@@ -1881,85 +1883,121 @@ def StruveL(n='n'):
 
 ###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials 
-def __init_value_associated_legendre(n,m,kind):
-    S1_2 = ZZ(1)/ZZ(2)
-    S2 = ZZ(2)
-    S1 = ZZ(1)
+@lru_cache
+def __legendreP_0(n):
+    if n == 0: return 1
+    if n == 1: return 0
+    return -__legendreP_0(n-2)*(n-1)/ZZ(n)
+
+@lru_cache
+def __legendreP_der_0(n):
+    if n == 0: return 0
+    if n == 1: return 1
+    return ((2*n-1)*__legendreP_0(n-1) - (n-1)*__legendreP_der_0(n-2))/ZZ(n)
+
+@lru_cache
+def __legendreP_mod_0(n,m):
+    if m == 0: return __legendreP_0(n)
+    if m < 0: return (-1)**m * factorial(n-m) / factorial(n + m) * __legendreP_mod_0(n,-m)
+    return (-1)**m*LegendreP(n,0).init(m)
     
-    if(kind == 1):
-        res = (2**m*sqrt(pi))/gamma((n-m)/S2 + S1)/gamma(S1_2-(n+m)/S2)
-    else:
-        res = -(S2**(m-S1)*sqrt(pi)*sin((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1_2)/gamma((n-m)/S2 + S1)
-
-    return res
-
-def __first_derivative_associated_legendre(n,m,kind):
-    S1_2 = ZZ(1)/ZZ(2)
-    S2 = ZZ(2)
-    S1 = ZZ(1)
-    
-    if(kind == 1):
-        res = -(S2**(m+S1)*sqrt(pi))/gamma((n-m)/S2 + S1_2)/gamma(-(n+m)/S2)
-    else:
-        res = (S2**m*sqrt(pi)*cos((S1_2)*(n+m)*pi))*gamma((n+m)/S2 + S1)/gamma((n-m)/S2 + S1_2)
-
-    return res
+@lru_cache
+def __legendreP_mod_der_0(n,m):
+    if m == 0: return __legendreP_der_0(n)
+    if m < 0: return (-1)**m * factorial(n-m) / factorial(n + m) * __legendreP_mod_der_0(n,-m)
+    return (-1)**m * LegendreP(n,0).init(m+1)
 
 @cached_function 
-def LegendreD(nu='n', mu = 0, kind=1):
+def LegendreP(n='n', mu = 0):
     r'''
-        TODO: Review this documentation
-        D-finite implementation of the Legendre functions (P_n(x) and Q_n(x))
-        
-        References:
-    - https://dlmf.nist.gov/18.3 & https://dlmf.nist.gov/14.2
-    - https://en.wikipedia.org/wiki/Legendre_polynomials
-    - http://mathworld.wolfram.com/LegendrePolynomial.html & http://mathworld.wolfram.com/LegendreFunctionoftheSecondKind.html
-            
-        Legendre functions are the solutions to the differential equation:
-            (1-x^2)f'' - 2xf' + n(n+1)f = 0
-        
-        This equation has a parameter 'n'. When 'n' takes non-negative integer
-        values, it has polynomial solutions, the so called Legendre polynomials (P_n(x)). 
-        This family of polynomials is a orthogonal set of polynomials. In particular
+        D-finite implementation of the Legendre functions (`P_n^{\mu}(x)`)
+
+        Method that creates a :class:`~ajpastor.dd_functions.ddFunction.DDFunction` to 
+        represent modified Legendre polynomials, which is defined with the following differential 
+        equation:
+
+        .. MATH::
+
+            (1 - x^2) P_n^{\mu}''(x) - 2xP_n^{\mu}'(x) + \left(n(n+1) - \frac{\mu^2}{1-x^2}\right)P_n^{\mu}(x) = 0.
+
+        The particular case of `\mu=0` (also called unmodified or simply classical) and `n` integer, we have 
+        two solutions: one is regular at `x=\pm 1` and they are, in fact, polynomials. This regular solution
+        is the _Legendre polynomials_ or _Legendre funcitons of first kind.
+
+        Then, the modified Legendre functions are defined using the unmodified function with the following formula:
+
+        .. MATH::
+
+            P_n^{\mu}(x) = (-1)^\mu (1-x^2)^{\mu/2} \frac{d^\mu}{dx^\mu}P_n(x).
+
+        Hence, the initial conditions for the modified case can be obtained directly from the initial conditions
+        of the classical cases.
+
+        When we managed polynomials (i.e., the case with `\mu = 0` and `n` integer), we obtain a family of
+        **orthogonal polynomials** with the following othogonal relation:
 
         .. MATH:: 
 
-            \int_{-1}^{1} P_n(x)P_m(x) = (2/(2n+1))\delta_{m,n}
+            \int_{-1}^{1} P_n(x)P_m(x) = (2/(2n+1))\delta_{m,n}.
 
-        This set of polynomials (as any orthogonal family of polynomials), also satisfies
-        a recursive relation:
-
-        .. MATH::
-
-            (n+1)P_{n+1}(x) = (2n+1)xP_n(x) - nP_{n-1}(x)
-        
-        The other solution are the Legendre functions of second kind (Q_n(x)). They also 
-        satisfy the same recurrence relation as the Legendre polynomials. They are power series
-        that converges from x=-1 to x=1.
-        
-        There is an associated differential equation with an extra parameter:
+        And they also satisfies the recurrence relation:
 
         .. MATH::
 
-            (1-x^2)^2f'' - 2x(1-x^2)f' + (n(n+1)(1-x^2) - m^2)f = 0,
+            (n+1)P_{n+1}(x) = (2n+1)xP_n(x) - nP_{n-1}(x).
 
-        that reduces to the original equation when m=0.
-        
-        This method allows the user to get the D-finite representation of the associated
-        Legendre differential equation. 
+        For further information, check the following references:
+
+        * :dlmf:`18.3` and :dlmf:`14.2`.
+        * :wiki:`Legendre_polynomials`.
+        * :wolf:`AssociatedLegendrePolynomial` and :wolf:`LegendrePolynomial`.
+
+        For the other linearly independent solution of this differential equation, check the method
+        :func:`LegendreQ`.
         
         INPUT:
-    - nu: the parameter 'n' on the associated differential equation. If not provided, ot takes the value 'n' by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - mu: the parameter 'm' on the associated differential equation. If not provided, ot takes the value 0 by default. This argument can be any rational number or any polynomial expression, which variables will be considered as parameters (so 'x' is not allowed).
-    - kind: the kind of the Legendre function the user want to get. It can take the values 1 and 2 (1 by default).
+
+        * ``n``: the parameter `n` of the differential equation. It takes the value ``"n"`` by default,
+          creating a parameter in the system. Since the initial values can not be computed for generic `n`,
+          the object _seems_ to be the zero function. If given, we require the value is an integer.
+        * ``mu``: the parameter `\mu` of the differential equation. It takes the value `0` by default,
+          returning, then, the classical Legendre function. It can only be set when the argument `n` is
+          an integer and, then, this argument must take a value between `-n` and `n`.
             
-        WARNING:
-    - Initial values will also be computed for the parameter values that have power series solutions. The second kind may have non-rational initial values and those will not be computed.
-    - When evaluating parameters, the initial values will not update and must be set by hand.
+        OUTPUT:
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` representing the Legendre function of first
+        kind for the given parameters `n` and `\mu`.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: all([LegendreP(i) == legendre_P(i,x) for i in range(20)])
+            True
+            sage: f = LegendreP(10)
+            sage: all((f[0] == 110, f[1] == -2*x, f[2] == (1-x^2)))
+            True
+            sage: f = LegendreP(3,2) # modified case
+            sage: all((f[0] == 12*(1-x^2) - 4, f[1] == -2*x*(1-x^2), f[2] == (1-x^2)^2))
+            True
+
+        We can check the recurrence and functional equations of the Legendre polynomials hold
+        with this implementation (see :funtop:`Legendre_polynomials`)::
+
+            sage: all(LegendreP(n)(-x) == (-1)**n*LegendreP(n) for n in range(1,100))
+            True
+            sage: all((n+1)*LegendreP(n+1) - (2*n+1)*x*LegendreP(n) + n*LegendreP(n-1) == 0 for n in range(1,50))
+            True
+            sage: all((1-x^2)*LegendreP(n).derivative() + n*x*LegendreP(n) - n*LegendreP(n-1) == 0 for n in range(1,50))
+            True
+
+        Legendre polynomials can also be written as hypegeometric functions (see :func:`GenericHypergeometricFunction`)::
+
+            sage: all(LegendreP(2*n) == (-1/4)^n *binomial(2*n, n) * F21(-n, n+1/2, 1/2)(x^2) for n in range(1,30))
+            True
     '''
-    parent, par = __check_list([nu,mu], DFinite.variables())
-    n = par[0]; m = par[1]
+    parent, par = __check_list([n,mu], DFinite.variables())
+    rn = par[0]; m = par[1]
     
     ## Building the final parent
     if(parent is QQ):
@@ -1969,33 +2007,35 @@ def LegendreD(nu='n', mu = 0, kind=1):
     
     ## Building the final name
     x = parent.variables()[0]
-    if(kind == 1): kind = "P"
-    elif(kind == 2): kind = "Q"
-    else: raise ValueError("Only Legendre functions of first and second kind are implemented. Got %s" %kind)
-
     if(m != 0):
-        name = DynamicString("gen_legendre_%s(_1,_2,_3)" %kind, [repr(n), repr(m), repr(x)])
+        if not rn in ZZ:
+            raise TypeError("The modified Legendre functions only allow for fixed values of `n`")
+        elif abs(m) > rn:
+            raise ValueError(f"The modified argument must be in (-n,n) [{m=},{rn=}]")
+        name = DynamicString("gen_legendre_P(_1,_2,_3)", [repr(rn), repr(m), repr(x)])
     else:
-        name = DynamicString("legendre_%s(_1,_2)" %kind, [repr(n),repr(x)])
+        name = DynamicString("legendre_P(_1,_2)", [repr(rn),repr(x)])
     
     ## Building the initial values
     init = []
-    if((m == 0) and (n in ZZ) and (n >= 0)):
-        try:
-            init = [__init_value_associated_legendre(n,m,kind), __first_derivative_associated_legendre(n,m,kind)]
-            if(any(el not in parent.coeff_field for el in init)):
-                init = []
-        except:
-            pass
-    ## Building the coefficients of the equation
+    if((m == 0) and (rn in ZZ) and (rn >= 0)):
+        init = [__legendreP_mod_0(rn,m), __legendreP_mod_der_0(rn,m)]
+
+    ## Building the coefficients
     if(m == 0):
-        coeffs = [(n*(n+1)),-2*x,1-x**2]
+        coeffs = [(rn*(rn+1)),-2*x,1-x**2]
     else:
-        coeffs = [n*(n+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)**2]
+        coeffs = [rn*(rn+1)*(1-x**2) - m**2, -2*x*(1-x**2), (1-x**2)**2]
      
     ## Returning the final element
     return parent.element(coeffs, init, name=name)
    
+def LegendreQ(n='n', mu = 0):
+    r'''
+        TODO: add documentation
+    '''
+    raise NotImplementedError
+ 
 ### Chebyshev Polynomials        
 @cached_function    
 def ChebyshevD(input='n', kind = 1, poly=True):

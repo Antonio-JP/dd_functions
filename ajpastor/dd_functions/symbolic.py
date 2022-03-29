@@ -40,7 +40,7 @@ from sage.all import SR, prod, ZZ, QQ, PolynomialRing
 
 from ajpastor.dd_functions.ddFunction import is_DDFunction, DFinite, ParametrizedDDRing
 from ajpastor.dd_functions.ddExamples import (Sin, Cos, Sinh, Cosh, Tan, Log, Exp, 
-                                                BesselJ, BesselI, LegendreD, ChebyshevD,
+                                                BesselJ, BesselI, LegendreP, LegendreQ, ChebyshevD,
                                                 GenericHypergeometricFunction, DAlgebraic)
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def symbolic(function):
             e^x
             sage: symbolic(BesselJ(2))
             bessel_J(2, x)
-            sage: symbolic(LegendreD('n','m'))
+            sage: symbolic(LegendreP('n','m'))
             gen_legendre_P(n, m, x)
     '''
     if(not is_DDFunction(function)):
@@ -256,16 +256,16 @@ def from_symbolic(exp, dR = None):
         return BesselI(ZZ(operands[0]))(from_symbolic(operands[1],dR))
     elif(name == "legendre_P"):
         logger.debug("Found an Legendre function of first kind")
-        return LegendreD(operands[0], 0, 1)(from_symbolic(operands[1],dR))
+        return LegendreP(operands[0], 0, 1)(from_symbolic(operands[1],dR))
     elif(name == "gen_legendre_P"):
         logger.debug("Found an generic Legendre function of first kind")
-        return LegendreD(operands[0], operands[1], 1)(from_symbolic(operands[1],dR))
+        return LegendreP(operands[0], operands[1], 1)(from_symbolic(operands[1],dR))
     elif(name == "legendre_Q"):
         logger.debug("Found an Legendre function of second kind")
-        return LegendreD(operands[0], 0, 2)(from_symbolic(operands[1],dR))
+        return LegendreQ(operands[0], 0, 2)(from_symbolic(operands[1],dR))
     elif(name == "gen_legendre_Q"):
         logger.debug("Found an generic Legendre function of second kind")
-        return LegendreD(operands[0], operands[1], 2)(from_symbolic(operands[1],dR))
+        return LegendreQ(operands[0], operands[1], 2)(from_symbolic(operands[1],dR))
     elif(name == "chebyshev_T"):
         logger.debug("Found an Chebyshev function of first kind")
         return ChebyshevD(operands[0], 1)(from_symbolic(operands[1],dR))
