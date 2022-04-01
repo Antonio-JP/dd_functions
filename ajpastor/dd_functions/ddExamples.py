@@ -47,7 +47,7 @@ The functions available in this module are the following:
 * HYPERGEOMETRIC FUNCTIONS (:dlmf:`15` and :dlmf:`16`):
     * :func:`HypergeometricFunction`
     * :func:`GenericHypergeometricFunction`
-    * :func:`PolylogarithmD` (:dlmf:`25.12`)
+    * :func:`Polylogarithm` (:dlmf:`25.12`)
 * RICCATI EQUATION (:wiki:`Riccati_equation`):
     * :func:`RiccatiD`
 * MATHIEU TYPE FUNCTIONS (:dlmf:`28`):
@@ -1918,11 +1918,11 @@ def LegendreP(n='n', mu = 0):
 
         .. MATH::
 
-            (1 - x^2) P_n^{\mu}''(x) - 2xP_n^{\mu}'(x) + \left(n(n+1) - \frac{\mu^2}{1-x^2}\right)P_n^{\mu}(x) = 0.
+            (1 - x^2) P_n^{\mu}{''}(x) - 2xP_n^{\mu}{'}(x) + \left(n(n+1) - \frac{\mu^2}{1-x^2}\right)P_n^{\mu}(x) = 0.
 
         The particular case of `\mu=0` (also called unmodified or simply classical) and `n` integer, we have 
         two solutions: one is regular at `x=\pm 1` and they are, in fact, polynomials. This regular solution
-        is the _Legendre polynomials_ or _Legendre funcitons of first kind_.
+        is the *Legendre polynomials* or *Legendre funcitons of first kind*.
 
         Then, the modified Legendre functions are defined using the unmodified function with the following formula:
 
@@ -1950,7 +1950,8 @@ def LegendreP(n='n', mu = 0):
 
         * :dlmf:`18.3` and :dlmf:`14.2`.
         * :wiki:`Legendre_polynomials`.
-        * :wolf:`AssociatedLegendrePolynomial` and :wolf:`LegendrePolynomial`.
+        * :wolf:`AssociatedLegendrePolynomial` 
+        * :wolf:`LegendrePolynomial`.
 
         For the other linearly independent solution of this differential equation, check the method
         :func:`LegendreQ`.
@@ -1959,7 +1960,7 @@ def LegendreP(n='n', mu = 0):
 
         * ``n``: the parameter `n` of the differential equation. It takes the value ``"n"`` by default,
           creating a parameter in the system. Since the initial values can not be computed for generic `n`,
-          the object _seems_ to be the zero function. If given, we require the value is an integer.
+          the object *seems* to be the zero function. If given, we require the value is an integer.
         * ``mu``: the parameter `\mu` of the differential equation. It takes the value `0` by default,
           returning, then, the classical Legendre function. It can only be set when the argument `n` is
           an integer and, then, this argument must take a value between `-n` and `n`.
@@ -2040,18 +2041,19 @@ def LegendreQ(n='n', mu = 0):
 
         .. MATH::
 
-            (1 - x^2) P_n^{\mu}''(x) - 2xP_n^{\mu}'(x) + \left(n(n+1) - \frac{\mu^2}{1-x^2}\right)P_n^{\mu}(x) = 0.
+            (1 - x^2) Q_n^{\mu}{''}(x) - 2xQ_n^{\mu}{'}(x) + \left(n(n+1) - \frac{\mu^2}{1-x^2}\right)Q_n^{\mu}(x) = 0.
 
         The particular case of `\mu=0` (also called unmodified or simply classical) and `n` integer, we have 
         two solutions: one is regular at `x=\pm 1` and they are, in fact, polynomials. This regular solution
-        is the _Legendre polynomials_ or _Legendre funcitons of first kind_. The other solutions, with singularities
-        at `x = \pm 1`, are the _Legendre functions of second kind_.
+        is the *Legendre polynomials* or *Legendre funcitons of first kind*. The other solutions, with singularities
+        at `x = \pm 1`, are the *Legendre functions of second kind*.
 
         For further information, check the following references:
 
         * :dlmf:`18.3` and :dlmf:`14.2`.
         * :wiki:`Legendre_polynomials`.
-        * :wolf:`AssociatedLegendrePolynomial` and :wolf:`LegendreFunctionoftheSecondKind`.
+        * :wolf:`AssociatedLegendrePolynomial`
+        * :wolf:`LegendreFunctionoftheSecondKind`.
 
         For the other linearly independent solution of this differential equation, check the method
         :func:`LegendreP`.
@@ -2060,7 +2062,7 @@ def LegendreQ(n='n', mu = 0):
 
         * ``n``: the parameter `n` of the differential equation. It takes the value ``"n"`` by default,
           creating a parameter in the system. Since the initial values can not be computed for generic `n`,
-          the object _seems_ to be the zero function. If given, we require the value is an integer.
+          the object *seems* to be the zero function. If given, we require the value is an integer.
         * ``mu``: the parameter `\mu` of the differential equation. It takes the value `0` by default,
           returning, then, the classical Legendre function. It can only be set when the argument `n` is
           an integer and, then, this argument must take a value between `-n` and `n`.
