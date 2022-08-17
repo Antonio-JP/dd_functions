@@ -1883,25 +1883,25 @@ def StruveL(n='n'):
 
 ###### ORTHOGONAL POLYNOMIALS
 ### Legendre Polynomials 
-@lru_cache
+@lru_cache()
 def __legendreP_0(n):
     if n == 0: return ZZ(1)
     if n == 1: return ZZ(0)
     return -__legendreP_0(n-2)*(n-1)/ZZ(n)
 
-@lru_cache
+@lru_cache()
 def __legendreP_der_0(n):
     if n == 0: return ZZ(0)
     if n == 1: return ZZ(1)
     return ((2*n-1)*__legendreP_0(n-1) - (n-1)*__legendreP_der_0(n-2))/ZZ(n)
 
-@lru_cache
+@lru_cache()
 def __legendreP_mod_0(n,m):
     if m == 0: return __legendreP_0(n)
     if m < 0: return (-1)**m * factorial(n-m) / factorial(n + m) * __legendreP_mod_0(n,-m)
     return (-1)**m*LegendreP(n,0).init(m)
     
-@lru_cache
+@lru_cache()
 def __legendreP_mod_der_0(n,m):
     if m == 0: return __legendreP_der_0(n)
     if m < 0: return (-1)**m * factorial(n-m) / factorial(n + m) * __legendreP_mod_der_0(n,-m)
