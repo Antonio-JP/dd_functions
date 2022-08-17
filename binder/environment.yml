@@ -17,3 +17,6 @@ dependencies:
   # https://github.com/conda-forge/sage-feedstock/blob/main/recipe/meta.yaml
   # for the things that are included in "sage" but that might be missing from
   # "sagelib".
+  - pip
+  - pip:
+    - git+https://github.com/mkauers/ore_algebra.git
