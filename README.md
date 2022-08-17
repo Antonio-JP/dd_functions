@@ -1,5 +1,5 @@
 
-# DD-finite functions in Sage [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
+# DD-finite functions in Sage [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions/doc_%2311?labpath=dd_functions_demo.ipynb)
 
 **dd_functions** is a [SageMath](https://www.sagemath.org) package
 to work with differentiably definable functions.
@@ -18,7 +18,7 @@ This package allows Sage users to _naturally_ use DD-finite functions on the com
 - license: GNU General Public License v3.0
 - home page: https://github.com/Antonio-JP/dd_functions
 - documentation: https://antonio-jp.github.io/dd_functions/
-- online demo: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions.git/master?filepath=dd_functions_demo.ipynb)
+- online demo: [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Antonio-JP/dd_functions/doc_%2311?labpath=dd_functions_demo.ipynb)
 
 This README includes an installation guide.
 
