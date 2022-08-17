@@ -20,3 +20,4 @@ dependencies:
   - pip
   - pip:
     - git+https://github.com/mkauers/ore_algebra.git
+    - git+https://github.com/Antonio-JP/dd_functions.git
