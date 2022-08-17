@@ -2114,7 +2114,7 @@ def LegendreQ(n='n', mu = 0):
         if not rn in ZZ:
             raise TypeError("The modified Legendre functions only allow for fixed values of `n`")
         elif abs(m) > rn:
-            raise ValueError(f"The modified argument must be in (-n,n) [{m=},{rn=}]")
+            raise ValueError(f"The modified argument must be in (-n,n) [m={m},rn={rn}]")
         name = DynamicString("gen_legendre_Q(_1,_2,_3)", [repr(rn), repr(m), repr(x)])
     else:
         name = DynamicString("legendre_Q(_1,_2)", [repr(rn),repr(x)])
