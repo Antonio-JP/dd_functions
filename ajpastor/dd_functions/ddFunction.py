@@ -1207,7 +1207,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         derivation = self.base_derivation, 
         default_operator = self.operator_class)
         
-    def is_field(self):
+    def is_field(self, **_):
         r'''
             Generic method for checking if ``self`` is a field.
 
@@ -1227,7 +1227,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return False
         
-    def is_finite(self):
+    def is_finite(self, **_):
         r'''
             Generic method for checking if ``self`` is finite.
 
@@ -1246,7 +1246,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
         '''
         return self.base().is_zero()
         
-    def is_noetherian(self):
+    def is_noetherian(self, **_):
         r'''
             Generic method for checking if ``self`` is Noetherian.
 
@@ -3891,9 +3891,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## creating the cache key
         if(S is None): cache = []
         else: cache = S
-        cache = list(cache)
-        cache.sort()
-        cache = tuple(cache)
+        cache = list(cache); cache.sort(); cache = tuple(cache) #pylint: disable=no-member
 
         if(not cache in self.__simple_derivative):
             if(self.is_constant()):
@@ -4064,27 +4062,84 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Compositional methods
     #####################################
     def compose(self, other):
-        '''
-            Method to compute the composition of 'self' with 'other' (if possible).
-            
-            The method first compute the new ring where the composition will belong and then relies on the method 'compose_solution' of the Operator class.
-            
-            Then, it computes the new initial values using the Faa di Bruno's formula.
-            
+        r'''
+            Method to compute the composition of ``self`` with ``other``.
+
+            Composing two formal power series is always possible when the inner power series has order
+            at least 1 (see :func:`ps_order`). Moreover, when the two of the formal power series are 
+            :class:`DDFunction` or are in the same chain of :class:`DDRing`, then the composition
+            satisfies another differential equation.
+
+            More precisely, assume ``self`` represent a formal power series `f(x)` and ``other``
+            represent another formal power series `g(x)`. Assume also that, for some ring `R` we know that
+            `f(x) \in \text{D}^n(R)` and `g(x) \in \text{D}^m(R)`. Then it was proven in :doi:`10.1016/j.aam.2020.102027`
+            that if `g(0) = 0` then `f(g(x)) \in \text{D}^{n+m}(R)`.
+
+            This method computes the corresponding representation of `f(g(x))`. Several special cases are taken 
+            into consideration:
+
+            * When ``other == a*x`` for a constant `a`: since in this case `ax \in \text{D}^0(R)` for any ring `R` with `x \in R`, 
+              then the composition will be in the same ring of `f(x)` and its equation and initial conditions can be easily computed. 
+              This was added in :issue:`18`.
+
             INPUT:
-                - 'self': a DDFunction
-                - 'other': an element of SAGE
+
+            * ``other``: the representation of a formal power series `g(x)`. ITs order must be at least 1.
             
             OUTPUT:
-                - A new DDFunction 'f' in the corresponding ring such f == self(other)
+            
+            A new :class:`DDFunction` in the corresponding :class:`DDRing` representing `f(g(x))`.
                 
             ERRORS:
-                - ValueError: if other(0) != 0
-                - TypeError: if we can not compute a destination ring
-                - Any error from Operator.compose_solution
+
+            * :class:`~ajpastor.dd_functions.exceptions.ZeroValueRequired`: if the evaluation of ``other`` at 0 does not vanish.
+            * :class:`TypeError`: if the computation of the final :class:`DDRing` fails.
+            * Any error from :func:`ajpastor.operator.Operator.compose_solution`.
                 
             WARNINGS:
-                - If the depth of the resulting DDFunction is greater than 3, a warning will pop-up
+
+            * If the depth of the destiny :class:`DDRing` is greater than 3, a warning will pop-up
+
+            EXAMPLES::
+
+                sage: from ajpastor.dd_functions import *
+                sage: f = Exp(x); g = BesselD(3)
+                sage: f.compose(f-1) == Exp(Exp(x)-1)
+                True
+                sage: h = f.compose(g)
+                sage: h in DDFinite
+                True
+                sage: h[0] == -16*BesselD(3).derivative()
+                True
+                sage: h[1] == 16
+                True
+                sage: h.init(10,True)
+                [1, 0, 0, 1/8, 0, -5/32, 5/32, 21/128, -35/32, 49/128]
+
+                
+            As mentioned, when the inner function does not evaluate to zero, we raise a 
+            :class:`~ajpastor.dd_functions.exceptions.ZeroValueRequired`::
+
+                sage: f.compose(f)
+                Traceback (most recent call last):
+                ...
+                ZeroValueRequired: required a zero value for ...
+                sage: g.compose(f)
+                Traceback (most recent call last):
+                ...
+                ZeroValueRequired: required a zero value for ...
+                
+            We can see the depth in the simplest case (when `g(x) = \alpha x`) never changes::
+
+                sage: DDFiniteI = DFiniteI.to_depth(2)
+                sage: I = DDFiniteI.coeff_field.gens()[0]; x = DDFiniteI.variable('x')
+                sage: a = DDFiniteI(x*I)
+                sage: g(a) == g(I*x)
+                True
+                sage: g(a).parent().depth() == 1 # used to be 3
+                True
+                sage: [g(a)[0], g(a)[1], g(a)[2]] == [x^2+9, -x, -x^2]
+                True
         '''
         ######################################
         ## Initial checking and considerations
@@ -4124,6 +4179,25 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         ## Second, compute the final depth of the DDRing
         if(not isinstance(push, DDRing)):
             raise TypeError("A non DDRing obtained for the composition: that is impossible -- review method _pushout_ of DDRing class")
+
+        ## Simple case where `other == a*x`
+        if (is_DDRing(op) and other.derivative().is_constant()) or (not is_DDRing(op) and other/push.variables()[0] in push.coeff_field):
+            push = push.to_depth(sp.depth())
+            a = push.coeff_field(other.sequence(1) if is_DDRing(op) else other/push.variables()[0]) 
+            other = a*push.variables()[0]
+            d = self.order()
+            # the new equation has as coefficients self[i](other)*a^(d-i)
+            new_equation = push.element([a**(d-i)*self[i](other) for i in range(d+1)]).equation
+            # the new initial values are self.init(i)*a^i
+            needed_initial = new_equation.get_jp_fo() + 1
+            ## Computing the new name
+            if(self.name is None):
+                new_name = None
+            else:
+                new_name = m_dreplace(self.name, {"x" : f"{a}*x"}, True)
+            return push.element(new_equation, [a**i*self.init(i) for i in range(needed_initial+1)], name=new_name)
+        
+        ## checking if the composition could be simpler
         if(isinstance(op, DDRing)):
             destiny_ring = push.to_depth(op.depth()+sp.depth())
         else:
@@ -4237,7 +4311,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                                                 "coefficients: %s" %F, 
                                                 "minimal polynomial: %s" %poly, 
                                                 "final ring: %s" %destiny_ring,
-                                                "init: %s" %init]))
+                                                "initial values: %s" %init]))
             
     #####################################
     ### Property methods
