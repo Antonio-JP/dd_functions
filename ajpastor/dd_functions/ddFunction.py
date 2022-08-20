@@ -1281,7 +1281,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
 
     base_derivation = property(derivation_on_base, None) #: alias for method :func:`~DDRing.derivation_on_base`
     
-    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None, euler=False):
+    def element(self,coefficients=[],init=[],inhomogeneous=0 , check_init=True, name=None, euler=False, sequence=False):
         r'''
             Method to create a :class:`DDFunction` contained in ``self``.
             
@@ -1303,6 +1303,9 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 * ``name``: optional argument for providing a name to the new built function.
                 * ``euler``: optional argument to whether use the canonical differential basis `\partial_x`
                   or the Euler differential operator `\theta_x = x\partial_x`.
+                * ``sequence``: indicates if the data in init is the information of the initial values or 
+                the sequence of the formal power series. If ``True``, the values of ``init`` will be multiplied
+                by the correspondent factorial to obtain the real initial values.
 
             OUTPUT:
 
@@ -1327,7 +1330,7 @@ class DDRing (Ring_w_Sequence, IntegralDomain, SerializableObject):
                 sage: g == f
                 True
         '''
-        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name,euler=euler)
+        return DDFunction(self,coefficients,init,inhomogeneous, check_init=check_init, name=name,euler=euler,sequence=sequence)
         
     def eval(self, element, X=None, **input):
         r'''
@@ -2085,6 +2088,9 @@ class DDFunction (IntegralDomainElement, SerializableObject):
           for a function that will be used when the method :func:`repr` is called.
         * ``euler``: whether the coefficients in ``input`` are considered in the canonical 
           basis `\partial_x` or the euler differential basis `\theta_x = x\partial_x`.
+        * ``sequence``: indicates if the data in init is the information of the initial values or 
+          the sequence of the formal power series. If ``True``, the values of ``init`` will be multiplied
+          by the correspondent factorial to obtain the real initial values.
 
         WARNING: 
         
@@ -2360,7 +2366,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     #####################################
     ### Init and Interface methods
     #####################################
-    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None, euler=False):   
+    def __init__(self, parent, input = 0 , init = [], inhomogeneous = 0 , check_init = True, name = None, euler=False, sequence=False):   
         # We check that the argument is a DDRing
         if(not isinstance(parent, DDRing)):
             raise DDFunctionError("A DD-Function must be an element of a DD-Ring")
@@ -2386,6 +2392,10 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             inits = {i : init[i] for i in range(len(init))}
         elif(type(init) == dict):
             inits = {k : init[k] for k in init} # if it is a dictionary, we copy it
+
+        ## Checking the argument ``sequence``
+        if sequence:
+            inits = {k : inits[k]*factorial(k) for k in inits}
 
         ## Checking the argument ``inhomogeneous``
         if(not inhomogeneous in parent):
