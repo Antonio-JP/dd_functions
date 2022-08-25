@@ -2928,22 +2928,21 @@ def HillD(a='a',q='q',init=()):
 @cached_function
 def AiryD(init=('a','b')):
     r'''
-        D-finite implementation of the Airy's functions (Ai(x), Bi(x)).
+        D-finite implementation of the Airy's functions.
         
-        The Airy functions `Ai(x)` and `Bi(x)` are the two linearly independent
-        solutions to the *Airy* or *Stokes* equation:
+        The Airy functions are the solutions to the *Airy* or *Stokes* equation:
         
         .. MATH::
 
             \frac{d^2y}{dx^2} - xy = 0
 
         It has several applications in physics (for example, it is the solution
-        to Schrodinger's equation for a particle confined within a triangular 
+        to Schrödinger's equation for a particle confined within a triangular 
         potential well and for a particle in a one-dimensional constant force 
         field).
 
-        The main definition shows that Airy functions are D-finite functions.
-        The classical Airy functions has as initial values:
+        By definition, Airy functions are D-finite. There are two specific Airy functions that are
+        significantly important, namely `Ai(x)` and `Bi(x)`, with initial values:
         
         .. MATH::
 
@@ -2951,6 +2950,8 @@ def AiryD(init=('a','b')):
                 Ai(0) = \frac{1}{3^{2/3} \Gamma(2/3)};& Ai'(0) = \frac{-1}{3^{1/3}\Gamma(1/3)}\\
                 Bi(0) = \frac{1}{3^{1/6} \Gamma(2/3)};& Bi'(0) = \frac{3^{1/6}}{\Gamma(1/3)}
             \end{array}
+
+        lead to a constant Wronskian equal to `1/\pi`. 
 
         Due to this fact, the classical Airy functions do not have rational 
         initial values. This is why this method can not retrieve te user with 
@@ -3836,45 +3837,63 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
 ################################################################################## 
 def DAlgebraic(polynomial, init=[], dR=None):
     '''
-        TODO: Review this documentation
-        Method that transform an algebraic function to a DD-Function.
-                
-        INPUT:
-    - polynomial: the minimal polynomial of the function we want to transform.
-    - init: the initial values that the function will have. Two options are 
-            possible: a list is given, then we will use it directly to build the final 
-            result, or a value is given an we will compute the others using the polynomial 
-            equation.
-    - dR: the ring where we want to include the result. If None, an automatic 
-            destiny ring will be computed.
-            
+        Method that convert an algebraic function to a D-finite function.
+
+        It is well-known (see any reference for holonomic functions or :doi:`10.1016/j.aam.2020.102027`)
+        that if `f(x) \in \mathbb{K}[[x]]` is algebraic over a field `F \subset \mathbb{K}((x))`, then
+        `f(x)` is differentially definable over `F`.
+
+        An algebraic function `f(x)` is defined by a polynomial `p(y) \in F[y]` such that `p(f(x)) = 0`. This is enough to 
+        compute the associated differential equation as a differentially definable function. Then we would need
+        some initial values to define the specific `f(x)`. 
+
+        INPUT: 
+
+        * ``polynomial``: a polynomial `p(y)`.
+        * ``init``: a list or tuple with the initial values that define `f(x)` as a solution of `p(y) = 0`.
+        * ``dR``: :class:`~ajpastor.dd_functions.ddFunction.DDRing` that will contain the function `f(x)`.
+
+        This method will guarantee that the polynomial `p(y)` is appropriate. This means the following:
+
+        - Its parent `R[y]` should have a base ring `R` that can be pushout with ``dR.base_ring()``.
+        - The variable `y` of the polynomial can not appear in ``dR``.
+
         OUTPUT:
-    - A DDFunction in a particuar DDRing.
+
+        A :class:`~ajpastor.dd_functions.ddFunction.DDFunction` that represent a formal power series `f(x)`
+        defined as `p(f(x)) = 0` with the given initial values.
+
+        EXAMPLES::
+
+            sage: from ajpastor.dd_functions import *
+            sage: 1
+            1
+
+        TODO: Put some examples for defining algebraic functions.
+
             
         WARNINGS:
-    - There is no control about the irreducibility of the polynomial.
-            
-        ERRORS:
-    - If the function can not be represented in dR a TypeError will be raised
-    - If any error happens with the initial values, a ValueError will be raised
+    
+        * We do not check whether the polynomial given is irreducible or not.
     '''    
     ###############################################
     ## Dealing with the polynomial input
     ###############################################
-    parent = polynomial.parent()
+    parent = polynomial.parent() # This is the ring `R[y]`
     if(not (isPolynomial(parent) or isMPolynomial(parent))):
-        raise TypeError("DAlgebraic: the input polynomial is NOT a polynomial")
+        raise TypeError("DAlgebraic: the input ``polynomial`` is NOT a polynomial")
     
     base_ring = None
     F = None
     poly_ring = parent
-    if(isMPolynomial(parent)):
+    ## We take care of the case when two variables are present 
+    if(isMPolynomial(parent) and (parent.ngens() > 2 or parent.ngens() <= 0)): # not valid: two many variables or not enough
         ## Only valid for 2 variables
-        if(parent.ngens() > 2):
-            raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables")
+        raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables")
+    elif(isMPolynomial(parent) and parent.ngens() == 2): # we have exactly 2 variables: the first is x and the second will be y.
         base_ring = PolynomialRing(parent.base(),parent.gens()[0])
         F = base_ring.fraction_field()
-    else:
+    else: # either univariate or multivariate with 1 variable
         if(isinstance(parent.base().construction()[0], FractionField)):
             base_ring = parent.base().base()
         else:
@@ -3898,7 +3917,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     if(polynomial.degree() == 1):
         return -polynomial[0]/polynomial[1]
     elif(polynomial.degree() <= 0):
-        raise TypeError("DAlgebraic: constant polynomial given for algebraic function: IMPOSSIBLE!!")
+        raise TypeError("DAlgebraic: constant polynomial does not defined an algebraic function")
         
     #################################################
     ## Building and checking the destiny ring
@@ -3910,7 +3929,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
         destiny_ring = dR
         coercion = destiny_ring.base()._coerce_map_from_(base_ring)
         if((coercion is None) or (coercion is False)):
-            raise TypeError("Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring))
+            raise TypeError("DAlgebraic: Incompatible polynomial with destiny ring:\n\t- Coefficients in: %s\n\t- Destiny Ring: %s" %(base_ring, destiny_ring))
             
     dest_var = repr(destiny_ring.variables()[0])
     
