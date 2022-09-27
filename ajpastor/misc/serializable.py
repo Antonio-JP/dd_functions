@@ -25,14 +25,14 @@ AUTHORS:
 
 class InitSequenceSerializable:
     r'''
-        Auxiliary class to detect the beginning of a sequence in a serializable argument.
+    Auxiliary class to detect the beginning of a sequence in a serializable argument.
     '''
     pass
 
 
 class FinishSequenceSerializable:
     r'''
-    Auxiliaryy class to detect the ending of a sequence in a serializable argument.
+    Auxiliary class to detect the ending of a sequence in a serializable argument.
     '''
     pass
 
@@ -56,7 +56,7 @@ class SerializableObject:
         '''
         from pickle import load as pload
 
-        # Auxiliar method for the recursive loading procedure
+        # Auxiliary method for the recursive loading procedure
         def rec_load(ctype, file):
             if(issubclass(ctype, SerializableObject)):
                 return ctype.unserialize(file)
