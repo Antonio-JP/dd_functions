@@ -1,20 +1,17 @@
 r"""
 Python file for serializable objects
 
-This package provides a class for characterize serializable elements providing methods 
-to save the object into a file and loading it from the same place.
+This package provides a class for characterize serializable elements
+providing methods to save the object into a file and loading it from
+the same place.
 
-The user only needs to inherit from this class and use appropiately the method
-set_args while building the object.
+The user only needs to inherit from this class and use appropriately
+the method ``set_args`` while building the object.
 
-EXAMPLES::
+AUTHORS:
 
-AUTHORS::
-
-    - Antonio Jimenez-Pastor (2019-08-23): initial version
-
+- Antonio Jimenez-Pastor (2019-08-23): initial version
 """
-
 # ****************************************************************************
 #  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
 #
@@ -25,38 +22,41 @@ AUTHORS::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+
 class InitSequenceSerializable:
     r'''
         Auxiliary class to detect the beginning of a sequence in a serializable argument.
     '''
     pass
 
+
 class FinishSequenceSerializable:
     r'''
-        Auxiliary class to detect the ending of a sequence in a serializable argument.
+    Auxiliaryy class to detect the ending of a sequence in a serializable argument.
     '''
     pass
 
+
 class SerializableObject:
     r'''
-        Class for serializable objects. This class provides the functionality required
-        for serialize objects into a binary file
+    Class for serializable objects. This class provides the functionality required
+    for serialize objects into a binary file
     '''
-    ### Class methods to load an object from a file
+    # Class methods to load an object from a file
     @classmethod
     def unserialize(cls, file):
         '''
-            Method to load an object of the class ``cls``.
+        Method to load an object of the class ``cls``.
 
-            This methods reads from a file (it opens it if it is given as a string) an object and build the 
-            corresponding object using the constructor for the class ``cls``.
+        This methods reads from a file (it opens it if it is given as a string) an object and build the
+        corresponding object using the constructor for the class ``cls``.
 
-            This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
-            use a recursive serialization procedure to get the final object.
+        This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
+        use a recursive serialization procedure to get the final object.
         '''
         from pickle import load as pload
 
-        ## Auxiliar method for the recursive loading procedure
+        # Auxiliar method for the recursive loading procedure
         def rec_load(ctype, file):
             if(issubclass(ctype, SerializableObject)):
                 return ctype.unserialize(file)
@@ -104,26 +104,28 @@ class SerializableObject:
             return ctype
 
         is_str = (type(file) == str)
-        if(is_str): file = open(file, "rb")
+        if is_str:
+            file = open(file, "rb")
 
-        ## Reading the first object: a list of classes
+        # Reading the first object: a list of classes
         args_types = pload(file)
-        ## Reading for each element in args the 
+        # Reading for each element in args the
         args = [rec_load(get_class(ctype), file) for ctype in args_types]
 
-        ## Reading the dictionary of names and types
+        # Reading the dictionary of names and types
         kwds_types = pload(file)
-        ## Building the actual dictionary of keywords
+        # Building the actual dictionary of keywords
         kwds = {ctype[0]: rec_load(get_class(ctype[1]), file) for ctype in kwds_types}
 
-        if(is_str): file.close()
+        if is_str:
+            file.close()
 
-        ## Returning the final object
+        # Returning the final object
         return cls(*args, **kwds)
 
-    ## Builder method to initialize variables
+    # Builder method to initialize variables
     def __init__(self, *args, **kwds):
-        # Initializing the two 
+        # Initializing the two
         if(len(args) > 0):
             self.__args = args
         else:
@@ -133,40 +135,40 @@ class SerializableObject:
         else:
             self.__kwds = {}
 
-    ## Setter and getter for the arguments of the builder
+    # Setter and getter for the arguments of the builder
     def set_sargs(self, *args, **kwds):
         r'''
-            Setter for the arguments of the serializable object
+        Setter for the arguments of the serializable object
         '''
         self.__args = args
         self.__kwds = kwds
 
     def sargs(self):
         r'''
-            Setter for the first arguments of the serializable object
+        Setter for the first arguments of the serializable object
         '''
         return self.__args
 
     def skwds(self):
         r'''
-            Setter for the named arguments of the serializable object
+        Setter for the named arguments of the serializable object
         '''
         return self.__kwds
 
-    ## Serializable method
+    # Serializable method
     def serialize(self, file):
         r'''
-            Method to dump an object into a file.
+        Method to dump an object into a file.
 
-            This methods writes to a file (it opens it if it is given as a string) an object.
+        This methods writes to a file (it opens it if it is given as a string) an object.
 
-            This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
-            use a recursive serialization procedure to write the whole object.
+        This method relies on the package ``pickle`` for those objects that are not serializable. Otherwise, it will
+        use a recursive serialization procedure to write the whole object.
         '''
         from pickle import dump as pdump
         from sage.all import Expression
 
-        ## Auxiliar method for the recursive loading procedure
+        # Auxiliary method for the recursive loading procedure
         def rec_dump(obj, file):
             if(isinstance(obj, SerializableObject)):
                 obj.serialize(file)
@@ -177,7 +179,7 @@ class SerializableObject:
                 for el in obj:
                     pdump(get_class(el), file)
                     rec_dump(el, file)
-                pdump(FinishSequenceSerializable,file)
+                pdump(FinishSequenceSerializable, file)
             elif(isinstance(obj, dict)):
                 pdump(InitSequenceSerializable, file)
                 for key in obj:
@@ -185,9 +187,9 @@ class SerializableObject:
                     rec_dump(key, file)
                     pdump(get_class(obj[key]), file)
                     rec_dump(obj[key], file)
-                pdump(FinishSequenceSerializable,file)
+                pdump(FinishSequenceSerializable, file)
             else:
-                pdump(obj,file)
+                pdump(obj, file)
 
         def get_class(obj):
             if(obj is None):
@@ -195,8 +197,9 @@ class SerializableObject:
             return obj.__class__
 
         # Checking the file is opened
-        is_str = (type(file) == str)
-        if(is_str): file = open(file, "wb+")
+        is_str = isinstance(file, str)
+        if is_str:
+            file = open(file, "wb+")
 
         # Serializing the list of types for args
         pdump([get_class(obj) for obj in self.sargs()], file)
@@ -210,7 +213,8 @@ class SerializableObject:
 
         # Serializing the arguments
         for key in self.skwds():
-            rec_dump(self.skwds()[key],file)
+            rec_dump(self.skwds()[key], file)
 
         # Closing the file if we opened it
-        if(is_str): file.close()
+        if is_str:
+            file.close()
