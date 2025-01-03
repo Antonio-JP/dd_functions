@@ -30,8 +30,16 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all import (QQ, gcd, lcm, UniqueRepresentation, var, PolynomialRing, 
-                        IntegralDomains, Fields, IntegralDomain, IntegralDomainElement)
+from sage.rings.rational_field import Q as QQ
+from sage.arith.misc import GCD as gcd
+from sage.arith.functions import lcm
+from sage.structure.unique_representation import UniqueRepresentation
+from sage.calculus.var import var
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.categories.integral_domains import IntegralDomains
+from sage.categories.fields import Fields
+from sage.rings.ring import IntegralDomain
+from sage.structure.element import IntegralDomainElement
 from sage.categories.map import Map #pylint: disable=no-name-in-module
 from sage.categories.pushout import ConstructionFunctor
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial

@@ -102,10 +102,25 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (cached_function, factorial, bell_polynomial, NumberField, QQ, ZZ, pi,
-                        sqrt, sin, cos, gamma, prod, PolynomialRing, Matrix, vector, lcm, SR,
-                        ideal)
-from sage.all_cmdline import x
+from sage.misc.cachefunc import cached_function
+from sage.functions.other import factorial
+from sage.combinat.combinat import bell_polynomial
+from sage.rings.number_field.number_field import NumberField
+from sage.rings.rational_field import Q as QQ
+from sage.rings.integer_ring import Z as ZZ
+from sage.symbolic.constants import pi
+from sage.misc.functional import sqrt
+from sage.functions.trig import sin
+from sage.functions.trig import cos
+from sage.functions.gamma import gamma
+from sage.misc.misc_c import prod
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.arith.functions import lcm
+from sage.symbolic.ring import SR
+from sage.rings.ideal import Ideal as ideal
+from sage.calculus.predefined import x
 
 from sage.rings.fraction_field import is_FractionField
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial

@@ -31,7 +31,8 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (Matrix, vector)
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
 
 ####################################################################################################
 ####################################################################################################
@@ -58,7 +59,8 @@ from sage.all import (Matrix, vector)
 ####################################################################################################
 
 #sage imports
-from sage.all import cached_method, lcm
+from sage.misc.cachefunc import cached_method
+from sage.arith.functions import lcm
 
 # Local imports
 from .listOperator import ListOperator

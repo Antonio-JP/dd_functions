@@ -36,16 +36,39 @@ import warnings
 import logging
 from functools import reduce
 
-#SAGE imports 
-from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fields,
-                        QQ, ZZ, SR, NumberField, PolynomialRing, factorial, latex, randint, var, Expression,
-                        cached_method, Matrix, vector, gcd, binomial, falling_factorial, bell_polynomial, 
-                        sage_eval, log, parent, identity_matrix, diff, kronecker_delta,
-                        infinity)
-from sage.all_cmdline import x
+#SAGE imports
+from sage.rings.ring import IntegralDomain
+from sage.structure.element import IntegralDomainElement
+from sage.categories.integral_domains import IntegralDomains
+from sage.categories.fields import Fields
+from sage.rings.rational_field import Q as QQ
+from sage.rings.integer_ring import Z as ZZ
+from sage.symbolic.ring import SR
+from sage.rings.number_field.number_field import NumberField
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.functions.other import factorial
+from sage.misc.latex import latex
+from sage.misc.prandom import randint
+from sage.calculus.var import var
+from sage.symbolic.expression import Expression
+from sage.misc.cachefunc import cached_method
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.arith.misc import GCD as gcd
+from sage.functions.other import binomial
+from sage.arith.misc import falling_factorial
+from sage.combinat.combinat import bell_polynomial
+from sage.misc.sage_eval import sage_eval
+from sage.misc.functional import log
+from sage.structure.element import parent
+from sage.matrix.special import identity_matrix
+from sage.calculus.functional import derivative as diff
+from sage.functions.generalized import kronecker_delta
+from sage.rings.infinity import Infinity as infinity
+from sage.calculus.predefined import x
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
-from sage.categories.all import Morphism
+from sage.categories.morphism import Morphism
 from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 

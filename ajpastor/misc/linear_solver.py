@@ -23,7 +23,11 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all import identity_matrix, Matrix, vector, ideal, cached_method
+from sage.matrix.special import identity_matrix
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.rings.ideal import Ideal as ideal
+from sage.misc.cachefunc import cached_method
 import sage.structure.element as SAGE_element
 from sage.categories.pushout import pushout
 

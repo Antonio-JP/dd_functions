@@ -30,7 +30,10 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all_cmdline import *   # import sage library
+try:
+    from sage.all_cmdline import *   # import sage library
+except ImportError:
+    from sage.all__sagemath_categories import *
 
 _sage_const_1 = Integer(1); _sage_const_0 = Integer(0)
 

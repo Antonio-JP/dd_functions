@@ -28,7 +28,11 @@ AUTHORS:
 # ****************************************************************************
 
 #Sage imports
-from sage.all import (lcm, Matrix, gcd, prod, vector)
+from sage.arith.functions import lcm
+from sage.matrix.constructor import Matrix
+from sage.arith.misc import GCD as gcd
+from sage.misc.misc_c import prod
+from sage.modules.free_module_element import free_module_element as vector
 
 ####################################################################################################
 ####################################################################################################

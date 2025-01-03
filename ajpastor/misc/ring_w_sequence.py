@@ -29,8 +29,16 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-# from sage.all import *   # import sage library
-from sage.all import (UniqueRepresentation, Ring, derivative, factorial, SR)
+from sage.structure.unique_representation import UniqueRepresentation
+from sage.rings.ring import Ring
+from sage.calculus.functional import derivative
+from sage.functions.other import factorial
+from sage.symbolic.ring import SR
+from sage.structure.unique_representation import UniqueRepresentation
+from sage.rings.ring import Ring
+from sage.calculus.functional import derivative
+from sage.functions.other import factorial
+from sage.symbolic.ring import SR
 
 
 class Ring_w_Sequence (UniqueRepresentation, Ring):
