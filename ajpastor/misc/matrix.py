@@ -24,8 +24,15 @@ AUTHORS:
 import sys
 from functools import reduce
 
-# Sage imports
-from sage.all import (Matrix, MatrixSpace, vector, kronecker_delta, ZZ, floor, random, identity_matrix, randint)
+from sage.matrix.constructor import Matrix
+from sage.matrix.matrix_space import MatrixSpace
+from sage.modules.free_module_element import free_module_element as vector
+from sage.functions.generalized import kronecker_delta
+from sage.rings.integer_ring import Z as ZZ
+from sage.functions.other import floor
+from sage.misc.prandom import random
+from sage.matrix.special import identity_matrix
+from sage.misc.prandom import randint
 
 # Local imports
 from .exceptions import SizeMatrixError

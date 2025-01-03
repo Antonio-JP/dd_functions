@@ -36,7 +36,11 @@ AUTHORS:
 
 import logging
 
-from sage.all import SR, prod, ZZ, QQ, PolynomialRing
+from sage.symbolic.ring import SR
+from sage.misc.misc_c import prod
+from sage.rings.integer_ring import Z as ZZ
+from sage.rings.rational_field import Q as QQ
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 
 from ajpastor.dd_functions.ddFunction import is_DDFunction, DFinite, ParametrizedDDRing
 from ajpastor.dd_functions.ddExamples import (Sin, Cos, Sinh, Cosh, Tan, Log, Exp, 

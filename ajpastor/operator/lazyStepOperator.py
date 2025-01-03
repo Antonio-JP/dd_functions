@@ -32,7 +32,9 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (cached_method, kronecker_delta, Matrix) 
+from sage.misc.cachefunc import cached_method
+from sage.functions.generalized import kronecker_delta
+from sage.matrix.constructor import Matrix
 
 ####################################################################################################
 ####################################################################################################

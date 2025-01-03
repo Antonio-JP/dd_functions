@@ -31,7 +31,10 @@ AUTHORS:
 # ****************************************************************************
 
 #Sage imports
-from sage.all import (factorial, bell_polynomial, falling_factorial, cached_function)
+from sage.functions.other import factorial
+from sage.combinat.combinat import bell_polynomial
+from sage.arith.misc import falling_factorial
+from sage.misc.cachefunc import cached_function
 
 ################################################################################
 ################################################################################

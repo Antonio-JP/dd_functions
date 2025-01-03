@@ -21,8 +21,16 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (Matrix, Permutations, ideal, gcd, cached_method, vector, lcm, prod,
-                        identity_matrix, diagonal_matrix)
+from sage.matrix.constructor import Matrix
+from sage.combinat.permutation import Permutations
+from sage.rings.ideal import Ideal as ideal
+from sage.arith.misc import GCD as gcd
+from sage.misc.cachefunc import cached_method
+from sage.modules.free_module_element import free_module_element as vector
+from sage.arith.functions import lcm
+from sage.misc.misc_c import prod
+from sage.matrix.special import identity_matrix
+from sage.matrix.special import diagonal_matrix
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 

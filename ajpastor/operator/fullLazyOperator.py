@@ -28,7 +28,12 @@ AUTHORS:
 # ****************************************************************************
 
 # Sage imports
-from sage.all import (Matrix, vector, gcd, kronecker_delta, lcm, prod)
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.arith.misc import GCD as gcd
+from sage.functions.generalized import kronecker_delta
+from sage.arith.functions import lcm
+from sage.misc.misc_c import prod
 
 ####################################################################################################
 ####################################################################################################

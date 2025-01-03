@@ -34,7 +34,10 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.all import identity_matrix, Matrix, vector, xgcd
+from sage.matrix.special import identity_matrix
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.arith.misc import XGCD as xgcd
 
 from ajpastor.misc.linear_solver import LinearSystemSolver, NoSolutionError
 

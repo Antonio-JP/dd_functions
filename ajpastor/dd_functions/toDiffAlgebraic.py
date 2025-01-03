@@ -28,13 +28,24 @@ AUTHORS:
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
-# ****************************************************************************   
+# ****************************************************************************
 # Python imports
 from functools import reduce
 # Sage imports
-from sage.all import (prod, PolynomialRing, QQ, ZZ, prod, Matrix, vector,
-                     kronecker_delta, falling_factorial, bell_polynomial, Compositions,
-                     ideal, cached_function, SR)
+from sage.misc.misc_c import prod
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.rational_field import Q as QQ
+from sage.rings.integer_ring import Z as ZZ
+from sage.misc.misc_c import prod
+from sage.matrix.constructor import Matrix
+from sage.modules.free_module_element import free_module_element as vector
+from sage.functions.generalized import kronecker_delta
+from sage.arith.misc import falling_factorial
+from sage.combinat.combinat import bell_polynomial
+from sage.combinat.composition import Compositions
+from sage.rings.ideal import Ideal as ideal
+from sage.misc.cachefunc import cached_function
+from sage.symbolic.ring import SR
 
 from sage.graphs.digraph import DiGraph
 
