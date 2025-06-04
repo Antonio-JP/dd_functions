@@ -29,10 +29,10 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all import (ideal, Matrix, vector,prod)
+from sage.all import (ideal, Matrix as matrix, vector,prod)
 
 from sage.categories.integral_domains import IntegralDomains
-import sage.structure.element as SAGE_element
+from sage.structure.element import Matrix, Vector
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_dense as isDenseIPolynomial
@@ -151,12 +151,12 @@ class ConversionSystem(object):
                 return self.poly_field()(n/d)
             except AttributeError:
                 return self.to_poly(element.parent().to_real(poly))
-        elif(SAGE_element.is_Matrix(element)):
+        elif(isinstance(element, Matrix)):
             R = self.poly_ring()
             if(element.parent().base().is_field()):
                 R = self.poly_field()
-            return Matrix(R, [self.to_poly(row) for row in element])
-        elif(SAGE_element.is_Vector(element)):
+            return matrix(R, [self.to_poly(row) for row in element])
+        elif(isinstance(element, Vector)):
             R = self.poly_ring()
             if(element.parent().base().is_field()):
                 R = self.poly_field()
@@ -198,12 +198,12 @@ class ConversionSystem(object):
             n = self.to_real(poly.numerator())
             d = self.to_real(poly.denominator())
             return n/d
-        elif(SAGE_element.is_Matrix(poly)):
+        elif(isinstance(poly, Matrix)):
             R = self.base()
             if(poly.parent().base().is_field()):
                 R = R.fraction_field()
-            return Matrix(R, [self.to_real(row) for row in poly])
-        elif(SAGE_element.is_Vector(poly)):
+            return matrix(R, [self.to_real(row) for row in poly])
+        elif(isinstance(poly, Vector)):
             R = self.base()
             if(poly.parent().base().is_field()):
                 R = R.fraction_field()
@@ -249,12 +249,12 @@ class ConversionSystem(object):
             return set([self.simplify(el) for el in element])
         elif(isinstance(element, tuple)):
             return tuple([self.simplify(el) for el in element])
-        elif(SAGE_element.is_Matrix(element)):
+        elif(isinstance(element, Matrix)):
             R = self.poly_ring()
             if(element.parent().base().is_field()):
                 R = self.poly_field()
-            return Matrix(R, [[self.simplify(el) for el in row] for row in element])
-        elif(SAGE_element.is_Vector(element)):
+            return matrix(R, [[self.simplify(el) for el in row] for row in element])
+        elif(isinstance(element, Vector)):
             R = self.poly_ring()
             if(element.parent().base().is_field()):
                 R = self.poly_field()

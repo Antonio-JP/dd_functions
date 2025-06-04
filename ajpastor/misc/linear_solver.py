@@ -23,9 +23,9 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from sage.all import Matrix, vector, ideal, cached_method
-import sage.structure.element as SAGE_element
+from sage.all import Matrix as matrix, vector, ideal, cached_method
 from sage.categories.pushout import pushout
+from sage.structure.element import Matrix, Vector
 
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
@@ -54,10 +54,10 @@ class LinearSystemSolver():
     '''
     def __init__(self, parent, matrix, inhomogeneous, is_zero=lambda p : False, relations=[]):
         ## Checking the input of matrix and vector
-        if(not SAGE_element.is_Matrix(matrix)):
-            matrix = Matrix(matrix)
+        if(not isinstance(matrix, Matrix)):
+            matrix = matrix(matrix)
         
-        if(not SAGE_element.is_Vector(inhomogeneous)):
+        if(not isinstance(inhomogeneous, Vector)):
             inhomogeneous = vector(inhomogeneous)
 
         if(isinstance(parent, Wrap_w_Sequence_Ring)):
@@ -298,9 +298,9 @@ class LinearSystemSolver():
             WARNING: repeated executions of this method may return different outputs since we may have
             found more relations.
         '''
-        if(SAGE_element.is_Matrix(obj)):
-            return Matrix(obj.parent().base(), [[self.simplify(el) for el in row] for row in obj])
-        elif(SAGE_element.is_Vector(obj)):
+        if(isinstance(obj, Matrix)):
+            return matrix(obj.parent().base(), [[self.simplify(el) for el in row] for row in obj])
+        elif(isinstance(obj, Vector)):
             return vector(obj.parent().base(), [self.simplify(el) for el in obj])
         elif(isinstance(obj, list)):
             return [self.simplify(el) for el in obj]
