@@ -44,7 +44,7 @@ from sage.all import (IntegralDomain, IntegralDomainElement, IntegralDomains, Fi
                         infinity)
 from sage.all_cmdline import x
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
+from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.categories.all import Morphism
 from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
@@ -5451,7 +5451,7 @@ def _is_polynomial_ring(ring, univariate=True, multivariate=True):
         with the optional arguments ''univariate'' and ''multivariate''. By default, the method
         checks for both types together.
     '''
-    return (univariate and isinstance(ring, PolynomialRing_generic)) or (multivariate and is_MPolynomialRing(ring))
+    return (univariate and isinstance(ring, PolynomialRing_generic)) or (multivariate and isinstance(ring, MPolynomialRing_base))
 
 def _is_polynomial(element, univariate=True, multivariate=True):
     r'''

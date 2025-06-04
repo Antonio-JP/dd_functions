@@ -35,7 +35,7 @@ from sage.all import (QQ, gcd, lcm, UniqueRepresentation, var, PolynomialRing,
 from sage.categories.map import Map #pylint: disable=no-name-in-module
 from sage.categories.pushout import ConstructionFunctor
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
+from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 
 from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 
@@ -573,7 +573,7 @@ class LazyRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     ### Private methods
     ################################################################################################
     def __create_poly_field(self):
-        if(isinstance(self.__poly_ring, PolynomialRing_generic) or (isMPolynomial(self.__poly_ring))):
+        if(isinstance(self.__poly_ring, (PolynomialRing_generic, MPolynomialRing_base))):
             self.__poly_field = self.__poly_ring.fraction_field()
         else:
             self.__poly_field = self.__poly_ring

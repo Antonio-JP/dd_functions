@@ -34,7 +34,7 @@ from sage.all import (ideal, Matrix, vector,prod)
 from sage.categories.integral_domains import IntegralDomains
 import sage.structure.element as SAGE_element
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
+from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_dense as isDenseIPolynomial
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing_sparse as isSparseIPolynomial
 
@@ -68,10 +68,7 @@ class ConversionSystem(object):
         '''
             Returns a Boolean value that show if there are variables in this conversion system.
         '''
-        return (isinstance(self.poly_ring(), PolynomialRing_generic) or
-        isMPolynomial(self.poly_ring()) or
-        isinstance(self.poly_ring(),isDenseIPolynomial) or
-        isinstance(self.poly_ring(),isSparseIPolynomial))
+        return isinstance(self.poly_ring(), (PolynomialRing_generic, MPolynomialRing_base, isDenseIPolynomial, isSparseIPolynomial))
 
     def poly_ring(self):
         '''

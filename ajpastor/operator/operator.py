@@ -76,7 +76,7 @@ from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
 from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
+from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 
 
 ## GENERIC UTILITIES METHODS
@@ -107,7 +107,7 @@ def get_integer_roots(element):
 def _tower_variables(parent):
     result = []
     n_vars = 0
-    while(isinstance(parent, PolynomialRing_generic) or is_MPolynomialRing(parent)):
+    while(isinstance(parent, (PolynomialRing_generic, MPolynomialRing_base))):
         result += [str(gen) for gen in parent.gens()]
         n_vars += parent.ngens()
         parent = parent.base()

@@ -113,7 +113,7 @@ from sage.all_cmdline import x
 
 from sage.rings.fraction_field import is_FractionField
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
-from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
+from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.categories.pushout import pushout, FractionField
 
 # ajpastor imports
@@ -3880,17 +3880,17 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ## Dealing with the polynomial input
     ###############################################
     parent = polynomial.parent() # This is the ring `R[y]`
-    if(not (isinstance(parent, PolynomialRing_generic) or isMPolynomial(parent))):
+    if(not (isinstance(parent, PolynomialRing_generic) or isinstance(parent, MPolynomialRing_base))):
         raise TypeError("DAlgebraic: the input ``polynomial`` is NOT a polynomial")
     
     base_ring = None
     F = None
     poly_ring = parent
     ## We take care of the case when two variables are present 
-    if(isMPolynomial(parent) and (parent.ngens() > 2 or parent.ngens() <= 0)): # not valid: two many variables or not enough
+    if(isinstance(parent, MPolynomialRing_base) and (parent.ngens() > 2 or parent.ngens() <= 0)): # not valid: two many variables or not enough
         ## Only valid for 2 variables
         raise TypeError("DAlgebraic: the input can not be a multivariate polynomial with more than 2 variables")
-    elif(isMPolynomial(parent) and parent.ngens() == 2): # we have exactly 2 variables: the first is x and the second will be y.
+    elif(isinstance(parent, MPolynomialRing_base) and parent.ngens() == 2): # we have exactly 2 variables: the first is x and the second will be y.
         base_ring = PolynomialRing(parent.base(),parent.gens()[0])
         F = base_ring.fraction_field()
     else: # either univariate or multivariate with 1 variable
@@ -4266,12 +4266,12 @@ def __decide_parent(input, parent = None, depth = 1):
             input_parent = ParametrizedDDRing(DFinite, parameters)
         else:
             input_parent = DDRing(PolynomialRing(QQ,x))
-    elif(isMPolynomial(input_parent) or isinstance(input_parent, PolynomialRing_generic)):
+    elif(isinstance(input_parent, MPolynomialRing_base) or isinstance(input_parent, PolynomialRing_generic)):
         parameters = [str(gen) for gen in input_parent.gens()[1:]]
         var = input_parent.gens()[0]
 
         current = input_parent.base()
-        while((is_FractionField(current) or isMPolynomial(current) or isinstance(current, PolynomialRing_generic)) and (current.gens() != (1))):
+        while((is_FractionField(current) or isinstance(current, MPolynomialRing_base) or isinstance(current, PolynomialRing_generic)) and (current.gens() != (1))):
             parameters += [str(gen) for gen in current.gens() if str(gen) != '1']
             current = current.base()
         parameters = list(set(parameters))
