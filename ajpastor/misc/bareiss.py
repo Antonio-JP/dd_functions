@@ -23,7 +23,7 @@ AUTHORS:
 # Sage imports
 from sage.all import (Matrix, gcd, vector, lcm, prod,
                         identity_matrix, diagonal_matrix)
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
+from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 
 # ajpastor imports
@@ -145,7 +145,7 @@ class BareissAlgorithm(LinearSystemSolver):
         ## Checking the parent parameter
         if(parent.is_field()):
             parent = parent.base()
-        if(not (isUniPolynomial(parent) or isMPolynomial(parent))):
+        if(not (isinstance(parent, PolynomialRing_generic) or isMPolynomial(parent))):
             raise TypeError("The parent for this algorithm must be a polynomial ring.\n\t Got: %s" %parent)
 
         ## Checking the matrix input

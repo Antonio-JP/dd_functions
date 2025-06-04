@@ -112,7 +112,7 @@ from sage.all import (cached_function, factorial, bell_polynomial, QQ, ZZ, pi,
 from sage.all_cmdline import x
 
 from sage.rings.fraction_field import is_FractionField
-from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isPolynomial
+from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
 from sage.categories.pushout import pushout, FractionField
 
@@ -3880,7 +3880,7 @@ def DAlgebraic(polynomial, init=[], dR=None):
     ## Dealing with the polynomial input
     ###############################################
     parent = polynomial.parent() # This is the ring `R[y]`
-    if(not (isPolynomial(parent) or isMPolynomial(parent))):
+    if(not (isinstance(parent, PolynomialRing_generic) or isMPolynomial(parent))):
         raise TypeError("DAlgebraic: the input ``polynomial`` is NOT a polynomial")
     
     base_ring = None
@@ -4167,7 +4167,7 @@ def PolynomialInverse(polynomial):
     ## Dealing with the polynomial input
     ###############################################
     parent = polynomial.parent()
-    if(not isPolynomial(parent)):
+    if(not isinstance(parent, PolynomialRing_generic)):
         raise TypeError("The minimal polynomial is NOT a polynomial")
         
     if(polynomial.constant_coefficient() != 0):
@@ -4266,12 +4266,12 @@ def __decide_parent(input, parent = None, depth = 1):
             input_parent = ParametrizedDDRing(DFinite, parameters)
         else:
             input_parent = DDRing(PolynomialRing(QQ,x))
-    elif(isMPolynomial(input_parent) or isPolynomial(input_parent)):
+    elif(isMPolynomial(input_parent) or isinstance(input_parent, PolynomialRing_generic)):
         parameters = [str(gen) for gen in input_parent.gens()[1:]]
         var = input_parent.gens()[0]
 
         current = input_parent.base()
-        while((is_FractionField(current) or isMPolynomial(current) or isPolynomial(current)) and (current.gens() != (1))):
+        while((is_FractionField(current) or isMPolynomial(current) or isinstance(current, PolynomialRing_generic)) and (current.gens() != (1))):
             parameters += [str(gen) for gen in current.gens() if str(gen) != '1']
             current = current.base()
         parameters = list(set(parameters))

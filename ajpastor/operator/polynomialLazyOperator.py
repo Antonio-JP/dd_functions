@@ -158,10 +158,10 @@ class PolynomialLazyOperator(TwoStepsOperator):
         except Exception:
             raise ValueError("The method to check membership is not correct")
             
-        from sage.rings.polynomial.polynomial_ring import is_PolynomialRing as isUniPolynomial
+        from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
         from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing as isMPolynomial
         ## Computing the kernell of the matrix
-        if(isUniPolynomial(R) or isMPolynomial(R)):
+        if(isinstance(R, PolynomialRing_generic) or isMPolynomial(R)):
             bareiss_algorithm = BareissAlgorithm(R,M,f)
             ker = bareiss_algorithm.syzygy().transpose()
             ## If some relations are found during this process, we add it to the conversion system

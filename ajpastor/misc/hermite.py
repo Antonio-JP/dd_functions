@@ -335,8 +335,8 @@ class HermiteSolver(LinearSystemSolver):
         r'''
             Method to compute the "smallest" solution of the system.
         '''
-        from sage.rings.polynomial.polynomial_ring import is_PolynomialRing 
-        if(is_PolynomialRing(self.parent()) and syzygy.ncols() == 1):
+        from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic 
+        if(isinstance(self.parent(), PolynomialRing_generic) and syzygy.ncols() == 1):
             d = max(el.degree() for el in syzygy.column(0))
             p = max(el.degree() for el in solution)
             while(p >= d):
