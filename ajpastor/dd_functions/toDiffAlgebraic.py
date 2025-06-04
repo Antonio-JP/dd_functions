@@ -40,7 +40,7 @@ from sage.graphs.digraph import DiGraph
 
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
-from sage.rings.fraction_field import is_FractionField
+from sage.rings.fraction_field import FractionField_generic
 
 # ajpastor.dd_functions imports
 from ajpastor.dd_functions import (is_DDRing, is_DDFunction, DDRing, ParametrizedDDRing,
@@ -147,7 +147,7 @@ def infinite_derivative(element, times=1, derivation=None):
     parent = element.parent()
     
     ##Simple call: parent is a Fraction Field
-    if(is_FractionField(parent)):
+    if(isinstance(parent, FractionField_generic)):
         parent = parent.base()
         n = parent(element.numerator()); dn = infinite_derivative(n,1,derivation)
         d = parent(element.denominator()); dd = infinite_derivative(d,1,derivation)
@@ -963,7 +963,7 @@ def inverse_DA(poly, vars=None, infinite=False):
     ## Checking that poly is a polynomial
     
     parent = poly.parent()
-    if(is_FractionField(parent)):
+    if(isinstance(parent, FractionField_generic)):
         parent = parent.base()
     if(is_InfinitePolynomialRing(parent)):
         poly = fromInfinityPolynomial_toFinitePolynomial(poly)
@@ -1418,7 +1418,7 @@ def is_Riccati(poly):
     
     new_poly = poly.polynomial()(**{str(var[i]): to_plug[i] for i in range(len(var))})
     
-    if(is_FractionField(new_poly.parent())):
+    if(isinstance(new_poly.parent(), FractionField_generic)):
         new_poly = new_poly.numerator()
     if(is_InfinitePolynomialRing(new_poly.parent())):
         new_poly = new_poly.polynomial()

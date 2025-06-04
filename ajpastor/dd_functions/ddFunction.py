@@ -5516,9 +5516,8 @@ def command(e):
     try:
         return e._to_command_()
     except AttributeError:
-        from sage.rings.polynomial import polynomial_ring as Uni_Polynomial
         from sage.rings.number_field.number_field import is_NumberField
-        from sage.rings.fraction_field import is_FractionField
+        from sage.rings.fraction_field import FractionField_generic
         if(e in _IntegralDomains):
             if(e is QQ):
                 return "QQ"
@@ -5527,7 +5526,7 @@ def command(e):
             if(is_NumberField(e)):
                 poly = e.defining_polynomial(); gen = e.gen()
                 return "NumberField(%s('%s'), %s)" %(command(poly.parent()), poly, str(gen))
-            if(is_FractionField(e)):
+            if(isinstance(e, FractionField_generic)):
                 return "FractionField(%s)" %command(e.base())
         return str(e)
         

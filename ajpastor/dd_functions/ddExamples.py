@@ -111,7 +111,7 @@ from sage.all import (cached_function, factorial, bell_polynomial, QQ, ZZ, pi,
                         ideal)
 from sage.all_cmdline import x
 
-from sage.rings.fraction_field import is_FractionField
+from sage.rings.fraction_field import FractionField_generic
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.categories.pushout import pushout, FractionField
@@ -4271,7 +4271,7 @@ def __decide_parent(input, parent = None, depth = 1):
         var = input_parent.gens()[0]
 
         current = input_parent.base()
-        while((is_FractionField(current) or isinstance(current, MPolynomialRing_base) or isinstance(current, PolynomialRing_generic)) and (current.gens() != (1))):
+        while(isinstance(current, (FractionField_generic, MPolynomialRing_base, PolynomialRing_generic)) and (current.gens() != 1)):
             parameters += [str(gen) for gen in current.gens() if str(gen) != '1']
             current = current.base()
         parameters = list(set(parameters))
@@ -4323,8 +4323,7 @@ def __check_list(list_of_elements, invalid_vars=[]):
         elif(isinstance(el, str)):
             all_vars += [el]
         else:
-            from sage.rings.fraction_field import is_FractionField
-            if(is_FractionField(el.parent())):
+            if(isinstance(el.parent(), FractionField_generic)):
                 all_vars += [str(v) for v in el.numerator().variables()]
                 all_vars += [str(v) for v in el.denominator().variables()]
             else:
