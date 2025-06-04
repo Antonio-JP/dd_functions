@@ -79,7 +79,7 @@ class _LazyElement(IntegralDomainElement):
     ### Methods for a LazyElement
     ################################################################################################
     def raw(self):
-        '''
+        r'''
         Method that computes (if needed) and returns an element of `self.base()` that is equal to `self`.
         '''
         if(self.__raw is None):
@@ -88,7 +88,7 @@ class _LazyElement(IntegralDomainElement):
         return self.__raw
 
     def poly(self):
-        '''
+        r'''
         Method that computes (if needed) and returns an polynomial such that the conversion using
         self.parent() returns self.raw().
         '''
@@ -101,7 +101,7 @@ class _LazyElement(IntegralDomainElement):
         self.__poly = self.parent().simplify(self.poly())
 
     def variables(self):
-        '''
+        r'''
         Method that returns a tuple with the variables that appear in self.poly().
 
         If such polynomial representation is a quotient of polynomials, it take the union of the variables in the numerator and denominator.
@@ -193,7 +193,7 @@ class _LazyElement(IntegralDomainElement):
     ### Non-trivial arithmetics methods
     ################################################################################################
     def gcd(self,*input):
-        '''
+        r'''
         Method that a common divisor of 'self' and the input
         '''
         if(len(input) > 1 ):
@@ -202,7 +202,7 @@ class _LazyElement(IntegralDomainElement):
         return _LazyElement(self.parent(), gcd([self.poly()]+[self.parent()(el).poly() for el in input]))
 
     def lcm(self,*input):
-        '''
+        r'''
         Method that a common multiple of 'self' and the input
         '''
         if(len(input) > 1 ):
@@ -211,7 +211,7 @@ class _LazyElement(IntegralDomainElement):
         return _LazyElement(self.parent(), lcm([self.poly()]+[self.parent()(el).poly() for el in input]))
 
     def divides(self, other):
-        '''
+        r'''
         Method that returns True if 'other = a*self'.
 
         REMARK: If this methods return False does not mean we can not divide other by self in the level of 'base'.

@@ -72,7 +72,7 @@ class ListOperator(Operator):
     ### INIT METHOD AND GETTERS
     #######################################################
     def __init__(self, base, input, derivate = foo_derivative):
-        '''
+        r'''
         This method allows the user to instantiate a new object of type Operator. 
         
         This method must be extended in each child-class of Operator.

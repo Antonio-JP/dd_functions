@@ -45,7 +45,7 @@ class SerializableObject:
     ### Class methods to load an object from a file
     @classmethod
     def unserialize(cls, file):
-        '''
+        r'''
             Method to load an object of the class ``cls``.
 
             This methods reads from a file (it opens it if it is given as a string) an object and build the 

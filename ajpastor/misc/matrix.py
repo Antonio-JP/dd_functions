@@ -39,7 +39,7 @@ from .exceptions import SizeMatrixError
 ###
 ####################################################################################
 def block_matrix(parent, rows, constant_or_identity = True):
-    '''
+    r'''
         Method that build a matrix using as blocks the elements of rows. 
         
         This method allows the user to build a matrix defining its blocks. There are two options for the inputs:

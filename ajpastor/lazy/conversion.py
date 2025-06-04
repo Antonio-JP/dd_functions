@@ -43,7 +43,7 @@ _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
 class ConversionSystem(object):
     ## Main bulder
     def __init__(self, base):
-        '''
+        r'''
             Builder for a Conversion system.
 
             Take the following input:
@@ -65,25 +65,25 @@ class ConversionSystem(object):
         return self.__base
 
     def is_polynomial(self):
-        '''
+        r'''
             Returns a Boolean value that show if there are variables in this conversion system.
         '''
         return isinstance(self.poly_ring(), (PolynomialRing_generic, MPolynomialRing_base, isDenseIPolynomial, isSparseIPolynomial))
 
     def poly_ring(self):
-        '''
+        r'''
             Returns the polynomial ring where the conversion system works.
         '''
         raise NotImplementedError("Abstract method not implemented 'poly_ring()'")
 
     def poly_field(self):
-        '''
+        r'''
             Returns the polynomial fraction field where the conversion system works.
         '''
         raise NotImplementedError("Abstract method not implemented 'poly_field()'")
 
     def map_of_vars(self):
-        '''
+        r'''
             Returns a Python dictionary which maps the variables of `self.poly_ring()` to the real elements of `self.base()`
         '''
         raise NotImplementedError("Abstract method not implemented 'map_of_vars()'")
@@ -103,7 +103,7 @@ class ConversionSystem(object):
         self.__relations = []
 
     def _add_relation(self, poly):
-        '''
+        r'''
             Auxiliar method to add a polynomial to the relations of the conversion system
         '''
         reduced = self.simplify(poly)
@@ -111,7 +111,7 @@ class ConversionSystem(object):
             self.__relations += [reduced]
 
     def _groebner_basis(self):
-        '''
+        r'''
             Auxiliar method to compute the groebner basis for the current set of relations on the conversion system
         '''
         if(len(self.__relations) >= 1):
@@ -120,7 +120,7 @@ class ConversionSystem(object):
         return [self.poly_ring().zero()]
 
     def to_poly(self, element):
-        '''
+        r'''
             This method cast an element in `self.base()` or `self.base().fraction_field()` to a polynomial in the conversion system. This method can receive different types on elments.
 
             The types allowed for the argument poly are:
@@ -171,7 +171,7 @@ class ConversionSystem(object):
             raise TypeError("Wrong type: Impossible to get polynomial value of element (%s)" %(element))
 
     def to_real(self, poly):
-        '''
+        r'''
             This method cast a polynomial recognized in the conversion system to a real element in `self.base()`. This method can receive different types on elments.
 
             The types allowed for the argument poly are:
@@ -218,7 +218,7 @@ class ConversionSystem(object):
             raise TypeError("Wrong type: Impossible to get real value of element (%s)" %(poly))
 
     def simplify(self, element):
-        '''
+        r'''
             Simplify the element receive using the relations known for the Conversion System.
 
             Several types of input are allowed:
@@ -265,7 +265,7 @@ class ConversionSystem(object):
             return element
 
     def _simplify(self, poly):
-        '''
+        r'''
             Auxiliar method that make the simplification of an element in self.poly_ring().
         '''
         try:
@@ -274,7 +274,7 @@ class ConversionSystem(object):
             return poly
 
     def mix_conversion(self, conversion):
-        '''
+        r'''
             Method that mixes two conversion system of the same class. It is also allowed to mix `self` with an element of `self.base().fraction_field()`
         '''
         if(isinstance(conversion, self.__class__) or (conversion in self.base().fraction_field())):
@@ -290,7 +290,7 @@ class ConversionSystem(object):
                 self.__rel_ideal = ideal(self.poly_ring(), [])
 
     def _relations(self):
-        '''
+        r'''
             Returns a Groebner Basis of the relations ideals known in this conversion system.
         '''
         if(self.__relations is None):
@@ -300,13 +300,13 @@ class ConversionSystem(object):
         return self.__relations
 
     def _rel_ideal(self):
-        '''
+        r'''
             Returns the ideal object of relations known in this conversion system.
         '''
         return self.__rel_ideal
 
     def _to_poly_element(self, element):
-        '''
+        r'''
             Method that cast an element in `self.base()` to a polynomial in the conversion system.
 
             This method must be implemented in each specific type of conversion system.
@@ -316,7 +316,7 @@ class ConversionSystem(object):
         raise NotImplementedError("Abstract method not implemented '_to_poly_element(element)'")
 
     def _to_real_element(self, polynomial):
-        '''
+        r'''
             Method that receives a polynomial in the variables on the conversion system and plug in the real values of those variables.
 
             It returns an element in self.base().
@@ -367,7 +367,7 @@ class ConversionSystem(object):
 #        return res
 
     def _mix_conversion(self, conversion):
-        '''
+        r'''
             Method that, assuming `conversion` is a compatible Conversion System, mix `self` with `conversion` to a new Conversion System of the same type of `self` that can represent objects in any conversion system.
 
             This method must be implemented in each particular class extending ConversionSystem.
@@ -376,7 +376,7 @@ class ConversionSystem(object):
 
     ## Private methods
     def __add_relation(self, relation):
-        '''
+        r'''
         General method for adding relations that accepts any kind of argument posible.
 
         Allowed input types:

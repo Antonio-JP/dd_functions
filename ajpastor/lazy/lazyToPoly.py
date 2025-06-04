@@ -120,7 +120,7 @@ class LazyToPoly(ConversionSystem):
     ### PRIVATE METHODS
     ##########################################
     def __add_components(self, element):
-        '''
+        r'''
             Auxiliar method for adding new components to the variables (if needed).
 
             This method is private and should only be called during the initialization.
@@ -163,7 +163,7 @@ class LazyToPoly(ConversionSystem):
             raise TypeError("Impossible to polynomize unlazy elements (%s)" %(element))
 
     def __v(self, element, check=True):
-        '''
+        r'''
             Auxiliar method to see if a SimpleLIDElement can be converted into a variable.
 
             This method check if `element` satisfies a linear equation of the form

@@ -168,7 +168,7 @@ class Operator(object):
     
     ### Getter methods
     def order(self):
-        '''
+        r'''
         This method allows the user to get the order of the operator. 
         
         This method must be extended in each child-class of Operator.
@@ -176,7 +176,7 @@ class Operator(object):
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def coefficients(self):
-        '''
+        r'''
         This method allows the user to get the coefficients of the operator. 
         
         This method must be extended in each child-class of Operator.
@@ -269,7 +269,7 @@ class Operator(object):
     ### RECURSION POLYNOMIALS METHODS
     #######################################################        
     def get_recursion_polynomial(self, n):
-        '''
+        r'''
             Method to get a recursion polynomial associated with this operator.
             
             If the requested polynomial is greater than zero, then we will return a `forward` polynomial, but if the request is lesser than zero, we will return a backward polynomial, computing it if necessary.
@@ -394,7 +394,7 @@ class Operator(object):
     ### OPERATOR ARITHMETIC METHODS (ABSTRACT)
     ####################################################### 
     def add(self, other):
-        '''
+        r'''
         This method allows the user to add two operators. 
         
         This method must be extended in each child-class of Operator.
@@ -402,7 +402,7 @@ class Operator(object):
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def scalar(self, other):
-        '''
+        r'''
         This method allows the user to do a (left)scalar multiplication. 
         
         This method must be extended in each child-class of Operator.
@@ -410,7 +410,7 @@ class Operator(object):
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def mult(self, other):
-        '''
+        r'''
         This method allows the user to multiply two operators. 
         
         This method must be extended in each child-class of Operator.
@@ -418,7 +418,7 @@ class Operator(object):
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def is_zero(self):
-        '''
+        r'''
         This method allows the user to know if this operator is the zero operator. 
         
         This method must be extended in each child-class of Operator.
@@ -426,7 +426,7 @@ class Operator(object):
         raise NotImplementedError('Method not implemented -- Abstract class asked')
         
     def derivative(self):
-        '''
+        r'''
         This method allows the user to derivate the operator (if possible). If not, it will raise a
         NotImplementedError. 
         
@@ -439,7 +439,7 @@ class Operator(object):
     ### SOLUTION ARITHMETHIC METHODS
     ####################################################### 
     def add_solution(self, other):
-        '''
+        r'''
         This method computes a new operator such any solution of 'self == 0' plus any solution of 'other == 0' must satisfy.
         '''
         ## If the input is not an operator, trying the casting
@@ -455,7 +455,7 @@ class Operator(object):
         return self._compute_add_solution(other)
                 
     def mult_solution(self, other):
-        '''
+        r'''
         This method computes a new operator such any solution of 'self == 0' multiplied by any solution of 'other == 0' must satisfy.
         '''
         ## If the input is not an operator, trying the casting
@@ -471,19 +471,19 @@ class Operator(object):
         return self._compute_mult_solution(other)
         
     def derivative_solution(self):
-        '''
+        r'''
         This method computes a new operator such the derivative of any solution of 'self == 0' must satisfy.
         '''
         return self._compute_derivative_solution()
         
     def integral_solution(self):
-        '''
+        r'''
         This method computes a new operator such any anti-derivative of any solution of 'self == 0' must satisfy.
         '''
         return self._compute_integral_solution()
         
     def compose_solution(self, other):
-        '''
+        r'''
         Let c be the coefficients of 'self'. This method computes a differential operator such any solution 'f' of the equation with coefficients 'c(other^(-1))' composed with 'other' will satisfy.
         
         This method (awkward by definition) requires that 'other' is in self.base().
@@ -507,26 +507,26 @@ class Operator(object):
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_mult_solution(self, other):
-        '''
+        r'''
         This method computes a new operator such any solution of 'self == 0' multiplied by any solution of 'other == 0' must satisfy.
         It assumes that other and self are exactly the same type.
         '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_derivative_solution(self):
-        '''
+        r'''
         This method computes a new operator such the derivative of any solution of 'self == 0' must satisfy.
         '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_integral_solution(self):
-        '''
+        r'''
         This method computes a new operator such any anti-derivative of any solution of 'self == 0' must satisfy.
         '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
         
     def _compute_compose_solution(self, other):
-        '''
+        r'''
         This method computes a new operator that annihilates any solution of 'self' compose with any solution of 'other'.
         '''
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
@@ -643,7 +643,7 @@ class Operator(object):
         return self.coefficient(key)
     
     def __call__(self, obj):
-        '''
+        r'''
         This method allows the user to apply the operator to an object. 
         
         This method must be extended in each child-class of Operator.

@@ -83,7 +83,7 @@ class _LazyDDFunction(IntegralDomainElement):
     ### Methods for a LazyElement
     ################################################################################################
     def raw(self):
-        '''
+        r'''
         Method that computes (if needed) and returns an element of `self.base()` that is equal to `self`.
         '''
         if(self.__raw is None):
@@ -92,7 +92,7 @@ class _LazyDDFunction(IntegralDomainElement):
         return self.__raw
 
     def poly(self):
-        '''
+        r'''
         Method that computes (if needed) and returns an polynomial such that the conversion using
         self.parent() returns self.raw().
         '''
@@ -110,7 +110,7 @@ class _LazyDDFunction(IntegralDomainElement):
         return self
 
     def variables(self):
-        '''
+        r'''
         Method that returns a tuple with the variables that appear in self.poly().
 
         If such polynomial representation is a quotient of polynomials, it take the union of the variables in the numerator and denominator.
@@ -127,7 +127,7 @@ class _LazyDDFunction(IntegralDomainElement):
         return tuple()
 
     def derivative(self, times = 1):
-        '''
+        r'''
         Method that computes the derivative of an element in the laziest way possible.
 
         This method compute the derivative of each of the variables in 'self.poly()' and then build
@@ -189,7 +189,7 @@ class _LazyDDFunction(IntegralDomainElement):
     ### Non-trivial arithmetics methods
     ################################################################################################
     def gcd(self,*input):
-        '''
+        r'''
         Method that a common divisor of 'self' and the input
         '''
         if(len(input) > 1):
@@ -198,7 +198,7 @@ class _LazyDDFunction(IntegralDomainElement):
         return _LazyDDFunction(self.parent(), gcd([self.poly()]+[self.parent()(el).poly() for el in input]))
 
     def lcm(self,*input):
-        '''
+        r'''
         Method that a common multiple of 'self' and the input
         '''
         if(len(input) > 1 ):
@@ -207,7 +207,7 @@ class _LazyDDFunction(IntegralDomainElement):
         return _LazyDDFunction(self.parent(), lcm([self.poly()]+[self.parent()(el).poly() for el in input]))
 
     def divides(self, other):
-        '''
+        r'''
         Method that returns True if 'other = a*self'.
 
         REMARK: If this methods return False does not mean we can not divide other by self in the level of 'base'.
@@ -279,7 +279,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
     Element = _LazyDDFunction
 
     def __init__(self, base, constants=QQ, var_name="z", category=None):
-        '''
+        r'''
             Implementation of a Covnersion System using InfinitePolynomialRing as a basic structure.
 
             Elements of 'base' will be represented in this ring using elements of
@@ -422,7 +422,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return self.__gen[self.__map_to_vars[element]]
 
     def _relations(self):
-        '''
+        r'''
             Returns a Groebner Basis of the relations ideals known in this conversion system.
         '''
         if(self._ConversionSystem__relations is None):
@@ -475,7 +475,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         self.__map_of_derivatives = {}
 
     def derivative(self, el, times=1):
-        '''
+        r'''
             Method that computes the derivative of an element in the LazyDDRing. It performs a casting to 'self' before starting the algorithm.
         '''
         el = self(el)
@@ -555,7 +555,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return self.base().is_noetherian()
 
     def _xgcd_univariate_polynomial(self, a, b):
-        '''
+        r'''
         Return an extended gcd of ``a`` and ``b``.
 
             INPUT:
@@ -752,7 +752,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return
 
     def __find_relation(self, g,f,d=None):
-        '''
+        r'''
             Method that get the relation between g and a f. If possible, it computes
             the derivatives up to some order of f and check relations with them.
 
@@ -782,7 +782,7 @@ class LazyDDRing (UniqueRepresentation, ConversionSystem, IntegralDomain):
         return None
 
     def __find_linear_relation(self, f,g):
-        '''
+        r'''
             This method receives two DDFunctions and return two constants (c,d)
             such that f = cg+d. None is return if those constants do not exist.
         '''

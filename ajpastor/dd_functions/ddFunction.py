@@ -1787,7 +1787,7 @@ class ParametrizedDDRing(DDRing):
         return ring
         
     def __init__(self, base_ddRing, parameters):
-        '''
+        r'''
             This class represent a generalized concept of DDRing. If `R` is a domain of the power series space (`K[[x]]`), and `D(R)` is its associated DDRing, then we can consider new constants elements and consider `D(R)`  but with the basic field be `K(var_1,...,var_m)`
             
             INPUT:
@@ -3269,7 +3269,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                 
     @derived_property
     def inverse(self):
-        '''
+        r'''
             Method that compute and return a DD-Function `f` such `f*self == 1`, i.e. this method computes the multiplicative inverse of `self`.
         '''
         if(self.init(0) == 0):
@@ -3291,7 +3291,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return inverse
     
     def add(self, other):
-        '''
+        r'''
             Method that adds two DDFunctions.
             
             INPUT:
@@ -3357,7 +3357,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return result
     
     def sub(self, other):
-        '''
+        r'''
             Method that substract two DDFunctions.
             
             INPUT:
@@ -3418,7 +3418,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return result
     
     def mult(self, other):
-        '''
+        r'''
             Method that calculate the product of two DDFunctions.
             
             INPUT:
@@ -3536,14 +3536,14 @@ class DDFunction (IntegralDomainElement, SerializableObject):
             return (n,result)
         
     def min_coefficient(self):
-        '''
+        r'''
             Method that computes the first non-zero coefficient. IN case 'self' is zero, this method returns 0.
         '''
         if(self.is_null): return 0
         return self.sequence(self.ps_order)
     
     def contraction(self, level):
-        '''
+        r'''
             Method that tries to compute the contraction of a sequence jumping through the elements 0 (mod level).
             
             This is equivalent to compose self(pow(x,1/level)) if 'self' only has non-zero element in the positions 0 (mod level).
@@ -3923,7 +3923,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Sequence methods
     #####################################
     def split_sequence(self, parts=2):
-        '''
+        r'''
             Method that returns a list of 'parts' elements such that the interlacing of their sequence
             is equal to the sequence of 'self'.
             
@@ -3963,7 +3963,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return [el.compose_algebraic(p, lambda n : el.sequence(parts*n)*factorial(n)) for el in f]
     
     def interlace(self, *others):
-        '''
+        r'''
             Method that computes a functions which sequence is the interlacing between 'self'
             and all the 'others' functions.
             
@@ -3985,7 +3985,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
     ### Differential methods
     #####################################
     def derivative(self, *args, **kwds):
-        '''
+        r'''
         Method to get a DDFunction `g` that satisfies `D(self) = g`.
         
         INPUT:
@@ -4035,7 +4035,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return self.__derivative
         
     def integrate(self, constant=0 ):
-        '''
+        r'''
         Method to get a DDFunction `g` that satisfies `D(g) = self` and `g(0) = constant`.
         
         INPUT:
@@ -4243,7 +4243,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return destiny_ring.element(new_equation, new_init, name=new_name)
     
     def compose_algebraic(self, poly, init):
-        '''
+        r'''
             Method to compute the composition of 'self' with an algebraic function over some DDRing
             
             The method first compute the new ring where the composition will belong and then relies on the method 'compose_algebraic_solution' of the Operator class.
@@ -4327,7 +4327,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
     @derived_property
     def is_one(self):
-        '''
+        r'''
             Cached property to check whether self is one on its ring or not.
             
             The method used is checking that the element is a constant and its first initial value is one.
@@ -4336,7 +4336,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
     @cached_method
     def is_constant(self):
-        '''
+        r'''
             Cached property to check whether self is a constant or not.
             
             We check enough initial values to know (without computing the derivative) if it is zero or not.
@@ -4374,7 +4374,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
 
     @derived_property
     def is_fully_defined(self):
-        '''
+        r'''
             Cached property yo check whether the function is fully defined or not.
             
             This means that, given some initial values and the differential equation, the solution of such problem is unique (True) or not (False)
@@ -4963,7 +4963,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return not (self.is_null)    
     ### Magic use
     def __call__(self, X=None, **input):
-        '''
+        r'''
             Method that return the value of the function in the point given. As the function as a power-series may not converge, this method only works if the argument is 0.
             Further implementation can be done for DDFunctions that we know about the convergence.
         '''
@@ -4974,7 +4974,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         
     ### Magic representation
     def __hash__(self):
-        '''
+        r'''
             Hash method for DDFunctions.
 
             Since several representations may be equal, we use the initial conditions as a mark for the hash.
@@ -4994,13 +4994,13 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return self.equation.coefficient(key)
 
     def __missing__(self, key):
-        '''
+        r'''
             Missing method for DDFunctions.
         '''
         return 0 
         
     def __str__(self, detail=True):
-        '''
+        r'''
             String method for DDFunctions. It prints all information of the DDFunction.
         '''
         #if(self.is_constant()):
@@ -5098,7 +5098,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
         return i-1
         
     def __repr__(self):
-        '''
+        r'''
             Representation method for DDFunctions. It prints basic information of the DDFunction.
         '''
         if(self.is_constant()):
@@ -5339,7 +5339,7 @@ class DDRingFunctor (ConstructionFunctor):
             return ((other.__depth == self.__depth) and (other.__base_field == self.__base_field))
 
     def merge(self, other):
-        '''
+        r'''
             Merging two DDRingFunctors or return None.
 
             For merging two DDRingFunctors, we need to be able to compute a common base field from both functors
@@ -5376,7 +5376,7 @@ class ParametrizedDDRingFunctor (DDRingFunctor):
         return ParametrizedDDRing(DDRing(x, depth = self.depth(), base_field = self.coeff_field), self.__vars)
         
     def merge(self, other):
-        '''
+        r'''
             Merging ``self`` with another DDRingFunctor or return None.
 
             This method is able to merge the functor with a DDRingFunctor in addition with the standard ParametrizedDDRingFunctor.
@@ -5442,7 +5442,7 @@ def zero_extraction(el):
 ### PRIVATE MODULE METHODS
 ###################################################################################################
 def _is_polynomial_ring(ring, univariate=True, multivariate=True):
-    '''
+    r'''
         Method that checks whether an object is a polynomial ring or not.
 
         This method checks if an object is a polynomial ring.

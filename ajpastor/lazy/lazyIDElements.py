@@ -59,7 +59,7 @@ class LazyIDElement(IntegralDomainElement):
         return self.parent().base()
 
     def raw(self):
-        '''
+        r'''
         Method that computes (if needed) and returns an element of `self.base()` that is equal to `self`.
         '''
         if(self.__raw is None):
@@ -68,7 +68,7 @@ class LazyIDElement(IntegralDomainElement):
         return self.__raw
 
     def max_divisor(self):
-        '''
+        r'''
         Method that computes (if needed) and returns a SumLIDElement which we know we can divide `self`.
         '''
         if(self.__max_divisor is None):
@@ -77,13 +77,13 @@ class LazyIDElement(IntegralDomainElement):
         return self.__max_divisor
 
     def gcd(self,*input):
-        '''
+        r'''
         Method that computes a SumLIDElement which we know we can divide `self` and every element on `input`.
         '''
         return self.max_divisor().gcd(*input)
 
     def lcm(self, *input):
-        '''
+        r'''
         Method that computes a lazyElement such every element of input and self are divisors
         '''
         ## Checking the arguments
@@ -100,7 +100,7 @@ class LazyIDElement(IntegralDomainElement):
         return smallLcm.lcm(input[1:])
 
     def is_multiple_of(self,element):
-        '''
+        r'''
         Method that returns whether `self` can be divided by `element`.
         '''
         if(self == element or element == self.base().one()):
@@ -109,7 +109,7 @@ class LazyIDElement(IntegralDomainElement):
         return self.__inner_is_multiple__(element)
 
     def divide(self,element):
-        '''
+        r'''
             Method that performs (if possible) the division of `self` by `element`.
         '''
         if((not element in self.base()) and (not isinstance(element, LazyIDElement))):
@@ -129,13 +129,13 @@ class LazyIDElement(IntegralDomainElement):
         return self.__compute_division__(element)
 
     def simplify(self):
-        '''
+        r'''
         Method that simplifies (if possible) the current element. It is a change inside the structure and the return is the result of the changes
         '''
         return self
 
     def derivative(self, *input):
-        '''
+        r'''
         Method that computes the lazy derivative of an element. It assumes that the parent ring has a derivation and the arguments for such derivation are provided in 'input'.
         '''
         raise AttributeError("Method not implemented")

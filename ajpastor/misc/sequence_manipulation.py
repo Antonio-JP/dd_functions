@@ -86,7 +86,7 @@ def ogf_egf(f):
     return lambda n: f(n)*factorial(n)
 
 def inv_lagrangian(f):
-    '''
+    r'''
         Inverse of a power series sequence using lagrangian inverse.
         
         This methods computes the functional inverse of the sequence
@@ -123,7 +123,7 @@ def inv_lagrangian(f):
     return egf_ogf(_inverse_egf)
 
 def Richardson(f,order):
-    '''
+    r'''
         Applies the Richardson transformation.
         
         Builds the Richarsdon's sequence of order ``order`` for the sequence given 
@@ -143,7 +143,7 @@ def Richardson(f,order):
 ################################################################################
 ## From list to sequence method
 def list_to_seq(input):
-    '''
+    r'''
         Convert a list into a sequence (i.e., a method)
         
         This method convert a list or any other iterable indexed by integers into 
@@ -153,7 +153,7 @@ def list_to_seq(input):
     return lambda n : input[n]
     
 def seq_to_list(f, bound=None):
-    '''
+    r'''
         Convert a sequence into a list.
         
         This method converts a sequence into a list exploring the sequence until it is 

@@ -533,7 +533,7 @@ class TwoStepsOperator(ListOperator):
     ### SOLVING MATRICES METHOD
     ####################################################### 
     def _get_element_nullspace(self, M):
-        '''
+        r'''
             Method that computes an element in the nullspace of M.
         '''        
         raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)

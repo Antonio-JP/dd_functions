@@ -329,7 +329,7 @@ class DynamicString(object):
         
     ### Implementation of 'str' methods
     def replace(self, pattern, out, deep=False):
-        '''
+        r'''
             Replacing method for DynamicStrings
 
             This method performs a similar operation as the method :func:`str.replace`. However, 
@@ -369,7 +369,7 @@ class DynamicString(object):
     
     ### Extra methods
     def m_replace(self, to_replace, deep=False):
-        '''
+        r'''
             Method to perform several replacements simultaneously. 
             
             This method do exactly the same as 'self.replace(key, value) for all (key,value) in to_replace but all at once, avoiding that one
@@ -601,7 +601,7 @@ def m_dreplace(element, to_replace, deep=False):
     raise TypeError("No string given. Impossible to replace multiple strings")
 
 def _din_indices(string, sep):
-    '''
+    r'''
         Private method for this module. Return a list of indices where the string 'sep' appears on 'string'.
         
         This method relies in the fact that both 'string' and 'sep' are of type 'str'.
@@ -613,7 +613,7 @@ def _din_indices(string, sep):
         return []
 
 def _din_m_indices(string, *seps):
-    '''
+    r'''
         Private method for this module. Return a sorted list of pairs of (index, element) such
         that the string 'element' starts in 'string[index]'. This method list all the apparitions 
         of the strings in 'seps' within 'string'.

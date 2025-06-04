@@ -2570,7 +2570,7 @@ def Li(s):
 ### Basic Riccati differential equation
 @cached_function
 def RiccatiD(a,b,c,init=None, ddR = None, full = False, name="w"):
-    '''
+    r'''
         TODO: Review this documentation
         Implementation using DDFunctions of the solutions for the Riccati differential equation.
         
@@ -2873,7 +2873,7 @@ def MathieuHCos(a='a',q='q'):
 ### Hill's equation
 @cached_function
 def HillD(a='a',q='q',init=()):
-    '''
+    r'''
         TODO: Review this documentation
         DD-finite implementation of the Hill equation.
         
@@ -3034,7 +3034,7 @@ def AiryD(init=('a','b')):
 ### Parabolic Cylinder Functions
 @cached_function
 def ParabolicCylinderD(a='a',b='b',c='c', init=()):
-    '''
+    r'''
         TODO: Review this documentation
         D-finite implementation of Parabolic Cylinder functions.
         
@@ -3066,7 +3066,7 @@ def ParabolicCylinderD(a='a',b='b',c='c', init=()):
 ###### ELLIPTIC INTEGRALS
 ## Legendre elliptic integrals
 def EllipticLegendreD(kind,var='phi'):
-    '''
+    r'''
         TODO: Review this documentation
         DD-finite implementation of the Legendre elliptic integrals (F(phi,k), E(phi,k), D(phi,k)
         
@@ -3131,7 +3131,7 @@ def EllipticLegendreD(kind,var='phi'):
 ## Generalized (or Coulomb) Spheroidal Differential Equation
 @cached_function
 def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
-    '''
+    r'''
         TODO: Review this documentation
         D-finite implementation of the Coulomb spheroidal function 
         
@@ -3178,7 +3178,7 @@ def CoulombSpheroidalFunctionD(a='a', b='b', c='c', d='d', kind = 1, init=()):
 
 @cached_function
 def SpheroidalWaveFunctionD(a='a', b='b', c='c', init=()):
-    '''
+    r'''
         TODO: Review this documentation
         D-finite implementation of the spheroidal wave function.
         
@@ -3836,7 +3836,7 @@ def DFiniteWP(g2 = 'a', g3 = 'b', with_x = False):
 ##################################################################################
 ################################################################################## 
 def DAlgebraic(polynomial, init=[], dR=None):
-    '''
+    r'''
         Method that convert an algebraic function to a D-finite function.
 
         It is well-known (see any reference for holonomic functions or :doi:`10.1016/j.aam.2020.102027`)
@@ -4297,7 +4297,7 @@ def __decide_parent(input, parent = None, depth = 1):
     return final_parent.base()(input), final_parent
 
 def __check_list(list_of_elements, invalid_vars=[]):
-    '''
+    r'''
         TODO: Review this documentation
         This method computes a field of rational functions in several variables given a list of 
         elements, where all the elements can be casted into. This method also allows to ban some variables
