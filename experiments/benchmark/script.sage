@@ -7,6 +7,8 @@ from datetime import datetime
 from time import perf_counter
 from dd_functions.dd_functions.ddExamples import *
 
+import multiprocessing as mp
+
 def experiment_tan_derivative():
     t = Tan(x)
     if t.derivative() != (1 + t^2):
@@ -66,17 +68,30 @@ def experiment_fibonacci():
 EXPERIMENTS = [experiment_tan_derivative, experiment_tan_cos, experiment_triple_sine, experiment_mathieu, experiment_bessel,
                experiment_polylog, experiment_tangent_2x, experiment_hypergeometric_2, experiment_elliptic_legendre, experiment_fibonacci]
 
-def run_experiments(date, version, csv_writer):
+def run_experiments(date, version, csv_writer, timeout=60):
     results = []
     for func in EXPERIMENTS:
         try:
             print(f"+ Running {func.__name__}...")
+            process = mp.Process(target=func)
             start_time = perf_counter()
-            func()
-            end_time = perf_counter()
-            elapsed_time = end_time - start_time
-            print(f"- Finished {func.__name__} (no error)")
-        except (Exception, KeyboardInterrupt) as e:
+            process.start()
+            process.join(timeout=timeout+0.1)
+
+            if process.is_alive():
+                process.terminate()
+                process.join()
+                raise TimeoutError
+            elif process.exitcode != 0:
+                raise ValueError(f"Process {func.__name__} exited with code {process.exitcode}")
+            else:
+                end_time = perf_counter()
+                elapsed_time = end_time - start_time
+                print(f"- Finished {func.__name__} (no error)")
+        except TimeoutError as e:
+            print(f"- Timeout running {func.__name__}: {e}")
+            elapsed_time = f"Timeout {timeout}s"
+        except (ValueError, KeyboardInterrupt) as e:
             print(f"- Error running {func.__name__}: {e}")
             elapsed_time = "Error"
         results.append(elapsed_time)
