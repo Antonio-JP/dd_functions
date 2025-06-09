@@ -3,7 +3,7 @@ Miscellaneous package (misc)
 =============================
 
 Package ``misc`` for Sage which provide several useful packages and utilities for
-the main package :mod:`ajpastor.dd_functions`.
+the main package :mod:`dd_functions.dd_functions`.
 
 Files in the package 
 ====================

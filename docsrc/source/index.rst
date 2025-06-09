@@ -16,7 +16,7 @@ functions. For further information, see the related bibliography:
 
 To use this module, it is enough to import it with the following Sage line::
 
-    from ajpastor.dd_functions import *
+    from dd_functions.dd_functions import *
 
 From this site, you can explore all the documentation (which contains several examples of usage) for all
 the modules included in this package. 

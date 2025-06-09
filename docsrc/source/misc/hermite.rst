@@ -3,7 +3,7 @@
 Solving linear systems using Hermite Normal Forms
 ==============================================================
 
-.. automodule:: ajpastor.misc.hermite
+.. automodule:: dd_functions.misc.hermite
    :members:
    :undoc-members:
    :show-inheritance:
