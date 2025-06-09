@@ -47,8 +47,10 @@ def experiment_polylog():
     if f.init(6, True) != [0, 2, 3/2, 31/6, 10, 1829/30]:
         raise ValueError("Polylogarithm function test failed")
     
-def experiment_hypergeometric():
-    f = HypergeometricFunction()(Sin(x))
+def experiment_tangent_2x():
+    f = (1-Tan(x)^2)*Tan(2*x)
+    if f.sequence(10, True) != [0, 2, 0, 2/3, 0, 4/15, 0, 34/315, 0, 124/2835]:
+        raise ValueError("Tangent of double angle test failed")
 
 def experiment_hypergeometric_2():
     f = HypergeometricFunction(1, 2, 3)(HypergeometricFunction(1,2,3)-1)
@@ -62,18 +64,20 @@ def experiment_fibonacci():
     FibonacciD()(FibonacciD((0,'a')))
 
 EXPERIMENTS = [experiment_tan_derivative, experiment_tan_cos, experiment_triple_sine, experiment_mathieu, experiment_bessel,
-               experiment_polylog, experiment_hypergeometric, experiment_hypergeometric_2, experiment_elliptic_legendre, experiment_fibonacci]
+               experiment_polylog, experiment_tangent_2x, experiment_hypergeometric_2, experiment_elliptic_legendre, experiment_fibonacci]
 
 def run_experiments(date, version, csv_writer):
     results = []
     for func in EXPERIMENTS:
         try:
+            print(f"+ Running {func.__name__}...")
             start_time = perf_counter()
             func()
             end_time = perf_counter()
             elapsed_time = end_time - start_time
-        except Exception as e:
-            print(f"Error running {func.__name__}: {e}")
+            print(f"- Finished {func.__name__} (no error)")
+        except (Exception, KeyboardInterrupt) as e:
+            print(f"- Error running {func.__name__}: {e}")
             elapsed_time = "Error"
         results.append(elapsed_time)
 
