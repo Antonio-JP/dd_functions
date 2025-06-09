@@ -62,7 +62,7 @@ sage --pip install git+https://github.com/Antonio-JP/dd_functions.git
 
 Once installed, start Sage and use appropriate imports:
 ```python
-sage: from ajpastor.dd_functions import *
+sage: from dd_functions.dd_functions import *
 ```
 Or launch the demo notebook
 [`dd_functions_demo.ipynb`](https://github.com/Antonio-JP/dd_functions/blob/master/dd_functions_demo.ipynb).

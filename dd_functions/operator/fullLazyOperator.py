@@ -56,9 +56,9 @@ from sage.all import (Matrix, vector, gcd, kronecker_delta, lcm, prod)
 from .twoStepsOperator import TwoStepsOperator
 from .operator import foo_derivative
 
-from ajpastor.lazy.lazyRing import LazyRing
+from dd_functions.lazy.lazyRing import LazyRing
 
-from ajpastor.misc.bareiss import BareissAlgorithm
+from dd_functions.misc.bareiss import BareissAlgorithm
 
 class FullLazyOperator(TwoStepsOperator):
     ### Static parameters
@@ -105,7 +105,7 @@ class FullLazyOperator(TwoStepsOperator):
     ### GETTING MATRICES METHODS
     ####################################################### 
     def _get_matrix_composition(self, other):
-        from ajpastor.misc.matrix import matrix_of_dMovement as move
+        from dd_functions.misc.matrix import matrix_of_dMovement as move
         R = self.__conversion
     
         dg = R(other).derivative()

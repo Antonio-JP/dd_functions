@@ -37,7 +37,7 @@ from sage.categories.pushout import ConstructionFunctor
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
+from dd_functions.misc.ring_w_sequence import Ring_w_Sequence
 
 from .conversion import ConversionSystem
 from .lazyIDElements import LazyDomain

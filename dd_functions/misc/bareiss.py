@@ -27,7 +27,7 @@ from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 
 # ajpastor imports
-from ajpastor.misc.linear_solver import LinearSystemSolver
+from dd_functions.misc.linear_solver import LinearSystemSolver
 
 # Main class of the file
 class BareissAlgorithm(LinearSystemSolver):

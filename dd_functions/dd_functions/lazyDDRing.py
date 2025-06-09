@@ -39,12 +39,12 @@ from sage.categories.integral_domains import IntegralDomains
 from sage.categories.fields import Fields
 from sage.categories.pushout import ConstructionFunctor
 
-from ajpastor.dd_functions.ddFunction import DFinite, is_DDFunction
+from dd_functions.dd_functions.ddFunction import DFinite, is_DDFunction
 
-from ajpastor.lazy.conversion import ConversionSystem
+from dd_functions.lazy.conversion import ConversionSystem
 
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
-from ajpastor.misc.matrix import vector_derivative
+from dd_functions.misc.ring_w_sequence import Ring_w_Sequence
+from dd_functions.misc.matrix import vector_derivative
 
 
 _Fields = Fields.__classcall__(Fields)

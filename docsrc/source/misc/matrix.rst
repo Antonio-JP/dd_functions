@@ -3,7 +3,7 @@
 Matrices and Linear Algebra: useful operations
 ==============================================================
 
-.. automodule:: ajpastor.misc.matrix
+.. automodule:: dd_functions.misc.matrix
    :members:
    :undoc-members:
    :show-inheritance:

@@ -3,7 +3,7 @@
 DDExamples: built-in functions and examples 
 =============================================
 
-.. automodule:: ajpastor.dd_functions.ddExamples
+.. automodule:: dd_functions.dd_functions.ddExamples
    :members:
    :undoc-members:
    :show-inheritance:

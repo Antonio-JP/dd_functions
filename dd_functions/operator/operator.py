@@ -71,9 +71,9 @@ from sage.all_cmdline import x
 ####################################################################################################
 ####################################################################################################
 
-from ajpastor.misc.cached_property import derived_property
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
+from dd_functions.misc.cached_property import derived_property
+from dd_functions.misc.ring_w_sequence import Ring_w_Sequence
+from dd_functions.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
 from sage.rings.polynomial.polynomial_ring import PolynomialRing_generic
 from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
@@ -250,7 +250,7 @@ class Operator(object):
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
         '''
-        from ajpastor.dd_functions import is_DDRing
+        from dd_functions.dd_functions import is_DDRing
         if(is_DDRing(self.base())):
             raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 

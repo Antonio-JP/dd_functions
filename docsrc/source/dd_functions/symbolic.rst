@@ -3,7 +3,7 @@
 DD-finite functions as symbolic expressions 
 =============================================
 
-.. automodule:: ajpastor.dd_functions.symbolic
+.. automodule:: dd_functions.dd_functions.symbolic
    :members:
    :undoc-members:
    :show-inheritance:

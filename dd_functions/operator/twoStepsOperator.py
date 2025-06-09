@@ -253,7 +253,7 @@ class TwoStepsOperator(ListOperator):
 
             A derivation matrix of the module `M`.
         '''
-        from ajpastor.misc.matrix import diagonal_matrix as diagonal
+        from dd_functions.misc.matrix import diagonal_matrix as diagonal
         Mf = self.companion()
         Mg = other.companion()
         
@@ -379,7 +379,7 @@ class TwoStepsOperator(ListOperator):
             The ansazt system for compute a linear relation with `\partial^{ncols}(f'(x))` 
             and its previous derivatives within the module `M`.
         '''        
-        from ajpastor.misc.matrix import vector_derivative as der
+        from dd_functions.misc.matrix import vector_derivative as der
         
         ## Controlling the input ncols
         if(ncols < 0):
@@ -430,7 +430,7 @@ class TwoStepsOperator(ListOperator):
             The ansazt system for compute a linear relation with `\partial^{ncols}(f(x)+g(x))` 
             and its previous derivatives within the module `M`.
         '''        
-        from ajpastor.misc.matrix import vector_derivative as der
+        from dd_functions.misc.matrix import vector_derivative as der
         
         ## Controlling the input ncols
         if(ncols < 0):
@@ -481,7 +481,7 @@ class TwoStepsOperator(ListOperator):
             The ansazt system for compute a linear relation with `\partial^{ncols}(f(x)g(x))` 
             and its previous derivatives within the module `M`.
         '''         
-        from ajpastor.misc.matrix import vector_derivative as der
+        from dd_functions.misc.matrix import vector_derivative as der
         
         ## Controlling the input ncols
         if(ncols < 0):
@@ -504,7 +504,7 @@ class TwoStepsOperator(ListOperator):
             return self._post_proc(system)
         
     def _get_matrix_composition(self, other):
-        from ajpastor.misc.matrix import matrix_of_dMovement as move
+        from dd_functions.misc.matrix import matrix_of_dMovement as move
     
         g = other
         

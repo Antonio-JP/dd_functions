@@ -62,10 +62,10 @@ from sage.all import (cached_method, kronecker_delta, Matrix, lcm, gcd, vector)
 from .twoStepsOperator import TwoStepsOperator
 from .operator import foo_derivative
 
-from ajpastor.lazy.lazyIDElements import LazyIntegralDomain
-from ajpastor.lazy.lazyToPoly import LazyToPoly
+from dd_functions.lazy.lazyIDElements import LazyIntegralDomain
+from dd_functions.lazy.lazyToPoly import LazyToPoly
 
-from ajpastor.misc.bareiss import BareissAlgorithm
+from dd_functions.misc.bareiss import BareissAlgorithm
 
 class PolynomialLazyOperator(TwoStepsOperator):
     ### Static parameters

@@ -3,7 +3,7 @@
 Bareiss: Division-free Linear Algebra for computing Nullspace
 ==============================================================
 
-.. automodule:: ajpastor.misc.bareiss
+.. automodule:: dd_functions.misc.bareiss
    :members:
    :undoc-members:
    :show-inheritance:

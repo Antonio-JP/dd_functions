@@ -50,18 +50,18 @@ from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
 #ajpastor imports
-from ajpastor.dd_functions.exceptions import DDFunctionError, ZeroValueRequired, InitValueError, NoValueError
+from dd_functions.dd_functions.exceptions import DDFunctionError, ZeroValueRequired, InitValueError, NoValueError
 
-from ajpastor.misc.dynamic_string import DynamicString, m_dreplace
-from ajpastor.misc.serializable import SerializableObject
-from ajpastor.misc.cached_property import derived_property
-from ajpastor.misc.ring_w_sequence import Ring_w_Sequence, sequence
-from ajpastor.misc.sets import FiniteEnumeratedSet, EmptySet
+from dd_functions.misc.dynamic_string import DynamicString, m_dreplace
+from dd_functions.misc.serializable import SerializableObject
+from dd_functions.misc.cached_property import derived_property
+from dd_functions.misc.ring_w_sequence import Ring_w_Sequence, sequence
+from dd_functions.misc.sets import FiniteEnumeratedSet, EmptySet
 
-from ajpastor.operator.operator import Operator
-from ajpastor.operator.oreOperator import w_OreOperator
-from ajpastor.operator.directStepOperator import DirectStepOperator
-from ajpastor.operator.fullLazyOperator import FullLazyOperator
+from dd_functions.operator.operator import Operator
+from dd_functions.operator.oreOperator import w_OreOperator
+from dd_functions.operator.directStepOperator import DirectStepOperator
+from dd_functions.operator.fullLazyOperator import FullLazyOperator
 
 # Private variables for module
 _IntegralDomains = IntegralDomains.__classcall__(IntegralDomains)
@@ -5102,7 +5102,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     raise ValueError("The exponent has to satisfy g(0) = 0. Got %s" %g0)
                 R = f.parent(); S = g.parent()
                 FR = pushout(R,S).to_depth(1+max(R.depth()+1, S.depth()))
-                from ajpastor.dd_functions.ddExamples import Log
+                from dd_functions.dd_functions.ddExamples import Log
                 self.__pows[other] = FR.element([-((lf0+Log(f/f0)*g)).derivative(), 1],[1],name=name)
 
         return self.__pows[other]
