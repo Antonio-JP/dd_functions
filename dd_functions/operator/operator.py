@@ -250,7 +250,7 @@ class Operator(object):
             with the ring `R[x_1,\ldots,x_n]_S` where the variable `x_i` represent the 
             element `\alpha_i`.
         '''
-        from dd_functions.dd_functions import is_DDRing
+        from dd_functions.dd_functions_old import is_DDRing
         if(is_DDRing(self.base())):
             raise NotImplementedError('Method not implemented. Class: %s' %self.__class__)
 

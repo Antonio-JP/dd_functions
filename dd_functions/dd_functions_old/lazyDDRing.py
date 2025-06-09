@@ -39,7 +39,7 @@ from sage.categories.integral_domains import IntegralDomains
 from sage.categories.fields import Fields
 from sage.categories.pushout import ConstructionFunctor
 
-from dd_functions.dd_functions.ddFunction import DFinite, is_DDFunction
+from dd_functions.dd_functions_old.ddFunction import DFinite, is_DDFunction
 
 from dd_functions.lazy.conversion import ConversionSystem
 

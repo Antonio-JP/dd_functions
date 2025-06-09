@@ -38,8 +38,8 @@ import logging
 
 from sage.all import SR, prod, ZZ, QQ, PolynomialRing
 
-from dd_functions.dd_functions.ddFunction import is_DDFunction, DFinite, ParametrizedDDRing
-from dd_functions.dd_functions.ddExamples import (Sin, Cos, Sinh, Cosh, Tan, Log, Exp, 
+from dd_functions.dd_functions_old.ddFunction import is_DDFunction, DFinite, ParametrizedDDRing
+from dd_functions.dd_functions_old.ddExamples import (Sin, Cos, Sinh, Cosh, Tan, Log, Exp, 
                                                 BesselJ, BesselI, LegendreP, LegendreQ, ChebyshevD,
                                                 GenericHypergeometricFunction, DAlgebraic)
 

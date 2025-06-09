@@ -43,7 +43,7 @@ from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.rings.fraction_field import FractionField_generic
 
 # ajpastor.dd_functions imports
-from dd_functions.dd_functions import (is_DDRing, is_DDFunction, DDRing, ParametrizedDDRing,
+from dd_functions.dd_functions_old import (is_DDRing, is_DDFunction, DDRing, ParametrizedDDRing,
                                    DFinite, Exp)
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing
 

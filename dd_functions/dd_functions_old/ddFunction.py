@@ -50,7 +50,7 @@ from sage.categories.pushout import pushout
 from sage.categories.pushout import ConstructionFunctor
 
 #ajpastor imports
-from dd_functions.dd_functions.exceptions import DDFunctionError, ZeroValueRequired, InitValueError, NoValueError
+from dd_functions.dd_functions_old.exceptions import DDFunctionError, ZeroValueRequired, InitValueError, NoValueError
 
 from dd_functions.misc.dynamic_string import DynamicString, m_dreplace
 from dd_functions.misc.serializable import SerializableObject
@@ -5102,7 +5102,7 @@ class DDFunction (IntegralDomainElement, SerializableObject):
                     raise ValueError("The exponent has to satisfy g(0) = 0. Got %s" %g0)
                 R = f.parent(); S = g.parent()
                 FR = pushout(R,S).to_depth(1+max(R.depth()+1, S.depth()))
-                from dd_functions.dd_functions.ddExamples import Log
+                from dd_functions.dd_functions_old.ddExamples import Log
                 self.__pows[other] = FR.element([-((lf0+Log(f/f0)*g)).derivative(), 1],[1],name=name)
 
         return self.__pows[other]

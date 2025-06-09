@@ -117,9 +117,9 @@ from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.categories.pushout import pushout, FractionField
 
 # ajpastor imports
-from dd_functions.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DFiniteI, DDFinite)
-from dd_functions.dd_functions.exceptions import ZeroValueRequired
-from dd_functions.dd_functions.lazyDDRing import LazyDDRing
+from dd_functions.dd_functions_old import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DFiniteI, DDFinite)
+from dd_functions.dd_functions_old.exceptions import ZeroValueRequired
+from dd_functions.dd_functions_old.lazyDDRing import LazyDDRing
 from dd_functions.misc.dynamic_string import DynamicString
 from dd_functions.misc.matrix import matrix_of_dMovement as move
 
