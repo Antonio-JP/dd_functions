@@ -6,7 +6,7 @@ VERSION=$(shell cat ./VERSION)
 SAGE=sage
 
 # Package folder
-PACKAGE=ajpastor
+PACKAGE=dd_functions
 
 all: install doc test
 	

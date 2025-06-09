@@ -15,8 +15,8 @@
 # General information about the project.
 project = u"DD-finite functions in Sage"
 copyright = u'2019'
-package_name = 'ajpastor'
-package_folder = "../../ajpastor"
+package_name = 'dd_functions'
+package_folder = "../../dd_functions"
 authors = u"Antonio Jimenez-Pastor"
 
 import sys

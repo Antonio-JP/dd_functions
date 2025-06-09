@@ -21,4 +21,4 @@ jobs:
         sage -pip install --upgrade .
     - name: Running sage tests
       run: |
-        sage -t ajpastor
+        sage -t dd_functions
