@@ -43,12 +43,12 @@ from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.rings.fraction_field import FractionField_generic
 
 # ajpastor.dd_functions imports
-from ajpastor.dd_functions import (is_DDRing, is_DDFunction, DDRing, ParametrizedDDRing,
+from dd_functions.dd_functions import (is_DDRing, is_DDFunction, DDRing, ParametrizedDDRing,
                                    DFinite, Exp)
 from sage.rings.polynomial.infinite_polynomial_ring import InfinitePolynomialRing
 
-from ajpastor.misc.matrix import matrix_of_dMovement
-from ajpastor.misc.matrix import vector_derivative
+from dd_functions.misc.matrix import matrix_of_dMovement
+from dd_functions.misc.matrix import vector_derivative
 
 ################################################################################
 ###

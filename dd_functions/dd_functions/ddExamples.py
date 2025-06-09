@@ -117,11 +117,11 @@ from sage.rings.polynomial.multi_polynomial_ring import MPolynomialRing_base
 from sage.categories.pushout import pushout, FractionField
 
 # ajpastor imports
-from ajpastor.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DFiniteI, DDFinite)
-from ajpastor.dd_functions.exceptions import ZeroValueRequired
-from ajpastor.dd_functions.lazyDDRing import LazyDDRing
-from ajpastor.misc.dynamic_string import DynamicString
-from ajpastor.misc.matrix import matrix_of_dMovement as move
+from dd_functions.dd_functions import (is_DDFunction, is_DDRing, DDRing, ParametrizedDDRing, DFinite, DFiniteI, DDFinite)
+from dd_functions.dd_functions.exceptions import ZeroValueRequired
+from dd_functions.dd_functions.lazyDDRing import LazyDDRing
+from dd_functions.misc.dynamic_string import DynamicString
+from dd_functions.misc.matrix import matrix_of_dMovement as move
 
 ##################################################################################
 ##################################################################################
@@ -4079,7 +4079,7 @@ def DAlgebraicInverse(polynomial, init=[], dR=None):
         polynomial *= lcm_denoms
         polynomial = polynomial.change_ring(polynomial.parent().base().base())
 
-    from ajpastor.misc.sequence_manipulation import inv_lagrangian
+    from dd_functions.misc.sequence_manipulation import inv_lagrangian
     ## Building the initial conditions
     if(len(init) < 1 or init[0] != 0):
         raise ValueError("The functional inverse is not a formal power series")

@@ -36,7 +36,7 @@ AUTHORS:
 
 from sage.all import identity_matrix, Matrix, vector, xgcd
 
-from ajpastor.misc.linear_solver import LinearSystemSolver, NoSolutionError
+from dd_functions.misc.linear_solver import LinearSystemSolver, NoSolutionError
 
 class HermiteSolver(LinearSystemSolver):
     r'''

@@ -27,7 +27,7 @@ from sage.all import Matrix as matrix, vector, ideal, cached_method
 from sage.categories.pushout import pushout
 from sage.structure.element import Matrix, Vector
 
-from ajpastor.misc.ring_w_sequence import Wrap_w_Sequence_Ring
+from dd_functions.misc.ring_w_sequence import Wrap_w_Sequence_Ring
 
 class NoSolutionError(ValueError):
     pass

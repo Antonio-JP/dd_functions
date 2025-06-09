@@ -71,7 +71,7 @@ class DirectStepOperator(TwoStepsOperator):
     ### SOLVING MATRICES METHOD
     ####################################################### 
     def _get_element_nullspace(self, M):
-        from ajpastor.misc.bareiss import BareissAlgorithm
+        from dd_functions.misc.bareiss import BareissAlgorithm
         ## We take the domain where our elements will lie
         parent = M.parent().base().base()
         
@@ -114,7 +114,7 @@ class DirectStepOperator(TwoStepsOperator):
     
     
     def _solve_linear_system(self, A, b, ring):
-        from ajpastor.misc.hermite import HermiteSolver
+        from dd_functions.misc.hermite import HermiteSolver
         return HermiteSolver(ring, A, b).solution()
     ####################################################### 
     

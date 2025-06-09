@@ -61,7 +61,7 @@ from sage.all import (cached_method, kronecker_delta, Matrix)
 from .twoStepsOperator import TwoStepsOperator
 from .operator import foo_derivative
 
-from ajpastor.lazy.lazyIDElements import LazyIntegralDomain
+from dd_functions.lazy.lazyIDElements import LazyIntegralDomain
 
 class LazyStepOperator(TwoStepsOperator):
     ### Static parameters
