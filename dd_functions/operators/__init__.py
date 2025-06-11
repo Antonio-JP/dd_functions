@@ -1,21 +1,17 @@
-r"""
-Package ajpastor
+r'''
+Package operators
 
 In this package the user may find the following subpackages:
-* dd_functions: implementation of DDFunctions
-* operator: implementation of linear differential operators
-* lazy: implementation of lazy systems in Sage
-* misc: implementation of several miscellaneous utilities
-* tests: provide several tests 
+* doperators: implementation of ore operators
 
 AUTHORS::
 
-    - Antonio Jimenez-Pastor (2016-10-01): initial version
+    - Antonio Jimenez-Pastor (2025-06-11): initial version
 
-"""
+'''
 
 # ****************************************************************************
-#  Copyright (C) 2019 Antonio Jimenez-Pastor <ajpastor@risc.uni-linz.ac.at>
+#  Copyright (C) 2025 Antonio Jimenez-Pastor <antonio.jimenezp@upm.es>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,4 +20,4 @@ AUTHORS::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from .operators import *
+from .doperators import *

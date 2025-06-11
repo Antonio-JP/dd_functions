@@ -8,7 +8,7 @@ r'''
 
     This module will provide an implementation of ore operators in the context of :mod:`dalgebra`, allowing to build the ring of ore operators directly from the ring `R` and the operations that are already included in `R`. This module will also take care of other important aspects, such as the conversion between ore operators and different structures in SageMath, the application of operators to elements in `R` and some extension, and the creation of a Category and Parent structure suited for this types of operators.
 
-    .. EXAMPLES::
+    EXAMPLES::
 
         sage: from dd_functions.operators.doperators import DOperators
         sage: from dalgebra import *
@@ -29,6 +29,8 @@ r'''
 
 import logging
 
+from ..exceptions import FieldRequiredError, NotUnivariateError, ToBeImplementedError
+
 from dalgebra.dring import AdditiveMap, DRings
 from dalgebra.dpolynomial.dpolynomial import DPolynomial, DPolynomialRing_Monoid   
 
@@ -38,19 +40,42 @@ from sage.categories.category import Category
 from sage.categories.morphism import Morphism
 from sage.categories.pushout import ConstructionFunctor, pushout
 from sage.functions.other import binomial
+from sage.matrix.constructor import matrix
 from sage.misc.cachefunc import cached_method
 from sage.misc.latex import latex
 from sage.misc.misc_c import prod
+from sage.rings.fraction_field import FractionField_generic
 from sage.rings.infinity import Infinity as oo
 from sage.rings.integer_ring import ZZ
+from sage.rings.polynomial.polynomial_element import Polynomial
+from sage.rings.polynomial.multi_polynomial_element import MPolynomial
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.structure.element import Element
+from sage.structure.element import Element, Matrix
 from sage.structure.factory import UniqueFactory
 from sage.structure.parent import Parent
 
-from typing import Collection, Iterator
+from typing import Collection
 
 _DRings = DRings.__classcall__(DRings)
+
+### Some decorators for the methods on operators
+def RequireUnivariate(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(self: DOperator, *args, **kwds):
+        if self.parent().noperators() != 1:
+            raise NotUnivariateError(f"The method {func.__name__} is not implemented for rings with more than one operator.")
+        return func(self, *args, **kwds)
+    return wrapper
+
+def RequireField(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(self: DOperator, *args, **kwds):
+        if not self.parent().base().is_field():
+            raise FieldRequiredError(f"The method {func.__name__} is only implemented for rings with a field as base ring.")
+        return func(self, *args, **kwds)
+    return wrapper
 
 
 #####################################
@@ -122,6 +147,57 @@ class DOperator (Element):
         r'''
             Return the order of the operator.
             This is the maximum order of the operators in the coefficients.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = 3*D^2 + 2*D + 1
+                sage: A.order()
+                2
+                sage: (5*D + 7).order()
+                1
+                sage: DOps(4).order()
+                0
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = 2*S^3 + S + 1
+                sage: A.order()
+                3
+                sage: (7*S^2).order()
+                2
+                sage: (S + 5).order()
+                1
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = 2*D^2*S + 3*D*S^2 + S
+                sage: A.order()
+                3
+                sage: (D^2 + D*S).order()
+                2
+                sage: (5*S^2).order()
+                2
+
+                sage: # Order with respect to a specific generator
+                sage: A = 2*D^2*S + 3*D*S^2 + S
+                sage: A.order('D')
+                2
+                sage: A.order('S')
+                2
+                sage: (D^3 + D^2*S^2).order('D')
+                3
+                sage: (D^3 + D^2*S^2).order('S')
+                2
         '''
         if gen is not None:
             if isinstance(gen, str):
@@ -141,6 +217,46 @@ class DOperator (Element):
         r'''
             Return the monomials of the operator.
             This is a tuple of :class:`DOperator` instances, each representing a monomial in the operator.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = 3*D^2 + 2*D + 1
+                sage: A.monomials()
+                (1, D, D^2)
+                sage: (5*D + 7).monomials()
+                (1, D)
+                sage: DOps(4).monomials()
+                (1,)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = 2*S^3 + S + 1
+                sage: A.monomials()
+                (1, S, S^3)
+                sage: (7*S^2).monomials()
+                (S^2,)
+                sage: (S + 5).monomials()
+                (1, S)
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = 2*D^2*S + 3*D*S^2 + S
+                sage: A.monomials()
+                (S, D*S^2, D^2*S)
+                sage: (D^2 + D*S).monomials()
+                (D*S, D^2)
+                sage: (5*S^2).monomials()
+                (S^2,)
         '''
         return tuple(self.parent().element_class(self.parent(), {mon: 1}) for mon in sorted(self.__coefficients.keys(), key=lambda x : (sum(x), x)))
     
@@ -167,6 +283,46 @@ class DOperator (Element):
         r'''
             Return the coefficients of the operator.
             This is a tuple of elements in the base ring, corresponding to the coefficients of the monomials in the operator.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = 3*D^2 + 2*D + 1
+                sage: A.coefficients()
+                (1, 2, 3)
+                sage: (5*D + 7).coefficients()
+                (7, 5)
+                sage: DOps(4).coefficients()
+                (4,)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = 2*S^3 + S + 1
+                sage: A.coefficients()
+                (1, 1, 2)
+                sage: (7*S^2).coefficients()
+                (7,)
+                sage: (S + 5).coefficients()
+                (5, 1)
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = 2*D^2*S + 3*D*S^2 + S
+                sage: A.coefficients()
+                (1, 3, 2)
+                sage: (D^2 + D*S).coefficients()
+                (1, 1)
+                sage: (5*S^2).coefficients()
+                (5,)
         '''
         return tuple(self.coefficient(monomial) for monomial in self.monomials())
 
@@ -229,7 +385,7 @@ class DOperator (Element):
         r'''
             Checks whether an operator is primitive, i.e., it has no common factor with the base ring.
         '''
-        return self.factor()[0] == 1
+        return self.factor()[0].is_unit()
 
     def primitive(self) -> DOperator:
         r'''
@@ -245,6 +401,108 @@ class DOperator (Element):
         '''
         return self.factor()[0]
 
+    def numerator(self) -> DOperator:
+        r'''
+            Returns the numerator of the operator.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = (1/2)*D^2 + D + 1
+                sage: A.numerator()
+                D^2 + 2*D + 2
+                sage: (3/5*D + 7/2).numerator()
+                (6*D + 35)
+                sage: DOps(QQ(4,3)).numerator()
+                4
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = (1/3)*S^3 + S + 1
+                sage: A.numerator()
+                S^3 + 3*S + 3
+                sage: (7/4*S^2).numerator()
+                7*S^2
+                sage: (S + 5/2).numerator()
+                (2*S + 5)
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = (1/2)*D^2*S + 3*D*S^2 + S
+                sage: A.numerator()
+                D^2*S + 6*D*S^2 + 2*S
+                sage: (D^2 + D*S/3).numerator()
+                (3*D^2 + D*S)
+                sage: (5/7*S^2).numerator()
+                5*S^2
+        '''
+        op = self.denominator() * self # we remove the denominator
+
+        if isinstance(self.parent().base(), FractionField_generic): # we can simplify the operator
+            R = self.parent().change_ring(self.parent().base().base()) # we remove the field structure
+            return R(op)
+        
+        return op
+
+    def denominator(self) -> Element:
+        r'''
+            Returns the denominator of the operator.
+            This is a non-zero element in the base ring.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = (1/2)*D^2 + D + 1
+                sage: A.denominator()
+                2
+                sage: (3/5*D + 7/2).denominator()
+                10
+                sage: DOps(QQ(4,3)).denominator()
+                3
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = (1/3)*S^3 + S + 1
+                sage: A.denominator()
+                3
+                sage: (7/4*S^2).denominator()
+                4
+                sage: (S + 5/2).denominator()
+                2
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = (1/2)*D^2*S + 3*D*S^2 + S
+                sage: A.denominator()
+                2
+                sage: (D^2 + D*S/3).denominator()
+                3
+                sage: (5/7*S^2).denominator()
+                7
+        '''
+        if self.parent().base().is_field():
+            return self.parent().base()._lcm_denominator(self.coefficients())
+        else:
+            return self.parent().one()
+
     @cached_method
     def as_polynomial(self) -> Element:
         R = PolynomialRing(self.parent().base().to_sage(), self.parent().names())
@@ -255,7 +513,7 @@ class DOperator (Element):
         )
 
     def to_sage(self) -> Element:
-        raise NotImplementedError("Conversion to SageMath element is not implemented yet.")
+        raise ToBeImplementedError()
     
     def conditions_to_zero(self) -> tuple[tuple[DOperator,Element]]:
         r'''
@@ -263,13 +521,6 @@ class DOperator (Element):
             This is a tuple of pairs (operator, condition) where the operator is the operator that must be applied to the element and the condition is the condition that must be satisfied for the operator to be zero.
         '''
         return tuple((m, c.to_sage()) for (m,c) in zip(self.monomials(), self.coefficients()))
-    
-    def lcm(self, *others: DOperator) -> DOperator:
-        r'''
-            Compute the least common multiple of the operator with other operators.
-            This is not implemented yet, as it depends on the specific implementation of the base ring.
-        '''
-        raise NotImplementedError("The method lcm is not implemented yet.")
     
     ## Arithmetic methods
     def _add_(self, other: DOperator) -> DOperator:
@@ -290,12 +541,7 @@ class DOperator (Element):
             Method that computes ``self * other`` for two ore operators.
 
             The multiplication is not commutative, so the order of multiplication matters. The rules for 
-            computing the product is as follows:
-
-            * If an operation is an homomorphism: `d \cdot f = d(f) \cdot d`.
-            * If an operation is a derivation: `d \cdot f = f \cdot d + d(f)`.
-
-            Hence we can apply these rules to compute the product of two operators where we put a coefficient 
+            computing the product of two operators where we put a coefficient 
             from the left and the monomial of operators to the right.    
         '''
         if self.is_zero() or other.is_zero():
@@ -350,10 +596,118 @@ class DOperator (Element):
         except (NotImplementedError,ValueError):
             return NotImplemented
 
+    def _floordiv_(self, other: DOperator) -> DOperator:
+        try:
+            return self.floor_div(other)
+        except (NotImplementedError, ValueError):
+            return NotImplemented
+    
+    def _mod_(self, other: DOperator) -> DOperator:
+        try:
+            return self.mod(other)
+        except NotImplementedError:
+            return NotImplemented
+
+    @cached_method
+    def factor(self) -> tuple[Element, DOperator, DOperator]:
+        r'''
+            Computes a simple factorization of the operator in the form `c * A * d`
+
+            This method computes a simple factorization of the operator ``self`` in the form `c * A * d`, where
+            * `c` is an element of self.parent().base().
+            * `A` is an :class:`DOperator` with constant coefficient different from zero
+            * `d` is a monomial operator.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: DOps.<D> = DOperators(R)
+                sage: A = 6*D^2 + 4*D + 2
+                sage: A.factor()
+                (2, 3*D^2 + 2*D + 1, 1)
+                sage: (4*D + 8).factor()
+                (4, D + 2, 1)
+                sage: (3*D^3).factor()
+                (3, D^3, 1)
+                sage: (2*D^2 + 4*D).factor()
+                (2, D + 2, D)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: DOps.<S> = DOperators(R)
+                sage: A = 9*S^3 + 6*S^2 + 3*S
+                sage: A.factor()
+                (3, 3*S^3 + 2*S^2 + S, 1)
+                sage: (8*S^2).factor()
+                (8, S^2, 1)
+                sage: (5*S + 10).factor()
+                (5, S + 2, 1)
+                sage: (2*S^3 + 4*S^2).factor()
+                (2, S + 2, S^2)
+
+                sage: # Multivariate ring Q[x]<D,S> with D = d/dx, S(f(x)) = f(x+1)
+                sage: from dalgebra import DifferentialRing, DifferenceRing
+                sage: R1 = DifferentialRing(QQ['x'], (1,))
+                sage: R = DifferenceRing(R1, ("x+1",))
+                sage: DOps.<D,S> = DOperators(R)
+                sage: A = 4*D^2*S + 8*D*S^2 + 12*S
+                sage: A.factor()
+                (4, D^2*S + 2*D*S^2 + 3*S, 1)
+                sage: (6*D^2 + 12*D*S).factor()
+                (6, D^2 + 2*D*S, 1)
+                sage: (7*S^2).factor()
+                (7, S^2, 1)
+                sage: (2*D*S^2 + 4*S^2).factor()
+                (2, D + 2, S^2)
+        '''
+        # Getting the value for `c`
+        c = gcd(self.__coefficients.values())
+
+        # Getting the operator `d`
+        d_tuple = tuple(min(m[i] for m in self.__coefficients.keys() for i in range(self.parent().ngens())))
+        d = self.parent().element_class(self.parent(), {d_tuple: 1})
+
+        # Computing the operator `A`
+        A = self.parent().element_class(self.parent(),
+                                        {
+                                            tuple(m[i] - d_tuple[i] for i in range(self.parent().ngens())): coeff // c
+                                            for (m, coeff) in self.__coefficients.items()
+                                        })
+        
+        return (c, A, d)
+    
+    def __eq__(self, other: DOperator) -> DOperator:
+        return (self - other).is_zero()
+    
+    def __ne__(self, other: DOperator) -> DOperator:
+        return not (self == other)
+    
+    ## Functional methods
+    def __hash__(self) -> int:
+        return hash(tuple(sorted(self.__coefficients.items(), key=lambda x: (sum(x[0]), x[0]))))
+        
+    def __call__(self, element: Element) -> DOperator:
+        return sum(
+            (coeff * element.operations(mon) for (mon, coeff) in self.__coefficients.items()),
+            start=self.parent().zero()
+        )
+    
+    ## Representation methods
+    def __repr__(self) -> str:
+        return repr(self.as_polynomial())
+
+    def _latex_(self) -> str:
+        return latex(self.as_polynomial())
+
+    #########################################
+    ### Methods for univariate Ore algebras
+    #########################################
+    @RequireUnivariate
     def exact_div(self, other: DOperator) -> DOperator:
-        if self.parent().noperators() != 1:
-            raise NotImplementedError("The method _div_ is not implemented for rings with more than one operator.")
-        ## Case with 1 operation
         if self.parent().base().is_field():
             q, r = self.quo_rem(other)
             if r.is_zero():
@@ -375,22 +729,9 @@ class DOperator (Element):
                     }
                 )
 
-    def _floordiv_(self, other: DOperator) -> DOperator:
-        try:
-            return self.floor_div(other)
-        except (NotImplementedError, ValueError):
-            return NotImplemented
     
-    def _mod_(self, other: DOperator) -> DOperator:
-        try:
-            return self.mod(other)
-        except NotImplementedError:
-            return NotImplemented
-
+    @RequireUnivariate
     def floor_div(self, other: DOperator) -> DOperator:
-        if self.parent().noperators() != 1:
-            raise NotImplementedError("The method _div_ is not implemented for rings with more than one operator.")
-        ## Case with 1 operation
         if self.parent().base().is_field():
             return self.quo_rem(other)[0]
         else:
@@ -406,11 +747,9 @@ class DOperator (Element):
                         for (mon, coeff) in q.__coefficients.items()
                     }
                 )
-            
+
+    @RequireUnivariate   
     def mod(self, other: DOperator) -> DOperator:
-        if self.parent().noperators() != 1:
-            raise NotImplementedError("The method _div_ is not implemented for rings with more than one operator.")
-        ## Case with 1 operation
         if self.parent().base().is_field():
             return self.quo_rem(other)[1]
         else:
@@ -427,10 +766,52 @@ class DOperator (Element):
                     }
                 )
 
+    ## Division, GCRD, and LCLM methods
+    @RequireUnivariate
+    @RequireField
     def quo_rem(self, other: DOperator) -> tuple[DOperator, DOperator]:
-        if self.parent().noperators() != 1 or (not self.parent().base().is_field()): 
-            raise NotImplementedError("The method quo_rem is not implemented for non-field rings or rings with more than one operator.")
+        r'''
+            Computes the quotient and remainder of the division of two operators (univariate, field case).
 
+            Returns a tuple `(Q, R)` such that `self = Q*other + R` and `R` has lower order than `other`.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: x = R.gen()
+                sage: DOps.<D> = DOperators(R)
+                sage: A = x*D^3 + 2*D^2 + x*D + 1
+                sage: B = D + 1
+                sage: Q, R = A.quo_rem(B)
+                sage: Q
+                x*D^2 + (2 - x)*D + (x - 2)
+                sage: R
+                3 - x
+                sage: (x*D^2 + 2*D + x).quo_rem(D + 1)
+                (x*D + (2 - x), x - 2)
+                sage: (2*x*D^2 + 3*D + 4).quo_rem(D)
+                (2*x*D + 3, 4)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: n = R.gen()
+                sage: DOps.<S> = DOperators(R)
+                sage: A = n*S^3 + 2*S^2 + n*S + 1
+                sage: B = S + 1
+                sage: Q, R = A.quo_rem(B)
+                sage: Q
+                n*S^2 + (2 - n)*S + (n - 2)
+                sage: R
+                3 - n
+                sage: (n*S^2 + 2*S + n).quo_rem(S + 1)
+                (n*S + (2 - n), n - 2)
+                sage: (2*n*S^2 + 3*S + 4).quo_rem(S)
+                (2*n*S + 3, 4)
+        '''
         ## Checking arguments
         if self.is_zero():
             return (self.parent().zero(), self)
@@ -450,15 +831,50 @@ class DOperator (Element):
 
         return (q,r) # Return the quotient and the remainder
 
+    @RequireUnivariate
     def pseudo_quo_rem(self, other: DOperator) -> tuple[Element, DOperator, DOperator]:
         r'''
             Computes the pseudo-quotient and remainder of the operator with respect to another operator.
 
             This method computes the pseudo-quotient and remainder of the operator ``self`` with respect to the operator ``other``. The pseudo quotient is an operator `Q` such that `m*self = Q*other + R` where `R` (the pseudo-remainder) is an operator with lower order than `other`. On the other hand, `m` is an element in the base ring.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: x = R.gen()
+                sage: DOps.<D> = DOperators(R)
+                sage: A = 2*x*D^3 + 4*D^2 + 2*x*D + 2
+                sage: B = 2*D + 2
+                sage: m, Q, R = A.pseudo_quo_rem(B)
+                sage: m
+                8
+                sage: Q
+                x*D^2 + (2 - x)*D + (x - 2)
+                sage: R
+                4 - 2*x
+                sage: (2*x*D^2 + 4*D + 2).pseudo_quo_rem(2*D)
+                (4, x*D + 2, 2)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: n = R.gen()
+                sage: DOps.<S> = DOperators(R)
+                sage: A = 3*n*S^3 + 6*S^2 + 3*n*S + 3
+                sage: B = 3*S + 3
+                sage: m, Q, R = A.pseudo_quo_rem(B)
+                sage: m
+                27
+                sage: Q
+                n*S^2 + (2 - n)*S + (n - 2)
+                sage: R
+                6 - 3*n
+                sage: (2*n*S^2 + 4*S + 2).pseudo_quo_rem(2*S)
+                (4, n*S + 2, 2)
         '''
-        if self.parent().noperators() != 1:
-            raise NotImplementedError("The method pseudo_quo_rem is not implemented for rings with more than one operator.")
-        
         if self.parent() != other.parent():
             R = pushout(self.parent(), other.parent())
             return R(self).pseudo_quo_rem(R(other))
@@ -493,15 +909,44 @@ class DOperator (Element):
                 prod(alphas)*R
         )
     
+    @RequireUnivariate
     def gcrd(self, other: DOperator) -> DOperator:
         r'''
             Method to compute the greatest common right divisor of two ore operators.
 
             The greatest common right divisor (gcrd) of two ore operators `self` and `other` is the operator `g` such that `g` divides both `self` and `other`, and any other operator that divides both `self` and `other` also divides `g`. This is computed using the pseudo-quotient and remainder method.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: x = R.gen()
+                sage: DOps.<D> = DOperators(R)
+                sage: A = (x+1)*D^2 + 2*D + x
+                sage: B = (x+1)*D + 1
+                sage: A.gcrd(B)
+                D + 1
+                sage: (x*D^2 + 2*D + x).gcrd(D + 1)
+                1
+                sage: ((x^2 + 2*x + 1)*D^2 + 2*(x+1)*D + (x^2 + 1)).gcrd((x+1)*D + 1)
+                D + 1
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: n = R.gen()
+                sage: DOps.<S> = DOperators(R)
+                sage: A = (n+1)*S^2 + 2*S + n
+                sage: B = (n+1)*S + 1
+                sage: A.gcrd(B)
+                S + 1
+                sage: (n*S^2 + 2*S + n).gcrd(S + 1)
+                1
+                sage: ((n^2 + 2*n + 1)*S^2 + 2*(n+1)*S + (n^2 + 1)).gcrd((n+1)*S + 1)
+                S + 1
         '''
-        if self.parent().noperators() != 1:
-            raise NotImplementedError("The method gcrd is not implemented for rings with more than one operator.")
-        
         if self.parent() != other.parent():
             R = pushout(self.parent(), other.parent())
             return R(self).gcrd(R(other))
@@ -516,53 +961,170 @@ class DOperator (Element):
                 return other
             return other.gcrd(r)
 
-    @cached_method
-    def factor(self) -> tuple[Element, DOperator, DOperator]:
+    @RequireUnivariate
+    def lclm(self, *other: DOperator, algorithm: str = "linalg") -> DOperator:
         r'''
-            Computes a simple factorization of the operator in the form `c * A * d`
+            Compute the least common left multiple of two ore operators.
 
-            This method computes a simple factorization of the operator ``self`` in the form `c * A * d`, where
-            * `c` is an element of self.parent().base().
-            * `A` is an :class:`DOperator` with constant coefficient different from zero
-            * `d` is a monomial operator.
-        ''' 
-        # Getting the value for `c`
-        c = gcd(self.__coefficients.values())
+            A common multiple of two ore operators `self` and `other` is an operator `M` such that `self` and `other` divide `M` from the left and such that `M` is minimal w.r.t. the order. This operator satisfies that any other common left multiple of `self` and `other` is a left-multiple of `M`.
 
-        # Getting the operator `d`
-        d_tuple = tuple(min(m[i] for m in self.__coefficients.keys() for i in range(self.parent().ngens())))
-        d = self.parent().element_class(self.parent(), {d_tuple: 1})
+            This computation can be done using the greatest common right divisor (:func:`~DOperator.xgcrd`) or using linear algebra algorithms. This method allows the user to decide the algorithm to compute the least common left multiple. We use the algorithm based on linear algebra by default.
 
-        # Computing the operator `A`
-        A = self.parent().element_class(self.parent(),
-                                        {
-                                            tuple(m[i] - d_tuple[i] for i in range(self.parent().ngens())): coeff // c
-                                            for (m, coeff) in self.__coefficients.items()
-                                        })
-        
-        return (c, A, d)
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: x = R.gen()
+                sage: DOps.<D> = DOperators(R)
+                sage: A = (x+1)*D^2 + 2*D + x
+                sage: B = (x+1)*D + 1
+                sage: A.lclm(B, algorithm="xgcrd")
+                ((x+1)*D^2 + 2*D + x)*B
+                sage: (x*D^2 + 2*D + x).lclm(D + 1, algorithm="xgcrd")
+                (x*D^2 + 2*D + x)*(D + 1)
+                sage: ((x^2 + 2*x + 1)*D^2 + 2*(x+1)*D + (x^2 + 1)).lclm((x+1)*D + 1, algorithm="xgcrd")
+                ((x^2 + 2*x + 1)*D^2 + 2*(x+1)*D + (x^2 + 1))*((x+1)*D + 1)
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: n = R.gen()
+                sage: DOps.<S> = DOperators(R)
+                sage: A = (n+1)*S^2 + 2*S + n
+                sage: B = (n+1)*S + 1
+                sage: A.lclm(B, algorithm="xgcrd")
+                ((n+1)*S^2 + 2*S + n)*B
+                sage: (n*S^2 + 2*S + n).lclm(S + 1, algorithm="xgcrd")
+                (n*S^2 + 2*S + n)*(S + 1)
+                sage: ((n^2 + 2*n + 1)*S^2 + 2*(n+1)*S + (n^2 + 1)).lclm((n+1)*S + 1, algorithm="xgcrd")
+                ((n^2 + 2*n + 1)*S^2 + 2*(n+1)*S + (n^2 + 1))*((n+1)*S + 1)
+        '''
+        if len(other) == 0:
+            return self
+        elif len(other) == 1:
+            if self.parent() != other[0].parent():
+                R = pushout(self.parent(), other[0].parent())
+                return R(self).lclm(R(other[0]), algorithm=algorithm)
+            elif self.is_zero() or other[0].is_zero():
+                return self.parent().zero()
+            elif self.is_one():
+                return other[0]
+            elif other[0].is_one():
+                return self
+            elif algorithm == "linalg":
+                raise ToBeImplementedError()
+            elif algorithm == "xgcrd":
+                return ToBeImplementedError()
+            else:
+                raise ValueError(f"Unknown algorithm {algorithm} for computing the least common left multiple of ore operators in {self.parent()}. Use 'linalg' or 'xgcrd'.")
+        else:
+            return self.lclm(other[0], algorithm=algorithm).lclm(*other[1:], algorithm=algorithm)
+
+    @RequireUnivariate
+    def companion_matrix(self) -> Matrix:
+        r'''
+            Method that computes the companion matrix of the operator.
+
+            Let `A` be an ore operator with one operation with coefficients in a field `(R, \sigma)`. Then, if `y` is a solution to the operator, i.e., `A(y) = 0`, then the companion matrix of `A` is a matrix that represent the action of `\sigma` on the vector space of a solution to the operator, which is generated by the elements `(y, \sigma(y), \ldots, \sigma^{n-1}(y))` where `n` is the order of the operator. 
+
+            The companion matrix is a square matrix of size `n` with entries in the field of fractions of the base ring.
+
+            EXAMPLES::
+
+                sage: # Univariate differential operator ring Q[x]<D> with D = d/dx
+                sage: from dd_functions.operators.doperators import DOperators
+                sage: from dalgebra import DifferentialRing
+                sage: R = DifferentialRing(QQ['x'], (1,))
+                sage: x = R.gen()
+                sage: DOps.<D> = DOperators(R)
+                sage: A = x*D^2 + 2*D + 3
+                sage: A.companion_matrix()
+                [   0    1 ]
+                [ -3/x -2/x]
+
+                sage: B = D^3 + x*D^2 + 1
+                sage: B.companion_matrix()
+                [ 0  1  0 ]
+                [ 0  0  1 ]
+                [-1  0 -x ]
+
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                sage: from dalgebra import DifferenceRing
+                sage: R = DifferenceRing(QQ['n'], ("n+1",))
+                sage: n = R.gen()
+                sage: DOps.<S> = DOperators(R)
+                sage: A = n*S^2 + 2*S + 3
+                sage: A.companion_matrix()
+                [   0    1 ]
+                [ -3/n -2/n]
+
+                sage: B = S^3 + n*S^2 + 1
+                sage: B.companion_matrix()
+                [ 0  1  0 ]
+                [ 0  0  1 ]
+                [-1  0 -n ]
+        '''
+        rows = [[1 if column == row+1 else 0 for column in range(self.order())] for row in range(self.order()-1)]
+        last_row = [-self[i]/self[self.order()] for i in range(self.order())]
+
+        return matrix(rows + [last_row])
     
-    def __eq__(self, other: DOperator) -> DOperator:
-        return (self - other).is_zero()
-    def __ne__(self, other: DOperator) -> DOperator:
-        return not (self == other)
-    
-    ## Functional methods
-    def __hash__(self) -> int:
-        return hash(tuple(sorted(self.__coefficients.items(), key=lambda x: (sum(x[0]), x[0]))))
-        
-    def __call__(self, element: Element) -> DOperator:
-        return sum(
-            (coeff * element.operations(mon) for (mon, coeff) in self.__coefficients.items()),
-            start=self.parent().zero()
-        )
-    
-    ## Representation methods
-    def __repr__(self) -> str:
-        return repr(self.as_polynomial())
+    @RequireUnivariate
+    def symmetric_dot(self, other: DOperator, algorithm: str = "linalg") -> DOperator:
+        r'''
+            Computes the symmetric dot product of two ore operators.
 
-    def _latex_(self) -> str:
-        return latex(self.as_polynomial())
+            The symmetric dot product of two ore operators `self` and `other` is defined as the operator that results from the multiplication of `self` and `other` followed by a symmetrization process. This is useful in the context of differential and difference equations.
+
+            EXAMPLES::
+
+                sage:
+                # Univariate differential operator ring Q[x]<D> with D = d/dx
+                from dd_functions.operators.doperators import DOperators
+                from dalgebra import DifferentialRing
+                R = DifferentialRing(QQ['x'], (1,))
+                DOps.<D> = DOperators(R)    
+                A = 2*D^2 + 3*D + 4
+                B = D + 1
+                A.symmetric_dot(B)
+                2*D^3 + 5*D^2 + 7*D + 4
+                sage: (2*D^2 + 3*D + 4).symmetric_dot(D + 1)
+                2*D^3 + 5*D^2 + 7*D + 4
+                sage: ((2*D^2 + 3*D + 4)*D + 1).symmetric_dot(D + 1)
+                2*D^3 + 5*D^2 + 7*D + 4
+                sage: # Univariate difference operator ring Q[n]<S> with S(f(n)) = f(n+1)
+                from dalgebra import DifferenceRing
+                R = DifferenceRing(QQ['n'], ("n+1",))
+                DOps.<S> = DOperators(R)
+                A = 2*S^2 + 3*S + 4
+                B = S + 1
+                A.symmetric_dot(B)
+                2*S^3 + 5*S^2 + 7*S + 4
+                sage: (2*S^2 + 3*S + 4).symmetric_dot(S + 1)
+                2*S^3 + 5*S^2 + 7*S + 4
+        '''
+        raise ToBeImplementedError()
+
+    @RequireUnivariate
+    def symmetric_poly(self, poly: Polynomial | MPolynomial) -> DOperator:
+        r'''
+            Computes the symmetric polynomial of an ore operator.
+
+            The symmetric polynomial for an oer operator is the evaluation of a commutative polynomial ``poly`` at the operator `self`, meaning that we replace the variable in the polynomial by the operator and compute multiplications of variables as symmetric products.
+
+            It allows poly to be multivariate, meaning that the different variables of the polynomial represent the derivative of the operator itself (see method :func:`~DOperator.solution_derivative`)
+        '''
+        raise ToBeImplementedError()
+
+    @RequireUnivariate
+    def adjoint(self) -> DOperator: 
+        r'''
+            Method that computes the adjoint of the operator.
+        '''
+        raise ToBeImplementedError()
+    
 
 #####################################
 ### PARENT CLASS
@@ -761,7 +1323,7 @@ class DOperatorsRing (Parent):
             Return the SageMath parent of the ring of ore operators.
             This is used to convert the ring to a SageMath structure.
         '''
-        raise NotImplementedError("Conversion to SageMath parent is not implemented yet.")
+        raise ToBeImplementedError("Conversion to SageMath parent is not implemented yet.")
 
 #####################################
 ### FUNCTOR CLASS
@@ -851,7 +1413,7 @@ class DOp_PolynomialsToOperators(Morphism):
         if not element.degree(self.__v) == 1:
             raise ValueError(f"Cannot convert a non-linear operator {element} to the DOperatorsRing {self.codomain()}.")
         
-        raise NotImplementedError("Conversion from DPolynomials to DOperatorsRing is not implemented yet.")
+        raise ToBeImplementedError("Conversion from DPolynomials to DOperatorsRing is not implemented yet.")
 
 
 class DOp_BetweenBases(Morphism):
