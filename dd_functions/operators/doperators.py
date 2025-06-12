@@ -34,6 +34,8 @@ from ..exceptions import FieldRequiredError, NotUnivariateError, ToBeImplemented
 from dalgebra.dring import AdditiveMap, DRings
 from dalgebra.dpolynomial.dpolynomial import DPolynomial, DPolynomialRing_Monoid   
 
+from functools import reduce
+
 from sage.arith.misc import GCD as gcd
 from sage.categories.algebras import Algebras
 from sage.categories.category import Category
@@ -381,18 +383,40 @@ class DOperator (Element):
         '''
         return self.lc() == 1
     
+    def monic(self) -> DOperator:
+        a = self.lc()
+        if a.is_unit():
+            return (~a)*self
+        elif (c % a == 0 for c in self.coefficients()):
+            return self.parent().element_class(self.parent(), {
+                mon: coeff // a for (mon, coeff) in self.__coefficients.items() # exact division guaranteed
+            })
+        else:
+            raise ValueError(f"The operator {self} can not be made monic, as the leading coefficient {a} is not a unit in the base ring {self.parent().base()}.")
+
     def is_primitive(self) -> bool:
         r'''
             Checks whether an operator is primitive, i.e., it has no common factor with the base ring.
         '''
         return self.factor()[0].is_unit()
 
-    def primitive(self) -> DOperator:
+    def primitive(self, *others: DOperator) -> DOperator:
         r'''
             Returns the primitive part of the operator, i.e., the operator without common factors with the base ring.
         '''
-        c, A, d = self.factor()
-        return A * d
+        if len(others) == 0:
+            _, A, d = self.factor()
+            return A * d
+        else:
+            if any(op.parent() != self.parent() for op in others):
+                R = reduce(lambda p, q : pushout(p, q), (op.parent() for op in others), self.parent())
+                return R(self).primitive(*[R(op) for op in others])
+            
+            ## We have the same parent for all
+            factors = [self.factor(), *(op.factor() for op in others)]
+            C = gcd(factor[0] for factor in factors) # the common factor
+            reduced = [(factor[0]//C)*factor[1]*factor[2] for factor in factors] # we remove the common factor from all operators
+            return reduced[0], tuple(reduced[1:])
 
     def content(self) -> Element:
         r'''
@@ -664,11 +688,14 @@ class DOperator (Element):
                 sage: (2*D*S^2 + 4*S^2).factor()
                 (2, D + 2, S^2)
         '''
+        if self.is_zero():
+            return (self.parent().base().one(), self.parent().zero(), self.parent().one())
+        
         # Getting the value for `c`
         c = gcd(self.__coefficients.values())
 
         # Getting the operator `d`
-        d_tuple = tuple(min(m[i] for m in self.__coefficients.keys() for i in range(self.parent().ngens())))
+        d_tuple = tuple(min(m[i] for m in self.__coefficients.keys()) for i in range(self.parent().ngens()))
         d = self.parent().element_class(self.parent(), {d_tuple: 1})
 
         # Computing the operator `A`
@@ -729,7 +756,6 @@ class DOperator (Element):
                     }
                 )
 
-    
     @RequireUnivariate
     def floor_div(self, other: DOperator) -> DOperator:
         if self.parent().base().is_field():
@@ -909,6 +935,75 @@ class DOperator (Element):
                 prod(alphas)*R
         )
     
+    @cached_method
+    @RequireUnivariate
+    def xgcrd(self, other: DOperator) -> DOperator:
+        r'''
+            Method to compute the greatest common right divisor of two ore operators.
+
+            The greatest common right divisor (gcrd) of two ore operators `self` and `other` is the operator `g` such that `g` divides both `self` and `other`, and any other operator that divides both `self` and `other` also divides `g`. This is computed using the Euclidean algorithm.
+
+            This method computes this common right divisor and also the two operators `a` and `b` such that `g = a*self + b*other`. This is also known as the extended GCD algorithm.
+
+            This method has two main operational modes:
+            1. If the base ring is a field, it uses the Euclidean algorithm to compute the GCRD.
+            2. If the base ring is not a field, it uses the pseudo-quotient and remainder method to compute the GCRD.
+
+            OUTPUT:
+
+            A tuple `(g, a, b)` where:
+            - `g` is the greatest common right divisor of `self` and `other`.
+            - `g = a*self + b*other`.
+        '''
+        if self.is_zero():
+            return other
+        elif other.is_zero():
+            return self
+        elif self.is_one() or other.is_one():
+            return self.parent().one()
+        
+        if self.parent() != other.parent():
+            R = pushout(self.parent(), other.parent())
+            return R(self).xgcrd(R(other))
+        
+        ## We adapt the quo_rem algorithm depending whether we work over a field or not
+        if self.parent().base().is_field():
+            quo_rem = lambda p,q : (self.parent().base().one(), *p.quo_rem(q))
+        else:
+            quo_rem = lambda p,q : p.pseudo_quo_rem(q)
+
+        if self.order() >= other.order():
+            R1, R2 = self, other
+            a,b,c,d = self.parent().one(), self.parent().zero(), self.parent().zero(), self.parent().one()
+        else:
+            R1, R2 = other, self
+            a,b,c,d = self.parent().zero(), self.parent().one(), self.parent().one(), self.parent().zero()
+        
+        m,Q,R = quo_rem(R1, R2)
+        ## During the loop we always have R1 = a*self + b*other and R2 = c*self + d*other
+        while R != 0:
+            assert R1 == a*self + b*other, f"R1 {R1} is not a linear combination of {self} and {other} with coefficients {a} and {b}."
+            assert R2 == c*self + d*other, f"R2 {R2} is not a linear combination of {self} and {other} with coefficients {c} and {d}."
+
+            nc = m*a - Q*c
+            nd = m*b - Q*d
+            ## We ensure the expression is primitive (no common left-coefficient factor for the new identity)
+            R, (nc, nd) = R.primitive(nc, nd)
+
+            ## We update the coefficients for the next iteration
+            a, b, c, d = c, d, nc, nd
+            R1, R2 = R2, R
+            m, Q, R = quo_rem(R1, R2)
+
+        ## We have reached the gcrd, which is R2 and the two cofactors are c and d respectively
+        ## We remove the maximum possible content from the three elements 
+        ## (which is division from the left by the gcd of the contents)
+        g, (a,b) = R2.primitive(c,d) 
+
+        assert g == a*self + b*other, f"gcrd {g} is not a linear combination of {self} and {other} with coefficients {a} and {b}."
+
+        return g, a, b
+
     @RequireUnivariate
     def gcrd(self, other: DOperator) -> DOperator:
         r'''
@@ -922,14 +1017,14 @@ class DOperator (Element):
                 sage: from dd_functions.operators.doperators import DOperators
                 sage: from dalgebra import DifferentialRing
                 sage: R = DifferentialRing(QQ['x'], (1,))
-                sage: x = R.gen()
+                sage: x = R.gen(0)
                 sage: DOps.<D> = DOperators(R)
                 sage: A = (x+1)*D^2 + 2*D + x
                 sage: B = (x+1)*D + 1
                 sage: A.gcrd(B)
-                D + 1
+                x
                 sage: (x*D^2 + 2*D + x).gcrd(D + 1)
-                1
+                2*x - 2
                 sage: ((x^2 + 2*x + 1)*D^2 + 2*(x+1)*D + (x^2 + 1)).gcrd((x+1)*D + 1)
                 D + 1
 
@@ -947,19 +1042,7 @@ class DOperator (Element):
                 sage: ((n^2 + 2*n + 1)*S^2 + 2*(n+1)*S + (n^2 + 1)).gcrd((n+1)*S + 1)
                 S + 1
         '''
-        if self.parent() != other.parent():
-            R = pushout(self.parent(), other.parent())
-            return R(self).gcrd(R(other))
-
-        if self.is_zero():
-            return other
-        elif self.order() < other.order():
-            return other.gcrd(self)
-        else:
-            r = (self.quo_rem(other) if self.parent().base().is_field() else self.pseudo_quo_rem(other))[-1]
-            if r.is_zero():
-                return other
-            return other.gcrd(r)
+        return self.xgcrd(other)[0].primitive()
 
     @RequireUnivariate
     def lclm(self, *other: DOperator, algorithm: str = "linalg") -> DOperator:
@@ -1151,6 +1234,9 @@ class DOperatorsRing (Parent):
         
         self._initialize_operators()
 
+        ## Initializing the conversions and coercions
+        self.base().register_conversion(DOp_ParentToBase(self))
+
     def _initialize_operators(self):
         r'''
             Initialize the operators for this ring.
@@ -1260,19 +1346,31 @@ class DOperatorsRing (Parent):
         # coercion new -> old
         coercion = self.base().coerce_map_from(new_base)
         if coercion is not None:
-            self.register_coercion(DOp_BetweenBases(new_ring, self, coercion))
+            try:
+                self.register_coercion(DOp_BetweenBases(new_ring, self, coercion))
+            except AssertionError:
+                pass # If the coercion is already registered, we ignore it
         # coercion old -> new
         coercion = new_ring.base().coerce_map_from(self.base())
         if coercion is not None:
-            new_ring.register_coercion(DOp_BetweenBases(self, new_ring, coercion))
+            try:
+                new_ring.register_coercion(DOp_BetweenBases(self, new_ring, coercion))
+            except AssertionError:
+                pass # If the coercion is already registered, we ignore it
         # conversion new -> old
         conversion = self.base().convert_map_from(new_base)
         if conversion is not None:
-            self.register_conversion(DOp_BetweenBases(new_ring, self, conversion))
+            try:
+                self.register_conversion(DOp_BetweenBases(new_ring, self, conversion))
+            except AssertionError:
+                pass # If the coercion is already registered, we ignore it
         # conversion old -> new
         conversion = new_ring.base().convert_map_from(self.base())
         if conversion is not None:
-            new_ring.register_conversion(DOp_BetweenBases(self, new_ring, conversion))
+            try:
+                new_ring.register_conversion(DOp_BetweenBases(self, new_ring, conversion))
+            except AssertionError:
+                pass # If the coercion is already registered, we ignore it
         
         return new_ring
 
